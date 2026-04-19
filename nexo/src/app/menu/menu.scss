@@ -1,0 +1,109 @@
+/* BARRA LATERAL (SIDEBAR)
+   width: largura larga de 700px (ajustada depois no responsivo)
+   background-color: fundo branco puro
+   border-right: linha separadora cinza à direita
+   display: flex: organiza os itens internos
+   position: sticky: mantém a barra fixa no topo ao rolar a página */
+.sidebar {
+    width: 700px;
+    min-height: 100vh;
+    background-color: #ffffff;
+    border-right: 1px solid #dddddf;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+}
+
+/* Área do nome/marca no topo da barra lateral
+   padding: espaçamento interno (superior, lateral, inferior)
+   border-bottom: linha de separação inferior */
+.sidebar-brand {
+    padding: 28px 24px 22px;
+    border-bottom: 1px solid #e5e5e7;
+}
+
+/* Alinhamento da logo com o texto
+   align-items: center: centraliza ícone e texto verticalmente
+   gap: 12px: distância entre ícone e texto */
+.brand-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Estilo do ícone da marca (cor roxa) */
+.brand-icon {
+    font-size: 28px;
+    color: #7d4df1;
+}
+
+/* Estilo do título da marca (negrito e roxo) */
+.brand-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #7d4df1;
+    margin: 0;
+}
+
+/* Container do menu de navegação lateral */
+.sidebar-menu {
+    padding: 16px 14px;
+}
+
+/* Remove marcadores e espaços da lista do menu */
+.sidebar-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Espaço entre cada item da lista do menu */
+.sidebar-list li {
+    margin-bottom: 12px;
+}
+
+/* Estilo dos links do menu lateral
+   border-radius: cantos bem arredondados
+   transition: suaviza a mudança de cor ao passar o mouse */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 22px;
+    border-radius: 20px;
+    color: #33435c;
+    font-size: 18px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+/* Tamanho dos ícones dentro dos links do menu */
+.sidebar-link i {
+    font-size: 23px;
+}
+
+/* Estilo do link quando está selecionado (Ativo)
+   background: aplica um degradê colorido (roxo para verde)
+   box-shadow: adiciona uma sombra suave para dar profundidade */
+.sidebar-link.active {
+    color: #ffffff;
+    background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
+    box-shadow: 0 8px 20px rgba(102, 65, 190, 0.18);
+}
+
+/* Rodapé da barra lateral
+   border-top: linha fina superior para separação */
+.sidebar-footer {
+    padding: 24px 20px;
+    border-top: 1px solid #e5e5e7;
+    text-align: center;
+}
+
+/* Texto informativo no rodapé da sidebar */
+.sidebar-footer p {
+    margin: 0;
+    color: #6b778c;
+    font-size: 14px;
+}
