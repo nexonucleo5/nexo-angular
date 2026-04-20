@@ -1,14 +1,21 @@
-import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Cadastro } from './cadastro/cadastro';
 import { Dashboards } from './dashboards/dashboards';
+import { Login } from './login/login';
 import { Materias } from './materias/materias';
 import { Menu } from './menu/menu';
-import { MeusNiveisNotas } from './meus-niveis-notas/meus-niveis-notas';
-import { Perfil } from './perfil/perfil';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Dashboards, Materias, Menu, MeusNiveisNotas, Perfil],
+  imports: [CommonModule, 
+    RouterOutlet, 
+    Dashboards, 
+    Materias, 
+    Menu, 
+    Cadastro, 
+    Login],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

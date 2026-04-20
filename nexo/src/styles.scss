@@ -28,6 +28,18 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    background-color: var(--bg-primary);
+}
+
+.app-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
 // Utilitários de Gradientes (Seus botões e ícones)
 .green-gradient { background: linear-gradient(135deg, #0fcd5c, #08d6a2); }
 .blue-gradient  { background: linear-gradient(135deg, #2e73f6, #10c6df); }
@@ -46,34 +58,6 @@ body {
 .app-layout {
   display: flex;
   min-height: 100vh;
-}
-
-.sidebar {
-  width: 280px;
-  min-height: 100vh;
-  background-color: var(--bg-card);
-  border-right: 1px solid var(--border-color);
-  position: sticky;
-  top: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: background-color 0.3s, border-color 0.3s;
-}
-
-.sidebar-link {
-  color: var(--text-main);
-  text-decoration: none;
-  transition: all 0.2s;
-  
-  &:hover {
-    background-color: rgba(155, 47, 255, 0.1);
-  }
-  
-  &.active {
-    color: #ffffff !important;
-    background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
-  }
 }
 
 .main-content {

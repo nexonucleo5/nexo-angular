@@ -1,18 +1,20 @@
+/* menu.scss */
 .sidebar {
-  width: 300px; /* Ajustei de 700px para 300px pois 700px ocuparia quase a tela toda */
+  width: 300px;
   min-height: 100vh;
-  background-color: #ffffff;
-  border-right: 1px solid #dddddf;
+  background-color: var(--bg-card); /* Usa a variável do global */
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   position: sticky;
   top: 0;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .sidebar-brand {
   padding: 28px 24px 22px;
-  border-bottom: 1px solid #e5e5e7;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-menu { padding: 16px 14px; }
@@ -21,9 +23,9 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  
+  li { margin-bottom: 12px; }
 }
-
-.sidebar-list li { margin-bottom: 12px; }
 
 .sidebar-link {
   display: flex;
@@ -31,30 +33,34 @@
   gap: 16px;
   padding: 18px 22px;
   border-radius: 20px;
-  color: #33435c;
+  color: var(--text-main); /* Texto dinâmico */
   font-size: 18px;
   font-weight: 600;
   transition: 0.2s;
   text-decoration: none;
-}
 
-.sidebar-link i { font-size: 23px; }
+  i { font-size: 23px; }
 
-/* O Angular gerencia essa classe 'active' via routerLinkActive */
-.sidebar-link.active {
-  color: #ffffff;
-  background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
-  box-shadow: 0 8px 20px rgba(102, 65, 190, 0.18);
+  &:hover {
+    background-color: rgba(155, 47, 255, 0.1);
+  }
+
+  &.active {
+    color: #ffffff !important;
+    background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
+    box-shadow: 0 8px 20px rgba(102, 65, 190, 0.18);
+  }
 }
 
 .sidebar-footer {
   padding: 24px 20px;
-  border-top: 1px solid #e5e5e7;
+  border-top: 1px solid var(--border-color);
   text-align: center;
+  color: var(--text-muted);
 }
 
 /* Responsividade */
 @media (max-width: 1200px) { .sidebar { width: 260px; } }
 @media (max-width: 992px) {
-  .sidebar { width: 100%; min-height: auto; position: relative; }
+  .sidebar { width: 100%; min-height: auto; position: relative; border-right: none; border-bottom: 1px solid var(--border-color); }
 }
