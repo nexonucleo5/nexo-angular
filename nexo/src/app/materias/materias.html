@@ -1,1 +1,131 @@
-<p>materias works!</p>
+<section class="page-content p-4">
+    <div class="page-heading mb-4">
+        <h1 class="page-title fw-bold" style="font-size: 44px; color: var(--text-main);">Minhas Matérias</h1>
+        <p class="text-muted fs-5">Explore todo o conteúdo disponível por disciplina</p>
+    </div>
+
+    <section class="filters-box bg-white p-4 rounded-4 shadow-sm mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-8">
+                <div class="search-box d-flex align-items-center p-2 border rounded-4 bg-light">
+                    <i class="bi bi-search px-2 text-secondary"></i>
+                    <input type="text" class="form-control border-0 bg-transparent" placeholder="Buscar matéria...">
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="filter-box d-flex justify-content-between align-items-center p-2 border rounded-4 bg-light px-3">
+                    <span><i class="bi bi-funnel me-2"></i>Todos os Níveis</span>
+                    <i class="bi bi-chevron-down"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="subjects-section mb-5">
+        <div class="row g-4">
+            
+            <div class="col-md-6 col-xl-4">
+                <div class="subject-card bg-white p-4 rounded-5 shadow-sm h-100 d-flex flex-column justify-content-between">
+                    <div class="subject-header d-flex justify-content-between align-items-start mb-4">
+                        <div class="d-flex gap-3">
+                            <div class="subject-icon green-gradient d-flex align-items-center justify-content-center rounded-4" style="width: 70px; height: 70px; color: white;">
+                                <i class="bi bi-dna fs-2"></i>
+                            </div>
+                            <div>
+                                <h2 class="subject-title">Biologia</h2>
+                                <p class="subject-level-text">Fundamental</p>
+                            </div>
+                        </div>
+                        <span class="badge rounded-pill bg-light text-success fw-bold p-2">↗ 45%</span>
+                    </div>
+                    <div class="subject-progress mb-4">
+                        <div class="progress mb-2" style="height: 10px;">
+                            <div class="progress-bar green-gradient" style="width: 45%"></div>
+                        </div>
+                        <small class="text-muted">11/24 aulas concluídas</small>
+                    </div>
+                    <a href="#" class="btn green-button text-white fw-bold py-3 rounded-4">Acessar Disciplina</a>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <div class="subject-card bg-white p-4 rounded-5 shadow-sm h-100 d-flex flex-column justify-content-between">
+                    <div class="subject-header d-flex justify-content-between align-items-start mb-4">
+                        <div class="d-flex gap-3">
+                            <div class="subject-icon blue-gradient d-flex align-items-center justify-content-center rounded-4" style="width: 70px; height: 70px; color: white;">
+                                <i class="bi bi-123 fs-2"></i>
+                            </div>
+                            <div>
+                                <h2 class="subject-title">Matemática</h2>
+                                <p class="subject-level-text">Médio</p>
+                            </div>
+                        </div>
+                        <span class="badge rounded-pill bg-light text-primary fw-bold p-2">↗ 60%</span>
+                    </div>
+                    <div class="subject-progress mb-4">
+                        <div class="progress mb-2" style="height: 10px;">
+                            <div class="progress-bar blue-gradient" style="width: 60%"></div>
+                        </div>
+                        <small class="text-muted">22/36 aulas concluídas</small>
+                    </div>
+                    <a href="#" class="btn blue-button text-white fw-bold py-3 rounded-4">Acessar Disciplina</a>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <div class="subject-card bg-white p-4 rounded-5 shadow-sm h-100 d-flex flex-column justify-content-between">
+                    <div class="subject-header d-flex justify-content-between align-items-start mb-4">
+                        <div class="d-flex gap-3">
+                            <div class="subject-icon pink-gradient d-flex align-items-center justify-content-center rounded-4" style="width: 70px; height: 70px; color: white;">
+                                <span class="subject-icon-text">US</span>
+                            </div>
+                            <div>
+                                <h2 class="subject-title">Inglês</h2>
+                                <p class="subject-level-text">Médio</p>
+                            </div>
+                        </div>
+                        <span class="badge rounded-pill bg-light text-danger fw-bold p-2">↗ 70%</span>
+                    </div>
+                    <div class="subject-progress mb-4">
+                        <div class="progress mb-2" style="height: 10px;">
+                            <div class="progress-bar pink-gradient" style="width: 70%"></div>
+                        </div>
+                        <small class="text-muted">21/30 aulas concluídas</small>
+                    </div>
+                    <a href="#" class="btn pink-button text-white fw-bold py-3 rounded-4">Acessar Disciplina</a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="stats-section mt-5">
+        <h2 class="fw-bold mb-4" style="color: var(--text-main);">Estatísticas Gerais</h2>
+        <div class="row g-4 text-center">
+            <div class="col-md-6 col-xl-3">
+                <div class="stat-box shadow-sm">
+                    <h3 class="stat-number purple-text">10</h3>
+                    <p class="stat-label">Matérias Ativas</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="stat-box shadow-sm">
+                    <h3 class="stat-number green-text">162</h3>
+                    <p class="stat-label">Aulas Concluídas</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="stat-box shadow-sm">
+                    <h3 class="stat-number blue-text">58%</h3>
+                    <p class="stat-label">Progresso Médio</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="stat-box shadow-sm">
+                    <h3 class="stat-number orange-text">134h</h3>
+                    <p class="stat-label">Tempo Total</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>

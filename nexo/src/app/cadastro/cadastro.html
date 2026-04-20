@@ -1,0 +1,128 @@
+<div class="cadastro-container m-3">
+    <form class="cadastro-form"
+          th:action="@{/alunos/cadastrar}"
+          th:object="${alunoDTO}"
+          method="post">
+
+        <h2 class="cadastro-title text-center mb-4">Cadastrar Aluno</h2>
+        <p class="cadastro-subtitle">Preencha os dados para finalizar o cadastro</p>
+
+        <div th:if="${sucesso}" class="alert alert-success d-none" th:text="${sucesso}"></div>
+        <div th:if="${erro}" class="alert alert-danger d-none" th:text="${erro}"></div>
+
+        <fieldset class="border p-3 rounded">
+            <div class="row">
+
+                <div class="col-md-6 border-end coluna-esquerda">
+
+                    <div class="mb-3">
+                        <label class="form-label">Nome:</label>
+                        <input type="text"
+                               id="nome"
+                               th:field="*{nome}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'"
+                               placeholder="Digite o nome do aluno">
+                        <div class="invalid-feedback" th:errors="*{nome}"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">CPF:</label>
+                        <input type="text"
+                               th:field="*{cpf}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('cpf')} ? 'is-invalid'"
+                               placeholder="000.000.000-00">
+                        <div class="invalid-feedback" th:errors="*{cpf}"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Sexo:</label>
+                            <select th:field="*{sexo}" class="form-select">
+                                <option value="" disabled selected>Selecione</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Feminino</option>
+                                <option value="N">Não informar</option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label">Telefone:</label>
+                            <input type="text"
+                                   th:field="*{telefone}"
+                                   class="form-control"
+                                   placeholder="(DDD) 00000-0000">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label">Data de Nascimento:</label>
+                            <input type="date"
+                                   th:field="*{dataNascimento}"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('dataNascimento')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{dataNascimento}"></div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" th:field="*{email}" id="emailGerado">
+                    <input type="hidden" th:field="*{password}" id="senhaGerada">
+
+                    <button type="button" id="btnGerarAcesso" class="btn btn-cadastro w-100 mt-4">
+                        Gerar acesso
+                    </button>
+                </div>
+
+                <div class="col-md-6 coluna-direita">
+
+                    <div class="mb-3">
+                        <label class="form-label">Email do responsável:</label>
+                        <input type="email"
+                               th:field="*{emailResponsavel}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('emailResponsavel')} ? 'is-invalid'"
+                               placeholder="exemplo@gmail.com">
+                        <div class="invalid-feedback" th:errors="*{emailResponsavel}"></div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">CPF Responsável:</label>
+                            <input type="text"
+                                   th:field="*{cpfResponsavel}"
+                                   class="form-control"
+                                   placeholder="000.000.000-00">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Telefone Responsável:</label>
+                            <input type="text"
+                                   th:field="*{telefoneResponsavel}"
+                                   class="form-control"
+                                   placeholder="(DDD) 00000-0000">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Endereço:</label>
+                        <input type="text"
+                               th:field="*{endereco}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('endereco')} ? 'is-invalid'"
+                               placeholder="Digite o endereço">
+                        <div class="invalid-feedback" th:errors="*{endereco}"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Complemento:</label>
+                        <input type="text"
+                               th:field="*{complemento}"
+                               class="form-control"
+                               placeholder="Digite o complemento">
+                    </div>
+
+                    <button type="submit" class="btn btn-cadastro w-100 mt-4">
+                        Finalizar Cadastro
+                    </button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
