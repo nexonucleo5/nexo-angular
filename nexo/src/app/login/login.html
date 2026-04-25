@@ -1,0 +1,38 @@
+<div class="login-container">
+    <form class="login-form" method="post" th:action="@{/login}">
+        <h2 class="login-title">Entrar</h2>
+        <p class="login-subtitle">Acesse sua conta para continuar</p>
+
+        <div th:if="${erro}" class="alert alert-danger d-none" th:text="${erro}"></div>
+        <div th:if="${sucesso}" class="alert alert-success d-none" th:text="${sucesso}"></div>
+
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Login</label>
+            <input type="text"
+                   name="username"
+                   class="form-control"
+                   id="exampleInputEmail1"
+                   aria-describedby="emailHelp"
+                   placeholder="Digite seu login">
+            <div id="emailHelp" class="form-text">
+                Nunca compartilharemos o seu login com ninguém.
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">Senha</label>
+            <input type="password"
+                   name="password"
+                   class="form-control"
+                   id="exampleInputPassword1"
+                   placeholder="Digite sua senha">
+        </div>
+
+        <div class="form-check mb-4">
+            <input type="checkbox" class="form-check-input" id="exampleCheck1">
+            <label class="form-check-label" for="exampleCheck1">Mostrar senha</label>
+        </div>
+
+        <button type="submit" class="btn btn-login w-100">Entrar</button>
+    </form>
+</div>
