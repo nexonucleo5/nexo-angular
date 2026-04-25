@@ -1,0 +1,50 @@
+.settings-list {
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.settings-group {
+  padding: 10px 0;
+}
+
+.settings-title {
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.settings-item {
+  padding: 12px 0;
+}
+
+.toggle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.toggle-item span {
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.toggle-item small {
+  font-size: 12px;
+}
+
+//Muda a cor dos textos menores explicando as configurações. A ser removido caso o padrão ser mudado
+.settings-item small.text-muted {
+  color: var(--text-muted) !important; //!important faz isso sobrescrever o bootstrap
+  opacity: 0.75;
+  font-size: 12.5px;
+}
+
+.settings-subtext {
+  color: var(--text-muted);
+  font-size: 12.5px;
+  line-height: 1.3;
+}
+
