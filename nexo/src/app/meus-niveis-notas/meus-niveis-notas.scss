@@ -1,0 +1,16 @@
+.borda{
+position: relative; /* Define que o limite é esta div */
+ border: 1px solid black;
+  padding: 20px;
+  padding-bottom: 20px; /* Empurra a borda de baixo para longe do conteúdo */
+  
+}
+
+.img{
+    width: 40px; /* Define a largura para 300px e a altura ajusta automaticamente */
+   height: auto;
+    position: absolute;
+    top: 70px;   /* Distância do topo */
+    right: 60px; /* Distância da direita */
+
+}
