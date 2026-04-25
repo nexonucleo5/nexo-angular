@@ -1,0 +1,122 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #121212;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #f1f1f1;
+}
+
+/* CONTAINER */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* FORM */
+.login-form {
+    width: 100%;
+    max-width: 400px;
+    background-color: #1e1e1e;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+}
+
+/* TEXTOS */
+.login-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.login-subtitle {
+    font-size: 14px;
+    color: #bbbbbb;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.form-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #dddddd;
+    margin-bottom: 8px;
+}
+
+/* INPUT */
+.form-control {
+    height: 45px;
+    font-size: 14px;
+    border-radius: 8px;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #ffffff;
+}
+
+.form-control::placeholder {
+    color: #9a9a9a;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: #7a2cff;
+    background-color: #2a2a2a;
+    color: #ffffff;
+}
+
+/* TEXTO AUXILIAR */
+.form-text {
+    font-size: 12px;
+    color: #aaaaaa;
+    margin-top: 6px;
+}
+
+/* CHECKBOX */
+.form-check-input {
+    background-color: #2a2a2a;
+    border: 1px solid #666;
+}
+
+.form-check-input:focus {
+    box-shadow: none;
+    border-color: #7a2cff;
+}
+
+.form-check-input:checked {
+    background-color: #7a2cff;
+    border-color: #7a2cff;
+}
+
+.form-check-label {
+    font-size: 13px;
+    color: #cccccc;
+}
+
+/* BOTÃO */
+.btn {
+    height: 45px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.btn-login {
+    background-color: #7a2cff;
+    border: none;
+    color: white;
+}
+
+.btn-login:hover {
+    background-color: #6923e6;
+    color: white;
+}
+
+/* ALERTAS ESCONDIDOS */
+.alert {
+    display: none;
+}
