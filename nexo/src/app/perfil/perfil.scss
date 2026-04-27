@@ -86,31 +86,6 @@
     }
 }
 
-/* ============================================================
-   3. BOTÃO DE CONFIGURAÇÕES (MODIFICADO COM O GRADIENTE ROXO/VERDE)
-   ============================================================ */
-.account-settings-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    /* Aplicando o gradiente solicitado da imagem */
-    background: var(--grad-purple-green) !important;
-    color: #ffffff !important;
-    padding: 16px 28px;
-    border-radius: 50px;
-    font-size: 18px;
-    font-weight: 700;
-    text-decoration: none !important;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: none;
-    cursor: pointer;
-
-    &:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(143, 36, 255, 0.4);
-        filter: brightness(1.1);
-    }
-}
 
 /* ============================================================
    4. CARDS DE RESUMO (PROGRESSO, CONQUISTAS, SEQUÊNCIA)
