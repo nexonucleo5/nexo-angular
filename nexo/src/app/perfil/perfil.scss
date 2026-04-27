@@ -1,433 +1,270 @@
 /* ============================================================
-CONTEÚDO PRINCIPAL DA PÁGINA
-============================================================ */
+   1. VARIÁVEIS E CONFIGURAÇÕES GERAIS
+   ============================================================ */
+:root {
+    --bg-main: #121212;
+    --bg-card: #1e1e1e;
+    --border-color: #333333;
+    --text-main: #ffffff;
+    --text-muted: #b3b3b3;
+    
+    /* Seus Gradientes */
+    --green-gradient: linear-gradient(135deg, #0fcd5c, #08d6a2);
+    --blue-gradient: linear-gradient(135deg, #2e73f6, #10c6df);
+    --orange-gradient: linear-gradient(135deg, #ff6a00, #ff5f79);
+    --pink-gradient: linear-gradient(135deg, #8f24ff, #f2389d);
+    
+    /* Novo Gradiente solicitado para o botão (Roxo para Verde) */
+    --grad-purple-green: linear-gradient(135deg, #8f24ff, #0fcd5c);
+}
 
 .main-content {
-min-width: 0;
+    min-height: 100vh;
+    background-color: var(--bg-main) !important;
+    transition: all 0.3s ease;
 }
 
 .page-content {
-padding: 34px;
+    padding: 34px;
 }
 
 /* ============================================================
-HEADER DO PERFIL
-============================================================ */
-
-.top-header-title {
-margin: 0;
-font-size: 24px;
-font-weight: 700;
-color: var(--text-main);
-}
-
-.profile-area {
-display: flex;
-align-items: center;
-gap: 14px;
-}
-
-.profile-text {
-text-align: right;
-}
-
-.profile-name {
-margin: 0;
-font-size: 18px;
-font-weight: 700;
-color: var(--text-main);
-}
-
-.profile-level {
-margin: 4px 0 0 0;
-font-size: 15px;
-color: var(--text-muted);
-font-weight: 600;
-}
-
-/* ============================================================
-PERFIL PRINCIPAL (CARD)
-============================================================ */
-
+   2. CARD PRINCIPAL DO PERFIL (HEADER)
+   ============================================================ */
 .profile-main-card {
-background: linear-gradient(90deg, #fbf7ff, #f4fbf8);
-border-radius: 26px;
-padding: 34px;
-margin-bottom: 38px;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 26px;
+    padding: 34px;
+    margin-bottom: 38px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+    .profile-page-name {
+        font-size: 38px;
+        font-weight: 800;
+        color: var(--text-main) !important;
+        margin: 0 0 10px 0;
+    }
+
+    .profile-page-level {
+        font-size: 22px;
+        color: var(--text-muted) !important;
+        font-weight: 500;
+        margin-bottom: 24px;
+    }
 }
 
 .profile-main-image {
-width: 170px;
-height: 170px;
-border-radius: 50%;
-object-fit: cover;
-border: 5px solid #9b2fff;
-display: block;
-margin: 0 auto;
-}
-
-.profile-page-name {
-font-size: 38px;
-font-weight: 800;
-color: var(--text-main);
-margin: 0 0 10px 0;
-}
-
-.profile-page-level {
-font-size: 22px;
-color: var(--text-muted);
-margin: 0 0 24px 0;
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #8f24ff; 
+    box-shadow: 0 0 20px rgba(143, 36, 255, 0.3);
 }
 
 .profile-tags {
-display: flex;
-flex-wrap: wrap;
-gap: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
 }
 
 .profile-tag {
-background: var(--bg-card);
-border: 1px solid var(--border-color);
-border-radius: 18px;
-padding: 12px 18px;
-display: flex;
-align-items: center;
-gap: 10px;
-color: var(--text-main);
-font-size: 16px;
-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-}
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-main) !important;
+    font-size: 16px;
 
-.profile-tag i {
-color: #9b2fff;
-font-size: 18px;
-}
-
-.account-settings-btn {
-display: inline-flex;
-align-items: center;
-gap: 12px;
-background: linear-gradient(90deg, #9b2fff 0%, #06d25e 100%);
-color: #ffffff;
-padding: 16px 24px;
-border-radius: 18px;
-font-size: 18px;
-font-weight: 700;
-margin-top: 10px;
+    i {
+        color: #8f24ff;
+        font-size: 18px;
+    }
 }
 
 /* ============================================================
-SEÇÃO DE RESUMO
-============================================================ */
+   3. BOTÃO DE CONFIGURAÇÕES (MODIFICADO COM O GRADIENTE ROXO/VERDE)
+   ============================================================ */
+.account-settings-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    /* Aplicando o gradiente solicitado da imagem */
+    background: var(--grad-purple-green) !important;
+    color: #ffffff !important;
+    padding: 16px 28px;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    cursor: pointer;
 
-.profile-summary-section {
-margin-bottom: 38px;
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(143, 36, 255, 0.4);
+        filter: brightness(1.1);
+    }
 }
 
+/* ============================================================
+   4. CARDS DE RESUMO (PROGRESSO, CONQUISTAS, SEQUÊNCIA)
+   ============================================================ */
 .summary-card {
-background: var(--bg-card);
-border-radius: 24px;
-padding: 30px;
-min-height: 245px;
-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-display: flex;
-flex-direction: column;
-justify-content: space-between;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 30px;
+    height: 100%;
 }
 
 .summary-card-top {
-display: flex;
-align-items: center;
-gap: 16px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
 }
 
 .summary-icon {
-width: 62px;
-height: 62px;
-border-radius: 18px;
-display: flex;
-align-items: center;
-justify-content: center;
-color: #ffffff;
-font-size: 28px;
-flex-shrink: 0;
-}
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
 
-.purple-summary {
-background: linear-gradient(135deg, #8f24ff, #b56cff);
-}
-
-.gold-summary {
-background: linear-gradient(135deg, #f0a500, #ffbf3c);
-}
-
-.fire-summary {
-background: linear-gradient(135deg, #ff5b2e, #ff9a1f);
+    &.purple-summary { background: rgba(143, 36, 255, 0.1); color: #8f24ff; }
+    &.gold-summary { background: rgba(255, 215, 0, 0.1); color: #ffd700; }
+    &.fire-summary { background: rgba(255, 106, 0, 0.1); color: #ff6a00; }
 }
 
 .summary-title {
-margin: 0;
-font-size: 18px;
-color: var(--text-muted);
+    margin: 0;
+    font-size: 16px;
+    color: var(--text-muted) !important;
 }
 
 .summary-number {
-margin: 4px 0 0 0;
-font-size: 32px;
-font-weight: 800;
-color: var(--text-main);
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-main) !important;
 }
 
 .summary-progress-track {
-width: 100%;
-height: 10px;
-background-color: #d9c7ff;
-border-radius: 999px;
-overflow: hidden;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin-bottom: 15px;
+    overflow: hidden;
 }
 
 .summary-progress-fill {
-height: 100%;
-background: linear-gradient(90deg, #6d2cff, #7f42f5);
-border-radius: 999px;
-}
-
-.summary-footer-text {
-margin: 0;
-font-size: 15px;
-color: var(--text-muted);
+    height: 100%;
+    background: var(--blue-gradient) !important;
+    border-radius: 10px;
 }
 
 /* ============================================================
-CARDS E CONQUISTAS
-============================================================ */
-
-.middle-section {
-margin-bottom: 38px;
-}
-
+   5. CONQUISTAS RECENTES E PROGRESSO POR MATÉRIA
+   ============================================================ */
 .content-card {
-background: var(--bg-card);
-border-radius: 24px;
-padding: 28px;
-min-height: 100%;
+    background: var(--bg-card) !important;
+    border-radius: 24px;
+    padding: 28px;
+    border: 1px solid var(--border-color);
+    height: 100%;
 }
 
 .section-card-title {
-display: flex;
-align-items: center;
-gap: 12px;
-font-size: 24px;
-font-weight: 800;
-color: var(--text-main);
-margin: 0 0 24px 0;
-}
-
-.title-icon {
-font-size: 24px;
-}
-
-.achievements-grid {
-padding-top: 4px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-main) !important;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .achievement-item {
-background: linear-gradient(90deg, #f7f3ff, #f3fbf6);
-border-radius: 22px;
-padding: 26px 16px;
-text-align: center;
-min-height: 185px;
-display: flex;
-flex-direction: column;
-justify-content: center;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 22px;
+    padding: 20px 10px;
+    text-align: center;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.06) !important;
+        transform: scale(1.05);
+    }
+
+    .achievement-emoji { font-size: 32px; margin-bottom: 10px; }
+    .achievement-title { font-size: 16px; font-weight: 700; color: var(--text-main) !important; margin: 0; }
+    .achievement-date { font-size: 12px; color: var(--text-muted) !important; margin-top: 4px; }
 }
 
-.achievement-emoji {
-font-size: 44px;
-margin-bottom: 14px;
-}
-
-.achievement-title {
-font-size: 18px;
-font-weight: 700;
-color: var(--text-main);
-margin: 0 0 8px 0;
-}
-
-.achievement-date {
-font-size: 15px;
-color: var(--text-muted);
-margin: 0;
-}
-
-/* ============================================================
-PROGRESSO POR MATÉRIA
-============================================================ */
-
-.subject-progress-list {
-display: flex;
-flex-direction: column;
-gap: 28px;
-padding-top: 8px;
-}
-
+.subject-progress-item { margin-bottom: 20px; }
 .subject-progress-header {
-display: flex;
-justify-content: space-between;
-font-size: 18px;
-font-weight: 700;
-color: var(--text-main);
-margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-main) !important;
+    font-weight: 600;
+    margin-bottom: 8px;
 }
 
-.subject-line-track {
-width: 100%;
-height: 14px;
-background: #d6d9df;
-border-radius: 999px;
-overflow: hidden;
-}
+.subject-line-track { height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+.subject-line-fill { height: 100%; border-radius: 10px; }
 
-.subject-line-fill {
-height: 100%;
-border-radius: 999px;
-}
-
-.green-fill { background: #08c857; }
-.blue-fill { background: #22aaf5; }
-.orange-fill { background: #ff6c1e; }
-.pink-fill { background: linear-gradient(90deg, #8f24ff, #f2389d); }
+.green-fill { background: var(--green-gradient) !important; }
+.blue-fill { background: var(--blue-gradient) !important; }
+.orange-fill { background: var(--orange-gradient) !important; }
+.pink-fill { background: var(--pink-gradient) !important; }
 
 /* ============================================================
-ESTATÍSTICAS
-============================================================ */
-
-.stats-section {
-background: var(--bg-card);
-border-radius: 26px;
-padding: 32px 28px 22px;
-}
-
+   6. ESTATÍSTICAS DETALHADAS (RODAPÉ)
+   ============================================================ */
 .stats-title {
-margin: 0 0 22px 0;
-font-size: 28px;
-font-weight: 800;
-color: var(--text-main);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-main) !important;
+    margin: 40px 0 25px 0;
 }
 
-.stat-number {
-font-size: 40px;
-font-weight: 800;
-margin: 0 0 8px 0;
+.stat-box {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color);
+    padding: 30px;
+    border-radius: 24px;
+    transition: transform 0.3s ease;
+
+    &:hover { transform: translateY(-5px); }
+    
+    .stat-number { font-size: 32px; font-weight: 800; margin-bottom: 5px; }
+    .stat-label { color: var(--text-muted) !important; font-size: 16px; margin: 0; }
 }
 
-.stat-label {
-font-size: 17px;
-color: var(--text-muted);
-margin: 0;
-}
-
-.purple-text { color: #8f24ff; }
-.green-text { color: #08c857; }
-.blue-text { color: #245cff; }
-.orange-text { color: #ff7a00; }
-.gold-text { color: #e2a500; }
+.purple-text { color: #8f24ff !important; }
+.green-text { color: #0fcd5c !important; }
+.blue-text { color: #2e73f6 !important; }
+.gold-text { color: #ffd700 !important; }
 
 /* ============================================================
-RESPONSIVO
-============================================================ */
-
+   7. RESPONSIVIDADE
+   ============================================================ */
 @media (max-width: 992px) {
-.page-content {
-padding: 28px 20px 40px;
-}
-
-.profile-main-card {
-    padding: 26px;
-}
-
-.profile-main-image {
-    width: 140px;
-    height: 140px;
-}
-
-.profile-page-name {
-    font-size: 30px;
-}
-
-.profile-page-level {
-    font-size: 20px;
-}
+    .profile-main-card { text-align: center; }
+    .profile-tags { justify-content: center; }
+    .account-settings-btn { margin-top: 20px; }
 }
 
 @media (max-width: 768px) {
-.profile-area {
-align-self: flex-end;
-}
-
-.profile-main-card {
-    text-align: center;
-}
-
-.profile-tags {
-    justify-content: center;
-}
-
-.account-settings-btn {
-    margin-top: 16px;
-}
-
-.profile-main-image {
-    width: 120px;
-    height: 120px;
-}
-
-.summary-card {
-    min-height: auto;
-}
-
-.achievement-item {
-    min-height: 160px;
-}
-}
-
-@media (max-width: 576px) {
-.page-content {
-padding: 20px 16px 26px;
-}
-
-.profile-area {
-width: 100%;
-justify-content: space-between;
-}
-
-.profile-page-name {
-font-size: 26px;
-}
-
-.profile-page-level {
-font-size: 18px;
-}
-
-.profile-tag {
-width: 100%;
-justify-content: center;
-}
-
-.account-settings-btn {
-width: 100%;
-justify-content: center;
-}
-
-.stats-title {
-font-size: 22px;
-}
-
-.section-card-title {
-font-size: 22px;
-}
-
-.stat-number {
-font-size: 32px;
-}
+    .page-content { padding: 20px; }
+    .profile-page-name { font-size: 28px; }
 }
