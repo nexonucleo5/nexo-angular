@@ -1,50 +1,145 @@
-.borda{
-position: relative; /* Define que o limite é esta div */
- border: transparent;
- background-color: rgb(109, 4, 109);
- border-radius: 20px;
-  padding: 20px;
-  padding-bottom: 20px; /* Empurra a borda de baixo para longe do conteúdo */
-  
-  
-}
-.borda:hover{
-     transform: scale(1.01); /* aumenta o tamanho */
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3); /* sombra mais forte */
-}
-.img{
-    width: 100px; /* Define a largura para 300px e a altura ajusta automaticamente */
-   height: auto;
-    position: absolute;
-    top: 70px;   /* Distância do topo */
-    right: 60px; /* Distância da direita */
-
-}
-.numero{
-    right: 60px; /* Distância da direita */
-}
-
-.container {
-  display: flex;          /* coloca os itens lado a lado */
-  gap: 20px;              /* espaço entre as divs */
-
+/* CARD */
+.borda {
+  background: linear-gradient(135deg, #7b3fe4, #00c853);
   border-radius: 20px;
-  padding: 20px;
+  padding: 30px;
+  color: white;
+  transition: 0.3s;
 }
 
-.container div {
- width: 100px;
-  padding: 15px;
+.borda:hover {
+  transform: scale(1.01);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+
+/* TOPO */
+.topo-nivel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nivel-label {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.borda h1 {
+  font-size: 44px;
+  margin: 5px 0;
+}
+
+.nivel-sub {
+  opacity: 0.9;
+}
+
+/* ICONE */
+.box-icone {
+  background: rgba(255,255,255,0.2);
+  padding: 18px;
   border-radius: 15px;
-  background: linear-gradient(135deg, #2d2a31, #403c44);
+}
+
+.img {
+  width: 35px;
+  height: auto;
+  position: static; /* remove posição quebrada */
+}
+
+/* PROGRESSO */
+.secao-progresso {
+  margin-top: 25px;
+}
+
+.linha-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.xp {
+  font-weight: bold;
+}
+
+/* BARRA */
+.barra-progresso {
+  height: 10px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: #6d28d9; /* roxo da barra igual da imagem */
+  border-radius: 10px;
+}
+
+/* TEXTO FINAL */
+.faltam {
+  margin-top: 8px;
+  font-size: 13px;
+  opacity: 0.85;
+}
+-----------------
+body {
+  background-color: #000; /* Fundo preto para combinar com o print */
+  margin: 0;
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+.stats {
+  display: flex;       /* Coloca um do lado do outro */
+  gap: 100px;           /* Pequeno espaço entre os cards */
+  flex-wrap: wrap;     /* Ajusta se a tela for pequena */
+}
+
+.card {
+  background-color: #1a1a1a; /* Fundo cinza escuro do card */
+  border: 1px solid #333;    /* Borda sutil */
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;       /* Centraliza o conteúdo */
   text-align: center;
-  color: white;
 }
-.container div:hover {
-  transform: scale(1.08); /* aumenta o tamanho */
-  filter: brightness(0.85); /* escurece */
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3); /* sombra mais forte */
+
+/* Estilo do ícone (o quadradinho colorido) */
+.icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 12px;
 }
+
+/* Cores específicas dos ícones */
+.roxo { background-color: #5b21b6; }
+.verde { background-color: #065f46; }
+.azul { background-color: #1e40af; }
+.laranja { background-color: #9a3412; }
+
+/* Textos */
+.card p {
+  color: #a0a0a0;    /* Cinza claro para o rótulo */
+  font-size: 14px;
+  margin: 0;
+}
+
+.card h2 {
+  color: #fff;       /* Branco para o valor principal */
+  font-size: 22px;
+  margin: 4px 0 0 0;
+}
+
+-----------------------------
 .img2 {
   width: 40px;
   height: auto;
