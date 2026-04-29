@@ -1,15 +1,5 @@
-.page-title {
-  font-size: 42px;
-  color: var(--text-main);
-}
+.page-title { font-size: 42px; color: var(--text-main); }
 
-.user-avatar {
-  width: 45px;
-  height: 45px;
-  border: 3px solid #9b2fff;
-}
-
-/* STATS */
 .stat-card {
   background: var(--bg-card);
   padding: 22px;
@@ -21,145 +11,76 @@
 }
 
 .icon-box {
-  width: 50px;
-  height: 50px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-
+  width: 50px; height: 50px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center; color: white;
   &.orange { background: linear-gradient(135deg, #ff9800, #ff5722); }
   &.green { background: linear-gradient(135deg, #06d25e, #00c853); }
   &.red { background: linear-gradient(135deg, #ff3d00, #ff1744); }
 }
 
-/* FILTROS */
 .filters-box {
   background: var(--bg-card);
-  padding: 20px;
   border-radius: 20px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.05);
 }
 
-.search-input,
+.search-box {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  input { color: var(--text-main); &::placeholder { color: #777; } }
+  &:focus-within { border-color: #9b2fff; }
+}
+
 .filter-select {
   background-color: var(--bg-card);
   color: var(--text-main);
   border: 1px solid var(--border-color);
   border-radius: 14px;
   padding: 12px;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23777' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 }
 
-/* CARDS */
 .challenge-card {
   background: var(--bg-card);
-  padding: 24px;
   border-radius: 24px;
-  margin-bottom: 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   border: 1px solid var(--border-color);
   transition: 0.2s;
   box-shadow: 0 6px 18px rgba(0,0,0,0.05);
-
-  &:hover {
-    transform: translateY(-3px);
-    border-color: #9b2fff;
-  }
+  &:hover { transform: translateY(-3px); border-color: #9b2fff; }
+  
+  &.success { border: 2px solid rgba(6, 210, 94, 0.4); background: rgba(6, 210, 94, 0.05); }
+  &.progress-card { border: 2px solid rgba(155, 47, 255, 0.4); }
 }
 
-/* VARIAÇÕES */
-.success {
-  border: 2px solid rgba(6, 210, 94, 0.4);
-  background: rgba(6, 210, 94, 0.08);
-}
+.challenge-info { display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap; font-weight: 500; }
 
-.progress-card {
-  border: 2px solid rgba(155, 47, 255, 0.4);
-}
-
-/* INFO */
-.challenge-info {
-  display: flex;
-  gap: 16px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-  font-weight: 500;
-}
-
-/* NÍVEIS */
 .level {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: bold;
-
-  &.facil {
-    background: rgba(6, 210, 94, 0.15);
-    color: #06d25e;
-  }
-
-  &.medio {
-    background: rgba(255, 193, 7, 0.15);
-    color: #ffc107;
-  }
-
-  &.dificil {
-    background: rgba(255, 61, 0, 0.15);
-    color: #ff3d00;
-  }
+  padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold;
+  &.facil { background: rgba(6, 210, 94, 0.15); color: #06d25e; }
+  &.medio { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
+  &.dificil { background: rgba(255, 61, 0, 0.15); color: #ff3d00; }
 }
 
-/* BOTÕES */
 .gradient-btn {
   background: linear-gradient(90deg, #9b2fff, #06d25e);
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 10px 20px;
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-.gradient-btn:hover {
-  opacity: 0.9;
+  color: white; border: none; border-radius: 20px; padding: 10px 20px;
+  font-weight: bold; transition: 0.2s;
+  &:hover { opacity: 0.9; }
 }
 
 .btn-dark-custom {
-  background-color: var(--bg-card);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  padding: 10px 18px;
+  background-color: var(--bg-card); color: var(--text-main);
+  border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 18px;
   font-weight: 600;
-
-  &:hover {
-    border-color: #9b2fff;
-    background-color: rgba(155, 47, 255, 0.08);
-  }
+  &:hover { border-color: #9b2fff; background-color: rgba(155, 47, 255, 0.08); }
 }
 
-/* BADGE */
 .badge-success-custom {
   background: linear-gradient(90deg, #06d25e, #00c853);
-  color: white;
-  padding: 5px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  margin-left: 8px;
+  color: white; padding: 5px 12px; border-radius: 999px; font-size: 12px;
 }
 
-/* PROGRESS */
-.progress {
-  height: 8px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.08);
-  margin-top: 10px;
-}
-
-.progress-bar {
-  background: linear-gradient(90deg, #9b2fff, #06d25e);
-  border-radius: 10px;
-}
+.progress { height: 8px; border-radius: 10px; background: rgba(255,255,255,0.08); }
+.progress-bar { background: linear-gradient(90deg, #9b2fff, #06d25e); border-radius: 10px; }
+.text-soft { color: #bbb; }

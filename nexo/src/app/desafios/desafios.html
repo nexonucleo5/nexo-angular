@@ -1,179 +1,90 @@
 <section class="page-content p-4">
 
-    <!-- HEADER -->
     <div class="page-heading mb-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div>
-                <h1 class="page-title fw-bold" style="font-size: 44px; color: var(--text-main);">Desafios</h1>
-                <p class="text-muted fs-5">Complete desafios e ganhe XP para subir no ranking</p>
-            </div>
-
-            <div class="user-box d-flex align-items-center gap-3">
-                <div class="text-end">
-                    <strong>Gabriel Silva</strong><br>
-                    <small class="text-muted">2º Ano - Ensino Médio</small>
-                </div>
-                <img src="https://i.pravatar.cc/50" class="rounded-circle user-avatar">
-            </div>
-        </div>
+        <h1 class="page-title fw-bold" style="font-size: 44px; color: var(--text-main);">Desafios</h1>
+        <p class="text-soft fs-5">Complete desafios e ganhe XP para subir no ranking</p>
     </div>
 
-    <!-- STATS -->
     <section class="stats-section mb-4">
         <div class="row g-4">
-            <div class="col-md-6 col-xl-4">
-                <div class="stat-card rounded-4 shadow-sm">
-                    <div>
-                        <p class="text-muted mb-1">Desafios Concluídos</p>
-                        <h2>42</h2>
-                    </div>
+            <div class="col-md-4">
+                <div class="stat-card shadow-sm">
+                    <div><p class="text-soft mb-1">Desafios Concluídos</p><h2>42</h2></div>
                     <div class="icon-box orange"><i class="bi bi-trophy"></i></div>
                 </div>
             </div>
-
-            <div class="col-md-6 col-xl-4">
-                <div class="stat-card rounded-4 shadow-sm">
-                    <div>
-                        <p class="text-muted mb-1">Taxa de Sucesso</p>
-                        <h2>87%</h2>
-                    </div>
+            <div class="col-md-4">
+                <div class="stat-card shadow-sm">
+                    <div><p class="text-soft mb-1">Taxa de Sucesso</p><h2>87%</h2></div>
                     <div class="icon-box green"><i class="bi bi-bullseye"></i></div>
                 </div>
             </div>
-
-            <div class="col-md-6 col-xl-4">
-                <div class="stat-card rounded-4 shadow-sm">
-                    <div>
-                        <p class="text-muted mb-1">Sequência Atual</p>
-                        <h2>7 dias</h2>
-                    </div>
+            <div class="col-md-4">
+                <div class="stat-card shadow-sm">
+                    <div><p class="text-soft mb-1">Sequência Atual</p><h2>7 dias</h2></div>
                     <div class="icon-box red"><i class="bi bi-fire"></i></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- FILTROS -->
     <section class="filters-box p-4 rounded-4 shadow-sm mb-4">
         <div class="row g-3 align-items-center">
             <div class="col-lg-6">
-                <div class="search-box d-flex align-items-center p-2 border rounded-4 bg-light">
+                <div class="search-box d-flex align-items-center p-2">
                     <i class="bi bi-search px-2 text-secondary"></i>
-                    <input type="text" class="form-control border-0 bg-transparent" placeholder="Buscar desafio...">
+                    <input type="text" [(ngModel)]="buscaDeTermos" class="form-control border-0 bg-transparent shadow-none" placeholder="Buscar desafio...">
                 </div>
             </div>
-
             <div class="col-lg-3">
-                <select class="form-select filter-select">
-                    <option>Todas as Matérias</option>
+                <select class="form-select filter-select" [(ngModel)]="materiaSelecionada">
+                    <option *ngFor="let m of materias" [value]="m">{{m}}</option>
                 </select>
             </div>
-
             <div class="col-lg-3">
-                <select class="form-select filter-select">
-                    <option>Todos os Níveis</option>
+                <select class="form-select filter-select" [(ngModel)]="nivelSelecionado">
+                    <option *ngFor="let n of niveis" [value]="n">{{n}}</option>
                 </select>
             </div>
         </div>
     </section>
 
-    <!-- LISTA DE DESAFIOS -->
     <section class="challenge-section mb-5">
         <div class="row g-4">
-
-            <!-- CONCLUÍDO -->
-            <div class="col-md-6 col-xl-4">
-                <div class="challenge-card success p-4 rounded-5 shadow-sm h-100 d-flex flex-column justify-content-between">
+            <div class="col-md-6 col-xl-4" *ngFor="let desafio of desafiosFiltrados">
+                <div class="challenge-card p-4 h-100 d-flex flex-column justify-content-between"
+                     [class.success]="desafio.status === 'concluido'"
+                     [class.progress-card]="desafio.status === 'progresso'">
+                    
                     <div>
                         <h3>
-                            Quiz: Fotossíntese
-                            <span class="badge badge-success-custom">Concluído</span>
+                            {{desafio.titulo}}
+                            <span *ngIf="desafio.status === 'concluido'" class="badge badge-success-custom">Concluído</span>
                         </h3>
-                        <p class="text-muted">Biologia</p>
+                        <p class="text-soft">{{desafio.materia}}</p>
 
                         <div class="challenge-info">
-                            <span class="level medio">Médio</span>
-                            <span>⚡ 150 XP</span>
-                            <span>15 min</span>
-                            <span>10 questões</span>
+                            <span class="level" [ngClass]="getClasseNivel(desafio.nivel)">{{desafio.nivel}}</span>
+                            <span>⚡ {{desafio.xp}} XP</span>
+                            <span>{{desafio.tempo}}</span>
+                            <span>{{desafio.questoes}} questões</span>
+                        </div>
+
+                        <div class="progress mt-3" *ngIf="desafio.status === 'progresso'">
+                            <div class="progress-bar" [style.width]="desafio.progresso + '%'"></div>
                         </div>
                     </div>
 
                     <div class="d-flex gap-2 mt-3">
-                        <button class="btn btn-dark-custom w-100">Ver Resultado</button>
-                        <button class="btn gradient-btn w-100">Refazer</button>
+                        <ng-container [ngSwitch]="desafio.status">
+                            <button *ngSwitchCase="'concluido'" class="btn btn-dark-custom w-100">Ver Resultado</button>
+                            <button *ngSwitchCase="'concluido'" class="btn gradient-btn w-100">Refazer</button>
+                            <button *ngSwitchCase="'progresso'" class="btn gradient-btn w-100">Continuar</button>
+                            <button *ngSwitchDefault class="btn gradient-btn w-100">Iniciar Desafio</button>
+                        </ng-container>
                     </div>
                 </div>
             </div>
-
-            <!-- EM ANDAMENTO -->
-            <div class="col-md-6 col-xl-4">
-                <div class="challenge-card progress-card p-4 rounded-5 shadow-sm h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <h3>Desafio: Funções Trigonométricas</h3>
-                        <p class="text-muted">Matemática</p>
-
-                        <div class="challenge-info">
-                            <span class="level dificil">Difícil</span>
-                            <span>⚡ 250 XP</span>
-                            <span>30 min</span>
-                            <span>15 questões</span>
-                        </div>
-
-                        <div class="progress mt-3">
-                            <div class="progress-bar" style="width: 40%"></div>
-                        </div>
-                    </div>
-
-                    <button class="btn gradient-btn mt-3 w-100">Continuar</button>
-                </div>
-            </div>
-
-            <!-- NOVO -->
-            <div class="col-md-6 col-xl-4">
-                <div class="challenge-card p-4 rounded-5 shadow-sm h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <h3>Exercícios: Present Perfect</h3>
-                        <p class="text-muted">Inglês</p>
-
-                        <div class="challenge-info">
-                            <span class="level facil">Fácil</span>
-                            <span>⚡ 100 XP</span>
-                            <span>20 min</span>
-                            <span>12 questões</span>
-                        </div>
-                    </div>
-
-                    <button class="btn gradient-btn mt-3 w-100">Iniciar Desafio</button>
-                </div>
-            </div>
-
-            <!-- OUTRO CONCLUÍDO -->
-            <div class="col-md-6 col-xl-4">
-                <div class="challenge-card success p-4 rounded-5 shadow-sm h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <h3>
-                            Quiz: Segunda Guerra Mundial
-                            <span class="badge badge-success-custom">Concluído</span>
-                        </h3>
-                        <p class="text-muted">História</p>
-
-                        <div class="challenge-info">
-                            <span class="level medio">Médio</span>
-                            <span>⚡ 180 XP</span>
-                            <span>18 min</span>
-                            <span>10 questões</span>
-                        </div>
-                    </div>
-
-                    <div class="d-flex gap-2 mt-3">
-                        <button class="btn btn-dark-custom w-100">Ver Resultado</button>
-                        <button class="btn gradient-btn w-100">Refazer</button>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </section>
-
 </section>
