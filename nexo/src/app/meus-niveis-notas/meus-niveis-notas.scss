@@ -1,16 +1,230 @@
 .borda{
 position: relative; /* Define que o limite é esta div */
- border: 1px solid black;
+ border: transparent;
+ background-color: rgb(109, 4, 109);
+ border-radius: 20px;
   padding: 20px;
   padding-bottom: 20px; /* Empurra a borda de baixo para longe do conteúdo */
   
+  
 }
-
+.borda:hover{
+     transform: scale(1.01); /* aumenta o tamanho */
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3); /* sombra mais forte */
+}
 .img{
-    width: 40px; /* Define a largura para 300px e a altura ajusta automaticamente */
+    width: 100px; /* Define a largura para 300px e a altura ajusta automaticamente */
    height: auto;
     position: absolute;
     top: 70px;   /* Distância do topo */
     right: 60px; /* Distância da direita */
 
+}
+.numero{
+    right: 60px; /* Distância da direita */
+}
+
+.container {
+  display: flex;          /* coloca os itens lado a lado */
+  gap: 20px;              /* espaço entre as divs */
+
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.container div {
+ width: 100px;
+  padding: 15px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #2d2a31, #403c44);
+  text-align: center;
+  color: white;
+}
+.container div:hover {
+  transform: scale(1.08); /* aumenta o tamanho */
+  filter: brightness(0.85); /* escurece */
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3); /* sombra mais forte */
+}
+.img2 {
+  width: 40px;
+  height: auto;
+}
+
+.chart {
+  width: 100%;
+  max-width: 500px;
+  height: 300px;
+}
+
+.chart svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Grade */
+.grid line {
+  stroke: #ddd;
+  stroke-width: 1;
+}
+
+/* Linha do gráfico */
+.line {
+  fill: none;
+  stroke: url(#grad);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+/* Pontos */
+.point {
+  fill: #7b3fe4;
+  stroke: white;
+  stroke-width: 2;
+}
+
+/* GRID */
+.materias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+/* CARD */
+.materia-card {
+  background: linear-gradient(135deg, #1f1f24, #2a2a31);
+  border-radius: 15px;
+  padding: 15px;
+  color: #f1f1f1;
+  transition: 0.3s;
+}
+
+.materia-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+}
+
+/* TOPO */
+.topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topo h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.topo span {
+  font-size: 12px;
+  color: #9e9e9e;
+}
+
+/* NOTA */
+.nota {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.nota small {
+  display: block;
+  font-size: 10px;
+  color: #9e9e9e;
+}
+
+/* BARRA */
+.barra {
+  width: 100%;
+  height: 8px;
+  background: #3a3a3f;
+  border-radius: 10px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+/* PROGRESSO */
+.progresso {
+  height: 100%;
+  border-radius: 10px;
+}
+
+/* CORES (ajustadas pro dark) */
+.bio { width: 75%; background: #00e676; }
+.mat { width: 60%; background: #26c6da; }
+.his { width: 85%; background: #ff9100; }
+.ing { width: 70%; background: #b388ff; }
+
+.atividades-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* CARD */
+.atividade {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #1f1f24, #2a2a31);
+  padding: 15px 20px;
+  border-radius: 15px;
+  color: #f1f1f1;
+  transition: 0.3s;
+}
+
+.atividade:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+}
+
+/* INFO ESQUERDA */
+.info h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.info span {
+  font-size: 13px;
+  color: #9e9e9e;
+}
+
+/* DIREITA */
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.data {
+  font-size: 12px;
+  color: #9e9e9e;
+}
+
+/* STATUS (emoji com fundo) */
+.status {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 14px;
+}
+
+/* CORES */
+.status.bom {
+  background: rgba(0, 230, 118, 0.15);
+}
+
+.status.medio {
+  background: rgba(38, 198, 218, 0.15);
+}
+
+.status.alerta {
+  background: rgba(255, 145, 0, 0.15);
+}
+
+/* NOTA */
+.nota {
+  font-size: 22px;
+  font-weight: bold;
+  color: #ffffff;
 }
