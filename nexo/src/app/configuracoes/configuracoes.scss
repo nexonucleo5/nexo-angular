@@ -1,8 +1,4 @@
 
-/* ============================================================
-   SETTINGS - NEON CLEAN (ÍCONE BRANCO + FUNDO POR SEÇÃO)
-   ============================================================ */
-
 /* HEADER */
 .settings-header {
     margin-bottom: 30px;
@@ -49,7 +45,7 @@
 }
 
 /* ============================================================
-   TÍTULO (NEON PILL POR SEÇÃO)
+   TÍTULO NEON (PILL)
    ============================================================ */
 
 .section-card-title {
@@ -73,18 +69,11 @@
     isolation: isolate;
 }
 
-/* ÍCONE SEMPRE BRANCO */
 .section-card-title i {
     color: #fff !important;
-    font-size: 18px;
 }
 
-/* TEXTO SEMPRE BRANCO */
-.section-card-title {
-    color: #fff !important;
-}
-
-/* FUNDO BASE */
+/* fundo base */
 .section-card-title::before {
     content: "";
     position: absolute;
@@ -93,7 +82,7 @@
     opacity: 0.9;
 }
 
-/* BRILHO SUAVE */
+/* brilho leve */
 .section-card-title::after {
     content: "";
     position: absolute;
@@ -102,41 +91,35 @@
 
     background: radial-gradient(
         circle,
-        rgba(255,255,255,0.18),
+        rgba(255,255,255,0.15),
         transparent 60%
     );
 }
 
 /* ============================================================
-   CORES POR SEÇÃO (EXATAMENTE O PADRÃO NEON)
+   CORES DAS SEÇÕES (MESMO PADRÃO DOS ÍCONES)
    ============================================================ */
 
-/* NOTIFICAÇÕES */
 .settings-card:nth-child(1) .section-card-title::before {
     background: linear-gradient(135deg, #8f24ff, #2e73f6);
 }
 
-/* GAMIFICAÇÃO */
 .settings-card:nth-child(2) .section-card-title::before {
     background: linear-gradient(135deg, #ff2bd6, #8f24ff);
 }
 
-/* ESTUDOS */
 .settings-card:nth-child(3) .section-card-title::before {
     background: linear-gradient(135deg, #0fcd5c, #00d4ff);
 }
 
-/* APARÊNCIA */
 .settings-card:nth-child(4) .section-card-title::before {
     background: linear-gradient(135deg, #2e73f6, #00d4ff);
 }
 
-/* PRIVACIDADE */
 .settings-card:nth-child(5) .section-card-title::before {
     background: linear-gradient(135deg, #ff8a00, #ff2bd6);
 }
 
-/* CONTA */
 .settings-card:nth-child(6) .section-card-title::before {
     background: linear-gradient(135deg, #8f24ff, #0fcd5c);
 }
@@ -216,34 +199,79 @@
 }
 
 /* ============================================================
-   BOTÕES (mantido simples e seguro)
+   BOTÕES (IGUAL PADRÃO DOS ÍCONES)
    ============================================================ */
 
 .settings-card button.btn {
     font-weight: 600 !important;
     border-radius: 14px !important;
-    transition: 0.3s ease !important;
 
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
     border: none !important;
+
+    color: #fff !important;
+
+    position: relative;
+    overflow: hidden;
+
+    transition: all 0.3s ease !important;
 }
 
-/* editar perfil */
+/* brilho igual ícones */
+.settings-card button.btn::after {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    z-index: 0;
+
+    background: radial-gradient(
+        circle,
+        rgba(255,255,255,0.15),
+        transparent 60%
+    );
+}
+
+/* garantir texto acima */
+.settings-card button.btn {
+    z-index: 1;
+    position: relative;
+}
+
+/* ============================================================
+   EDITAR PERFIL (AZUL = MESMA LÓGICA DOS ÍCONES)
+   ============================================================ */
+
 .settings-card:last-child button.btn.btn-gradient:nth-of-type(1) {
     background: linear-gradient(135deg, #2e73f6, #00d4ff) !important;
-    color: #fff !important;
+    box-shadow: 0 0 14px rgba(46,115,246,0.25);
 }
 
-/* alterar senha */
+.settings-card:last-child button.btn.btn-gradient:nth-of-type(1):hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+/* ============================================================
+   ALTERAR SENHA (ROXO = MESMA LÓGICA DOS ÍCONES)
+   ============================================================ */
+
 .settings-card:last-child button.btn.btn-gradient:nth-of-type(2) {
     background: linear-gradient(135deg, #8f24ff, #ff2bd6) !important;
-    color: #fff !important;
+    box-shadow: 0 0 14px rgba(143,36,255,0.25);
 }
 
-/* encerrar sessão */
+.settings-card:last-child button.btn.btn-gradient:nth-of-type(2):hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+/* ============================================================
+   ENCERRAR SESSÃO
+   ============================================================ */
+
 button.btn.btn-danger-soft {
     background: transparent !important;
     border: 1px solid #ff4d4d !important;
@@ -251,6 +279,7 @@ button.btn.btn-danger-soft {
 
     &:hover {
         background: rgba(255, 77, 77, 0.12) !important;
+        transform: translateY(-2px);
     }
 }
 
