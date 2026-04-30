@@ -1,5 +1,6 @@
+
 /* ============================================================
-   CONFIGURAÇÕES - PADRÃO FINAL (CORRIGIDO)
+   SETTINGS - NEON CLEAN (ÍCONE BRANCO + FUNDO POR SEÇÃO)
    ============================================================ */
 
 /* HEADER */
@@ -37,8 +38,6 @@
     border-radius: 24px;
     padding: 28px;
     border: 1px solid var(--border-color);
-    height: 100%;
-
     position: relative;
     overflow: hidden;
     transition: all 0.3s ease;
@@ -47,106 +46,99 @@
         transform: translateY(-6px);
         box-shadow: 0 15px 40px rgba(0,0,0,0.5);
     }
-
-    /* Glow suave */
-    &::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        border-radius: 24px;
-        padding: 1px;
-
-        background: linear-gradient(
-            135deg,
-            transparent,
-            rgba(143,36,255,0.2),
-            transparent
-        );
-
-        -webkit-mask:
-            linear-gradient(#000 0 0) content-box,
-            linear-gradient(#000 0 0);
-
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-    }
-}
-
-/* Cor leve por seção */
-.settings-card:nth-child(2)::before {
-    background: linear-gradient(135deg, rgba(46,115,246,0.2), transparent);
-}
-
-.settings-card:nth-child(3)::before {
-    background: linear-gradient(135deg, rgba(15,205,92,0.2), transparent);
-}
-
-.settings-card:nth-child(4)::before {
-    background: linear-gradient(135deg, rgba(255,215,0,0.2), transparent);
 }
 
 /* ============================================================
-   TÍTULOS (COM FALLBACK)
+   TÍTULO (NEON PILL POR SEÇÃO)
    ============================================================ */
 
 .section-card-title {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 25px;
-
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 12px;
 
-    color: var(--text-main); // fallback
+    padding: 10px 16px;
+    border-radius: 14px;
 
-    @supports (-webkit-background-clip: text) {
-        background: linear-gradient(135deg, #8f24ff, #0fcd5c);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+    font-size: 18px;
+    font-weight: 700;
+
+    color: #fff;
+
+    position: relative;
+    overflow: hidden;
+
+    margin-bottom: 25px;
+
+    isolation: isolate;
 }
 
-/* ============================================================
-   ÍCONES (CORRIGIDO)
-   ============================================================ */
-
-.title-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-
+/* ÍCONE SEMPRE BRANCO */
+.section-card-title i {
+    color: #fff !important;
     font-size: 18px;
 }
 
-/* Garante cor */
-.title-icon i {
-    color: inherit;
+/* TEXTO SEMPRE BRANCO */
+.section-card-title {
+    color: #fff !important;
 }
 
-/* Cores */
-.purple-text {
-    background: rgba(143,36,255,0.15);
-    color: #8f24ff;
+/* FUNDO BASE */
+.section-card-title::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.9;
 }
 
-.blue-text {
-    background: rgba(46,115,246,0.15);
-    color: #2e73f6;
+/* BRILHO SUAVE */
+.section-card-title::after {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    z-index: -1;
+
+    background: radial-gradient(
+        circle,
+        rgba(255,255,255,0.18),
+        transparent 60%
+    );
 }
 
-.green-text {
-    background: rgba(15,205,92,0.15);
-    color: #0fcd5c;
+/* ============================================================
+   CORES POR SEÇÃO (EXATAMENTE O PADRÃO NEON)
+   ============================================================ */
+
+/* NOTIFICAÇÕES */
+.settings-card:nth-child(1) .section-card-title::before {
+    background: linear-gradient(135deg, #8f24ff, #2e73f6);
 }
 
-.gold-text {
-    background: rgba(255,215,0,0.15);
-    color: #ffd700;
+/* GAMIFICAÇÃO */
+.settings-card:nth-child(2) .section-card-title::before {
+    background: linear-gradient(135deg, #ff2bd6, #8f24ff);
+}
+
+/* ESTUDOS */
+.settings-card:nth-child(3) .section-card-title::before {
+    background: linear-gradient(135deg, #0fcd5c, #00d4ff);
+}
+
+/* APARÊNCIA */
+.settings-card:nth-child(4) .section-card-title::before {
+    background: linear-gradient(135deg, #2e73f6, #00d4ff);
+}
+
+/* PRIVACIDADE */
+.settings-card:nth-child(5) .section-card-title::before {
+    background: linear-gradient(135deg, #ff8a00, #ff2bd6);
+}
+
+/* CONTA */
+.settings-card:nth-child(6) .section-card-title::before {
+    background: linear-gradient(135deg, #8f24ff, #0fcd5c);
 }
 
 /* ============================================================
@@ -156,7 +148,6 @@
 .settings-item {
     padding: 18px 0;
     border-bottom: 1px solid var(--border-color);
-    transition: 0.3s;
 
     &:last-child {
         border-bottom: none;
@@ -189,7 +180,7 @@
 }
 
 /* ============================================================
-   SWITCH CUSTOM
+   SWITCH
    ============================================================ */
 
 .custom-switch {
@@ -215,8 +206,8 @@
     }
 
     &:checked {
-        background: linear-gradient(135deg, #8f24ff, #10c6df);
-        box-shadow: 0 0 10px rgba(143,36,255,0.5);
+        background: linear-gradient(135deg, #8f24ff, #00d4ff, #0fcd5c);
+        box-shadow: 0 0 12px rgba(0,212,255,0.4);
     }
 
     &:checked::before {
@@ -224,45 +215,42 @@
     }
 }
 
-/* Variação por seção */
-.settings-card:nth-child(2) .custom-switch:checked {
-    background: linear-gradient(135deg, #2e73f6, #10c6df);
-}
-
-.settings-card:nth-child(3) .custom-switch:checked {
-    background: linear-gradient(135deg, #0fcd5c, #08d6a2);
-}
-
 /* ============================================================
-   BOTÕES
+   BOTÕES (mantido simples e seguro)
    ============================================================ */
 
-.btn-gradient {
-    background: linear-gradient(135deg, #8f24ff, #0fcd5c);
-    border: none;
-    color: white;
+.settings-card button.btn {
+    font-weight: 600 !important;
+    border-radius: 14px !important;
+    transition: 0.3s ease !important;
 
-    padding: 12px;
-    border-radius: 14px;
-    font-weight: 600;
-    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    &:hover {
-        opacity: 0.9;
-    }
+    border: none !important;
 }
 
-.btn-danger-soft {
-    background: transparent;
-    border: 1px solid #ff4d4d;
-    color: #ff4d4d;
+/* editar perfil */
+.settings-card:last-child button.btn.btn-gradient:nth-of-type(1) {
+    background: linear-gradient(135deg, #2e73f6, #00d4ff) !important;
+    color: #fff !important;
+}
 
-    padding: 12px;
-    border-radius: 14px;
-    transition: 0.3s;
+/* alterar senha */
+.settings-card:last-child button.btn.btn-gradient:nth-of-type(2) {
+    background: linear-gradient(135deg, #8f24ff, #ff2bd6) !important;
+    color: #fff !important;
+}
+
+/* encerrar sessão */
+button.btn.btn-danger-soft {
+    background: transparent !important;
+    border: 1px solid #ff4d4d !important;
+    color: #ff4d4d !important;
 
     &:hover {
-        background: rgba(255, 77, 77, 0.1);
+        background: rgba(255, 77, 77, 0.12) !important;
     }
 }
 
