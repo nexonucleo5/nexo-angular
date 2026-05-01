@@ -1,1 +1,90 @@
-<p>desafios works!</p>
+<section class="page-content p-4">
+
+    <div class="page-heading mb-4">
+        <h1 class="page-title fw-bold" style="font-size: 44px; color: var(--text-main);">Desafios</h1>
+        <p class="text-soft fs-5">Complete desafios e ganhe XP para subir no ranking</p>
+    </div>
+
+    <section class="stats-section mb-4">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="stat-card shadow-sm">
+                    <div><p class="text-soft mb-1">Desafios Concluídos</p><h2>42</h2></div>
+                    <div class="icon-box orange"><i class="bi bi-trophy"></i></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card shadow-sm">
+                    <div><p class="text-soft mb-1">Taxa de Sucesso</p><h2>87%</h2></div>
+                    <div class="icon-box green"><i class="bi bi-bullseye"></i></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card shadow-sm">
+                    <div><p class="text-soft mb-1">Sequência Atual</p><h2>7 dias</h2></div>
+                    <div class="icon-box red"><i class="bi bi-fire"></i></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="filters-box p-4 rounded-4 shadow-sm mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-6">
+                <div class="search-box d-flex align-items-center p-2">
+                    <i class="bi bi-search px-2 text-secondary"></i>
+                    <input type="text" [(ngModel)]="buscaDeTermos" class="form-control border-0 bg-transparent shadow-none" placeholder="Buscar desafio...">
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <select class="form-select filter-select" [(ngModel)]="materiaSelecionada">
+                    <option *ngFor="let m of materias" [value]="m">{{m}}</option>
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <select class="form-select filter-select" [(ngModel)]="nivelSelecionado">
+                    <option *ngFor="let n of niveis" [value]="n">{{n}}</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <section class="challenge-section mb-5">
+        <div class="row g-4">
+            <div class="col-md-6 col-xl-4" *ngFor="let desafio of desafiosFiltrados">
+                <div class="challenge-card p-4 h-100 d-flex flex-column justify-content-between"
+                     [class.success]="desafio.status === 'concluido'"
+                     [class.progress-card]="desafio.status === 'progresso'">
+                    
+                    <div>
+                        <h3>
+                            {{desafio.titulo}}
+                            <span *ngIf="desafio.status === 'concluido'" class="badge badge-success-custom">Concluído</span>
+                        </h3>
+                        <p class="text-soft">{{desafio.materia}}</p>
+
+                        <div class="challenge-info">
+                            <span class="level" [ngClass]="getClasseNivel(desafio.nivel)">{{desafio.nivel}}</span>
+                            <span>⚡ {{desafio.xp}} XP</span>
+                            <span>{{desafio.tempo}}</span>
+                            <span>{{desafio.questoes}} questões</span>
+                        </div>
+
+                        <div class="progress mt-3" *ngIf="desafio.status === 'progresso'">
+                            <div class="progress-bar" [style.width]="desafio.progresso + '%'"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-3">
+                        <ng-container [ngSwitch]="desafio.status">
+                            <button *ngSwitchCase="'concluido'" class="btn btn-dark-custom w-100">Ver Resultado</button>
+                            <button *ngSwitchCase="'concluido'" class="btn gradient-btn w-100">Refazer</button>
+                            <button *ngSwitchCase="'progresso'" class="btn gradient-btn w-100">Continuar</button>
+                            <button *ngSwitchDefault class="btn gradient-btn w-100">Iniciar Desafio</button>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
