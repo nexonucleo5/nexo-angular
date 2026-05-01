@@ -5,6 +5,7 @@ import { Cadastro } from './cadastro/cadastro';
 import { Perfil } from './perfil/perfil';
 import { MeusNiveisNotas } from './meus-niveis-notas/meus-niveis-notas';
 import { Desafios } from './desafios/desafios';
+import { Configuracoes } from './configuracoes/configuracoes';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboards', pathMatch: 'full' },
@@ -14,4 +15,5 @@ export const routes: Routes = [
   { path: 'perfil', component: Perfil },
   { path: 'desafios', component: Desafios },
   { path: 'meus_niveis_notas', component: MeusNiveisNotas },
+  { path: 'configuracoes', component: Configuracoes },
 ];
