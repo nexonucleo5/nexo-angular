@@ -6,6 +6,7 @@ import { Perfil } from './perfil/perfil';
 import { MeusNiveisNotas } from './meus-niveis-notas/meus-niveis-notas';
 import { Desafios } from './desafios/desafios';
 import { Configuracoes } from './configuracoes/configuracoes';
+import { Login } from './login/login';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboards', pathMatch: 'full' },
@@ -16,4 +17,5 @@ export const routes: Routes = [
   { path: 'desafios', component: Desafios },
   { path: 'meus_niveis_notas', component: MeusNiveisNotas },
   { path: 'configuracoes', component: Configuracoes },
+  { path: 'login', component: Login },
 ];
