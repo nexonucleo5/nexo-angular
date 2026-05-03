@@ -6,13 +6,15 @@ import { Dashboards } from './dashboards/dashboards';
 import { Login } from './login/login';
 import { Materias } from './materias/materias';
 import { Menu } from './menu/menu';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
   imports: [CommonModule, 
     RouterOutlet, 
     Dashboards, 
-    Materias, 
+    Materias,
+    FormsModule, 
     Menu, 
     Cadastro, 
     Login],
