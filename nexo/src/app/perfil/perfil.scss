@@ -1,642 +1,245 @@
 /* ============================================================
-   ESTILOS GLOBAIS E RESET
+   1. VARIÁVEIS E CONFIGURAÇÕES GERAIS
    ============================================================ */
-
-body {
-    margin: 0; /* Remove as margens externas padrão do navegador */
-    background-color: #f6f6f7; /* Define a cor de fundo cinza clara para o modo padrão */
-    font-family: Arial, Helvetica, sans-serif; /* Define a família de fontes principal */
-    color: #12284a; /* Define a cor base do texto no modo claro */
+:root {
+    --bg-main: #121212;
+    --bg-card: #1e1e1e;
+    --border-color: #333333;
+    --text-main: #ffffff;
+    --text-muted: #b3b3b3;
+    
+    /* Seus Gradientes */
+    --green-gradient: linear-gradient(135deg, #0fcd5c, #08d6a2);
+    --blue-gradient: linear-gradient(135deg, #2e73f6, #10c6df);
+    --orange-gradient: linear-gradient(135deg, #ff6a00, #ff5f79);
+    --pink-gradient: linear-gradient(135deg, #8f24ff, #f2389d);
+    
+    /* Novo Gradiente solicitado para o botão (Roxo para Verde) */
+    --grad-purple-green: linear-gradient(135deg, #8f24ff, #0fcd5c);
 }
-
-a {
-    text-decoration: none; /* Remove o sublinhado padrão dos elementos de link */
-}
-
-.app-layout {
-    min-height: 100vh; /* Garante que o container principal ocupe toda a altura da tela */
-}
-
-
-/* ============================================================
-   CONTEÚDO PRINCIPAL (MAIN)
-   ============================================================ */
 
 .main-content {
-    background-color: #f6f6f7; /* Cor de fundo da área de conteúdo */
-    min-width: 0; /* Evita quebras de layout em elementos flex */
-}
-
-.top-header {
-    background-color: #ffffff; /* Fundo branco do cabeçalho superior */
-    padding: 24px 34px; /* Espaçamento interno do cabeçalho */
-    border-bottom: 1px solid #dddddf; /* Linha divisória inferior */
-}
-
-.top-header-title {
-    margin: 0; /* Remove margens padrão */
-    font-size: 24px; /* Tamanho do título da página */
-    font-weight: 700; /* Peso negrito */
-    color: #12284a; /* Cor azul escura */
-}
-
-.profile-area {
-    display: flex; /* Organiza info do perfil e foto lado a lado */
-    align-items: center; /* Centraliza verticalmente */
-    gap: 14px; /* Espaço entre texto e foto */
-}
-
-.profile-text {
-    text-align: right; /* Alinha o texto do perfil à direita */
-}
-
-.profile-name {
-    margin: 0; /* Remove margens */
-    font-size: 18px; /* Tamanho do nome */
-    font-weight: 700; /* Negrito */
-    color: #12284a; /* Azul escuro */
-}
-
-.profile-level {
-    margin: 4px 0 0 0; /* Margem apenas no topo */
-    font-size: 15px; /* Tamanho da fonte do nível */
-    color: #637086; /* Cinza para o nível */
-    font-weight: 600; /* Semi-negrito */
-}
-
-.profile-image {
-    width: 58px; /* Largura da foto de perfil no topo */
-    height: 58px; /* Altura da foto de perfil no topo */
-    border-radius: 50%; /* Torna a foto circular */
-    object-fit: cover; /* Mantém proporção da imagem */
-    border: 3px solid #9b2fff; /* Borda roxa fina */
-    display: block; /* Remove espaços vazios na base */
-    flex-shrink: 0; /* Impede que a foto amasse */
+    min-height: 100vh;
+    background-color: var(--bg-main) !important;
+    transition: all 0.3s ease;
 }
 
 .page-content {
-    padding: 34px; /* Espaçamento geral do conteúdo da página */
+    padding: 34px;
 }
 
 /* ============================================================
-   PERFIL PRINCIPAL (CARD)
+   2. CARD PRINCIPAL DO PERFIL (HEADER)
    ============================================================ */
-
 .profile-main-card {
-    background: linear-gradient(90deg, #fbf7ff, #f4fbf8); /* Fundo gradiente suave */
-    border-radius: 26px; /* Cantos arredondados do card */
-    padding: 34px; /* Espaçamento interno do card */
-    margin-bottom: 38px; /* Espaço abaixo do card */
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 26px;
+    padding: 34px;
+    margin-bottom: 38px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+    .profile-page-name {
+        font-size: 38px;
+        font-weight: 800;
+        color: var(--text-main) !important;
+        margin: 0 0 10px 0;
+    }
+
+    .profile-page-level {
+        font-size: 22px;
+        color: var(--text-muted) !important;
+        font-weight: 500;
+        margin-bottom: 24px;
+    }
 }
 
 .profile-main-image {
-    width: 170px; /* Largura da foto grande */
-    height: 170px; /* Altura da foto grande */
-    border-radius: 50%; /* Foto circular */
-    object-fit: cover; /* Ajuste da imagem */
-    border: 5px solid #9b2fff; /* Borda roxa grossa */
-    display: block; /* Garante comportamento de bloco */
-    margin: 0 auto; /* Centraliza a foto horizontalmente */
-}
-
-.profile-page-name {
-    font-size: 38px; /* Tamanho do nome em destaque */
-    font-weight: 800; /* Peso extra-negrito */
-    color: #0d2347; /* Cor azul marinho */
-    margin: 0 0 10px 0; /* Margem na base */
-}
-
-.profile-page-level {
-    font-size: 22px; /* Tamanho do nível em destaque */
-    color: #46546b; /* Cor cinza azulada */
-    margin: 0 0 24px 0; /* Margem na base */
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #8f24ff; 
+    box-shadow: 0 0 20px rgba(143, 36, 255, 0.3);
 }
 
 .profile-tags {
-    display: flex; /* Organiza tags em linha */
-    flex-wrap: wrap; /* Permite quebra de linha se necessário */
-    gap: 14px; /* Espaçamento entre as tags */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
 }
 
 .profile-tag {
-    background: #ffffff; /* Fundo branco das tags */
-    border: 1px solid #e7e7ea; /* Borda cinza clara */
-    border-radius: 18px; /* Arredondamento das tags */
-    padding: 12px 18px; /* Interno das tags */
-    display: flex; /* Alinha ícone e texto na tag */
-    align-items: center; /* Centraliza conteúdo da tag */
-    gap: 10px; /* Espaço interno da tag */
-    color: #3e4c62; /* Cor do texto da tag */
-    font-size: 16px; /* Tamanho da fonte da tag */
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04); /* Sombra sutil */
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-main) !important;
+    font-size: 16px;
+
+    i {
+        color: #8f24ff;
+        font-size: 18px;
+    }
 }
 
-.profile-tag i {
-    color: #9b2fff; /* Cor do ícone na tag */
-    font-size: 18px; /* Tamanho do ícone na tag */
-}
-
-.account-settings-btn {
-    display: inline-flex; /* Ajusta largura ao conteúdo */
-    align-items: center; /* Centraliza itens do botão */
-    gap: 12px; /* Espaço entre ícone e texto */
-    background: linear-gradient(90deg, #9b2fff 0%, #06d25e 100%); /* Fundo gradiente */
-    color: #ffffff; /* Texto branco */
-    padding: 16px 24px; /* Tamanho do botão */
-    border-radius: 18px; /* Arredondamento do botão */
-    font-size: 18px; /* Fonte do botão */
-    font-weight: 700; /* Botão em negrito */
-    margin-top: 10px; /* Espaço no topo */
-}
-
-.account-settings-btn i {
-    font-size: 18px; /* Tamanho do ícone do botão */
-}
 
 /* ============================================================
-   SEÇÃO DE RESUMO
+   4. CARDS DE RESUMO (PROGRESSO, CONQUISTAS, SEQUÊNCIA)
    ============================================================ */
-
-.profile-summary-section {
-    margin-bottom: 38px; /* Espaçamento entre as seções */
-}
-
 .summary-card {
-    background: #ffffff; /* Fundo branco do card de resumo */
-    border-radius: 24px; /* Arredondamento do card */
-    padding: 30px; /* Interno do card */
-    min-height: 245px; /* Altura mínima para manter padrão */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02); /* Sombra mínima */
-    display: flex; /* Estrutura flexível */
-    flex-direction: column; /* Coluna vertical */
-    justify-content: space-between; /* Espalha conteúdo */
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 30px;
+    height: 100%;
 }
 
 .summary-card-top {
-    display: flex; /* Alinha topo do card */
-    align-items: center; /* Centraliza itens */
-    gap: 16px; /* Espaço no topo do card */
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
 }
 
 .summary-icon {
-    width: 62px; /* Largura do ícone de destaque */
-    height: 62px; /* Altura do ícone de destaque */
-    border-radius: 18px; /* Arredondamento da caixa do ícone */
-    display: flex; /* Flex para centralizar ícone */
-    align-items: center; /* Centraliza vertical */
-    justify-content: center; /* Centraliza horizontal */
-    color: #ffffff; /* Ícone em branco */
-    font-size: 28px; /* Tamanho do ícone */
-    flex-shrink: 0; /* Não amassa */
-}
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
 
-.purple-summary {
-    background: linear-gradient(135deg, #8f24ff, #b56cff); /* Gradiente roxo */
-}
-
-.gold-summary {
-    background: linear-gradient(135deg, #f0a500, #ffbf3c); /* Gradiente ouro */
-}
-
-.fire-summary {
-    background: linear-gradient(135deg, #ff5b2e, #ff9a1f); /* Gradiente fogo */
+    &.purple-summary { background: rgba(143, 36, 255, 0.1); color: #8f24ff; }
+    &.gold-summary { background: rgba(255, 215, 0, 0.1); color: #ffd700; }
+    &.fire-summary { background: rgba(255, 106, 0, 0.1); color: #ff6a00; }
 }
 
 .summary-title {
-    margin: 0; /* Remove margens */
-    font-size: 18px; /* Tamanho do título da métrica */
-    color: #46546b; /* Cor secundária */
+    margin: 0;
+    font-size: 16px;
+    color: var(--text-muted) !important;
 }
 
 .summary-number {
-    margin: 4px 0 0 0; /* Margem no topo */
-    font-size: 32px; /* Tamanho do número grande */
-    font-weight: 800; /* Peso extra-negrito */
-    color: #0d2347; /* Azul marinho */
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-main) !important;
 }
 
 .summary-progress-track {
-    width: 100%; /* Largura total da barra */
-    height: 10px; /* Altura da barra */
-    background-color: #d9c7ff; /* Cor da trilha de fundo */
-    border-radius: 999px; /* Formato pílula */
-    overflow: hidden; /* Corta o excesso do preenchimento */
+    height: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin-bottom: 15px;
+    overflow: hidden;
 }
 
 .summary-progress-fill {
-    height: 100%; /* Ocupa altura total da track */
-    background: linear-gradient(90deg, #6d2cff, #7f42f5); /* Cor de preenchimento */
-    border-radius: 999px; /* Arredondamento */
-}
-
-.summary-footer-text {
-    margin: 0; /* Remove margem */
-    font-size: 15px; /* Fonte pequena */
-    color: #637086; /* Cor cinza */
+    height: 100%;
+    background: var(--blue-gradient) !important;
+    border-radius: 10px;
 }
 
 /* ============================================================
-   CARDS DE CONTEÚDO E CONQUISTAS
+   5. CONQUISTAS RECENTES E PROGRESSO POR MATÉRIA
    ============================================================ */
-
-.middle-section {
-    margin-bottom: 38px; /* Espaço abaixo da seção do meio */
-}
-
 .content-card {
-    background: #ffffff; /* Fundo branco */
-    border-radius: 24px; /* Arredondamento */
-    padding: 28px; /* Interno */
-    min-height: 100%; /* Preenche altura da coluna */
+    background: var(--bg-card) !important;
+    border-radius: 24px;
+    padding: 28px;
+    border: 1px solid var(--border-color);
+    height: 100%;
 }
 
 .section-card-title {
-    display: flex; /* Alinha ícone e título */
-    align-items: center; /* Centraliza vertical */
-    gap: 12px; /* Espaço entre itens */
-    font-size: 24px; /* Tamanho do título */
-    font-weight: 800; /* Negrito */
-    color: #0d2347; /* Azul marinho */
-    margin: 0 0 24px 0; /* Margem inferior */
-}
-
-.title-icon {
-    font-size: 24px; /* Tamanho do ícone do título */
-}
-
-.achievements-grid {
-    padding-top: 4px; /* Respiro no topo do grid */
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-main) !important;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .achievement-item {
-    background: linear-gradient(90deg, #f7f3ff, #f3fbf6); /* Fundo com gradiente suave */
-    border-radius: 22px; /* Arredondamento */
-    padding: 26px 16px; /* Interno do item de conquista */
-    text-align: center; /* Centraliza texto */
-    min-height: 185px; /* Altura mínima do item */
-    display: flex; /* Flex */
-    flex-direction: column; /* Coluna */
-    justify-content: center; /* Centraliza verticalmente */
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 22px;
+    padding: 20px 10px;
+    text-align: center;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.06) !important;
+        transform: scale(1.05);
+    }
+
+    .achievement-emoji { font-size: 32px; margin-bottom: 10px; }
+    .achievement-title { font-size: 16px; font-weight: 700; color: var(--text-main) !important; margin: 0; }
+    .achievement-date { font-size: 12px; color: var(--text-muted) !important; margin-top: 4px; }
 }
 
-.achievement-emoji {
-    font-size: 44px; /* Tamanho do emoji da conquista */
-    margin-bottom: 14px; /* Espaço abaixo do emoji */
-}
-
-.achievement-title {
-    font-size: 18px; /* Título da conquista */
-    font-weight: 700; /* Negrito */
-    color: #0d2347; /* Azul marinho */
-    margin: 0 0 8px 0; /* Margem inferior */
-}
-
-.achievement-date {
-    font-size: 15px; /* Data da conquista */
-    color: #637086; /* Cinza */
-    margin: 0; /* Remove margem */
-}
-
-/* ============================================================
-   PROGRESSO POR MATÉRIA
-   ============================================================ */
-
-.subject-progress-list {
-    display: flex; /* Flex */
-    flex-direction: column; /* Coluna */
-    gap: 28px; /* Espaçamento entre matérias */
-    padding-top: 8px; /* Respiro no topo */
-}
-
-.subject-progress-item {
-    width: 100%; /* Largura total */
-}
-
+.subject-progress-item { margin-bottom: 20px; }
 .subject-progress-header {
-    display: flex; /* Flex */
-    justify-content: space-between; /* Nome à esquerda, % à direita */
-    font-size: 18px; /* Tamanho da fonte */
-    font-weight: 700; /* Negrito */
-    color: #0d2347; /* Azul marinho */
-    margin-bottom: 10px; /* Margem abaixo do header */
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-main) !important;
+    font-weight: 600;
+    margin-bottom: 8px;
 }
 
-.subject-line-track {
-    width: 100%; /* Largura da barra */
-    height: 14px; /* Altura da barra */
-    background: #d6d9df; /* Fundo cinza da barra */
-    border-radius: 999px; /* Redondo */
-    overflow: hidden; /* Corta o preenchimento */
-}
+.subject-line-track { height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+.subject-line-fill { height: 100%; border-radius: 10px; }
 
-.subject-line-fill {
-    height: 100%; /* Altura total */
-    border-radius: 999px; /* Redondo */
-}
-
-.green-fill {
-    background: #08c857; /* Preenchimento verde */
-}
-
-.blue-fill {
-    background: #22aaf5; /* Preenchimento azul */
-}
-
-.orange-fill {
-    background: #ff6c1e; /* Preenchimento laranja */
-}
-
-.pink-fill {
-    background: linear-gradient(90deg, #8f24ff, #f2389d); /* Preenchimento rosa/roxo */
-}
+.green-fill { background: var(--green-gradient) !important; }
+.blue-fill { background: var(--blue-gradient) !important; }
+.orange-fill { background: var(--orange-gradient) !important; }
+.pink-fill { background: var(--pink-gradient) !important; }
 
 /* ============================================================
-   SEÇÃO DE ESTATÍSTICAS
+   6. ESTATÍSTICAS DETALHADAS (RODAPÉ)
    ============================================================ */
-
-.stats-section {
-    background: #ffffff; /* Fundo branco */
-    border-radius: 26px; /* Arredondamento */
-    padding: 32px 28px 22px; /* Interno das estatísticas */
-}
-
-.detailed-stats-section {
-    margin-top: 10px; /* Espaço no topo */
-}
-
 .stats-title {
-    margin: 0 0 22px 0; /* Margem abaixo */
-    font-size: 28px; /* Tamanho do título */
-    font-weight: 800; /* Negrito pesado */
-    color: #10264a; /* Azul escuro */
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-main) !important;
+    margin: 40px 0 25px 0;
 }
 
 .stat-box {
-    padding: 8px 0; /* Respiro vertical no box */
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color);
+    padding: 30px;
+    border-radius: 24px;
+    transition: transform 0.3s ease;
+
+    &:hover { transform: translateY(-5px); }
+    
+    .stat-number { font-size: 32px; font-weight: 800; margin-bottom: 5px; }
+    .stat-label { color: var(--text-muted) !important; font-size: 16px; margin: 0; }
 }
 
-.stat-number {
-    font-size: 40px; /* Número gigante */
-    font-weight: 800; /* Negrito pesado */
-    margin: 0 0 8px 0; /* Margem inferior */
-}
-
-.stat-label {
-    font-size: 17px; /* Rótulo da estatística */
-    color: #45556d; /* Cor cinza */
-    margin: 0; /* Remove margens */
-}
-
-.purple-text {
-    color: #8f24ff; /* Texto roxo */
-}
-
-.green-text {
-    color: #08c857; /* Texto verde */
-}
-
-.blue-text {
-    color: #245cff; /* Texto azul */
-}
-
-.orange-text {
-    color: #ff7a00; /* Texto laranja */
-}
-
-.gold-text {
-    color: #e2a500; /* Texto ouro */
-}
+.purple-text { color: #8f24ff !important; }
+.green-text { color: #0fcd5c !important; }
+.blue-text { color: #2e73f6 !important; }
+.gold-text { color: #ffd700 !important; }
 
 /* ============================================================
-   DARK MODE (MODO ESCURO) - INDIVIDUALIZADO
+   7. RESPONSIVIDADE
    ============================================================ */
-
-body.dark-mode {
-    background-color: #0f172a; /* Fundo geral escuro */
-    color: #f8fafc; /* Cor de texto claro */
-}
-
-body.dark-mode .sidebar {
-    background-color: #111827; /* Fundo da sidebar escuro */
-    border-right: 1px solid #1f2937; /* Borda escura na sidebar */
-}
-
-body.dark-mode .sidebar-brand {
-    border-bottom: 1px solid #1f2937; /* Borda inferior da marca escura */
-}
-
-body.dark-mode .sidebar-footer {
-    border-top: 1px solid #1f2937; /* Borda superior do rodapé escura */
-}
-
-body.dark-mode .sidebar-link {
-    color: #e5e7eb; /* Cor do link inativo no escuro */
-}
-
-body.dark-mode .sidebar-footer p {
-    color: #9ca3af; /* Cor do texto do rodapé no escuro */
-}
-
-body.dark-mode .main-content {
-    background-color: #0f172a; /* Fundo do conteúdo principal escuro */
-}
-
-body.dark-mode .top-header {
-    background-color: #111827; /* Fundo do header escuro */
-    border-bottom: 1px solid #1f2937; /* Borda do header escura */
-}
-
-/* Títulos e Números no Modo Escuro */
-body.dark-mode .top-header-title { color: #f8fafc; }
-body.dark-mode .profile-name { color: #f8fafc; }
-body.dark-mode .profile-page-name { color: #f8fafc; }
-body.dark-mode .summary-number { color: #f8fafc; }
-body.dark-mode .section-card-title { color: #f8fafc; }
-body.dark-mode .achievement-title { color: #f8fafc; }
-body.dark-mode .subject-progress-header { color: #f8fafc; }
-body.dark-mode .stats-title { color: #f8fafc; }
-body.dark-mode .stat-number { color: #f8fafc; }
-
-/* Legendas e Níveis no Modo Escuro */
-body.dark-mode .profile-level { color: #cbd5e1; }
-body.dark-mode .profile-page-level { color: #cbd5e1; }
-body.dark-mode .summary-title { color: #cbd5e1; }
-body.dark-mode .summary-footer-text { color: #cbd5e1; }
-body.dark-mode .achievement-date { color: #cbd5e1; }
-body.dark-mode .stat-label { color: #cbd5e1; }
-
-body.dark-mode .profile-main-card {
-    background: linear-gradient(90deg, #1e1b2e, #0f2a24); /* Gradiente escuro para card principal */
-}
-
-body.dark-mode .profile-tag {
-    background: #111827; /* Fundo da tag no escuro */
-    border: 1px solid #334155; /* Borda da tag no escuro */
-    color: #f8fafc; /* Texto da tag claro */
-    box-shadow: none; /* Remove sombras no escuro */
-}
-
-body.dark-mode .summary-card {
-    background-color: #111827; /* Fundo do card de resumo escuro */
-    box-shadow: none; /* Remove sombra */
-}
-
-body.dark-mode .content-card {
-    background-color: #111827; /* Fundo do card de conteúdo escuro */
-    box-shadow: none; /* Remove sombra */
-}
-
-body.dark-mode .stats-section {
-    background-color: #111827; /* Fundo da seção de estatísticas escura */
-    box-shadow: none; /* Remove sombra */
-}
-
-body.dark-mode .achievement-item {
-    background: linear-gradient(90deg, #1e1b2e, #0f2a24); /* Gradiente escuro para itens de conquista */
-}
-
-body.dark-mode .subject-line-track {
-    background: #374151; /* Trilha da barra de progresso escura */
-}
-
-body.dark-mode .summary-progress-track {
-    background-color: #4c1d95; /* Trilha da barra de resumo escura */
-}
-
-/* ============================================================
-   DESIGN RESPONSIVO (ADAPTAÇÕES)
-   ============================================================ */
-
-@media (max-width: 1200px) {
-    .sidebar {
-        width: 290px; /* Reduz largura da sidebar em telas menores */
-    }
-
-    .profile-page-name {
-        font-size: 34px; /* Reduz fonte do nome */
-    }
-}
-
 @media (max-width: 992px) {
-    .app-layout {
-        flex-direction: column; /* Empilha sidebar e conteúdo verticalmente */
-    }
-
-    .sidebar {
-        width: 100%; /* Sidebar ocupa largura total */
-        min-height: auto; /* Altura se ajusta ao conteúdo */
-        position: relative; /* Perde o comportamento sticky */
-    }
-
-    .top-header {
-        padding: 22px 20px; /* Reduz padding */
-    }
-
-    .page-content {
-        padding: 28px 20px 40px; /* Ajusta padding lateral */
-    }
-
-    .profile-main-card {
-        padding: 26px; /* Card menor */
-    }
-
-    .profile-main-image {
-        width: 140px; /* Foto menor */
-        height: 140px; /* Foto menor */
-    }
-
-    .profile-page-name {
-        font-size: 30px; /* Fonte menor */
-    }
-
-    .profile-page-level {
-        font-size: 20px; /* Fonte menor */
-    }
+    .profile-main-card { text-align: center; }
+    .profile-tags { justify-content: center; }
+    .account-settings-btn { margin-top: 20px; }
 }
 
 @media (max-width: 768px) {
-    .top-header {
-        flex-direction: column; /* Empilha itens do header */
-        align-items: flex-start !important; /* Alinha à esquerda */
-        gap: 18px; /* Espaço entre itens */
-    }
-
-    .profile-area {
-        align-self: flex-end; /* Joga perfil para o final */
-    }
-
-    .profile-main-card {
-        text-align: center; /* Centraliza textos do perfil */
-    }
-
-    .profile-tags {
-        justify-content: center; /* Centraliza tags */
-    }
-
-    .account-settings-btn {
-        margin-top: 16px; /* Espaço extra no topo */
-    }
-
-    .profile-main-image {
-        width: 120px; /* Foto ainda menor */
-        height: 120px;
-    }
-
-    .summary-card {
-        min-height: auto; /* Remove altura mínima fixa */
-    }
-
-    .achievement-item {
-        min-height: 160px; /* Reduz altura mínima da conquista */
-    }
-}
-
-@media (max-width: 576px) {
-    .sidebar-link {
-        font-size: 16px; /* Links menores */
-        padding: 16px 18px; /* Padding menor */
-    }
-
-    .top-header {
-        padding: 16px; /* Padding de borda reduzido */
-    }
-
-    .page-content {
-        padding: 20px 16px 26px; /* Padding lateral celular */
-    }
-
-    .profile-area {
-        width: 100%; /* Largura total da área de perfil */
-        justify-content: space-between; /* Espalha nome e foto */
-    }
-
-    .profile-page-name {
-        font-size: 26px; /* Fonte adaptada para celular */
-    }
-
-    .profile-page-level {
-        font-size: 18px; /* Fonte adaptada */
-    }
-
-    .profile-tag {
-        width: 100%; /* Tags ocupam linha toda */
-        justify-content: center; /* Centraliza conteúdo da tag */
-    }
-
-    .account-settings-btn {
-        width: 100%; /* Botão ocupa largura total */
-        justify-content: center; /* Centraliza texto do botão */
-    }
-
-    .stats-title {
-        font-size: 22px; /* Título de seção menor */
-    }
-
-    .section-card-title {
-        font-size: 22px; /* Título de seção menor */
-    }
-
-    .stat-number {
-        font-size: 32px; /* Números menores no celular */
-    }
+    .page-content { padding: 20px; }
+    .profile-page-name { font-size: 28px; }
 }
