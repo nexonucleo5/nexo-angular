@@ -21,7 +21,8 @@
           <span>Aviso de tarefas novas</span>
           <small>Receba alertas quando novas tarefas forem publicadas</small>
         </div>
-        <input type="checkbox" class="custom-switch">
+        <input type="checkbox" class="custom-switch" [checked]="notificacoes().avisoTarefasNovas"
+          (change)="onNotificacoesChange('avisoTarefasNovas', $any($event.target).checked)">
       </div>
 
       <div class="settings-item toggle-item">
@@ -29,7 +30,8 @@
           <span>Lembretes de prazos</span>
           <small>Alertas antes do vencimento de atividades</small>
         </div>
-        <input type="checkbox" class="custom-switch">
+        <input type="checkbox" class="custom-switch" [checked]="notificacoes().lembretesPrazos"
+          (change)="onNotificacoesChange('lembretesPrazos', $any($event.target).checked)">
       </div>
 
       <div class="settings-item toggle-item">
@@ -37,7 +39,8 @@
           <span>Mensagens de professores</span>
           <small>Notificações de mensagens diretas</small>
         </div>
-        <input type="checkbox" class="custom-switch">
+        <input type="checkbox" class="custom-switch" [checked]="notificacoes().mensagensProfessores"
+          (change)="onNotificacoesChange('mensagensProfessores', $any($event.target).checked)">
       </div>
 
       <div class="settings-item toggle-item">
@@ -45,7 +48,8 @@
           <span>Notificações por e-mail</span>
           <small>Receber avisos no seu e-mail</small>
         </div>
-        <input type="checkbox" class="custom-switch">
+        <input type="checkbox" class="custom-switch" [checked]="notificacoes().notificacoesEmail"
+          (change)="onNotificacoesChange('notificacoesEmail', $any($event.target).checked)">
       </div>
     </div>
 
@@ -61,7 +65,8 @@
           <span>Exibir XP em tempo real</span>
           <small>Mostra ganhos de XP durante atividades</small>
         </div>
-        <input type="checkbox" class="custom-switch" checked>
+        <input type="checkbox" class="custom-switch" [checked]="gamificacao().exibirXpTempoReal"
+          (change)="onGamificacaoChange('exibirXpTempoReal', $any($event.target).checked)">
       </div>
 
       <div class="settings-item toggle-item">
@@ -69,7 +74,8 @@
           <span>Animações de conquista</span>
           <small>Mostrar efeitos ao desbloquear badges</small>
         </div>
-        <input type="checkbox" class="custom-switch" checked>
+        <input type="checkbox" class="custom-switch" [checked]="gamificacao().animacoesConquista"
+          (change)="onGamificacaoChange('animacoesConquista', $any($event.target).checked)">
       </div>
 
       <div class="settings-item toggle-item">
@@ -77,7 +83,8 @@
           <span>Ranking da turma</span>
           <small>Exibir sua posição no ranking</small>
         </div>
-        <input type="checkbox" class="custom-switch">
+        <input type="checkbox" class="custom-switch" [checked]="gamificacao().rankingTurma"
+          (change)="onGamificacaoChange('rankingTurma', $any($event.target).checked)">
       </div>
     </div>
 
@@ -93,7 +100,7 @@
           <span>Modo foco</span>
           <small>Remove distrações durante atividades</small>
         </div>
-        <input type="checkbox" class="custom-switch">
+        <input type="checkbox" class="custom-switch" [checked]="estudos().modoFoco" (change)="onEstudosChange('modoFoco', $event)">
       </div>
 
       <div class="settings-item toggle-item">
@@ -101,7 +108,8 @@
           <span>Auto avançar tarefas</span>
           <small>Ir automaticamente para próxima atividade</small>
         </div>
-        <input type="checkbox" class="custom-switch">
+        <input type="checkbox" class="custom-switch" [checked]="estudos().autoAvancarTarefas"
+          (change)="onEstudosChange('autoAvancarTarefas', $any($event.target).checked)">
       </div>
 
       <div class="settings-item toggle-item">
@@ -109,7 +117,8 @@
           <span>Lembrete de estudo diário</span>
           <small>Notificação para manter sua sequência</small>
         </div>
-        <input type="checkbox" class="custom-switch">
+        <input type="checkbox" class="custom-switch" [checked]="estudos().lembreteEstudoDiario"
+          (change)="onEstudosChange('lembreteEstudoDiario', $any($event.target).checked)">
       </div>
     </div>
 
@@ -122,10 +131,11 @@
 
       <div class="settings-item toggle-item">
         <div>
-          <span>Modo escuro</span>
+          <span>Modo Escuro</span>
           <small>Alternar entre tema claro e escuro</small>
         </div>
-        <input type="checkbox" class="custom-switch">
+        <input type="checkbox" class="custom-switch" [checked]="aparencia().temaEscuro"
+          (change)="onAparenciaChange('temaEscuro', $any($event).target.checked)">
       </div>
 
       <div class="settings-item toggle-item">
@@ -133,7 +143,8 @@
           <span>Animações da interface</span>
           <small>Ativar transições e efeitos visuais</small>
         </div>
-        <input type="checkbox" class="custom-switch" checked>
+        <input type="checkbox" class="custom-switch" [checked]="aparencia().animacoesInterface"
+          (change)="onAparenciaChange('animacoesInterface', $any($event.target).checked)">
       </div>
     </div>
 
@@ -149,7 +160,8 @@
           <span>Perfil público</span>
           <small>Permitir que outros alunos vejam seu perfil</small>
         </div>
-        <input type="checkbox" class="custom-switch">
+        <input type="checkbox" class="custom-switch" [checked]="privacidade().perfilPublico"
+          (change)="onPrivacidadeChange('perfilPublico', $any($event.target).checked)">
       </div>
 
       <div class="settings-item toggle-item">
@@ -157,7 +169,8 @@
           <span>Exibir no ranking</span>
           <small>Mostrar seu nome nos rankings</small>
         </div>
-        <input type="checkbox" class="custom-switch" checked>
+        <input type="checkbox" class="custom-switch" [checked]="privacidade().exibirNoRanking"
+          (change)="onPrivacidadeChange('exibirNoRanking', $any($event.target).checked)">
       </div>
     </div>
 
@@ -168,9 +181,15 @@
         Conta
       </h2>
 
-      <button class="btn btn-gradient w-100 mb-3">Editar perfil</button>
-      <button class="btn btn-gradient w-100 mb-3">Alterar senha</button>
-      <button class="btn btn-danger-soft w-100">Encerrar sessão</button>
+      <button class="btn btn-gradient w-100 mb-3" (click)="editarPerfil()">
+        Editar perfil
+      </button>
+      <button class="btn btn-gradient w-100 mb-3" (click)="alterarSenha()">
+        Alterar senha
+      </button>
+      <button class="btn btn-danger-soft w-100" (click)="encerrarSessao()">
+        Encerrar sessão
+      </button>
     </div>
 
   </div>
