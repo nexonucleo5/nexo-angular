@@ -5,13 +5,11 @@
     <main class="main-content">
         <header class="top-header">
             <h2 class="h4 fw-bold mb-0">Portal do Aluno</h2>
-            <div class="profile-area d-flex align-items-center gap-3">
-                <div class="text-end">
-                    <h3 class="h6 fw-bold mb-0">Gabriel Mendes</h3>
-                    <small class="text-muted">2º Ano - Ensino Médio</small>
-                </div>
-                <img src="assets/imagensProjeto/gabrielZapelini.png" alt="gayzão" class="profile-image">
-            </div>
+            <app-menu-usuario 
+                [userName]="'Gabriel Mendes'"
+                [userClass]="'2º Ano - Ensino Médio'"
+                [userPhoto]="'assets/imagensProjeto/gabrielZapelini.png'">
+            </app-menu-usuario>
         </header>
 
         <div class="container-fluid p-4">

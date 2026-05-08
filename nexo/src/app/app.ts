@@ -7,6 +7,7 @@ import { Login } from './login/login';
 import { Materias } from './materias/materias';
 import { Menu } from './menu/menu';
 import { FormsModule } from '@angular/forms';
+import { MenuUsuario } from './menu-usuario/menu-usuario';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +18,8 @@ import { FormsModule } from '@angular/forms';
     FormsModule, 
     Menu, 
     Cadastro, 
-    Login],
+    Login,
+    MenuUsuario],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
