@@ -1,42 +1,49 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common'; // ESSENCIAL para *ngFor e *ngIf funcionarem
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-dashboards',
   standalone: true,
-  imports: [CommonModule], // Adicionado aqui
+  imports: [CommonModule], 
   templateUrl: './dashboards.html',
   styleUrl: './dashboards.scss',
 })
 export class Dashboards {
 
-  // Dados do Ranking (Baseado na imagem do Figma)
+  atividades = [
+    { 
+      titulo: 'Exercícios de Redes', 
+      materia: 'Networking', 
+      xp: 150, 
+      tempo: 'há 2 horas', 
+      icone: '🌐', 
+      progresso: 100, 
+      corProgresso: 'blue-fill' 
+    },
+    { 
+      titulo: 'Revisão de Biologia', 
+      materia: 'Biologia', 
+      xp: 80, 
+      tempo: 'há 5 horas', 
+      icone: '🧬', 
+      progresso: 45, 
+      corProgresso: 'green-fill' 
+    },
+    { 
+      titulo: 'Lista de Java', 
+      materia: 'Programação', 
+      xp: 200, 
+      tempo: 'Ontem', 
+      icone: '☕', 
+      progresso: 70, 
+      corProgresso: 'purple-fill' 
+    }
+  ];
+
   ranking = [
-    { name: 'Ana Costa', xp: 4520, pos: 1, photo: 'assets/ana.jpg', rankColor: 'gold', isMe: false },
-    { name: 'Carlos Santos', xp: 3980, pos: 2, photo: 'assets/carlos.jpg', rankColor: 'silver', isMe: false },
-    { name: 'Gabriel Silva', xp: 3450, pos: 3, photo: 'assets/gabriel.jpg', rankColor: 'bronze', isMe: true }
+    { pos: 1, nome: 'Henrique Silva', xp: 4520, foto: 'assets/imagensProjeto/henrique.png', isMe: false },
+    { pos: 2, nome: 'Ana Costa', xp: 3980, foto: 'assets/imagensProjeto/ana.png', isMe: false },
+    { pos: 3, nome: 'Gabriel Silva', xp: 3450, foto: 'assets/imagensProjeto/gabrielZapelini.png', isMe: true },
+    { pos: 4, nome: 'Carla Souza', xp: 2100, foto: 'assets/imagensProjeto/carla.png', isMe: false }
   ];
-
-  // Dados dos Cards Superiores
-  stats = [
-    { label: 'Tempo de Estudo Hoje', value: '2h 45min', icon: 'bi-clock', colorClass: 'purple-bg' },
-    { label: 'Desafios Concluídos', value: '8/12', icon: 'bi-trophy', colorClass: 'green-bg' },
-    { label: 'XP Acumulado', value: '3,450 XP', icon: 'bi-lightning-charge', colorClass: 'orange-bg' },
-    { label: 'Posição no Ranking', value: '#3', icon: 'bi-award', colorClass: 'blue-bg' }
-  ];
-
-  // Dados das Atividades Recentes (Faltava isso!)
-  recentActivities = [
-    { name: 'Genética - DNA e RNA', subject: 'Biologia', time: 'Há 2 horas', progress: 100 },
-    { name: 'Equações do 2º Grau', subject: 'Matemática', time: 'Há 5 horas', progress: 75 },
-    { name: 'Segunda Guerra Mundial', subject: 'História', time: 'Ontem', progress: 100 }
-  ];
-
-  // Dados dos Próximos Desafios
-  challenges = [
-    { title: 'Quiz: Fotossíntese', subject: 'Biologia', difficulty: 'Médio', diffClass: 'medium', xp: 150 },
-    { title: 'Desafio: Funções Trigonométricas', subject: 'Matemática', difficulty: 'Difícil', diffClass: 'hard', xp: 250 },
-    { title: 'Exercícios: Present Perfect', subject: 'Inglês', difficulty: 'Fácil', diffClass: 'easy', xp: 100 }
-  ];
-
 }

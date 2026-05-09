@@ -1,123 +1,222 @@
-// Cores e Variáveis
-$dark-card: #141414;
-$dark-inner: #1c1c1c;
-$border-color: #2b2b2b;
+/* ============================================================
+   1. IMPORTAÇÕES E VARIÁVEIS 
+   ============================================================ */
+:root {
+    --bg-main: #121212;
+    --bg-card: #1e1e1e;
+    --border-color: #333333;
+    --text-main: #ffffff;
+    --text-muted: #b3b3b3;
+    
+    --green-gradient: linear-gradient(135deg, #0fcd5c, #08d6a2);
+    --blue-gradient: linear-gradient(135deg, #2e73f6, #10c6df);
+    --orange-gradient: linear-gradient(135deg, #ff6a00, #ff5f79);
+    --pink-gradient: linear-gradient(135deg, #8f24ff, #f2389d);
+    --grad-purple-green: linear-gradient(135deg, #8f24ff, #0fcd5c);
+}
+
+/* Utilitários de texto */
+.purple-text { color: #8f24ff !important; }
+.green-text { color: #0fcd5c !important; }
+.blue-text { color: #2e73f6 !important; }
+.gold-text { color: #ffd700 !important; }
+
+/* ============================================================
+   2. ESTRUTURA PRINCIPAL
+   ============================================================ */
+.main-content {
+    min-height: 100vh;
+    background-color: var(--bg-main) !important;
+    transition: all 0.3s ease;
+}
 
 .page-content {
-  background-color: transparent;
-  min-height: 100vh;
+    padding: 34px;
 }
 
-.welcome-banner {
-  background: linear-gradient(90deg, #8a2be2 0%, #00c853 100%);
-  padding: 2.5rem 2rem;
-  border-radius: 16px;
-  color: white;
+/* ============================================================
+   3. BANNER DO DASHBOARD
+   ============================================================ */
+.dashboard-welcome-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 26px;
+    padding: 34px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+    }
+
+    .profile-page-name {
+        font-size: 38px;
+        font-weight: 800;
+        color: var(--text-main) !important;
+        margin: 0 0 10px 0;
+    }
+
+    .profile-page-level {
+        font-size: 18px;
+        color: var(--text-muted) !important;
+        font-weight: 400;
+    }
 }
 
-.stat-card, .content-box, .challenge-item {
-  background: $dark-card;
-  border: 1px solid $border-color;
-  transition: transform 0.2s ease, border-color 0.2s ease;
-  
-  &:hover {
-    border-color: #3d3d3d;
-    transform: translateY(-3px);
-  }
+.btn-action-primary {
+    background: var(--grad-purple-green);
+    border: none;
+    padding: 14px 28px;
+    border-radius: 14px;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    &:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 10px 20px rgba(143, 36, 255, 0.3);
+        filter: brightness(1.1);
+    }
+    
+    &:active {
+        transform: scale(0.95);
+    }
 }
 
-.stat-icon {
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: white;
-  
-  &.purple-bg { background: #9d50bb; }
-  &.green-bg { background: #2ecc71; }
-  &.orange-bg { background: #f39c12; }
-  &.blue-bg { background: #3498db; }
+/* ============================================================
+   4. CARDS DE CONTEÚDO E RESUMO (Com Hover Adicionado)
+   ============================================================ */
+.summary-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 30px;
+    height: 100%;
+    transition: all 0.3s ease; // Acrescentado para animação
+    cursor: pointer;
+
+    &:hover {
+        transform: translateY(-10px);
+        background: #252525 !important;
+        border-color: #8f24ff;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
 }
 
-.rank-item {
-  background: $dark-inner;
-  border: 1px solid transparent;
+.summary-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
 
-  &.user-me {
-    background: rgba(138, 43, 226, 0.08);
-    border-color: #8a2be2;
-  }
+    &.purple-summary { background: rgba(143, 36, 255, 0.1); color: #8f24ff; }
+    &.gold-summary { background: rgba(255, 215, 0, 0.1); color: #ffd700; }
+    &.fire-summary { background: rgba(255, 106, 0, 0.1); color: #ff6a00; }
 }
 
-.rank-badge {
-  position: absolute;
-  top: -4px;
-  left: -4px; // Ajustado para a esquerda como no Figma
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  font-size: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  color: #000;
-  &.gold { background: #ffca28; }
-  &.silver { background: #cfd8dc; }
-  &.bronze { background: #ff8a65; }
+.summary-title { margin: 0; font-size: 16px; color: var(--text-muted) !important; }
+.summary-number { margin: 0; font-size: 28px; font-weight: 800; color: var(--text-main) !important; }
+
+.summary-progress-track, .subject-line-track {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-.streak-badge {
-  background: rgba(255, 152, 0, 0.1);
-  color: #ffa726;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
+.summary-progress-fill, .subject-line-fill {
+    height: 100%;
+    background: var(--pink-gradient) !important;
+    border-radius: 10px;
+    transition: width 1s ease-in-out; // Animação da barra ao carregar
 }
 
-.activity-card {
-  background: $dark-inner;
-  border: 1px solid $border-color;
+.content-card {
+    background: var(--bg-card) !important;
+    border-radius: 24px;
+    padding: 28px;
+    border: 1px solid var(--border-color);
+    height: 100%;
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    }
 }
 
-.custom-bg-dark { background-color: #2a2a2a !important; }
-.purple-gradient { background: #8a2be2 !important; }
-.text-soft { color: #888 !important; }
-
-.diff-badge {
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  &.easy { background: rgba(0, 200, 83, 0.1); color: #00c853; }
-  &.medium { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
-  &.hard { background: rgba(244, 67, 54, 0.1); color: #f44336; }
+.section-card-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-main) !important;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.play-action-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: none;
-  background: linear-gradient(135deg, #8a2be2, #00c853);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  
-  &:hover { 
-    opacity: 0.9;
-    transform: scale(1.05); 
-  }
+/* Efeito nos itens da lista de atividades */
+.subject-progress-item {
+    padding: 12px;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        background: rgba(255, 255, 255, 0.03);
+        transform: translateX(8px);
+    }
 }
 
-.btn-dark-outline {
-  border: 1px solid $border-color;
-  background: transparent;
-  transition: all 0.2s;
-  &:hover { background: #222; }
+/* Classes Auxiliares para Cores das Barras */
+.green-fill { background: var(--green-gradient) !important; }
+.blue-fill { background: var(--blue-gradient) !important; }
+.orange-fill { background: var(--orange-gradient) !important; }
+.pink-fill { background: var(--pink-gradient) !important; }
+.purple-fill { background: #8f24ff !important; } // Adicionada para o card de Java
+
+/* ============================================================
+   5. COMPONENTES NOVOS ESPECÍFICOS DO DASHBOARD
+   ============================================================ */
+.rank-item-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 16px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateX(5px) scale(1.02);
+    }
+
+    &.user-is-me {
+        background: rgba(143, 36, 255, 0.08);
+        border: 1px solid rgba(143, 36, 255, 0.3);
+        
+        &:hover {
+            background: rgba(143, 36, 255, 0.12);
+        }
+    }
+
+    .rank-position {
+        font-size: 18px;
+        font-weight: 800;
+        min-width: 30px;
+    }
+
+    .rank-user-img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid transparent;
+        transition: border-color 0.3s;
+    }
+    
+    &:hover .rank-user-img {
+        border-color: #8f24ff;
+    }
 }
