@@ -1,1 +1,159 @@
-<p>dashboards works!</p>
+<main class="main-content flex-grow-1">
+    <section class="page-content">
+
+        <section class="dashboard-welcome-card">
+            <div class="row align-items-center g-4">
+                <div class="col-md-8">
+                    <h1 class="profile-page-name">Boa noite, Gabriel! 👋</h1>
+                    <p class="profile-page-level mb-0">Continue assim! Você está no caminho certo para alcançar sua meta de 80% até julho.</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <button class="btn-action-primary">
+                        <i class="bi bi-play-fill"></i> Continuar Estudos
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="profile-summary-section mt-4">
+            <div class="row g-4">
+                <div class="col-md-6 col-xl-3">
+                    <div class="summary-card">
+                        <div class="summary-card-top mb-3">
+                            <div class="summary-icon purple-summary">
+                                <i class="bi bi-lightning-charge"></i>
+                            </div>
+                            <div>
+                                <p class="summary-title">XP na Semana</p>
+                                <h3 class="summary-number">850</h3>
+                            </div>
+                        </div>
+                        <div class="summary-progress-track">
+                            <div class="summary-progress-fill" style="width: 85%;"></div>
+                        </div>
+                        <p class="summary-footer-text">Meta semanal: 1000 XP</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-3">
+                    <div class="summary-card">
+                        <div class="summary-card-top mb-3">
+                            <div class="summary-icon fire-summary">
+                                <i class="bi bi-fire"></i>
+                            </div>
+                            <div>
+                                <p class="summary-title">Ofensiva</p>
+                                <h3 class="summary-number">7 dias</h3>
+                            </div>
+                        </div>
+                        <div class="summary-progress-track">
+                            <div class="summary-progress-fill" style="background: var(--orange-gradient); width: 100%;"></div>
+                        </div>
+                        <p class="summary-footer-text">O dobro da semana passada!</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-3">
+                    <div class="summary-card">
+                        <div class="summary-card-top mb-3">
+                            <div class="summary-icon gold-summary">
+                                <i class="bi bi-trophy"></i>
+                            </div>
+                            <div>
+                                <p class="summary-title">Posição</p>
+                                <h3 class="summary-number">#3</h3>
+                            </div>
+                        </div>
+                        <div class="summary-progress-track">
+                            <div class="summary-progress-fill" style="background: var(--blue-gradient); width: 90%;"></div>
+                        </div>
+                        <p class="summary-footer-text">Top 5 da Turma 2A</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-3">
+                    <div class="summary-card">
+                        <div class="summary-card-top mb-3">
+                            <div class="summary-icon" style="background: rgba(15, 205, 92, 0.1); color: #0fcd5c;">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div>
+                                <p class="summary-title">Tarefas Hoje</p>
+                                <h3 class="summary-number">4/5</h3>
+                            </div>
+                        </div>
+                        <div class="summary-progress-track">
+                            <div class="summary-progress-fill" style="background: var(--green-gradient); width: 80%;"></div>
+                        </div>
+                        <p class="summary-footer-text">Falta apenas 1 tarefa</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="middle-section mt-4">
+            <div class="row g-4">
+                
+                <div class="col-xl-8">
+                    <div class="content-card">
+                        <h2 class="section-card-title">
+                            <i class="bi bi-clock-history title-icon purple-text"></i>
+                            Atividades Recentes
+                        </h2>
+
+                        <div class="subject-progress-list mt-4">
+                            <div class="subject-progress-item" *ngFor="let act of atividades">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="achievement-emoji" style="font-size: 24px;">{{ act.icone }}</div>
+                                        <div>
+                                            <h6 class="mb-0 text-white fw-bold">{{ act.titulo }}</h6>
+                                            <small class="text-muted">{{ act.materia }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="d-block text-white fw-bold">+{{ act.xp }} XP</span>
+                                        <small class="text-muted">{{ act.tempo }}</small>
+                                    </div>
+                                </div>
+                                <div class="subject-line-track mt-2">
+                                    <div [class]="'subject-line-fill ' + act.corProgresso" [style.width.%]="act.progresso"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4">
+                    <div class="content-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="section-card-title m-0">
+                                <i class="bi bi-bar-chart-fill title-icon blue-text"></i>
+                                Ranking
+                            </h2>
+                            <a href="#" class="text-muted text-decoration-none small">Ver todos</a>
+                        </div>
+
+                        <div class="ranking-list d-flex flex-column gap-3">
+                            <div class="rank-item-card" *ngFor="let user of ranking" [class.user-is-me]="user.isMe">
+                                <div class="d-flex align-items-center">
+                                    <span class="rank-position" [class.gold-text]="user.pos === 1" [class.text-muted]="user.pos > 3">
+                                        #{{ user.pos }}
+                                    </span>
+                                    <img [src]="user.foto" alt="Foto" class="rank-user-img ms-3">
+                                    <div class="ms-3 flex-grow-1">
+                                        <p class="mb-0 fw-bold text-white fs-6">{{ user.nome }}</p>
+                                        <small class="text-muted">{{ user.xp }} XP</small>
+                                    </div>
+                                    <i *ngIf="user.isMe" class="bi bi-caret-up-fill green-text"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </section>
+</main>
