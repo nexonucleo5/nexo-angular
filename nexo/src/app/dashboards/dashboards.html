@@ -1,0 +1,116 @@
+<section class="page-content p-4">
+  <header class="welcome-banner mb-4 shadow-sm">
+    <div class="banner-content">
+      <h1 class="fw-bold">Boa noite, Gabriel! 👋</h1>
+      <p class="text-white-50 fs-6 mb-0">Continue assim! Você está no caminho certo para alcançar seus objetivos.</p>
+    </div>
+  </header>
+
+  <section class="row g-3 mb-4">
+    <div class="col-12 col-md-6 col-xl-3" *ngFor="let stat of stats">
+      <div class="stat-card p-4 rounded-4 h-100">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-soft d-block mb-2">{{ stat.label }}</span>
+            <h3 class="fw-bold mb-0 text-white">{{ stat.value }}</h3>
+          </div>
+          <div [class]="'stat-icon rounded-4 ' + stat.colorClass">
+            <i [class]="'bi ' + stat.icon"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="row g-4 mb-5">
+    
+    <aside class="col-12 col-lg-4 col-xl-3">
+      <div class="content-box p-4 rounded-4 h-100">
+        <h5 class="fw-bold mb-4 text-white d-flex align-items-center gap-2">
+          <i class="bi bi-trophy text-warning"></i> Ranking da Turma
+        </h5>
+        <div class="ranking-stack d-flex flex-column gap-3">
+          <div *ngFor="let user of ranking" 
+               [class.user-me]="user.isMe" 
+               class="rank-item p-3 rounded-4 d-flex align-items-center">
+            <div class="position-relative">
+              <img [src]="user.photo" alt="Foto do usuário" class="rounded-circle border border-2 border-dark" width="48" height="48" onerror="this.src='assets/default-avatar.png'">
+              <span [class]="'rank-badge ' + user.rankColor">{{ user.pos }}</span>
+            </div>
+            <div class="ms-3 flex-grow-1">
+              <p class="mb-0 fw-bold text-white fs-6">{{ user.name }}</p>
+              <small class="text-soft">{{ user.xp }} XP</small>
+            </div>
+            <i *ngIf="user.isMe" class="bi bi-star-fill text-warning fs-5"></i>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="col-12 col-lg-8 col-xl-9">
+      
+      <div class="content-box p-4 rounded-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="fw-bold mb-0 text-white d-flex align-items-center gap-2">
+            <i class="bi bi-graph-up-arrow text-success"></i> Progresso Geral
+          </h5>
+          <span class="streak-badge">🔥 7 dias seguidos</span>
+        </div>
+        <div class="progress-details">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-soft">Conclusão do Semestre</span>
+            <span class="text-white fw-bold">68%</span>
+          </div>
+          <div class="progress custom-bg-dark rounded-pill" style="height: 10px;">
+            <div class="progress-bar purple-gradient rounded-pill" style="width: 68%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-box p-4 rounded-4">
+        <h5 class="fw-bold mb-4 text-white">Atividades Recentes</h5>
+        <div class="activity-list d-flex flex-column gap-3">
+          <div *ngFor="let activity of recentActivities" class="activity-card p-3 rounded-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h6 class="text-white fw-bold mb-1">{{ activity.name }}</h6>
+                <small class="text-soft">{{ activity.subject }}</small>
+              </div>
+              <small class="text-soft">{{ activity.time }}</small>
+            </div>
+            <div class="progress custom-bg-dark rounded-pill" style="height: 6px;">
+              <div class="progress-bar purple-gradient rounded-pill" [style.width.%]="activity.progress"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <section class="pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="fw-bold text-white mb-0">Próximos Desafios</h4>
+      <button class="btn btn-dark-outline rounded-pill px-4 text-white py-2">Ver Todos</button>
+    </div>
+    <div class="row g-4">
+      <div class="col-12 col-md-6 col-lg-4" *ngFor="let challenge of challenges">
+        <div class="challenge-item p-4 rounded-4 h-100 d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="text-white fw-bold mb-1">{{ challenge.title }}</h5>
+            <p class="text-soft mb-4">{{ challenge.subject }}</p>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex gap-2 align-items-center">
+              <span [class]="'diff-badge ' + challenge.diffClass">{{ challenge.difficulty }}</span>
+              <span class="text-soft small">{{ challenge.xp }} XP</span>
+            </div>
+            <button class="play-action-btn">
+              <i class="bi bi-play-fill"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
