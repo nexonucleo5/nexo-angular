@@ -1,0 +1,127 @@
+// Variáveis de cores baseadas na sua imagem (ajuste se já tiver um arquivo global)
+:root {
+  --bg-sidebar: #0f172a;      // Azul bem escuro
+  --text-main: #94a3b8;       // Cinza azulado (inativo)
+  --text-active: #ffffff;     // Branco
+  --accent-blue: #1d4ed8;     // Azul do botão selecionado
+  --border-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar {
+  width: 300px;
+  min-height: 100vh;
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  transition: all 0.3s;
+  font-family: 'Inter', sans-serif; // Sugestão de fonte moderna
+}
+
+.sidebar-brand {
+  padding: 32px 24px;
+  
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    .brand-icon {
+      font-size: 24px;
+      color: var(--accent-blue);
+    }
+    
+    .brand-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.sidebar-menu {
+  padding: 10px 16px;
+}
+
+.sidebar-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    margin-bottom: 8px;
+  }
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-radius: 12px; // Cantos arredondados como na imagem
+  color: var(--text-main);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: 0.2s ease-in-out;
+
+  i {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+  }
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+    color: #fff;
+  }
+
+  // Estilo do item selecionado (conforme sua imagem)
+  &.active {
+    color: var(--text-active) !important;
+    background-color: #2563eb; // Azul vibrante da imagem
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    
+    i {
+      color: #fff;
+    }
+  }
+}
+
+.sidebar-footer {
+  padding: 24px;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: #475569;
+  }
+}
+
+// Estilos extras do Perfil (que estavam no seu código original)
+.profile-trigger-container {
+  padding: 16px;
+  margin: 10px 14px;
+  
+  .profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+
+    &:hover {
+      background: rgba(37, 99, 235, 0.1);
+    }
+  }
+}

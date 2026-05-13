@@ -1,16 +1,31 @@
 <div class="app-layout">
     
-    <app-menu></app-menu>
+    @if (perfilUsuario === 'aluno') {
+      <app-menu></app-menu>
+    } 
+    @else if (perfilUsuario === 'diretor') {
+      <app-menu-diretor></app-menu-diretor>
+    }
 
     <main class="main-content">
         <header class="top-header">
-            <h2 class="h4 fw-bold mb-0">Portal do Aluno</h2>
-            <app-menu-usuario 
-                [userName]="'Gabriel Mendes'"
-                [userClass]="'2º Ano - Ensino Médio'"
-                [userPhoto]="'assets/imagensProjeto/gabrielZapelini.png'">
-            </app-menu-usuario>
-        </header>
+    <div class="d-flex align-items-center">
+        <h2 class="h4 fw-bold mb-0">
+            @if (perfilUsuario === 'aluno') { Portal do Aluno }
+            @else { Portal do Diretor }
+        </h2>
+        
+        <button (click)="alternarPerfil()" class="btn btn-sm btn-outline-primary ms-4">
+            Trocar para {{ perfilUsuario === 'aluno' ? 'Diretor' : 'Aluno' }}
+        </button>
+    </div>
+    
+    <app-menu-usuario 
+        [userName]="perfilUsuario === 'aluno' ? 'Gabriel Mendes' : 'Diretor Silva'"
+        [userClass]="perfilUsuario === 'aluno' ? '2º Ano - Ensino Médio' : 'Administração Escolar'"
+        [userPhoto]="'assets/imagensProjeto/gabrielZapelini.png'">
+    </app-menu-usuario>
+</header>
 
         <div class="container-fluid p-4">
             <router-outlet></router-outlet>
