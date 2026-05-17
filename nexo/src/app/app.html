@@ -2,30 +2,32 @@
     
     @if (perfilUsuario === 'aluno') {
       <app-menu></app-menu>
-    } 
-    @else if (perfilUsuario === 'diretor') {
+    } @else {
       <app-menu-diretor></app-menu-diretor>
     }
 
     <main class="main-content">
         <header class="top-header">
-    <div class="d-flex align-items-center">
-        <h2 class="h4 fw-bold mb-0">
-            @if (perfilUsuario === 'aluno') { Portal do Aluno }
-            @else { Portal do Diretor }
-        </h2>
-        
-        <button (click)="alternarPerfil()" class="btn btn-sm btn-outline-primary ms-4">
-            Trocar para {{ perfilUsuario === 'aluno' ? 'Diretor' : 'Aluno' }}
-        </button>
-    </div>
-    
-    <app-menu-usuario 
-        [userName]="perfilUsuario === 'aluno' ? 'Gabriel Mendes' : 'Diretor Silva'"
-        [userClass]="perfilUsuario === 'aluno' ? '2º Ano - Ensino Médio' : 'Administração Escolar'"
-        [userPhoto]="'assets/imagensProjeto/gabrielZapelini.png'">
-    </app-menu-usuario>
-</header>
+            <div class="d-flex align-items-center">
+                <h2 class="h4 fw-bold mb-0">
+                    {{ perfilUsuario === 'aluno' ? 'Portal do Aluno' : 'Portal do Diretor' }}
+                </h2>
+                
+                <button (click)="alternarPerfil()" class="btn btn-sm btn-outline-primary ms-4">
+                    Mudar para {{ perfilUsuario === 'aluno' ? 'Diretor' : 'Aluno' }}
+                </button>
+
+                <button (click)="alternarTema()" class="btn-theme ms-2">
+                    <i class="bi" [ngClass]="temaEscuro ? 'bi-sun-fill' : 'bi-moon-fill'"></i>
+                </button>
+            </div>
+            
+            <app-menu-usuario 
+                [userName]="perfilUsuario === 'aluno' ? 'Gabriel Mendes' : 'Diretor Silva'"
+                [userClass]="perfilUsuario === 'aluno' ? '2º Ano - Ensino Médio' : 'Administração Escolar'"
+                [userPhoto]="'assets/imagensProjeto/gabrielZapelini.png'">
+            </app-menu-usuario>
+        </header>
 
         <div class="container-fluid p-4">
             <router-outlet></router-outlet>
