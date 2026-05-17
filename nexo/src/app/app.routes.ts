@@ -13,6 +13,7 @@ export const routes: Routes = [
   { path: '', redirectTo: '/dashboards', pathMatch: 'full' },
   { path: 'dashboards', component: Dashboards },
   { path: 'materias', component: MatriculasWrapper },   
+  { path: 'matriculas', component: MatriculasWrapper }, 
   { path: 'cadastro', component: Cadastro },
   { path: 'perfil', component: Perfil },
   { path: 'desafios', component: Desafios },

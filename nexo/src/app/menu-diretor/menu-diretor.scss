@@ -1,127 +1,145 @@
-// Variáveis de cores baseadas na sua imagem (ajuste se já tiver um arquivo global)
-:root {
-  --bg-sidebar: #0f172a;      // Azul bem escuro
-  --text-main: #94a3b8;       // Cinza azulado (inativo)
-  --text-active: #ffffff;     // Branco
-  --accent-blue: #1d4ed8;     // Azul do botão selecionado
-  --border-color: rgba(255, 255, 255, 0.05);
-}
+// Paleta de Cores do Painel Administrativo (Dark Mode)
+$bg-sidebar: #0b0e14;
+$bg-link-hover: rgba(255, 255, 255, 0.03);
+$text-main: #ffffff;
+$text-muted: #6c7a9c;
+$gradient-primary: linear-gradient(135deg, #7b2cbf, #2ec4b6);
 
 .sidebar {
-  width: 300px;
-  min-height: 100vh;
-  background-color: var(--bg-sidebar);
-  border-right: 1px solid var(--border-color);
+  width: 260px;
+  height: 100vh;
+  background-color: $bg-sidebar;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  position: sticky;
+  padding: 24px 16px;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  position: fixed;
   top: 0;
-  transition: all 0.3s;
-  font-family: 'Inter', sans-serif; // Sugestão de fonte moderna
-}
+  left: 0;
+  z-index: 100;
 
-.sidebar-brand {
-  padding: 32px 24px;
-  
-  .brand-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    
-    .brand-icon {
-      font-size: 24px;
-      color: var(--accent-blue);
+  // Bloco da Marca / Logotipo
+  &-brand {
+    padding: 0 12px 24px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 24px;
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .brand-icon {
+        font-size: 1.8rem;
+        background: $gradient-primary;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .brand-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: $text-main;
+        letter-spacing: 1px;
+        margin: 0;
+      }
     }
-    
-    .brand-title {
-      font-size: 22px;
-      font-weight: 800;
-      color: #fff;
-      margin: 0;
-      letter-spacing: 1px;
-    }
-  }
-}
 
-.sidebar-menu {
-  padding: 10px 16px;
-}
-
-.sidebar-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-
-  li {
-    margin-bottom: 8px;
-  }
-}
-
-.sidebar-link {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 20px;
-  border-radius: 12px; // Cantos arredondados como na imagem
-  color: var(--text-main);
-  font-size: 16px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: 0.2s ease-in-out;
-
-  i {
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-  }
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.03);
-    color: #fff;
-  }
-
-  // Estilo do item selecionado (conforme sua imagem)
-  &.active {
-    color: var(--text-active) !important;
-    background-color: #2563eb; // Azul vibrante da imagem
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-    
-    i {
-      color: #fff;
+    .role-badge {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 0.75rem;
+      color: #2ec4b6;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
   }
-}
 
-.sidebar-footer {
-  padding: 24px;
-  border-top: 1px solid var(--border-color);
-  text-align: center;
-  
-  p {
+  // Estrutura de Listagem do Menu
+  &-menu {
+    flex-grow: 1;
+  }
+
+  &-list {
+    list-style: none;
+    padding: 0;
     margin: 0;
-    font-size: 12px;
-    color: #475569;
-  }
-}
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 
-// Estilos extras do Perfil (que estavam no seu código original)
-.profile-trigger-container {
-  padding: 16px;
-  margin: 10px 14px;
-  
-  .profile-trigger {
+    li {
+      width: 100%;
+    }
+  }
+
+  // Links de Navegação e Estados Reativos
+  &-link {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 16px;
-    cursor: pointer;
-    border: 1px solid var(--border-color);
+    gap: 14px;
+    padding: 12px 16px;
+    color: $text-muted;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 12px;
+    transition: all 0.25s ease-in-out;
+
+    i {
+      font-size: 1.2rem;
+      transition: transform 0.2s ease;
+    }
 
     &:hover {
-      background: rgba(37, 99, 235, 0.1);
+      color: $text-main;
+      background-color: $bg-link-hover;
+
+      i {
+        transform: scale(1.1);
+      }
     }
+
+    // Estado Ativo (Onde o degradê do Figma se aplica)
+    &.active {
+      background: $gradient-primary;
+      color: $text-main;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(123, 44, 191, 0.25);
+
+      i {
+        color: $text-main;
+      }
+    }
+  }
+
+  // Rodapé Informativo
+  &-footer {
+    padding: 16px 12px 0 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+
+    p {
+      color: $text-main;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .version-text {
+      color: $text-muted;
+      font-size: 0.75rem;
+      display: block;
+      margin-top: 2px;
+    }
+  }
+}
+
+// Layout Adjust: Garante que o conteúdo à direita respeite o espaço fixo da sidebar
+@media (min-width: 768px) {
+  .main-content {
+    margin-left: 260px;
+    width: calc(100% - 260px);
   }
 }
