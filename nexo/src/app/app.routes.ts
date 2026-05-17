@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { Dashboards } from './dashboards/dashboards';
-import { Materias } from './materias/materias';
 import { Cadastro } from './cadastro/cadastro';
 import { Perfil } from './perfil/perfil';
 import { MeusNiveisNotas } from './meus-niveis-notas/meus-niveis-notas';
@@ -9,10 +8,13 @@ import { Configuracoes } from './configuracoes/configuracoes';
 import { Login } from './login/login';
 import { MenuDiretor } from './menu-diretor/menu-diretor';
 
+// 1. ADICIONE ESSE IMPORT AQUI NO TOPO (Ajuste o caminho se sua pasta for diferente)
+import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
+
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboards', pathMatch: 'full' },
   { path: 'dashboards', component: Dashboards },
-  { path: 'materias', component: Materias },
+  { path: 'materias', component: MatriculasWrapper },   
   { path: 'cadastro', component: Cadastro },
   { path: 'perfil', component: Perfil },
   { path: 'desafios', component: Desafios },

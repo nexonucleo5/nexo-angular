@@ -10,9 +10,14 @@ import { Menu } from './menu/menu';
 import { MenuUsuario } from './menu-usuario/menu-usuario';
 import { MenuDiretor } from './menu-diretor/menu-diretor';
 
+// 1. IMPORTAR o Serviço e o seu novo Componente Wrapper
+import { UserService } from './services/user';
+import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
+
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, 
+  imports: [
+    CommonModule, 
     RouterOutlet, 
     Dashboards, 
     Materias,
@@ -21,23 +26,35 @@ import { MenuDiretor } from './menu-diretor/menu-diretor';
     Cadastro, 
     Login,
     MenuUsuario,
-    MenuDiretor],
+    MenuDiretor,
+    // 2. ADICIONAR o Wrapper na lista de imports do componente Standalone
+    MatriculasWrapper
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App implements OnInit {
-  // Estado Inicial
+  // Estado Inicial (Mantive começando como 'diretor' igual ao seu código)
   perfilUsuario: 'aluno' | 'diretor' = 'diretor'; 
   temaEscuro: boolean = false;
+
+  // 3. INJETAR o UserService no construtor da classe
+  constructor(private userService: UserService) {}
 
   ngOnInit() {
     // Define o tema inicial como light ao carregar
     this.aplicarTema();
+
+    // Sincroniza o estado inicial do serviço com o seu perfil inicial ('diretor')
+    this.userService.alternarPerfil(this.perfilUsuario);
   }
 
   // Alterna entre Aluno e Diretor
   alternarPerfil() {
     this.perfilUsuario = this.perfilUsuario === 'aluno' ? 'diretor' : 'aluno';
+    
+    // 4. AVISAR o serviço global sobre a mudança de perfil
+    this.userService.alternarPerfil(this.perfilUsuario);
   }
 
   // Alterna entre Claro e Escuro

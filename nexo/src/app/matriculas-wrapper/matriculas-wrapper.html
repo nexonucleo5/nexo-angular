@@ -1,0 +1,4 @@
+<div [ngSwitch]="perfilAtual" class="w-100">
+  <app-materias *ngSwitchCase="'aluno'"></app-materias>
+  <app-matriculas-diretor *ngSwitchCase="'diretor'"></app-matriculas-diretor>
+</div>
