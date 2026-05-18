@@ -8,12 +8,14 @@ import { Configuracoes } from './configuracoes/configuracoes';
 import { Login } from './login/login';
 import { MenuDiretor } from './menu-diretor/menu-diretor';
 import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
+import { Auditoria } from './auditoria/auditoria';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboards', pathMatch: 'full' },
   { path: 'dashboards', component: Dashboards },
-  { path: 'materias', component: MatriculasWrapper },
-  { path: 'matriculas', component: MatriculasWrapper },
+  { path: 'materias', component: MatriculasWrapper }, 
+  { path: 'matriculas', component: MatriculasWrapper }, 
+  { path: 'auditoria', component: Auditoria },
   { path: 'cadastro', component: Cadastro },
   { path: 'perfil', component: Perfil },
   { path: 'desafios', component: Desafios },

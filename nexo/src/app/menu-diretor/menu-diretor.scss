@@ -1,8 +1,8 @@
-/* Aplicando exatamente a mesma estrutura, variáveis e larguras do menu do aluno */
 .sidebar {
   width: 300px;
+  min-width: 300px;
   min-height: 100vh;
-  background-color: var(--bg-card);
+  background-color: var(--bg-card); /* Mesma cor de fundo dinâmica do aluno */
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -10,13 +10,13 @@
   position: sticky;
   top: 0;
   transition: background-color 0.3s, border-color 0.3s;
+  box-sizing: border-box;
 }
 
 .sidebar-brand {
   padding: 28px 24px 22px;
   border-bottom: 1px solid var(--border-color);
   
-  /* Mantendo o alinhamento do ícone e título do Diretor */
   .brand-row {
     display: flex;
     align-items: center;
@@ -24,7 +24,6 @@
 
     .brand-icon {
       font-size: 1.8rem;
-      /* Aplicando o mesmo gradiente da sua identidade visual */
       background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -41,14 +40,17 @@
 
 .sidebar-menu { 
   padding: 8px 14px; 
-  flex-grow: 1; 
+  flex-grow: 1;
 }
 
 .sidebar-list {
   list-style: none; 
   margin: 0; 
   padding: 0;
-  li { margin-bottom: 12px; }
+  
+  li { 
+    margin-bottom: 12px; 
+  }
 }
 
 .sidebar-link {
@@ -63,7 +65,9 @@
   transition: 0.2s; 
   text-decoration: none;
   
-  i { font-size: 23px; }
+  i { 
+    font-size: 23px; 
+  }
   
   &:hover { 
     background-color: rgba(155, 47, 255, 0.1); 
@@ -74,7 +78,9 @@
     background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
     box-shadow: 0 8px 20px rgba(102, 65, 190, 0.18);
     
-    i { color: #ffffff; }
+    i { 
+      color: #ffffff; 
+    }
   }
 }
 
@@ -83,4 +89,9 @@
   border-top: 1px solid var(--border-color);
   text-align: center; 
   color: var(--text-muted);
+  
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
 }
