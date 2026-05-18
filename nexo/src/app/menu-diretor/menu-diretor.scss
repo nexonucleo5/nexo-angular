@@ -1,145 +1,86 @@
-// Paleta de Cores do Painel Administrativo (Dark Mode)
-$bg-sidebar: #0b0e14;
-$bg-link-hover: rgba(255, 255, 255, 0.03);
-$text-main: #ffffff;
-$text-muted: #6c7a9c;
-$gradient-primary: linear-gradient(135deg, #7b2cbf, #2ec4b6);
-
+/* Aplicando exatamente a mesma estrutura, variáveis e larguras do menu do aluno */
 .sidebar {
-  width: 260px;
-  height: 100vh;
-  background-color: $bg-sidebar;
+  width: 300px;
+  min-height: 100vh;
+  background-color: var(--bg-card);
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 24px 16px;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  z-index: 100;
+  transition: background-color 0.3s, border-color 0.3s;
+}
 
-  // Bloco da Marca / Logotipo
-  &-brand {
-    padding: 0 12px 24px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    margin-bottom: 24px;
-
-    .brand-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      .brand-icon {
-        font-size: 1.8rem;
-        background: $gradient-primary;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      .brand-title {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: $text-main;
-        letter-spacing: 1px;
-        margin: 0;
-      }
-    }
-
-    .role-badge {
-      display: inline-block;
-      margin-top: 6px;
-      font-size: 0.75rem;
-      color: #2ec4b6;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-  }
-
-  // Estrutura de Listagem do Menu
-  &-menu {
-    flex-grow: 1;
-  }
-
-  &-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-
-    li {
-      width: 100%;
-    }
-  }
-
-  // Links de Navegação e Estados Reativos
-  &-link {
+.sidebar-brand {
+  padding: 28px 24px 22px;
+  border-bottom: 1px solid var(--border-color);
+  
+  /* Mantendo o alinhamento do ícone e título do Diretor */
+  .brand-row {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 12px 16px;
-    color: $text-muted;
-    text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 500;
-    border-radius: 12px;
-    transition: all 0.25s ease-in-out;
+    gap: 12px;
 
-    i {
-      font-size: 1.2rem;
-      transition: transform 0.2s ease;
+    .brand-icon {
+      font-size: 1.8rem;
+      /* Aplicando o mesmo gradiente da sua identidade visual */
+      background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    &:hover {
-      color: $text-main;
-      background-color: $bg-link-hover;
-
-      i {
-        transform: scale(1.1);
-      }
-    }
-
-    // Estado Ativo (Onde o degradê do Figma se aplica)
-    &.active {
-      background: $gradient-primary;
-      color: $text-main;
-      font-weight: 600;
-      box-shadow: 0 4px 15px rgba(123, 44, 191, 0.25);
-
-      i {
-        color: $text-main;
-      }
-    }
-  }
-
-  // Rodapé Informativo
-  &-footer {
-    padding: 16px 12px 0 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-
-    p {
-      color: $text-main;
-      font-size: 0.85rem;
-      font-weight: 500;
+    .brand-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main);
       margin: 0;
-    }
-
-    .version-text {
-      color: $text-muted;
-      font-size: 0.75rem;
-      display: block;
-      margin-top: 2px;
     }
   }
 }
 
-// Layout Adjust: Garante que o conteúdo à direita respeite o espaço fixo da sidebar
-@media (min-width: 768px) {
-  .main-content {
-    margin-left: 260px;
-    width: calc(100% - 260px);
+.sidebar-menu { 
+  padding: 8px 14px; 
+  flex-grow: 1; 
+}
+
+.sidebar-list {
+  list-style: none; 
+  margin: 0; 
+  padding: 0;
+  li { margin-bottom: 12px; }
+}
+
+.sidebar-link {
+  display: flex; 
+  align-items: center; 
+  gap: 16px; 
+  padding: 18px 22px;
+  border-radius: 20px; 
+  color: var(--text-main); 
+  font-size: 18px;
+  font-weight: 600; 
+  transition: 0.2s; 
+  text-decoration: none;
+  
+  i { font-size: 23px; }
+  
+  &:hover { 
+    background-color: rgba(155, 47, 255, 0.1); 
   }
+  
+  &.active {
+    color: #ffffff !important;
+    background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
+    box-shadow: 0 8px 20px rgba(102, 65, 190, 0.18);
+    
+    i { color: #ffffff; }
+  }
+}
+
+.sidebar-footer {
+  padding: 24px 20px; 
+  border-top: 1px solid var(--border-color);
+  text-align: center; 
+  color: var(--text-muted);
 }
