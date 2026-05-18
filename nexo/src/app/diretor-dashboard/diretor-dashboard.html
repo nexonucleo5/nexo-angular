@@ -1,0 +1,82 @@
+<div class="dashboard-executivo">
+  <header class="dashboard-header mb-4">
+    <h1 class="h3 fw-bold text-white">Dashboard Executivo</h1>
+    <p class="text-soft">Visão geral institucional em tempo real</p>
+  </header>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3" *ngFor="let m of metrics">
+      <div class="metric-card">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+          <div class="icon-square" [ngClass]="m.color">
+            <i [class]="'bi ' + m.icon"></i>
+          </div>
+          <span class="trend-tag" [class.negative]="m.trend.includes('-')">
+            {{m.trend}}
+          </span>
+        </div>
+        <p class="text-soft mb-1">{{m.label}}</p>
+        <h2 class="text-white fw-bold mb-0">{{m.value}}</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-xl-8">
+      <div class="main-card p-4 mb-4">
+        <h3 class="h5 text-white fw-bold mb-4">Desempenho Institucional</h3>
+        <div class="chart-area">
+          <div class="fake-chart-placeholder">
+             <img src="assets/imagensProjeto/grafico_desempenho.png" class="img-fluid" alt="Gráfico">
+          </div>
+        </div>
+      </div>
+
+      <div class="main-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="h5 text-white fw-bold mb-0">Alunos em Risco de Evasão</h3>
+          <button class="btn btn-link text-primary text-decoration-none p-0">Ver todos</button>
+        </div>
+        
+        <div class="student-list">
+          <div class="student-row d-flex align-items-center p-3 mb-2" *ngFor="let a of alunosRisco">
+            <img [src]="a.foto" class="avatar-circle me-3">
+            <div class="flex-grow-1">
+              <h6 class="text-white mb-0">{{a.nome}}</h6>
+              <small class="text-soft">{{a.turma}}</small>
+            </div>
+            <div class="risk-stats d-flex align-items-center gap-4">
+               <div class="freq-box text-end d-none d-md-block">
+                  <small class="text-soft d-block">Frequência</small>
+                  <span class="text-white fw-bold">{{a.frequencia}}%</span>
+               </div>
+               <div class="risk-badge-box text-end">
+                  <small class="text-soft d-block mb-1">{{a.tempo}}</small>
+                  <span class="risk-tag" [ngClass]="a.risco">Risco {{a.risco}}</span>
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-4">
+      <div class="main-card p-4 h-100">
+        <h3 class="h5 text-white fw-bold mb-4 d-flex align-items-center gap-2">
+          <i class="bi bi-exclamation-triangle text-warning"></i> Alertas Críticos
+        </h3>
+        
+        <div class="alert-stack">
+          <div class="alert-card p-3 mb-3" *ngFor="let alert of alertas">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="text-white fw-bold">{{alert.titulo}}</span>
+              <span class="priority-tag" [ngClass]="alert.nivel">{{alert.nivel}}</span>
+            </div>
+            <p class="text-soft small mb-2">{{alert.desc}}</p>
+            <small class="text-muted">{{alert.tempo}}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
