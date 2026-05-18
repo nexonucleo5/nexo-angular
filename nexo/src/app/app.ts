@@ -12,13 +12,13 @@ import { MenuDiretor } from './menu-diretor/menu-diretor';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, 
-    RouterOutlet, 
-    Dashboards, 
+  imports: [CommonModule,
+    RouterOutlet,
+    Dashboards,
     Materias,
-    FormsModule, 
-    Menu, 
-    Cadastro, 
+    FormsModule,
+    Menu,
+    Cadastro,
     Login,
     MenuUsuario,
     MenuDiretor],
@@ -32,5 +32,5 @@ export class App {
   alternarPerfil() {
     this.perfilUsuario = this.perfilUsuario === 'aluno' ? 'diretor' : 'aluno';
   }
-  
+
 }
