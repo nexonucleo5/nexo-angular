@@ -16,14 +16,15 @@ import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [
-    CommonModule, 
-    RouterOutlet, 
-    Dashboards, 
+    CommonModule,
+    RouterOutlet,
+    Dashboards,
     Materias,
-    FormsModule, 
-    Menu, 
-    Cadastro, 
+    FormsModule,
+    Menu,
+    Cadastro,
     Login,
     MenuUsuario,
     MenuDiretor,
@@ -34,30 +35,21 @@ import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
   styleUrl: './app.scss'
 })
 export class App implements OnInit {
-  // Estado Inicial (Mantive começando como 'diretor' igual ao seu código)
   perfilUsuario: 'aluno' | 'diretor' = 'diretor'; 
   temaEscuro: boolean = false;
 
-  // 3. INJETAR o UserService no construtor da classe
   constructor(private userService: UserService) {}
 
   ngOnInit() {
-    // Define o tema inicial como light ao carregar
     this.aplicarTema();
-
-    // Sincroniza o estado inicial do serviço com o seu perfil inicial ('diretor')
     this.userService.alternarPerfil(this.perfilUsuario);
   }
 
-  // Alterna entre Aluno e Diretor
   alternarPerfil() {
     this.perfilUsuario = this.perfilUsuario === 'aluno' ? 'diretor' : 'aluno';
-    
-    // 4. AVISAR o serviço global sobre a mudança de perfil
     this.userService.alternarPerfil(this.perfilUsuario);
   }
-
-  // Alterna entre Claro e Escuro
+  
   alternarTema() {
     this.temaEscuro = !this.temaEscuro;
     this.aplicarTema();

@@ -1,0 +1,58 @@
+// Layout Base
+.metric-card, .main-card {
+  background-color: #161f31;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.metric-card {
+  padding: 24px;
+  
+  .icon-square {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: white;
+    &.blue { background: #2563eb; }
+    &.red { background: #dc2626; }
+    &.green { background: #16a34a; }
+    &.orange { background: #ea580c; }
+  }
+}
+
+// Alunos em Risco
+.student-row {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 16px;
+  transition: 0.2s;
+  &:hover { background: rgba(255, 255, 255, 0.05); }
+}
+
+.avatar-circle {
+  width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
+}
+
+.risk-tag {
+  font-size: 11px; font-weight: bold; padding: 4px 12px; border-radius: 20px;
+  text-transform: capitalize;
+  &.alto { background: rgba(220, 38, 38, 0.2); color: #f87171; }
+  &.medio { background: rgba(234, 88, 12, 0.2); color: #fb923c; }
+}
+
+// Alertas
+.alert-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border-left: 4px solid transparent;
+  
+  &:has(.priority-tag.alta) { border-left-color: #dc2626; }
+  &:has(.priority-tag.media) { border-left-color: #ea580c; }
+}
+
+.priority-tag {
+  font-size: 10px; font-weight: bold; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 4px;
+  &.alta { background: #dc2626; color: white; }
+  &.media { background: #ea580c; color: white; }
+}
+
+.text-soft { color: #94a3b8; }
