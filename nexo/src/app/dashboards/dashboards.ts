@@ -1,14 +1,16 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DashboardDiretor } from '../diretor-dashboard/diretor-dashboard'; 
 
 @Component({
   selector: 'app-dashboards',
   standalone: true,
-  imports: [CommonModule], 
+  imports: [CommonModule, DashboardDiretor],
   templateUrl: './dashboards.html',
   styleUrl: './dashboards.scss',
 })
 export class Dashboards {
+  perfilUsuario: string = 'diretor'; 
 
   atividades = [
     { 

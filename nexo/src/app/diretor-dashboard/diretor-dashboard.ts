@@ -5,8 +5,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-dashboard-diretor',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './dashboard-diretor.html',
-  styleUrl: './dashboard-diretor.scss'
+  templateUrl: './diretor-dashboard.html', 
+  styleUrl: './diretor-dashboard.scss'
 })
 export class DashboardDiretor {
   metrics = [
