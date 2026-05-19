@@ -1,4 +1,7 @@
-<div [ngSwitch]="perfilAtual" class="w-100">
-  <app-materias *ngSwitchCase="'aluno'"></app-materias>
-  <app-matriculas-diretor *ngSwitchCase="'diretor'"></app-matriculas-diretor>
+<div class="w-100">
+  @if (authService.usuarioLogado()?.role === 'diretor') {
+  <app-matriculas-diretor></app-matriculas-diretor>
+  } @else {
+  <app-materias></app-materias>
+  }
 </div>

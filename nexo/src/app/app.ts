@@ -9,6 +9,7 @@ import { Materias } from './materias/materias';
 import { Menu } from './menu/menu';
 import { MenuUsuario } from './menu-usuario/menu-usuario';
 import { MenuDiretor } from './menu-diretor/menu-diretor';
+import { AuthService } from './services/auth.service';
 
 // 1. IMPORTAR o Serviço e o seu novo Componente Wrapper
 import { UserService } from './services/user';
@@ -35,21 +36,18 @@ import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
   styleUrl: './app.scss'
 })
 export class App implements OnInit {
-  perfilUsuario: 'aluno' | 'diretor' = 'diretor'; 
   temaEscuro: boolean = false;
 
-  constructor(private userService: UserService) {}
+  constructor(public authService: AuthService) {}
 
   ngOnInit() {
     this.aplicarTema();
-    this.userService.alternarPerfil(this.perfilUsuario);
   }
 
   alternarPerfil() {
-    this.perfilUsuario = this.perfilUsuario === 'aluno' ? 'diretor' : 'aluno';
-    this.userService.alternarPerfil(this.perfilUsuario);
+    this.authService.alternarPerfil();
   }
-  
+
   alternarTema() {
     this.temaEscuro = !this.temaEscuro;
     this.aplicarTema();

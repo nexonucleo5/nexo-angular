@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -13,6 +14,7 @@ export class Login {
   // Injeção de dependências
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private authService = inject(AuthService); // Injetando o novo serviço
 
   // Estados reativos da tela
   public loginForm: FormGroup;
@@ -39,6 +41,8 @@ export class Login {
     this.mensagemErro = '';
     const { username, password } = this.loginForm.value;
 
+    this.authService.login(username); // Chama o método de login do serviço
+
     // Prontinho para integrar com o seu serviço de API / Spring Security futuramente
     console.log('Enviando dados para o servidor:', { username, password });
 
@@ -46,7 +50,7 @@ export class Login {
 
     // Redireciona para a rota '/dashboard'
     setTimeout(() => {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/dashboards']);
     }, 120);
   }
 }

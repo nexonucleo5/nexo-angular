@@ -1,4 +1,4 @@
-@if (perfilUsuario === 'diretor') {
+@if (authService.usuarioLogado()?.role === 'diretor') {
     <app-dashboard-diretor></app-dashboard-diretor>
 } @else {
     <main class="main-content flex-grow-1">

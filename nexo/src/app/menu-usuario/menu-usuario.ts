@@ -9,6 +9,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: './menu-usuario.scss',
 })
 export class MenuUsuario {
+  [x: string]: any;
   userName = input.required<string>();
   userClass = input<string>('Estudante');
   userPhoto = input<string>('assets/imagensProjeto/defaultUser.png');
@@ -29,8 +30,9 @@ export class MenuUsuario {
     }
   }
 
-  signOut() {
-    this.onLogout.emit();
+  public signOut(): void {
     this.menuOpen.set(false);
+    this['authService'].logout();
+    this['router'].navigate(['/login']);
   }
 }

@@ -9,9 +9,10 @@ import { Login } from './login/login';
 import { MenuDiretor } from './menu-diretor/menu-diretor';
 import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
 import { Auditoria } from './auditoria/auditoria';
+import { DashboardDiretor } from './diretor-dashboard/diretor-dashboard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/dashboards', pathMatch: 'full' },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'dashboards', component: Dashboards },
   { path: 'materias', component: MatriculasWrapper }, 
   { path: 'matriculas', component: MatriculasWrapper }, 
@@ -22,5 +23,6 @@ export const routes: Routes = [
   { path: 'meus_niveis_notas', component: MeusNiveisNotas },
   { path: 'configuracoes', component: Configuracoes },
   { path: 'login', component: Login },
-  { path: 'menu-diretor', component: MenuDiretor }
+  { path: 'menu-diretor', component: MenuDiretor },
+  { path: 'diretor-dashboards', component: DashboardDiretor }
 ];
