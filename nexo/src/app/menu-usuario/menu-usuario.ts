@@ -1,5 +1,6 @@
-import { Component, ElementRef, HostListener, input, output, signal, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, ElementRef, HostListener, input, output, signal, viewChild, inject, } from '@angular/core';
+import { RouterLink, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-menu-usuario',
@@ -9,7 +10,8 @@ import { RouterLink } from '@angular/router';
   styleUrl: './menu-usuario.scss',
 })
 export class MenuUsuario {
-  [x: string]: any;
+  authService = inject(AuthService);
+  router = inject(Router);
   userName = input.required<string>();
   userClass = input<string>('Estudante');
   userPhoto = input<string>('assets/imagensProjeto/defaultUser.png');
@@ -32,7 +34,7 @@ export class MenuUsuario {
 
   public signOut(): void {
     this.menuOpen.set(false);
-    this['authService'].logout();
-    this['router'].navigate(['/login']);
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }
