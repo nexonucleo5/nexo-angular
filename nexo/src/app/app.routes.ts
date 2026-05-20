@@ -11,6 +11,8 @@ import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
 import { Auditoria } from './auditoria/auditoria';
 import { DashboardDiretor } from './diretor-dashboard/diretor-dashboard';
 
+// A primeira rota ta redirecionando para o login, para garantir que o usuário sempre comece pela tela de autenticação.
+// So alterar o redirectTo para '/dashboards' para iniciar como era antes.
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'dashboards', component: Dashboards },

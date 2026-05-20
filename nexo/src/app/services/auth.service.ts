@@ -12,6 +12,8 @@ export interface Usuario {
     providedIn: 'root',
 })
 export class AuthService {
+    // O AuthService esta mais completo e melhor estruturado que o UserService, podendo ser removido futuramente.
+    
     // O estado começa como 'null' (ninguém logado)
     public usuarioLogado = signal<Usuario | null>(null);
 
@@ -19,6 +21,7 @@ export class AuthService {
     public login(username: string): void {
         const loginLimpo = username.trim().toLowerCase();
 
+        //Simula um Login simples: O diretor é o email e admin é a senha.
         if (loginLimpo === 'diretor' || loginLimpo === 'admin') {
             this.usuarioLogado.set({
                 nome: 'Diretor Silva',
@@ -26,6 +29,8 @@ export class AuthService {
                 foto: 'assets/imagensProjeto/gabrielZapelini.png', // Foto genérica para o diretor
                 role: 'diretor'
             });
+            // Futuramente,sera implementado o sistema de autenticação real, onde o backend retornará os dados do usuário, incluindo seu papel (aluno, diretor, etc).
+            // Para logar com o Aluno,basta usar qualquer outro nome de usuário que não seja 'diretor' ou 'admin', e ele será logado como aluno.
         } else {
             this.usuarioLogado.set({
                 nome: 'Gabriel Mendes',
@@ -49,7 +54,7 @@ export class AuthService {
         });
     }
 
-    /** Método para deslogar */
+    //Método para deslogar
     public logout(): void {
         this.usuarioLogado.set(null);
     }

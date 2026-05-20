@@ -32,6 +32,7 @@ export class MenuUsuario {
     }
   }
 
+  // Método para deslogar o usuário, fechar o menu e redirecionar para a tela de login
   public signOut(): void {
     this.menuOpen.set(false);
     this.authService.logout();
