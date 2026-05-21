@@ -14,6 +14,7 @@ import { AuthService } from './services/auth.service';
 // 1. IMPORTAR o Serviço e o seu novo Componente Wrapper
 import { UserService } from './services/user';
 import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
+import { GestaoEvasao } from './gestao-evasao/gestao-evasao';
 
 @Component({
   selector: 'app-root',
@@ -29,8 +30,8 @@ import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
     Login,
     MenuUsuario,
     MenuDiretor,
-    // 2. ADICIONAR o Wrapper na lista de imports do componente Standalone
-    MatriculasWrapper
+    MatriculasWrapper,
+    GestaoEvasao
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'

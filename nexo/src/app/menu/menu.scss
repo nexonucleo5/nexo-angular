@@ -1,15 +1,30 @@
-/* Mantendo todo o seu código original e acrescentando o gatilho */
+/* Atualizado para fixar o menu na tela */
 .sidebar {
   width: 300px;
-  min-height: 100vh;
+  height: 100vh; /* Ocupa 100% da altura da janela do navegador */
   background-color: var(--bg-card);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  position: sticky;
+  
+  position: fixed; 
   top: 0;
+  left: 0;
+  z-index: 1000; 
+  
   transition: background-color 0.3s, border-color 0.3s;
+}
+
+.app-layout-wrapper {
+  display: flex;
+  min-height: 100vh;
+
+  & > :not(.sidebar) {
+    margin-left: 300px; /* Mesma largura da sua sidebar */
+    flex-grow: 1;
+    min-width: 0; /* Evita quebras de layout em elementos flex internos */
+  }
 }
 
 /* ESTILOS DO GATILHO DE PERFIL */
@@ -71,7 +86,6 @@
   }
 }
 
-/* SEUS ESTILOS ORIGINAIS ABAIXO */
 .sidebar-brand {
   padding: 28px 24px 22px;
   border-bottom: 1px solid var(--border-color);
@@ -96,9 +110,125 @@
 .sidebar-footer {
   padding: 24px 20px; border-top: 1px solid var(--border-color);
   text-align: center; color: var(--text-muted);
+}/* Menu Lateral com Posição Fixa Inteligente */
+.sidebar {
+  width: 300px;
+  height: 100vh; /* Ocupa 100% da altura da janela */
+  background-color: var(--bg-card);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  
+  position: fixed; /* Mantém fixo ao scrollar */
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
+/* Container do Layout Geral */
 .app-layout-wrapper {
   display: flex;
   min-height: 100vh;
+  width: 100%;
+  
+  /* Garante que QUALQUEER conteúdo principal ao lado da sidebar ganhe o recuo */
+  & > :not(.sidebar),
+  .dashboard-executivo,
+  .dashboard-diretor {
+    padding-left: 300px; /* Cria o espaço exato para a sidebar não cobrir nada */
+    flex-grow: 1;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* ========================================================== */
+/* SEUS ESTILOS DO GATILHO DE PERFIL E MENU ABAIXO */
+/* ========================================================== */
+
+.profile-trigger-container {
+  position: relative;
+  padding: 16px;
+  margin: 10px 14px;
+}
+
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  border: 1px solid var(--border-color);
+
+  &:hover {
+    background: rgba(155, 47, 255, 0.08);
+  }
+}
+
+.user-avatar-wrapper {
+  .user-photo {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 2px solid #8f24ff;
+    object-fit: cover;
+  }
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  .user-name {
+    color: var(--text-main);
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .user-role {
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+}
+
+.arrow-icon {
+  color: var(--text-muted);
+  font-size: 14px;
+  transition: transform 0.3s ease;
+  
+  &.rotated {
+    transform: rotate(180deg);
+  }
+}
+
+.sidebar-brand {
+  padding: 28px 24px 22px;
+  border-bottom: 1px solid var(--border-color);
+}
+.sidebar-menu { padding: 8px 14px; }
+.sidebar-list {
+  list-style: none; margin: 0; padding: 0;
+  li { margin-bottom: 12px; }
+}
+.sidebar-link {
+  display: flex; align-items: center; gap: 16px; padding: 18px 22px;
+  border-radius: 20px; color: var(--text-main); font-size: 18px;
+  font-weight: 600; transition: 0.2s; text-decoration: none;
+  i { font-size: 23px; }
+  &:hover { background-color: rgba(155, 47, 255, 0.1); }
+  &.active {
+    color: #ffffff !important;
+    background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
+    box-shadow: 0 8px 20px rgba(102, 65, 190, 0.18);
+  }
+}
+.sidebar-footer {
+  padding: 24px 20px; border-top: 1px solid var(--border-color);
+  text-align: center; color: var(--text-muted);
 }

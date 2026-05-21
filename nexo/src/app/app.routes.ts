@@ -11,14 +11,14 @@ import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
 import { Auditoria } from './auditoria/auditoria';
 import { RelatoriosDiretor } from './relatorios-diretor/relatorios-diretor';
 import { DashboardDiretor } from './diretor-dashboard/diretor-dashboard';
+import { GestaoEvasao } from './gestao-evasao/gestao-evasao'; 
 
-// A primeira rota ta redirecionando para o login, para garantir que o usuário sempre comece pela tela de autenticação.
-// So alterar o redirectTo para '/dashboards' para iniciar como era antes.
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'dashboards', component: Dashboards },
   { path: 'materias', component: MatriculasWrapper }, 
   { path: 'matriculas', component: MatriculasWrapper }, 
+  { path: 'evasao', component: GestaoEvasao }, // <-- CONECTADO: Mapeamento do routerLink do seu menu lateral
   { path: 'auditoria', component: Auditoria },
   { path: 'relatorios', component: RelatoriosDiretor },
   { path: 'cadastro', component: Cadastro },

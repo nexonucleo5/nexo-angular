@@ -1,0 +1,156 @@
+<section class="page-content p-4">
+
+    <div class="page-heading mb-4">
+        <h1 class="page-title fw-bold" style="font-size: 44px; color: var(--text-main);">Gestão de Evasão</h1>
+        <p class="text-soft fs-5">Monitoramento e intervenção para retenção de alunos</p>
+    </div>
+
+    <section class="stats-section mb-4">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="stat-card shadow-sm border-bottom-indicator red-indicator">
+                    <div>
+                        <p class="text-soft mb-1">Total em Risco <span class="badge-trend text-soft">+5</span></p>
+                        <h2>47</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card shadow-sm border-bottom-indicator red-indicator">
+                    <div>
+                        <p class="text-soft mb-1">Risco Alto <span class="badge-trend text-soft">+3</span></p>
+                        <h2>18</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card shadow-sm border-bottom-indicator yellow-indicator">
+                    <div>
+                        <p class="text-soft mb-1">Risco Médio <span class="badge-trend text-soft">+2</span></p>
+                        <h2>29</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card shadow-sm border-bottom-indicator green-indicator">
+                    <div>
+                        <p class="text-soft mb-1">Recuperados <span class="badge-trend text-soft">+4</span></p>
+                        <h2>12</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="filters-box p-4 rounded-4 shadow-sm mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-5">
+                <div class="search-box d-flex align-items-center p-2">
+                    <i class="bi bi-search px-2 text-secondary"></i>
+                    <input type="text" [(ngModel)]="buscaNome" class="form-control border-0 bg-transparent shadow-none" placeholder="Buscar por nome, matrícula ou turma...">
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <select class="form-select filter-select" [(ngModel)]="riscoSelecionado">
+                    <option *ngFor="let r of riscos" [value]="r">{{ r }}</option>
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <select class="form-select filter-select" [(ngModel)]="turmaSelecionada">
+                    <option *ngFor="let t of turmas" [value]="t">{{ t }}</option>
+                </select>
+            </div>
+            <div class="col-lg-1">
+                <button class="btn gradient-btn w-100 d-flex align-items-center justify-content-center gap-1">
+                    <i class="bi bi-funnel-fill"></i> Filtrar
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fs-4 fw-bold text-white mb-0">Alunos em Risco ({{ alunosFiltrados.length }})</h2>
+        <button class="btn btn-export shadow-sm">Exportar Relatório</button>
+    </div>
+
+    <section class="students-section d-flex flex-column gap-3 mb-5">
+        <div class="student-card p-4 rounded-4 shadow-sm" *ngFor="let aluno of alunosFiltrados">
+            
+            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                <div class="d-flex gap-3 align-items-center">
+                    <div class="avatar-container position-relative">
+                        <img [src]="aluno.foto" [alt]="aluno.nome" class="rounded-circle student-avatar">
+                        <span class="status-badge-icon position-absolute" [ngClass]="getClasseRisco(aluno.risco)">
+                            <i class="bi" [ngClass]="aluno.risco === 'Alto' ? 'bi-exclamation-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="fs-5 text-white fw-bold mb-1">{{ aluno.nome }}</h3>
+                        <p class="text-soft mb-0 fs-6">{{ aluno.anoTurma }} • <span class="text-secondary">Mat: {{ aluno.matricula }}</span></p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-4 metrics-container align-items-center text-center">
+                    <div>
+                        <p class="text-soft mb-1 small">Frequência</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress flex-grow-1" style="width: 60px;">
+                                <div class="progress-bar bg-purple" [style.width]="aluno.frequencia + '%'"></div>
+                            </div>
+                            <span class="text-white fw-bold small">{{ aluno.frequencia }}%</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-soft mb-1 small">Participação</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress flex-grow-1" style="width: 60px;">
+                                <div class="progress-bar bg-purple" [style.width]="aluno.participacao + '%'"></div>
+                            </div>
+                            <span class="text-white fw-bold small">{{ aluno.participacao }}%</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-soft mb-1 small">Nota Média</p>
+                        <span class="fs-5 text-white fw-bold">{{ aluno.notaMedia }}</span>
+                    </div>
+                    <div>
+                        <p class="text-soft mb-1 small">Último Acesso</p>
+                        <span class="text-white small d-block fw-bold">{{ aluno.ultimoAcesso }}</span>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column gap-2 action-buttons">
+                    <button class="btn gradient-btn-blue w-100 d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-chat-left-text-fill"></i> Contatar
+                    </button>
+                    <button class="btn btn-dark-custom w-100 text-white text-center">
+                        Ver Detalhes
+                    </button>
+                </div>
+            </div>
+
+            <hr class="border-secondary opacity-25 my-4">
+
+            <div class="row g-3 text-start">
+                <div class="col-md-4">
+                    <p class="text-soft mb-1 small">Motivo Principal</p>
+                    <p class="text-white fw-semibold mb-0">{{ aluno.motivoPrincipal }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p class="text-soft mb-1 small">Intervenções Realizadas</p>
+                    <p class="text-white fw-semibold mb-0">{{ aluno.intervencoes }}</p>
+                    <small class="text-soft text-secondary block dynamic-small">{{ aluno.tempoIntervencao }}</small>
+                </div>
+                <div class="col-md-4">
+                    <p class="text-soft mb-1 small">Contato Responsável</p>
+                    <p class="text-white fw-semibold mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-telephone text-secondary"></i>
+                        <i class="bi bi-envelope text-secondary"></i>
+                        <span class="text-soft">{{ aluno.contatoResponsavel }}</span>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</section>

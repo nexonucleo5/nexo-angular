@@ -1,58 +1,106 @@
-// Layout Base
+.page-title { font-size: 42px; color: var(--text-main); }
+.text-main { color: var(--text-main); }
+.text-soft { color: var(--text-soft) !important; }
+.text-soft-muted { color: var(--text-soft); opacity: 0.6; font-size: 11px; }
+
 .metric-card, .main-card {
-  background-color: #161f31;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: var(--bg-card);
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
 }
 
 .metric-card {
-  padding: 24px;
+  padding: 22px;
   
   .icon-square {
-    width: 48px; height: 48px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; color: white;
-    &.blue { background: #2563eb; }
-    &.red { background: #dc2626; }
-    &.green { background: #16a34a; }
-    &.orange { background: #ea580c; }
+    width: 50px; height: 50px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center; color: white;
+    
+    &.blue { background: linear-gradient(135deg, #2196f3, #00bcd4); }
+    &.red { background: linear-gradient(135deg, #ff3d00, #ff1744); }
+    &.green { background: linear-gradient(135deg, #06d25e, #00c853); }
+    &.orange { background: linear-gradient(135deg, #ff9800, #ff5722); }
+    &.purple { background: linear-gradient(135deg, #9b2fff, #673ab7); }
   }
 }
 
-// Alunos em Risco
+.trend-tag {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(6, 210, 94, 0.12);
+  color: #06d25e;
+  
+  &.negative {
+    background: rgba(255, 61, 0, 0.12);
+    color: #ff3d00;
+  }
+}
+
+/* Área customizada para renderizar o Canvas do Chart.js responsivamente */
+.chart-area {
+  width: 100%;
+  height: 320px; 
+  position: relative;
+}
+
 .student-row {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  transition: 0.2s;
-  &:hover { background: rgba(255, 255, 255, 0.05); }
+  transition: transform 0.2s, border-color 0.2s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    border-color: #9b2fff;
+    background-color: rgba(155, 47, 255, 0.02);
+  }
 }
 
 .avatar-circle {
   width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
+  border: 2px solid var(--border-color);
 }
 
 .risk-tag {
   font-size: 11px; font-weight: bold; padding: 4px 12px; border-radius: 20px;
-  text-transform: capitalize;
-  &.alto { background: rgba(220, 38, 38, 0.2); color: #f87171; }
-  &.medio { background: rgba(234, 88, 12, 0.2); color: #fb923c; }
+  display: inline-block;
+  
+  &.alto { background: rgba(255, 61, 0, 0.12); color: #ff3d00; }
+  &.medio { background: rgba(255, 193, 7, 0.12); color: #ffc107; }
 }
 
-// Alertas
 .alert-card {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.02);
   border-radius: 16px;
-  border-left: 4px solid transparent;
+  border: 1px solid var(--border-color);
+  border-left: 5px solid transparent;
+  transition: background-color 0.2s;
   
-  &:has(.priority-tag.alta) { border-left-color: #dc2626; }
-  &:has(.priority-tag.media) { border-left-color: #ea580c; }
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+  
+  &:has(.priority-tag.alta) { border-left-color: #ff3d00; }
+  &:has(.priority-tag.media) { border-left-color: #ffc107; }
+}
+
+body.light-mode .alert-card {
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .priority-tag {
   font-size: 10px; font-weight: bold; text-transform: uppercase;
   padding: 2px 8px; border-radius: 4px;
-  &.alta { background: #dc2626; color: white; }
-  &.media { background: #ea580c; color: white; }
+  
+  &.alta { background: rgba(255, 61, 0, 0.15); color: #ff3d00; }
+  &.media { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
 }
 
-.text-soft { color: #94a3b8; }
+.custom-link-btn {
+  color: #9b2fff !important;
+  font-weight: 600;
+  font-size: 14px;
+  &:hover { opacity: 0.8; }
+}
