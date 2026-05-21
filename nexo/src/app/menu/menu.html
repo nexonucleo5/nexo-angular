@@ -1,43 +1,47 @@
-<aside class="sidebar">
-  <div>
-    <div class="sidebar-brand">
-      <div class="brand-row">
-        <i class="bi bi-mortarboard-fill brand-icon"></i>
-        <h1 class="brand-title">NEXO</h1>
+<div class="app-layout-wrapper">
+
+
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-brand">
+        <div class="brand-row">
+          <i class="bi bi-mortarboard-fill brand-icon"></i>
+          <h1 class="brand-title">NEXO</h1>
+        </div>
       </div>
+
+      <nav class="sidebar-menu">
+        <ul class="sidebar-list">
+          <li>
+            <a routerLink="/materias" routerLinkActive="active" class="sidebar-link">
+              <i class="bi bi-book"></i>
+              <span>Matérias</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/desafios" routerLinkActive="active" class="sidebar-link">
+              <i class="bi bi-bullseye"></i>
+              <span>Desafios</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/dashboards" routerLinkActive="active" class="sidebar-link">
+              <i class="bi bi-grid"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/meus_niveis_notas" routerLinkActive="active" class="sidebar-link">
+              <i class="bi bi-graph-up-arrow"></i>
+              <span>Meus Níveis e Notas</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </div>
 
-    <nav class="sidebar-menu">
-      <ul class="sidebar-list">
-        <li>
-          <a routerLink="/materias" routerLinkActive="active" class="sidebar-link">
-            <i class="bi bi-book"></i>
-            <span>Matérias</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/desafios" routerLinkActive="active" class="sidebar-link">
-            <i class="bi bi-bullseye"></i>
-            <span>Desafios</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/dashboards" routerLinkActive="active" class="sidebar-link">
-            <i class="bi bi-grid"></i>
-            <span>Dashboard</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/meus_niveis_notas" routerLinkActive="active" class="sidebar-link">
-            <i class="bi bi-graph-up-arrow"></i>
-            <span>Meus Níveis e Notas</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-  </div>
-
-  <div class="sidebar-footer">
-    <p>© 2026 NEXO</p>
-  </div>
-</aside>
+    <div class="sidebar-footer">
+      <p>© 2026 NEXO</p>
+    </div>
+  </aside>
+  

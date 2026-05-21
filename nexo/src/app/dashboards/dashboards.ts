@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardDiretor } from '../diretor-dashboard/diretor-dashboard'; 
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-dashboards',
@@ -10,7 +11,8 @@ import { DashboardDiretor } from '../diretor-dashboard/diretor-dashboard';
   styleUrl: './dashboards.scss',
 })
 export class Dashboards {
-  perfilUsuario: string = 'diretor'; 
+// Inject o AuthService para acessar os dados do usuário logado e controlar o acesso às funcionalidades do dashboard.
+  public authService = inject(AuthService); 
 
   atividades = [
     { 

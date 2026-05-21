@@ -1,38 +1,40 @@
 <div class="login-container">
-    <form class="login-form" method="post" th:action="@{/login}">
+    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="realizarLogin()">
         <h2 class="login-title">Entrar</h2>
         <p class="login-subtitle">Acesse sua conta para continuar</p>
 
-        <div th:if="${erro}" class="alert alert-danger d-none" th:text="${erro}"></div>
-        <div th:if="${sucesso}" class="alert alert-success d-none" th:text="${sucesso}"></div>
+        @if (mensagemErro) {
+        <div class="alert alert-danger">{{ mensagemErro }}</div>
+        }
+        @if (mensagemSucesso) {
+        <div class="alert alert-success">{{ mensagemSucesso }}</div>
+        }
 
         <div class="mb-3">
-            <label for="exampleInputEmail1" class="form-label">Login</label>
-            <input type="text"
-                   name="username"
-                   class="form-control"
-                   id="exampleInputEmail1"
-                   aria-describedby="emailHelp"
-                   placeholder="Digite seu login">
+            <label for="username" class="form-label">Login</label>
+            <input type="text" id="username" formControlName="username" class="form-control"
+                [class.is-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
+                placeholder="Digite seu login">
+            <div class="invalid-feedback">O login é obrigatório.</div>
             <div id="emailHelp" class="form-text">
                 Nunca compartilharemos o seu login com ninguém.
             </div>
         </div>
 
         <div class="mb-3">
-            <label for="exampleInputPassword1" class="form-label">Senha</label>
-            <input type="password"
-                   name="password"
-                   class="form-control"
-                   id="exampleInputPassword1"
-                   placeholder="Digite sua senha">
+            <label for="password" class="form-label">Senha</label>
+            <input [type]="mostrarSenha ? 'text' : 'password'" id="password" formControlName="password"
+                class="form-control"
+                [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                placeholder="Digite sua senha">
+            <div class="invalid-feedback">A senha é obrigatória.</div>
         </div>
 
         <div class="form-check mb-4">
-            <input type="checkbox" class="form-check-input" id="exampleCheck1">
-            <label class="form-check-label" for="exampleCheck1">Mostrar senha</label>
+            <input type="checkbox" class="form-check-input" id="togglePassword" (change)="mostrarSenha = !mostrarSenha">
+            <label class="form-check-label" for="togglePassword">Mostrar senha</label>
         </div>
 
-        <button type="submit" class="btn btn-login w-100">Entrar</button>
+        <button type="submit" class="btn btn-login w-100" [disabled]="loginForm.invalid">Entrar</button>
     </form>
 </div>
