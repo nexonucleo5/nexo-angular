@@ -5,6 +5,7 @@ html[data-theme='light'] {
   --bg-primary: #f6f6f7 !important;
   --bg-card: #ffffff !important;
   --text-main: #12284a !important;
+  --text-muted: #6c757d !important;
   --border-color: #dddddf !important;
 }
 
@@ -17,53 +18,29 @@ html[data-theme='dark'] {
 }
 
 /* ==========================================================================
-   2. ESTILOS GLOBAIS
+   2. ESTILOS GLOBAIS DE BASE
    ========================================================================== */
-body {
-  margin: 0;
-  background-color: var(--bg-primary);
-  color: var(--text-main);
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  transition: background-color 0.3s, color 0.3s;
-}
-
 html,
 body {
   height: 100%;
   margin: 0;
+  padding: 0;
   background-color: var(--bg-primary);
-}
-
-.app-layout {
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
+  color: var(--text-main);
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+  overflow-x: hidden;
 }
 
 // Utilitários de Gradientes (Seus botões e ícones)
-.green-gradient {
-  background: linear-gradient(135deg, #0fcd5c, #08d6a2);
-}
+.green-gradient   { background: linear-gradient(135deg, #0fcd5c, #08d6a2); }
+.blue-gradient    { background: linear-gradient(135deg, #2e73f6, #10c6df); }
+.orange-gradient  { background: linear-gradient(135deg, #ff6a00, #ff5f79); }
+.pink-gradient    { background: linear-gradient(135deg, #8f24ff, #f2389d); }
 
-.blue-gradient {
-  background: linear-gradient(135deg, #2e73f6, #10c6df);
-}
-
-.orange-gradient {
-  background: linear-gradient(135deg, #ff6a00, #ff5f79);
-}
-
-.pink-gradient {
-  background: linear-gradient(135deg, #8f24ff, #f2389d);
-}
-
-.green-button,
-.blue-button,
-.orange-button,
-.pink-button {
+.green-button, .blue-button, .orange-button, .pink-button {
   border: none;
   transition: opacity 0.2s;
-
   &:hover {
     opacity: 0.9;
     color: white;
@@ -71,16 +48,57 @@ body {
 }
 
 /* ==========================================================================
-   3. ESTRUTURA DO DASHBOARD (Sidebar e Header)
+   3. ESTRUTURA DO DASHBOARD (Ajustado para os 240px reais da barra)
    ========================================================================== */
 .app-layout {
   display: flex;
+  width: 100%;
   min-height: 100vh;
+  position: relative;
+  box-sizing: border-box;
+
+  &.tela-autenticacao {
+    justify-content: center;
+    align-items: center;
+
+    .main-content {
+      margin-left: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+
+// Força a marcação do componente a alinhar com o push do conteúdo
+app-menu, app-menu-diretor, .sidebar {
+  width: 300px !important; // Sincronizado com o tamanho real das imagens
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  background-color: var(--bg-card);
+  border-right: 1px solid var(--border-color);
+  box-sizing: border-box;
 }
 
 .main-content {
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   background-color: var(--bg-primary);
+  
+  // CORREÇÃO DO BURACO: Alinhado perfeitamente em 300px
+  margin-left: 300px; 
+  width: calc(100% - 300px);
+  max-width: calc(100% - 300px);
+  
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .top-header {
@@ -91,6 +109,26 @@ body {
   justify-content: space-between;
   align-items: center;
   transition: background-color 0.3s;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 999;
+}
+
+/* RENDEREZAÇÃO DAS PÁGINAS FILHAS (Router) */
+.main-content > router-outlet + *,
+.main-content > ng-component,
+.main-content > div,
+.page-container-pushed {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  padding: 32px !important; // Margem interna confortável para respirar os cards
+  margin-left: 0 !important; // Remove qualquer resquício de empurrão duplo
 }
 
 .profile-image {
@@ -102,10 +140,9 @@ body {
 }
 
 /* ==========================================================================
-   4. ELEMENTOS DE PÁGINA (Cards e inputs)
+   4. ELEMENTOS INTERNOS (Cards e Inputs)
    ========================================================================== */
 .bg-white {
-  // Sobrescrevendo a classe do bootstrap para aceitar o tema
   background-color: var(--bg-card) !important;
 }
 
@@ -130,23 +167,21 @@ input.form-control {
 }
 
 /* ==========================================================================
-   5. CONFIGURAÇÕES - ESTILOS ESPECÍFICOS
+   5. ACESSIBILIDADE E REGRAS ESPECÍFICAS
    ========================================================================== */
-
 body.modo-foco-ativo {
-  .sidebar, .top-header { 
-    display: none; 
+  .sidebar,
+  .top-header {
+    display: none;
   }
   .main-content {
     margin-left: 0 !important;
-    max-width: 800px; 
+    max-width: 800px;
     margin: 0 auto;
   }
 }
 
 .sem-animacoes {
-  // Remove transições de cor e fundo
-  // Adicionar novas regras para garantir que as animações sejam completamente desativadas
   *, *::before, *::after {
     transition-duration: 0s !important;
     transition-property: none !important;

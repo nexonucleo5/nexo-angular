@@ -1,39 +1,75 @@
-// Estrutura global do layout
-.app-layout {
+app-layout, .app-layout {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  background-color: #121212;
+  background-color: var(--bg-main, #121212);
+  box-sizing: border-box;
 
-  // Centralização exclusiva para telas de Autenticação (Login / Cadastro)
   &.tela-autenticacao {
     justify-content: center;
     align-items: center;
 
     .main-content {
-      width: 100%;
+      margin-left: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-left: 0 !important; 
     }
   }
 }
 
-// O conteúdo principal ocupa o resto da tela
 .main-content {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  transition: margin-left 0.3s ease, width 0.3s ease; // Transição suave ao alternar perfis
+
+  // Quando for o portal do Aluno, empurra menos (ajuste os 300px se a sua sidebar for diferente)
+  &.content-aluno {
+    margin-left: 300px; 
+    width: calc(100% - 300px);
+    max-width: calc(100% - 300px);
+  }
+
+  // Quando for o portal do Diretor, empurra os 300px que já davam certo antes
+  &.content-diretor {
+    margin-left: 300px; 
+    width: calc(100% - 300px);
+    max-width: calc(100% - 300px);
+  }
+}
+
+.top-header {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%; 
   box-sizing: border-box;
 }
 
-// Força os containers internos de visualização a ocuparem 100% do espaço disponível
+// Garante que o container do Bootstrap respeite os limites do router
+.container-fluid {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 router-outlet + * {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }

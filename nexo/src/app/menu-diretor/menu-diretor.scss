@@ -25,6 +25,7 @@
     .brand-icon {
       font-size: 1.8rem;
       background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
+      background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }

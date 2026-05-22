@@ -1,9 +1,27 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .page-container-pushed {
-  margin-left: 300px;
-  width: calc(100% - 300px);
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  margin: 0 !important;   // Zera qualquer margem duplicada que jogava o painel para a direita criando o vão escuro
+  padding: 0 !important;  // Evita conflito com o padding do container interno
+}
+
+// Garante que o container interno ocupe todo o espaço disponível sem travar larguras
+.container-fluid {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
   box-sizing: border-box;
 }
 
+// Classes utilitárias de cores permanecem abaixo...
 .purple-text { color: #8f24ff !important; }
 .green-text { color: #0fcd5c !important; }
 .blue-text { color: #2e73f6 !important; }
@@ -11,12 +29,6 @@
 
 .text-soft { color: var(--text-muted) !important; }
 .title-adaptive { color: var(--text-main) !important; }
-
-.main-content {
-  min-height: 100vh;
-  background-color: var(--bg-main);
-  transition: background-color 0.3s ease;
-}
 
 .dashboard-welcome-card {
   background: var(--bg-card);

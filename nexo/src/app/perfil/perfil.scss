@@ -19,13 +19,16 @@
 }
 
 .main-content {
-    min-height: 100vh;
+    margin-left: 130px !important; /* Alinhado perfeitamente com o menu */
+    width: 100% !important; /* Ocupa toda a largura restante */
     background-color: var(--bg-main) !important;
     transition: all 0.3s ease;
 }
 
 .page-content {
     padding: 34px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* ============================================================

@@ -8,7 +8,9 @@
     }
     }
 
-    <main class="main-content">
+    <main class="main-content" [class.content-aluno]="authService.usuarioLogado()?.role === 'aluno'"
+        [class.content-diretor]="authService.usuarioLogado()?.role === 'diretor'">
+
         @if (authService.usuarioLogado(); as usuario) {
         <header class="top-header">
             <div class="d-flex align-items-center">
