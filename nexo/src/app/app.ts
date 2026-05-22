@@ -11,7 +11,6 @@ import { MenuUsuario } from './menu-usuario/menu-usuario';
 import { MenuDiretor } from './menu-diretor/menu-diretor';
 import { AuthService } from './services/auth.service';
 
-// 1. IMPORTAR o Serviço e o seu novo Componente Wrapper
 import { UserService } from './services/user';
 import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
 import { GestaoEvasao } from './gestao-evasao/gestao-evasao';
