@@ -30,6 +30,11 @@
     font-size: 14px;
     outline: none;
     cursor: pointer;
+    
+    option {
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
   }
 }
 
@@ -67,8 +72,8 @@
       &.danger { background: rgba(231, 76, 60, 0.2); border-bottom: 2px solid #e74c3c; }
       &:hover { filter: brightness(1.2); }
     }
-    .bar-value { position: absolute; top: -25px; font-size: 10px; font-weight: 700; color: var(--text-muted); }
-    .bar-label { margin-top: 12px; font-size: 12px; color: var(--text-muted); font-weight: 600; }
+    .bar-value { position: absolute; top: -25px; font-size: 10px; font-weight: 700; }
+    .bar-label { margin-top: 12px; font-size: 12px; font-weight: 600; }
   }
 }
 

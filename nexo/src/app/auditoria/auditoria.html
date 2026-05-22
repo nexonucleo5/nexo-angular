@@ -1,7 +1,7 @@
 <div class="container-fluid auditoria-container p-4">
   <header class="mb-4">
     <h1 class="fw-bold m-0" style="color: var(--text-main);">Auditoria e Segurança</h1>
-    <p class="text-muted mb-0">Monitoramento de logs, integridade do ecossistema e compliance LGPD</p>
+    <p class="mb-0" style="color: var(--text-muted);">Monitoramento de logs, integridade do ecossistema e compliance LGPD</p>
   </header>
 
   <div class="row g-3 mb-4">
@@ -11,7 +11,7 @@
           <i class="bi" [ngClass]="item.icon"></i>
         </div>
         <div class="ms-3">
-          <p class="text-muted small mb-0">{{ item.label }}</p>
+          <p class="small mb-0" style="color: var(--text-muted);">{{ item.label }}</p>
           <h3 class="fw-bold m-0" style="color: var(--text-main);">{{ item.value }}</h3>
         </div>
       </div>
@@ -64,7 +64,7 @@
             </div>
             <div>
               <p class="mb-0 fw-bold" style="color: var(--text-main);">{{ log.nome }}</p>
-              <small class="text-muted">{{ log.hora }}</small>
+              <small style="color: var(--text-muted);">{{ log.hora }}</small>
             </div>
           </div>
           <span class="badge" [ngClass]="log.status === 'sucesso' ? 'bg-success-soft' : 'bg-danger-soft'">
