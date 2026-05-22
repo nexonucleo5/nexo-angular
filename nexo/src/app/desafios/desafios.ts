@@ -10,16 +10,13 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './desafios.scss',
 })
 export class Desafios {
-  // Modelos para os filtros
   buscaDeTermos: string = '';
   materiaSelecionada: string = 'Todas as Matérias';
   nivelSelecionado: string = 'Todos os Níveis';
 
-  // Listas que alimentam os selects
   materias: string[] = ['Todas as Matérias', 'Biologia', 'Matemática', 'Inglês', 'História'];
   niveis: string[] = ['Todos os Níveis', 'Fácil', 'Médio', 'Difícil'];
 
-  // Base de dados (Array de Objetos)
   desafios = [
     { 
       titulo: 'Quiz: Fotossíntese', 
@@ -60,7 +57,6 @@ export class Desafios {
     }
   ];
 
-  // Lógica de Filtragem combinada
   get desafiosFiltrados() {
     return this.desafios.filter(desafio => {
       const termo = this.buscaDeTermos.toLowerCase();
@@ -76,7 +72,6 @@ export class Desafios {
     });
   }
 
-  // Helper para remover acentos das classes CSS (ex: 'Médio' vira 'medio')
   getClasseNivel(nivel: string): string {
     return nivel.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
   }

@@ -1,27 +1,26 @@
+// Estrutura global do layout
 .app-layout {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  /* Ou a cor escura padrão do seu tema */
-   background-color: #121212;
+  background-color: #121212;
 
+  // Centralização exclusiva para telas de Autenticação (Login / Cadastro)
   &.tela-autenticacao {
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background-color: #121212;
-    /* Ajuste para a cor de fundo do seu sistema */
 
     .main-content {
       width: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
+      margin-left: 0 !important; 
     }
   }
-  // Estilização no login para não aparecer o navbar e o menu lateral
 }
 
+// O conteúdo principal ocupa o resto da tela
 .main-content {
   flex-grow: 1;
   display: flex;
@@ -29,16 +28,12 @@
   min-height: 100vh;
   width: 100%;
   box-sizing: border-box;
-
-  /* IMPORTANTE: Deixe SEM nenhum margin-left aqui! */
-  margin-left: 0 !important;
 }
 
-/* Removendo qualquer seletor antigo que tentava forçar margens baseadas no menu */
-:host:has(app-menu),
-:host:has(app-menu-diretor) {
-  .main-content {
-    margin-left: 0 !important;
-    width: 100%;
-  }
+// Força os containers internos de visualização a ocuparem 100% do espaço disponível
+router-outlet + * {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  width: 100%;
 }

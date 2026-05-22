@@ -1,222 +1,192 @@
-/* ============================================================
-   1. IMPORTAÇÕES E VARIÁVEIS 
-   ============================================================ */
-:root {
-    --bg-main: #121212;
-    --bg-card: #1e1e1e;
-    --border-color: #333333;
-    --text-main: #ffffff;
-    --text-muted: #b3b3b3;
-    
-    --green-gradient: linear-gradient(135deg, #0fcd5c, #08d6a2);
-    --blue-gradient: linear-gradient(135deg, #2e73f6, #10c6df);
-    --orange-gradient: linear-gradient(135deg, #ff6a00, #ff5f79);
-    --pink-gradient: linear-gradient(135deg, #8f24ff, #f2389d);
-    --grad-purple-green: linear-gradient(135deg, #8f24ff, #0fcd5c);
+.page-container-pushed {
+  margin-left: 300px;
+  width: calc(100% - 300px);
+  box-sizing: border-box;
 }
 
-/* Utilitários de texto */
 .purple-text { color: #8f24ff !important; }
 .green-text { color: #0fcd5c !important; }
 .blue-text { color: #2e73f6 !important; }
 .gold-text { color: #ffd700 !important; }
 
-/* ============================================================
-   2. ESTRUTURA PRINCIPAL
-   ============================================================ */
+.text-soft { color: var(--text-muted) !important; }
+.title-adaptive { color: var(--text-main) !important; }
+
 .main-content {
-    min-height: 100vh;
-    background-color: var(--bg-main) !important;
-    transition: all 0.3s ease;
+  min-height: 100vh;
+  background-color: var(--bg-main);
+  transition: background-color 0.3s ease;
 }
 
-.page-content {
-    padding: 34px;
-}
-
-/* ============================================================
-   3. BANNER DO DASHBOARD
-   ============================================================ */
 .dashboard-welcome-card {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border-color);
-    border-radius: 26px;
-    padding: 34px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    transition: transform 0.3s ease;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 26px;
+  padding: 34px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
 
-    &:hover {
-        transform: translateY(-5px);
-    }
+  &:hover {
+    transform: translateY(-3px);
+  }
 
-    .profile-page-name {
-        font-size: 38px;
-        font-weight: 800;
-        color: var(--text-main) !important;
-        margin: 0 0 10px 0;
-    }
+  .profile-page-name {
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0 0 10px 0;
+  }
 
-    .profile-page-level {
-        font-size: 18px;
-        color: var(--text-muted) !important;
-        font-weight: 400;
-    }
+  .profile-page-level {
+    font-size: 18px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
 }
 
 .btn-action-primary {
-    background: var(--grad-purple-green);
-    border: none;
-    padding: 14px 28px;
-    border-radius: 14px;
-    color: white;
-    font-weight: 600;
-    font-size: 16px;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    
-    &:hover {
-        transform: translateY(-3px) scale(1.05);
-        box-shadow: 0 10px 20px rgba(143, 36, 255, 0.3);
-        filter: brightness(1.1);
-    }
-    
-    &:active {
-        transform: scale(0.95);
-    }
+  background: linear-gradient(135deg, #8f24ff, #0fcd5c);
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(143, 36, 255, 0.2);
+    filter: brightness(1.05);
+  }
 }
 
-/* ============================================================
-   4. CARDS DE CONTEÚDO E RESUMO (Com Hover Adicionado)
-   ============================================================ */
 .summary-card {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border-color);
-    border-radius: 24px;
-    padding: 30px;
-    height: 100%;
-    transition: all 0.3s ease; // Acrescentado para animação
-    cursor: pointer;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 24px;
+  height: 100%;
+  transition: all 0.3s ease;
+  cursor: pointer;
 
-    &:hover {
-        transform: translateY(-10px);
-        background: #252525 !important;
-        border-color: #8f24ff;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-    }
+  &:hover {
+    transform: translateY(-5px);
+    border-color: #8f24ff;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  }
+  
+  .summary-card-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
 }
 
 .summary-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
 
-    &.purple-summary { background: rgba(143, 36, 255, 0.1); color: #8f24ff; }
-    &.gold-summary { background: rgba(255, 215, 0, 0.1); color: #ffd700; }
-    &.fire-summary { background: rgba(255, 106, 0, 0.1); color: #ff6a00; }
+  &.purple-summary { background: rgba(143, 36, 255, 0.12); color: #8f24ff; }
+  &.gold-summary { background: rgba(255, 215, 0, 0.12); color: #ffd700; }
+  &.fire-summary { background: rgba(255, 106, 0, 0.12); color: #ff6a00; }
+  &.green-summary { background: rgba(15, 205, 92, 0.12); color: #0fcd5c; }
 }
 
-.summary-title { margin: 0; font-size: 16px; color: var(--text-muted) !important; }
-.summary-number { margin: 0; font-size: 28px; font-weight: 800; color: var(--text-main) !important; }
+.summary-title { margin: 0; font-size: 14px; color: var(--text-muted); }
+.summary-number { margin: 0; font-size: 26px; font-weight: 800; color: var(--text-main); }
+.summary-footer-text { font-size: 13px; color: var(--text-muted); }
 
 .summary-progress-track, .subject-line-track {
-    height: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    overflow: hidden;
+  height: 8px;
+  background: rgba(var(--text-main-rgb, 0, 0, 0), 0.08);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .summary-progress-fill, .subject-line-fill {
-    height: 100%;
-    background: var(--pink-gradient) !important;
-    border-radius: 10px;
-    transition: width 1s ease-in-out; // Animação da barra ao carregar
+  height: 100%;
+  background: linear-gradient(135deg, #8f24ff, #f2389d);
+  border-radius: 10px;
+  transition: width 1s ease-in-out;
 }
 
-.content-card {
-    background: var(--bg-card) !important;
-    border-radius: 24px;
-    padding: 28px;
-    border: 1px solid var(--border-color);
-    height: 100%;
-    transition: box-shadow 0.3s ease;
+.green-fill { background: linear-gradient(135deg, #0fcd5c, #08d6a2) !important; }
+.blue-fill { background: linear-gradient(135deg, #2e73f6, #10c6df) !important; }
+.orange-fill { background: linear-gradient(135deg, #ff6a00, #ff5f79) !important; }
+.purple-fill { background: #8f24ff !important; }
 
-    &:hover {
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-    }
+.content-card {
+  background: var(--bg-card);
+  border-radius: 24px;
+  padding: 28px;
+  border: 1px solid var(--border-color);
+  height: 100%;
 }
 
 .section-card-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text-main) !important;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 0;
 }
 
-/* Efeito nos itens da lista de atividades */
 .subject-progress-item {
-    padding: 12px;
-    border-radius: 16px;
-    transition: all 0.3s ease;
-    
-    &:hover {
-        background: rgba(255, 255, 255, 0.03);
-        transform: translateX(8px);
-    }
+  padding: 12px;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  
+  &:hover {
+    background: rgba(var(--text-main-rgb, 0, 0, 0), 0.02);
+    transform: translateX(4px);
+    border-color: var(--border-color);
+  }
 }
 
-/* Classes Auxiliares para Cores das Barras */
-.green-fill { background: var(--green-gradient) !important; }
-.blue-fill { background: var(--blue-gradient) !important; }
-.orange-fill { background: var(--orange-gradient) !important; }
-.pink-fill { background: var(--pink-gradient) !important; }
-.purple-fill { background: #8f24ff !important; } // Adicionada para o card de Java
-
-/* ============================================================
-   5. COMPONENTES NOVOS ESPECÍFICOS DO DASHBOARD
-   ============================================================ */
 .rank-item-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 16px;
-    transition: all 0.3s ease;
-    cursor: pointer;
+  background: rgba(var(--text-main-rgb, 0, 0, 0), 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 14px;
+  transition: all 0.3s ease;
+  cursor: pointer;
 
-    &:hover {
-        background: rgba(255, 255, 255, 0.05);
-        transform: translateX(5px) scale(1.02);
-    }
+  &:hover {
+    background: rgba(var(--text-main-rgb, 0, 0, 0), 0.04);
+    transform: translateY(-2px);
+  }
 
-    &.user-is-me {
-        background: rgba(143, 36, 255, 0.08);
-        border: 1px solid rgba(143, 36, 255, 0.3);
-        
-        &:hover {
-            background: rgba(143, 36, 255, 0.12);
-        }
-    }
+  &.user-is-me {
+    background: rgba(143, 36, 255, 0.06);
+    border: 1px solid rgba(143, 36, 255, 0.25);
+  }
 
-    .rank-position {
-        font-size: 18px;
-        font-weight: 800;
-        min-width: 30px;
-    }
+  .rank-position {
+    font-size: 16px;
+    font-weight: 800;
+    min-width: 30px;
+    display: inline-block;
+  }
 
-    .rank-user-img {
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid transparent;
-        transition: border-color 0.3s;
-    }
-    
-    &:hover .rank-user-img {
-        border-color: #8f24ff;
-    }
+  .rank-user-img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid transparent;
+    transition: border-color 0.3s;
+  }
+  
+  &:hover .rank-user-img {
+    border-color: #8f24ff;
+  }
 }

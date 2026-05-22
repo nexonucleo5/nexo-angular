@@ -11,7 +11,6 @@ import { AuthService } from '../services/auth.service';
   styleUrl: './dashboards.scss',
 })
 export class Dashboards {
-// Inject o AuthService para acessar os dados do usuário logado e controlar o acesso às funcionalidades do dashboard.
   public authService = inject(AuthService); 
 
   atividades = [

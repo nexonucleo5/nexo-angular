@@ -1,288 +1,259 @@
-<div>
-
-
+<div class="page-container-pushed">
+    <section class="page-content p-4">
         <div class="page-heading mb-4">
-                <h1 class="page-title fw-bold" style="font-size: 44px; color: var(--text-main);">Meus Níveis e Notas
-                </h1>
-                <p class="text-muted fs-5">Acompanhe seu progresso e desempenho acadêmico</p>
+            <h1 class="page-title fw-bold">Meus Níveis e Notas</h1>
+            <p class="text-soft fs-5">Acompanhe seu progresso e desempenho acadêmico</p>
         </div>
-        <div class="borda">
 
-  <div class="topo-nivel">
-    <div>
-      <p class="nivel-label">Nível Atual</p>
-      <h1>Nível 12</h1>
-      <p class="nivel-sub">Estudante Dedicado</p>
-    </div>
+        <div class="borda mb-4">
+            <div class="topo-nivel">
+                <div>
+                    <p class="nivel-label mb-1">Nível Atual</p>
+                    <h1 class="fw-bold text-white">Nível 12</h1>
+                    <p class="nivel-sub mb-0">Estudante Dedicado</p>
+                </div>
+                <div class="box-icone">
+                    <img src="assets/imagensProjeto/medalhinha.png" class="img" alt="Medalha">
+                </div>
+            </div>
 
-    <div class="box-icone">
-      <img src="../assets/imagensProjeto/medalhinha.png" class="img">
-    </div>
-  </div>
+            <div class="secao-progresso">
+                <div class="linha-info text-white">
+                    <span>Progresso para o próximo nível</span>
+                    <span class="xp">3450 / 4000 XP</span>
+                </div>
+                <div class="barra-progresso">
+                    <div class="fill" style="width: 86%;"></div>
+                </div>
+                <p class="faltam mb-0">Faltam 550 XP para alcançar o Nível 13</p>
+            </div>
+        </div>
 
-  <div class="secao-progresso">
-    <div class="linha-info">
-      <span>Progresso para o próximo nível</span>
-      <span class="xp">3450 / 4000 XP</span>
-    </div>
+        <div class="stats mb-5">
+            <div class="row g-4 w-100 m-0">
+                <div class="col-6 col-md-3 p-2">
+                    <div class="stat-inner-card shadow-sm">
+                        <div class="icon roxo">📊</div>
+                        <div>
+                            <p class="text-soft mb-1">Média Geral</p>
+                            <h2 class="title-adaptive fw-bold">8.1</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 p-2">
+                    <div class="stat-inner-card shadow-sm">
+                        <div class="icon verde">📈</div>
+                        <div>
+                            <p class="text-soft mb-1">Melhor Nota</p>
+                            <h2 class="title-adaptive fw-bold">10.0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 p-2">
+                    <div class="stat-inner-card shadow-sm">
+                        <div class="icon azul">🎖️</div>
+                        <div>
+                            <p class="text-soft mb-1">Atividades</p>
+                            <h2 class="title-adaptive fw-bold">42</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 p-2">
+                    <div class="stat-inner-card shadow-sm">
+                        <div class="icon laranja">📅</div>
+                        <div>
+                            <p class="text-soft mb-1">Este Mês</p>
+                            <h2 class="title-adaptive fw-bold">12</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div class="barra-progresso">
-      <div class="fill" style="width: 86%;"></div>
-    </div>
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <h3 class="title-adaptive fw-bold mb-3">Evolução das Notas</h3>
+                <div class="chart-card p-4 shadow-sm">
+                    <div class="chart">
+                        <svg viewBox="0 0 400 200">
+                            <defs>
+                                <linearGradient id="gradNotas" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#7b3fe4"/>
+                                    <stop offset="100%" stop-color="#00c853"/>
+                                </linearGradient>
+                            </defs>
+                            <g class="grid">
+                                <line x1="0" y1="40" x2="400" y2="40"/>
+                                <line x1="0" y1="80" x2="400" y2="80"/>
+                                <line x1="0" y1="120" x2="400" y2="120"/>
+                                <line x1="0" y1="160" x2="400" y2="160"/>
+                            </g>
+                            <g class="grid">
+                                <line x1="20" y1="0" x2="20" y2="200"/>
+                                <line x1="120" y1="0" x2="120" y2="200"/>
+                                <line x1="220" y1="0" x2="220" y2="200"/>
+                                <line x1="320" y1="0" x2="320" y2="200"/>
+                            </g>
+                            <polyline class="line" points="20,140 120,130 220,120 320,125" stroke="url(#gradNotas)" />
+                            <circle class="point" cx="20" cy="140" r="5"/>
+                            <circle class="point" cx="120" cy="130" r="5"/>
+                            <circle class="point" cx="220" cy="120" r="5"/>
+                            <circle class="point" cx="320" cy="125" r="5"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
 
-    <p class="faltam">Faltam 550 XP para alcançar o Nível 13</p>
-  </div>
+            <div class="col-md-6">
+                <h3 class="title-adaptive fw-bold mb-3">Evolução do XP</h3>
+                <div class="chart-card p-4 shadow-sm">
+                    <div class="chart">
+                        <svg viewBox="0 0 400 200">
+                            <defs>
+                                <linearGradient id="gradXp" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#7b3fe4"/>
+                                    <stop offset="100%" stop-color="#00c853"/>
+                                </linearGradient>
+                            </defs>
+                            <g class="grid">
+                                <line x1="0" y1="40" x2="400" y2="40"/>
+                                <line x1="0" y1="80" x2="400" y2="80"/>
+                                <line x1="0" y1="120" x2="400" y2="120"/>
+                                <line x1="0" y1="160" x2="400" y2="160"/>
+                            </g>
+                            <g class="grid">
+                                <line x1="20" y1="0" x2="20" y2="200"/>
+                                <line x1="120" y1="0" x2="120" y2="200"/>
+                                <line x1="220" y1="0" x2="220" y2="200"/>
+                                <line x1="320" y1="0" x2="320" y2="200"/>
+                            </g>
+                            <polyline class="line" points="20,140 120,130 220,120 320,125" stroke="url(#gradXp)" />
+                            <circle class="point" cx="20" cy="140" r="5"/>
+                            <circle class="point" cx="120" cy="130" r="5"/>
+                            <circle class="point" cx="220" cy="120" r="5"/>
+                            <circle class="point" cx="320" cy="125" r="5"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-</div>
-        <br>
-      <div class="stats">
+        <h3 class="title-adaptive fw-bold mb-3">Desempenho por matéria</h3>
+        <div class="materias-grid mb-5">
+            <div class="materia-card shadow-sm">
+                <div class="topo">
+                    <div>
+                        <h4 class="fw-bold text-white mb-1">Biologia</h4>
+                        <span class="text-soft small">75% concluído</span>
+                    </div>
+                    <div class="nota text-white">8.5 <small class="text-soft d-block">média</small></div>
+                </div>
+                <div class="barra">
+                    <div class="progresso bio"></div>
+                </div>
+            </div>
 
-  <div class="card">
-    <div class="icon roxo">📊</div>
-    <div>
-      <p>Média Geral</p>
-      <h2>8.1</h2>
-    </div>
-  </div>
+            <div class="materia-card shadow-sm">
+                <div class="topo">
+                    <div>
+                        <h4 class="fw-bold text-white mb-1">Matemática</h4>
+                        <span class="text-soft small">60% concluído</span>
+                    </div>
+                    <div class="nota text-white">7.2 <small class="text-soft d-block">média</small></div>
+                </div>
+                <div class="barra">
+                    <div class="progresso mat"></div>
+                </div>
+            </div>
 
-  <div class="card">
-    <div class="icon verde">📈</div>
-    <div>
-      <p>Melhor Nota</p>
-      <h2>10.0</h2>
-    </div>
-  </div>
+            <div class="materia-card shadow-sm">
+                <div class="topo">
+                    <div>
+                        <h4 class="fw-bold text-white mb-1">História</h4>
+                        <span class="text-soft small">85% concluído</span>
+                    </div>
+                    <div class="nota text-white">9.0 <small class="text-soft d-block">média</small></div>
+                </div>
+                <div class="barra">
+                    <div class="progresso his"></div>
+                </div>
+            </div>
 
-  <div class="card">
-    <div class="icon azul">🎖️</div>
-    <div>
-      <p>Atividades</p>
-      <h2>42</h2>
-    </div>
-  </div>
+            <div class="materia-card shadow-sm">
+                <div class="topo">
+                    <div>
+                        <h4 class="fw-bold text-white mb-1">Inglês</h4>
+                        <span class="text-soft small">70% concluído</span>
+                    </div>
+                    <div class="nota text-white">8.0 <small class="text-soft d-block">média</small></div>
+                </div>
+                <div class="barra">
+                    <div class="progresso ing"></div>
+                </div>
+            </div>
+        </div>
 
-  <div class="card">
-    <div class="icon laranja">📅</div>
-    <div>
-      <p>Este Mês</p>
-      <h2>12</h2>
-    </div>
-  </div>
+        <h3 class="title-adaptive fw-bold mb-3">Atividades Recentes</h3>
+        <div class="atividades-lista">
+            <div class="atividade shadow-sm">
+                <div class="info">
+                    <h4 class="fw-bold text-white mb-1">Quiz: Fotossíntese</h4>
+                    <span class="text-soft small">Biologia</span>
+                </div>
+                <div class="meta">
+                    <span class="data text-soft">30 Mar 2026</span>
+                    <span class="status bom">😊</span>
+                    <span class="nota text-white">9.5</span>
+                </div>
+            </div>
 
-</div>
-      <br>
+            <div class="atividade shadow-sm">
+                <div class="info">
+                    <h4 class="fw-bold text-white mb-1">Desafio: Funções</h4>
+                    <span class="text-soft small">Matemática</span>
+                </div>
+                <div class="meta">
+                    <span class="data text-soft">28 Mar 2026</span>
+                    <span class="status medio">😐</span>
+                    <span class="nota text-white">7.0</span>
+                </div>
+            </div>
 
-      <h3><b>Evolução das Notas</b></h3> <br>
+            <div class="atividade shadow-sm">
+                <div class="info">
+                    <h4 class="fw-bold text-white mb-1">Segunda Guerra Mundial</h4>
+                    <span class="text-soft small">História</span>
+                </div>
+                <div class="meta">
+                    <span class="data text-soft">25 Mar 2026</span>
+                    <span class="status bom">😊</span>
+                    <span class="nota text-white">10.0</span>
+                </div>
+            </div>
 
-      <div class="chart">
-  <svg viewBox="0 0 400 200">
+            <div class="atividade shadow-sm">
+                <div class="info">
+                    <h4 class="fw-bold text-white mb-1">Present Perfect</h4>
+                    <span class="text-soft small">Inglês</span>
+                </div>
+                <div class="meta">
+                    <span class="data text-soft">22 Mar 2026</span>
+                    <span class="status bom">😊</span>
+                    <span class="nota text-white">8.5</span>
+                </div>
+            </div>
 
-    <defs>
-      <linearGradient id="grad">
-        <stop offset="0%" stop-color="#7b3fe4"/>
-        <stop offset="100%" stop-color="#00c853"/>
-      </linearGradient>
-    </defs>
-
-    <!-- Linhas de grade (horizontal) -->
-    <g class="grid">
-      <line x1="0" y1="40" x2="400" y2="40"/>
-      <line x1="0" y1="80" x2="400" y2="80"/>
-      <line x1="0" y1="120" x2="400" y2="120"/>
-      <line x1="0" y1="160" x2="400" y2="160"/>
-    </g>
-
-    <!-- Linhas de grade (vertical) -->
-    <g class="grid">
-      <line x1="20" y1="0" x2="20" y2="200"/>
-      <line x1="120" y1="0" x2="120" y2="200"/>
-      <line x1="220" y1="0" x2="220" y2="200"/>
-      <line x1="320" y1="0" x2="320" y2="200"/>
-    </g>
-
-    <!-- Linha do gráfico -->
-    <polyline 
-      class="line"
-      points="20,140 120,130 220,120 320,125" />
-
-    <!-- Pontos -->
-    <circle class="point" cx="20" cy="140" r="5"/>
-    <circle class="point" cx="120" cy="130" r="5"/>
-    <circle class="point" cx="220" cy="120" r="5"/>
-    <circle class="point" cx="320" cy="125" r="5"/>
-
-  </svg>
-</div> <br>
-
-<h3>Evolução do XP</h3>
-
-<div class="chart">
-  <svg viewBox="0 0 400 200">
-
-    <defs>
-      <linearGradient id="grad">
-        <stop offset="0%" stop-color="#7b3fe4"/>
-        <stop offset="100%" stop-color="#00c853"/>
-      </linearGradient>
-    </defs>
-
-    <!-- Linhas de grade (horizontal) -->
-    <g class="grid">
-      <line x1="0" y1="40" x2="400" y2="40"/>
-      <line x1="0" y1="80" x2="400" y2="80"/>
-      <line x1="0" y1="120" x2="400" y2="120"/>
-      <line x1="0" y1="160" x2="400" y2="160"/>
-    </g>
-
-    <!-- Linhas de grade (vertical) -->
-    <g class="grid">
-      <line x1="20" y1="0" x2="20" y2="200"/>
-      <line x1="120" y1="0" x2="120" y2="200"/>
-      <line x1="220" y1="0" x2="220" y2="200"/>
-      <line x1="320" y1="0" x2="320" y2="200"/>
-    </g>
-
-    <!-- Linha do gráfico -->
-    <polyline 
-      class="line"
-      points="20,140 120,130 220,120 320,125" />
-
-    <!-- Pontos -->
-    <circle class="point" cx="20" cy="140" r="5"/>
-    <circle class="point" cx="120" cy="130" r="5"/>
-    <circle class="point" cx="220" cy="120" r="5"/>
-    <circle class="point" cx="320" cy="125" r="5"/>
-
-  </svg>
-</div>
-<br>
-
-<h3><b>Desempenho por matéria</b></h3> <br>
-
-<div class="materias-grid">
-
-  <div class="materia-card">
-    <div class="topo">
-      <div>
-        <h4>Biologia</h4>
-        <span>75% concluído</span>
-      </div>
-      <div class="nota">8.5 <small>média</small></div>
-    </div>
-    <div class="barra">
-      <div class="progresso bio"></div>
-    </div>
-  </div>
-
-  <div class="materia-card">
-    <div class="topo">
-      <div>
-        <h4>Matemática</h4>
-        <span>60% concluído</span>
-      </div>
-      <div class="nota">7.2 <small>média</small></div>
-    </div>
-    <div class="barra">
-      <div class="progresso mat"></div>
-    </div>
-  </div>
-
-  <div class="materia-card">
-    <div class="topo">
-      <div>
-        <h4>História</h4>
-        <span>85% concluído</span>
-      </div>
-      <div class="nota">9.0 <small>média</small></div>
-    </div>
-    <div class="barra">
-      <div class="progresso his"></div>
-    </div>
-  </div>
-
-  <div class="materia-card">
-    <div class="topo">
-      <div>
-        <h4>Inglês</h4>
-        <span>70% concluído</span>
-      </div>
-      <div class="nota">8.0 <small>média</small></div>
-    </div>
-    <div class="barra">
-      <div class="progresso ing"></div>
-    </div>
-  </div>
-
-</div>
-
-<br>
-<h3><b>Atividades Recentes</b></h3> <br>
-<div class="atividades-lista">
-
-  <div class="atividade">
-    <div class="info">
-      <h4>Quiz: Fotossíntese</h4>
-      <span>Biologia</span>
-    </div>
-
-    <div class="meta">
-      <span class="data">30 Mar 2026</span>
-      <span class="status bom">😊</span>
-      <span class="nota">9.5</span>
-    </div>
-  </div>
-
-  <div class="atividade">
-    <div class="info">
-      <h4>Desafio: Funções</h4>
-      <span>Matemática</span>
-    </div>
-
-    <div class="meta">
-      <span class="data">28 Mar 2026</span>
-      <span class="status medio">😐</span>
-      <span class="nota">7.0</span>
-    </div>
-  </div>
-
-  <div class="atividade">
-    <div class="info">
-      <h4>Segunda Guerra Mundial</h4>
-      <span>História</span>
-    </div>
-
-    <div class="meta">
-      <span class="data">25 Mar 2026</span>
-      <span class="status bom">😊</span>
-      <span class="nota">10.0</span>
-    </div>
-  </div>
-
-  <div class="atividade">
-    <div class="info">
-      <h4>Present Perfect</h4>
-      <span>Inglês</span>
-    </div>
-
-    <div class="meta">
-      <span class="data">22 Mar 2026</span>
-      <span class="status bom">😊</span>
-      <span class="nota">8.5</span>
-    </div>
-  </div>
-
-  <div class="atividade">
-    <div class="info">
-      <h4>Lei de Ohm</h4>
-      <span>Física</span>
-    </div>
-
-    <div class="meta">
-      <span class="data">20 Mar 2026</span>
-      <span class="status alerta">😮</span>
-      <span class="nota">6.5</span>
-    </div>
-  </div>
-
-</div>
+            <div class="atividade shadow-sm">
+                <div class="info">
+                    <h4 class="fw-bold text-white mb-1">Lei de Ohm</h4>
+                    <span class="text-soft small">Física</span>
+                </div>
+                <div class="meta">
+                    <span class="data text-soft">20 Mar 2026</span>
+                    <span class="status alerta">😮</span>
+                    <span class="nota text-white">6.5</span>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
