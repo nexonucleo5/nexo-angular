@@ -1,133 +1,66 @@
-.page-container-pushed {
-  margin-left: 300px;
-  width: calc(100% - 300px);
-  box-sizing: border-box;
+/* Variáveis baseadas na sua tela de Matérias */
+:root {
+  --bg-page: #0f111a;
+  --bg-card: #1c1f2b;
+  --bg-input: #151821;
+  --text-main: #ffffff;
+  --text-soft: #a0a0a0;
+  --border-color: #2d3142;
 }
 
-.page-title { 
-  font-size: 44px; 
-  color: var(--text-main); 
-}
-
-.text-soft { color: var(--text-muted) !important; }
+.page-container-pushed { background-color: var(--bg-page); min-height: 100vh; }
+.page-title { color: var(--text-main); }
+.text-soft { color: var(--text-soft) !important; }
 .title-adaptive { color: var(--text-main) !important; }
 
+/* Cards */
 .stat-card {
   background: var(--bg-card);
-  padding: 24px;
-  border-radius: 20px;
+  border: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.02);
-
-  h2 { font-size: 28px; margin: 0; }
 }
 
+.challenge-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s;
+}
+
+/* Inputs e Selects */
+.custom-input {
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-main) !important;
+  input { color: var(--text-main) !important; }
+  input::placeholder { color: var(--text-soft); }
+}
+
+.custom-select-input {
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-main) !important;
+  cursor: pointer;
+  option { background: var(--bg-card); color: var(--text-main); }
+}
+
+/* Icons e Badges */
 .icon-box {
-  width: 50px; height: 50px; border-radius: 14px;
-  display: flex; align-items: center; justify-content: center; color: white;
-  font-size: 20px;
+  width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;
   &.orange { background: linear-gradient(135deg, #ff9800, #ff5722); }
   &.green { background: linear-gradient(135deg, #06d25e, #00c853); }
   &.red { background: linear-gradient(135deg, #ff3d00, #ff1744); }
 }
 
-.filters-box {
-  background: var(--bg-card);
-  border-radius: 20px;
-  border: 1px solid var(--border-color);
-}
+.badge-success-custom { background: #06d25e; color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; }
 
-.search-box {
-  background-color: var(--bg-main);
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
-  input { 
-    color: var(--text-main); 
-    &::placeholder { color: var(--text-muted); opacity: 0.7; } 
-  }
-  &:focus-within { border-color: #9b2fff; }
-}
-
-.filter-select {
-  background-color: var(--bg-main);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
-  padding: 12px;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23777' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-  
-  &:focus {
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    border-color: #9b2fff;
-    box-shadow: none;
-  }
-}
-
-.challenge-card {
-  background: var(--bg-card);
-  border-radius: 24px;
-  border: 1px solid var(--border-color);
-  transition: all 0.2s ease;
-  
-  &:hover { 
-    transform: translateY(-3px); 
-    border-color: #9b2fff; 
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-  }
-  
-  &.success { 
-    border: 2px solid rgba(6, 210, 94, 0.4); 
-    background: rgba(6, 210, 94, 0.03); 
-  }
-  &.progress-card { 
-    border: 2px solid rgba(155, 47, 255, 0.4); 
-  }
-}
-
-.challenge-info { 
-  display: flex; 
-  gap: 12px; 
-  margin-top: 10px; 
-  flex-wrap: wrap; 
-  align-items: center;
-
-  .info-tag {
-    font-size: 13px;
-    color: var(--text-muted);
-    font-weight: 500;
-  }
-}
-
+/* Levels */
 .level {
-  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;
-  &.facil { background: rgba(6, 210, 94, 0.15); color: #06d25e; }
-  &.medio { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
-  &.dificil { background: rgba(255, 61, 0, 0.15); color: #ff3d00; }
+  padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: bold;
+  &.facil { background: rgba(6, 210, 94, 0.2); color: #06d25e; }
+  &.medio { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+  &.dificil { background: rgba(255, 61, 0, 0.2); color: #ff3d00; }
 }
 
-.gradient-btn {
-  background: linear-gradient(90deg, #9b2fff, #06d25e);
-  color: white; border: none; border-radius: 20px; padding: 10px 20px;
-  font-weight: bold; transition: 0.2s;
-  &:hover { opacity: 0.9; color: white; }
-}
-
-.btn-dark-custom {
-  background-color: var(--bg-main); color: var(--text-main);
-  border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 18px;
-  font-weight: 600;
-  &:hover { border-color: #9b2fff; background-color: rgba(155, 47, 255, 0.05); }
-}
-
-.badge-success-custom {
-  background: linear-gradient(90deg, #06d25e, #00c853);
-  color: white; padding: 5px 12px; border-radius: 999px; font-size: 12px;
-  font-weight: 600;
-}
-
-.progress { height: 8px; border-radius: 10px; background: rgba(var(--text-main-rgb, 0,0,0), 0.08); }
-.progress-bar { background: linear-gradient(90deg, #9b2fff, #06d25e); border-radius: 10px; }
+.progress-bar { background: linear-gradient(90deg, #9b2fff, #06d25e); }
