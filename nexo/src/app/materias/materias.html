@@ -8,11 +8,8 @@
         </p>
     </div>
 
-    <!-- FILTROS -->
     <section class="filters-box p-4 rounded-4 shadow-sm mb-4">
         <div class="row g-3 align-items-center">
-
-            <!-- BUSCA -->
             <div class="col-lg-8">
                 <div class="search-box custom-input d-flex align-items-center px-3 py-2 rounded-pill">
                     <i class="bi bi-search me-2"></i>
@@ -25,7 +22,6 @@
                 </div>
             </div>
 
-            <!-- DROPDOWN -->
             <div class="col-lg-4">
                 <div class="custom-dropdown w-100">
                     <div 
@@ -35,78 +31,49 @@
                         {{ selecionarNivel }}
                         <i class="bi bi-chevron-down"></i>
                     </div>
-
                     <div class="dropdown-menu-custom w-100" *ngIf="dropdownAberto">
-                        <div class="dropdown-item" (click)="selecionar('Todos os Níveis')">
-                            Todos os Níveis
-                        </div>
-                        <div class="dropdown-item" (click)="selecionar('Fundamental')">
-                            Fundamental
-                        </div>
-                        <div class="dropdown-item" (click)="selecionar('Médio')">
-                            Médio
-                        </div>
+                        <div class="dropdown-item" (click)="selecionar('Todos os Níveis')">Todos os Níveis</div>
+                        <div class="dropdown-item" (click)="selecionar('Fundamental')">Fundamental</div>
+                        <div class="dropdown-item" (click)="selecionar('Médio')">Médio</div>
                     </div>
                 </div>
             </div>
-
         </div>
     </section>
 
-    <!-- MATÉRIAS -->
     <section class="subjects-section mb-5">
         <div class="row g-4">
-
             <div class="col-md-6 col-xl-4" *ngFor="let subject of filtroDeBusca">
-                <div class="subject-card bg-white p-4 rounded-5 shadow-sm h-100 d-flex flex-column justify-content-between">
-
+                <div class="subject-card card-theme p-4 rounded-5 shadow-sm h-100 d-flex flex-column justify-content-between">
                     <div class="subject-header d-flex justify-content-between align-items-start mb-4">
                         <div class="d-flex gap-3">
-
-                            <div 
-                                [class]="'subject-icon d-flex align-items-center justify-content-center rounded-4 ' + subject.gradientClass"
-                                style="width: 70px; height: 70px; color: rgb(231, 224, 224);"
-                            >
-                                <!-- VOLTOU PRO ORIGINAL -->
+                            <div [class]="'subject-icon d-flex align-items-center justify-content-center rounded-4 ' + subject.gradientClass"
+                                 style="width: 70px; height: 70px; color: #fff;">
                                 <i *ngIf="subject.iconClass" [class]="'bi ' + subject.iconClass + ' fs-2'"></i>
-                                <span *ngIf="subject.iconText">
-                                    {{subject.iconText}}
-                                </span>
+                                <span *ngIf="subject.iconText">{{subject.iconText}}</span>
                             </div>
-
                             <div>
-                                <h2 class="subject-title">{{subject.title}}</h2>
-                                <p class="subject-level-text">{{subject.level}}</p>
+                                <h2 class="subject-title" style="color: var(--text-main);">{{subject.title}}</h2>
+                                <p class="text-soft">{{subject.level}}</p>
                             </div>
-
                         </div>
-
-                        <span class="badge rounded-pill bg-light fw-bold p-2">
+                        <span class="badge rounded-pill bg-light fw-bold p-2 text-dark">
                             ↗ {{subject.progress}}%
                         </span>
                     </div>
-
                     <div class="subject-progress mb-4">
                         <div class="progress mb-2" style="height: 10px;">
-                            <div 
-                                [class]="'progress-bar ' + subject.gradientClass"
-                                [style.width.%]="subject.progress"
-                            ></div>
+                            <div [class]="'progress-bar ' + subject.gradientClass" [style.width.%]="subject.progress"></div>
                         </div>
-                        <small class="text-muted">
+                        <small class="text-soft">
                             {{subject.completedLessons}}/{{subject.totalLessons}} aulas concluídas
                         </small>
                     </div>
-
-                    <a 
-                        href="#"
-                        [class]="'btn text-white fw-bold py-3 rounded-4 ' + subject.buttonClass"
-                    >
+                    <a href="#" [class]="'btn text-white fw-bold py-3 rounded-4 ' + subject.buttonClass">
                         Acessar Disciplina
                     </a>
                 </div>
             </div>
-
         </div>
     </section>
 
@@ -114,30 +81,29 @@
         <h2 class="fw-bold mb-4" style="color: var(--text-main);">Estatísticas Gerais</h2>
         <div class="row g-4 text-center">
             <div class="col-md-6 col-xl-3">
-                <div class="stat-box shadow-sm">
-                    <h3 class="stat-number purple-text">10</h3>
-                    <p class="stat-label">Matérias Ativas</p>
+                <div class="stat-box card-theme p-4 rounded-4 shadow-sm">
+                    <h3 class="stat-number" style="color: var(--text-main);">10</h3>
+                    <p class="text-soft">Matérias Ativas</p>
                 </div>
             </div>
             <div class="col-md-6 col-xl-3">
-                <div class="stat-box shadow-sm">
-                    <h3 class="stat-number green-text">162</h3>
-                    <p class="stat-label">Aulas Concluídas</p>
+                <div class="stat-box card-theme p-4 rounded-4 shadow-sm">
+                    <h3 class="stat-number" style="color: var(--text-main);">162</h3>
+                    <p class="text-soft">Aulas Concluídas</p>
                 </div>
             </div>
             <div class="col-md-6 col-xl-3">
-                <div class="stat-box shadow-sm">
-                    <h3 class="stat-number blue-text">58%</h3>
-                    <p class="stat-label">Progresso Médio</p>
+                <div class="stat-box card-theme p-4 rounded-4 shadow-sm">
+                    <h3 class="stat-number" style="color: var(--text-main);">58%</h3>
+                    <p class="text-soft">Progresso Médio</p>
                 </div>
             </div>
             <div class="col-md-6 col-xl-3">
-                <div class="stat-box shadow-sm">
-                    <h3 class="stat-number orange-text">134h</h3>
-                    <p class="stat-label">Tempo Total</p>
+                <div class="stat-box card-theme p-4 rounded-4 shadow-sm">
+                    <h3 class="stat-number" style="color: var(--text-main);">134h</h3>
+                    <p class="text-soft">Tempo Total</p>
                 </div>
             </div>
         </div>
     </section>
-
 </section>
