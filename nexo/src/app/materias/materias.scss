@@ -1,13 +1,12 @@
 .page-content {
   background-color: var(--bg-page);
   min-height: 100vh;
-  padding-bottom: 3rem;
+  padding-bottom: 2rem;
 }
 
 .card-theme {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  transition: background 0.3s ease;
 }
 
 .filters-box {
@@ -18,16 +17,11 @@
   background: var(--bg-input) !important;
   border: 1px solid var(--border-color) !important;
   color: var(--text-main) !important;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  border-radius: 30px !important;
   transition: all 0.3s ease;
   cursor: pointer;
 
   input {
     color: var(--text-main) !important;
-    height: 100%;
     &::placeholder { color: var(--text-soft); }
   }
 
@@ -38,29 +32,28 @@
 
 .search-box i { color: var(--text-soft); }
 
+/* Correção principal do dropdown */
 .custom-dropdown {
-  position: relative;
-  width: 100%;
+  position: relative; /* Pai precisa de relative */
 }
 
 .dropdown-menu-custom {
   position: absolute;
-  top: calc(100% + 8px);
+  top: 105%; /* Logo abaixo do input */
   left: 0;
-  z-index: 9999;
+  z-index: 9999; /* Garante que fique por cima de tudo */
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 8px;
   width: 100%;
-  box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 
   .dropdown-item {
     color: var(--text-main);
     padding: 10px;
     border-radius: 10px;
     cursor: pointer;
-    transition: background 0.2s;
     &:hover { background: var(--dropdown-hover); }
   }
 }

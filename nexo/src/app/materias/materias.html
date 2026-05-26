@@ -23,7 +23,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="custom-dropdown position-relative w-100">
+                <div class="custom-dropdown w-100 position-relative">
                     <div 
                         class="custom-input rounded-pill px-3 py-2 d-flex justify-content-between align-items-center"
                         (click)="toggleDropdown()"
@@ -31,7 +31,6 @@
                         {{ selecionarNivel }}
                         <i class="bi bi-chevron-down"></i>
                     </div>
-
                     <div class="dropdown-menu-custom w-100" *ngIf="dropdownAberto">
                         <div class="dropdown-item" (click)="selecionar('Todos os Níveis')">Todos os Níveis</div>
                         <div class="dropdown-item" (click)="selecionar('Fundamental')">Fundamental</div>
@@ -54,7 +53,7 @@
                                 <span *ngIf="subject.iconText">{{subject.iconText}}</span>
                             </div>
                             <div>
-                                <h2 class="subject-title" style="color: var(--text-main);">{{subject.title}}</h2>
+                                <h2 class="subject-title" style="color: var(--text-main); font-size: 1.25rem;">{{subject.title}}</h2>
                                 <p class="text-soft">{{subject.level}}</p>
                             </div>
                         </div>
@@ -62,7 +61,6 @@
                             ↗ {{subject.progress}}%
                         </span>
                     </div>
-
                     <div class="subject-progress mb-4">
                         <div class="progress mb-2" style="height: 10px;">
                             <div [class]="'progress-bar ' + subject.gradientClass" [style.width.%]="subject.progress"></div>
@@ -71,7 +69,6 @@
                             {{subject.completedLessons}}/{{subject.totalLessons}} aulas concluídas
                         </small>
                     </div>
-
                     <a href="#" [class]="'btn text-white fw-bold py-3 rounded-4 ' + subject.buttonClass">
                         Acessar Disciplina
                     </a>
@@ -83,28 +80,10 @@
     <section class="stats-section mt-5">
         <h2 class="fw-bold mb-4" style="color: var(--text-main);">Estatísticas Gerais</h2>
         <div class="row g-4 text-center">
-            <div class="col-md-6 col-xl-3">
+            <div class="col-md-6 col-xl-3" *ngFor="let stat of stats">
                 <div class="stat-box card-theme p-4 rounded-4 shadow-sm">
-                    <h3 class="stat-number" style="color: var(--text-main);">10</h3>
-                    <p class="text-soft">Matérias Ativas</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-xl-3">
-                <div class="stat-box card-theme p-4 rounded-4 shadow-sm">
-                    <h3 class="stat-number" style="color: var(--text-main);">162</h3>
-                    <p class="text-soft">Aulas Concluídas</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-xl-3">
-                <div class="stat-box card-theme p-4 rounded-4 shadow-sm">
-                    <h3 class="stat-number" style="color: var(--text-main);">58%</h3>
-                    <p class="text-soft">Progresso Médio</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-xl-3">
-                <div class="stat-box card-theme p-4 rounded-4 shadow-sm">
-                    <h3 class="stat-number" style="color: var(--text-main);">134h</h3>
-                    <p class="text-soft">Tempo Total</p>
+                    <h3 class="stat-number" style="color: var(--text-main);">{{stat.value}}</h3>
+                    <p class="text-soft">{{stat.label}}</p>
                 </div>
             </div>
         </div>

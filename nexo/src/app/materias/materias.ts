@@ -24,8 +24,14 @@ interface Subject {
 export class Materias {
   buscaDeTermos: string = '';
   selecionarNivel: string = 'Todos os Níveis';
-
   dropdownAberto: boolean = false;
+
+  stats = [
+    { label: 'Matérias Ativas', value: '10' },
+    { label: 'Aulas Concluídas', value: '162' },
+    { label: 'Progresso Médio', value: '58%' },
+    { label: 'Tempo Total', value: '134h' }
+  ];
 
   toggleDropdown() {
     this.dropdownAberto = !this.dropdownAberto;
@@ -36,16 +42,16 @@ export class Materias {
     this.dropdownAberto = false;
   }
 
-  subject: Subject[] = [
+  subjects: Subject[] = [
     {
       title: 'Biologia',
       level: 'Fundamental',
       progress: 45,
       completedLessons: 11,
       totalLessons: 24,
-      iconClass: 'bi-dna', // 🧬
-      gradientClass: 'green-gradient',
-      buttonClass: 'green-button'
+      iconClass: 'bi-dna',
+      gradientClass: 'bg-primary',
+      buttonClass: 'btn-primary'
     },
     {
       title: 'Matemática',
@@ -54,8 +60,8 @@ export class Materias {
       completedLessons: 22,
       totalLessons: 36,
       iconClass: 'bi-123',
-      gradientClass: 'blue-gradient',
-      buttonClass: 'blue-button'
+      gradientClass: 'bg-info',
+      buttonClass: 'btn-info'
     },
     {
       title: 'Inglês',
@@ -65,13 +71,13 @@ export class Materias {
       totalLessons: 30,
       iconClass: '',
       iconText: 'US',
-      gradientClass: 'pink-gradient',
-      buttonClass: 'pink-button'
+      gradientClass: 'bg-warning',
+      buttonClass: 'btn-warning'
     }
   ];
 
   get filtroDeBusca() {
-    return this.subject.filter(subject => {
+    return this.subjects.filter(subject => {
       const matchesSearch = subject.title.toLowerCase().includes(this.buscaDeTermos.toLowerCase());
       const matchesLevel = this.selecionarNivel === 'Todos os Níveis' || subject.level === this.selecionarNivel;
       return matchesSearch && matchesLevel;

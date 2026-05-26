@@ -1,66 +1,63 @@
-/* Variáveis baseadas na sua tela de Matérias */
-:root {
-  --bg-page: #0f111a;
-  --bg-card: #1c1f2b;
-  --bg-input: #151821;
-  --text-main: #ffffff;
-  --text-soft: #a0a0a0;
-  --border-color: #2d3142;
-}
+.page-container { padding: 2rem; }
 
-.page-container-pushed { background-color: var(--bg-page); min-height: 100vh; }
-.page-title { color: var(--text-main); }
-.text-soft { color: var(--text-soft) !important; }
-.title-adaptive { color: var(--text-main) !important; }
-
-/* Cards */
-.stat-card {
-  background: var(--bg-card);
+.main-card {
+  background: var(--bg-card); 
+  border-radius: 20px; 
   border: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
-.challenge-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  transition: all 0.3s;
+.metric-card {
+  @extend .main-card;
+  padding: 20px;
+  .icon-square {
+    width: 45px; height: 45px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; color: white;
+    &.orange { background: linear-gradient(135deg, #ff9800, #ff5722); }
+    &.green { background: linear-gradient(135deg, #06d25e, #00c853); }
+    &.red { background: linear-gradient(135deg, #ff3d00, #ff1744); }
+  }
 }
 
-/* Inputs e Selects */
-.custom-input {
-  background: var(--bg-input) !important;
-  border: 1px solid var(--border-color) !important;
+.search-box {
+  display: flex; align-items: center; background: var(--bg-body);
+  padding: 8px 15px; border-radius: 20px; border: 1px solid var(--border-color);
+  i { color: var(--text-soft); margin-right: 10px; }
+  .form-control-custom { 
+    background: transparent; border: none; color: var(--text-main); width: 100%;
+    &:focus { outline: none; }
+    &::placeholder { color: var(--text-soft); }
+  }
+}
+
+.form-select-custom {
+  width: 100%; 
+  background-color: var(--bg-body) !important; 
   color: var(--text-main) !important;
-  input { color: var(--text-main) !important; }
-  input::placeholder { color: var(--text-soft); }
-}
-
-.custom-select-input {
-  background: var(--bg-input) !important;
-  border: 1px solid var(--border-color) !important;
-  color: var(--text-main) !important;
+  border: 1px solid var(--border-color); 
+  border-radius: 20px; /* Bordas bem redondas */
+  padding: 10px 15px;
   cursor: pointer;
-  option { background: var(--bg-card); color: var(--text-main); }
+  appearance: none; /* Remove seta padrão para maior controle se necessário */
+  
+  option {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    padding: 10px;
+  }
+  
+  &:focus { border-color: #9b2fff; outline: none; }
 }
 
-/* Icons e Badges */
-.icon-box {
-  width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;
-  &.orange { background: linear-gradient(135deg, #ff9800, #ff5722); }
-  &.green { background: linear-gradient(135deg, #06d25e, #00c853); }
-  &.red { background: linear-gradient(135deg, #ff3d00, #ff1744); }
+.level-tag {
+  font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 8px;
+  &.facil { background: rgba(6, 210, 94, 0.1); color: #06d25e; }
+  &.medio { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+  &.dificil { background: rgba(255, 61, 0, 0.1); color: #ff3d00; }
 }
 
-.badge-success-custom { background: #06d25e; color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; }
-
-/* Levels */
-.level {
-  padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: bold;
-  &.facil { background: rgba(6, 210, 94, 0.2); color: #06d25e; }
-  &.medio { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
-  &.dificil { background: rgba(255, 61, 0, 0.2); color: #ff3d00; }
-}
-
-.progress-bar { background: linear-gradient(90deg, #9b2fff, #06d25e); }
+.status-badge.success { background: rgba(6, 210, 94, 0.1); color: #06d25e; padding: 4px 10px; border-radius: 8px; font-size: 11px; }
+.btn-gradient { background: linear-gradient(90deg, #9b2fff, #06d25e); color: white; border: none; }
+.btn-outline-main { border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; border-radius: 12px; }
+.progress { height: 6px; background: var(--border-color); border-radius: 3px; }
+.progress-bar { background: #9b2fff; border-radius: 3px; }
+.active-border { border-color: #9b2fff; }
