@@ -1,8 +1,11 @@
-// Herança do sistema Dark
-.page-title { font-size: 44px; color: #ffffff; }
+// Variáveis e classes de texto integradas
+.page-title { font-size: 44px; color: var(--text-main); }
+.text-main { color: var(--text-main); }
+.text-soft { color: var(--text-soft) !important; }
 
 .stat-card {
-    background: #1e293b;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     padding: 24px;
     border-radius: 20px;
     height: 140px;
@@ -10,6 +13,7 @@
     align-items: center;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.04);
 
     h2 { font-size: 32px; font-weight: 700; margin-bottom: 0; }
 }
@@ -36,9 +40,11 @@
     &.soft { background: rgba(148, 163, 184, 0.1); color: #94a3b8; }
 }
 
-// Gráfico Mock
+// Gráfico Mock e Cards
 .chart-card, .top-performers-card {
-    background: #1e293b;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.04);
     height: 100%;
 }
 
@@ -46,7 +52,7 @@
     height: 250px;
     .bars-wrapper {
         height: 180px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        border-bottom: 1px solid var(--border-color);
     }
     .bar-multi {
         display: flex; gap: 4px; align-items: flex-end;
@@ -58,22 +64,33 @@
 }
 
 // Top Performers Ranking
-.performer-avatar { width: 45px; height: 45px; object-fit: cover; }
+.performer-avatar { 
+    width: 45px; height: 45px; object-fit: cover; 
+    border: 2px solid var(--border-color); 
+}
 .rank-badge {
-    width: 24px; height: 24px; background: rgba(255,255,255,0.1);
+    width: 24px; height: 24px; 
+    background: var(--border-color);
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 12px; color: #fff;
+    font-size: 12px; color: var(--text-main); font-weight: bold;
 }
 
 // Teacher Card
 .teacher-card {
-    background: #1e293b;
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     transition: 0.3s;
-    &:hover { border-color: #a855f7; transform: translateX(5px); }
+    &:hover { 
+        border-color: #a855f7; 
+        transform: translateX(5px); 
+        background-color: rgba(168, 85, 247, 0.02);
+    }
 }
 
-.teacher-avatar { width: 70px; height: 70px; object-fit: cover; border: 2px solid #334155; }
+.teacher-avatar { 
+    width: 70px; height: 70px; object-fit: cover; 
+    border: 2px solid var(--border-color); 
+}
 
 .badge-status {
     padding: 2px 12px;
@@ -87,16 +104,29 @@
 }
 
 .btn-action-icon {
-    background: rgba(255,255,255,0.05);
-    color: #94a3b8;
+    background: var(--border-color);
+    color: var(--text-soft);
+    border: none;
     border-radius: 12px;
     width: 42px; height: 42px;
+    transition: 0.2s;
     &:hover { background: #a855f7; color: #fff; }
 }
 
-.progress { height: 8px; border-radius: 10px; background: #0f172a; }
-.bg-gradient-purple { background: linear-gradient(90deg, #a855f7, #6366f1); border-radius: 10px; }
-.text-soft { color: #94a3b8; }
+.border-top-custom {
+    border-top: 1px solid var(--border-color);
+}
+
+.progress { 
+    height: 8px; border-radius: 10px; 
+    background: var(--border-color); 
+}
+
+.bg-gradient-purple { 
+    background: linear-gradient(90deg, #a855f7, #6366f1); 
+    border-radius: 10px; 
+}
+
 .text-orange { color: #f59e0b; }
 .text-green { color: #10b981; }
 .text-blue { color: #3b82f6; }
