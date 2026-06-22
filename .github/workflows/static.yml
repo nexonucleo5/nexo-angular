@@ -1,0 +1,35 @@
+name: Deploy Angular to GitHub Pages
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Install dependencies
+      run: |
+        cd nexo
+        npm install
+
+    - name: Build Angular Project
+      run: |
+        cd nexo
+        npx ng build --configuration production --base-href /
+
+    - name: Upload Artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        # Aponta para a pasta onde o Angular gera o build (geralmente dist/[nome-do-projeto]/browser)
+        path: nexo/dist/nexo/browser
+
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
