@@ -1,0 +1,224 @@
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h1 class="brand-title">IN-RIA</h1>
+      <p class="brand-subtitle">Painel do Professor</p>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item">
+        <i class="bi bi-grid-1x2"></i> Dashboard
+      </a>
+      <a href="#" class="nav-item active">
+        <i class="bi bi-journal-check"></i> Diário de Classe
+      </a>
+      <a href="#" class="nav-item">
+        <i class="bi bi-file-earmark-text"></i> Avaliações
+      </a>
+      <a href="#" class="nav-item">
+        <i class="bi bi-bar-chart-line"></i> Notas e Engajamento
+      </a>
+      <a href="#" class="nav-item">
+        <i class="bi bi-chat-left-text"></i> Comunicação
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <p class="m-0">© 2026 IN-RIA · Versão 1.0</p>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    
+    <header class="topbar mb-4">
+      <div class="search-box-top">
+        <i class="bi bi-search"></i>
+        <input type="text" placeholder="Buscar alunos, turmas, atividades...">
+      </div>
+      
+      <div class="user-profile-zone">
+        <div class="notification-icon">
+          <i class="bi bi-bell"></i>
+          <span class="notification-dot"></span>
+        </div>
+        <div class="profile-info">
+          <div class="profile-text">
+            <span class="profile-name">Prof. Ana Oliveira</span>
+            <span class="profile-role">Matemática e Física</span>
+          </div>
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" alt="Professora" class="profile-avatar">
+        </div>
+      </div>
+    </header>
+
+    <section class="dashboard-header mb-4 d-flex justify-content-between align-items-start">
+      <div>
+        <h1 class="page-title fw-bold">Diário de Classe e Frequência</h1>
+        <p class="text-soft m-0">Registro oficial de aulas e acompanhamento acadêmico</p>
+      </div>
+      <button class="btn btn-export">
+        <i class="bi bi-download"></i> Exportar Diário
+      </button>
+    </section>
+
+    <div class="main-card p-4 mb-4">
+      <h5 class="text-main fw-bold mb-3"><i class="bi bi-funnel"></i> Filtros</h5>
+      <div class="row g-3">
+        <div class="col-12 col-md-3">
+          <label class="text-soft small mb-1">Turma</label>
+          <select class="form-select-custom" [(ngModel)]="turmaSelecionada" (change)="atualizarDados()">
+            <option *ngFor="let t of turmas" [value]="t">{{t}}</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="text-soft small mb-1">Disciplina</label>
+          <select class="form-select-custom" [(ngModel)]="disciplinaSelecionada">
+            <option *ngFor="let d of disciplinas" [value]="d">{{d}}</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="text-soft small mb-1">Data da Aula</label>
+          <input type="date" class="form-control-custom" [(ngModel)]="dataAula">
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="text-soft small mb-1">Horário</label>
+          <input type="time" class="form-control-custom" [(ngModel)]="horarioAula">
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3" *ngFor="let stat of stats">
+        <div class="metric-card p-3">
+          <p class="text-soft small mb-1">{{stat.label}}</p>
+          <h2 class="fw-bold mb-0 text-main">{{stat.value}}</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      
+      <div class="col-12 col-xl-7">
+        <div class="main-card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <h4 class="text-main fw-bold m-0 d-flex align-items-center gap-2">
+              <i class="bi bi-check2-circle text-success"></i> Registro de Frequência
+            </h4>
+            <div class="d-flex gap-2">
+              <button class="btn btn-light-custom" (click)="marcarTodosPresentes()">
+                Marcar Todos Presentes
+              </button>
+              <button class="btn btn-gradient" (click)="salvarFrequencia()">
+                <i class="bi bi-hdd"></i> Salvar Frequência
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th align="left" style="width: 35%;">Aluno</th>
+                  <th align="center" style="width: 20%;">Matrícula</th>
+                  <th align="center" style="width: 20%;">Presença</th>
+                  <th align="center" style="width: 15%;">Freq. Geral</th>
+                  <th align="center" style="width: 10%;">Obs.</th>
+                </tr>
+              </thead>
+            </table>
+            
+            <div class="table-body-scroll">
+              <table class="table-custom">
+                <tbody>
+                  <tr *ngFor="let aluno of alunos">
+                    <td align="left" style="width: 35%;">
+                      <div class="d-flex align-items-center gap-3">
+                        <img [src]="aluno.foto" class="avatar-student" alt="Aluno">
+                        <span class="text-main fw-semibold">{{aluno.nome}}</span>
+                      </div>
+                    </td>
+                    <td align="center" style="width: 20%;" class="text-soft">{{aluno.matricula}}</td>
+                    <td align="center" style="width: 20%;">
+                      <div class="d-flex justify-content-center gap-2">
+                        <button class="btn-presence correct" [class.active]="aluno.presente === true" (click)="aluno.presente = true; calcularMetricas()">
+                          <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button class="btn-presence wrong" [class.active]="aluno.presente === false" (click)="aluno.presente = false; calcularMetricas()">
+                          <i class="bi bi-x-lg"></i>
+                        </button>
+                      </div>
+                    </td>
+                    <td align="center" style="width: 15%;">
+                      <span class="fw-bold" [ngClass]="aluno.freqGeral >= 90 ? 'text-success' : 'text-warning'">
+                        {{aluno.freqGeral}}%
+                      </span>
+                    </td>
+                    <td align="center" style="width: 10%;">
+                      <button class="btn-icon-obs">
+                        <i class="bi bi-pencil-square"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-xl-5">
+        <div class="row g-4">
+          
+          <div class="col-12">
+            <div class="main-card p-4">
+              <h4 class="text-main fw-bold mb-4 d-flex align-items-center gap-2">
+                <i class="bi bi-book text-success"></i> Conteúdo Ministrado Hoje
+              </h4>
+              
+              <div class="mb-3">
+                <label class="text-soft small mb-1">Título da Aula</label>
+                <input type="text" class="form-control-custom purple-focus" placeholder="Ex: Funções Exponenciais - Propriedades">
+              </div>
+              <div class="mb-3">
+                <label class="text-soft small mb-1">Descrição do Conteúdo</label>
+                <textarea class="form-control-custom text-area-custom" rows="3" placeholder="Descreva o conteúdo abordado na aula de hoje..."></textarea>
+              </div>
+              <div class="mb-4">
+                <label class="text-soft small mb-1">Observações da Aula</label>
+                <textarea class="form-control-custom text-area-custom" rows="2" placeholder="Observações gerais, dificuldades identificadas..."></textarea>
+              </div>
+
+              <button class="btn btn-gradient w-100">
+                <i class="bi bi-file-earmark-plus"></i> Registrar Conteúdo
+              </button>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="main-card p-4">
+              <h4 class="text-main fw-bold mb-3 d-flex align-items-center gap-2">
+                <i class="bi bi-calendar3 text-primary"></i> Histórico de Aulas
+              </h4>
+              
+              <div class="history-list">
+                <div class="history-item p-3 mb-2" *ngFor="let aula of historico">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="text-main fw-bold m-0 class-title">{{aula.titulo}}</h6>
+                    <i class="bi bi-pencil text-soft edit-icon-small"></i>
+                  </div>
+                  <div class="d-flex gap-3 text-soft small flex-wrap">
+                    <span><i class="bi bi-clock"></i> {{aula.data}}</span>
+                    <span class="text-success"><i class="bi bi-check-circle"></i> {{aula.presentes}} presentes</span>
+                    <span class="text-danger"><i class="bi bi-x-circle"></i> {{aula.ausentes}} ausentes</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

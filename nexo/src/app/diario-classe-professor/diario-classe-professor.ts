@@ -1,0 +1,78 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-diario-classe-professor',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './diario-classe-professor.html',   
+  styleUrl: './diario-classe-professor.scss'       
+})
+export class DiarioClasseProfessorComponent implements OnInit {
+  // Modelos de Filtro
+  buscaDeTermos: string = '';
+  turmaSelecionada: string = '2º Ano A';
+  disciplinaSelecionada: string = 'Matemática';
+  dataAula: string = '2026-06-03';
+  horarioAula: string = '14:00';
+
+  // Coleções de Opções
+  turmas = ['1º Ano A', '1º Ano B', '2º Ano A', '2º Ano B', '3º Ano A'];
+  disciplinas = ['Matemática', 'Física', 'Geometria'];
+
+  // Estado Estatístico Dinâmico (Métricas)
+  stats = [
+    { label: 'Total de Alunos', value: '0' },
+    { label: 'Presentes Hoje', value: '0' },
+    { label: 'Ausentes Hoje', value: '0' },
+    { label: 'Taxa de Frequência', value: '0%' }
+  ];
+
+  // Base de dados mockada de alunos
+  alunos = [
+    { nome: 'Ana Carolina Silva', matricula: '2024001', presente: true, freqGeral: 95, foto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100' },
+    { nome: 'Bruno Henrique Costa', matricula: '2024002', presente: true, freqGeral: 92, foto: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100' },
+    { nome: 'Camila Rodrigues', matricula: '2024003', presente: false, freqGeral: 88, foto: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100' },
+    { nome: 'Daniel Santos', matricula: '2024004', presente: true, freqGeral: 90, foto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100' },
+    { nome: 'Eduarda Ferreira', matricula: '2024005', presente: true, freqGeral: 97, foto: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100' }
+  ];
+
+  // Histórico de Aulas ministradas
+  historico = [
+    { titulo: 'Funções Quadráticas - Gráficos e Propriedades', data: '30 Mai 2026', presentes: 28, ausentes: 4 },
+    { titulo: 'Equações do Segundo Grau - Fórmula de Bhaskara', data: '27 Mai 2026', presentes: 30, ausentes: 2 },
+    { titulo: 'Sistemas Lineares - Método de Substituição', data: '23 Mai 2026', presentes: 29, ausentes: 3 }
+  ];
+
+  ngOnInit(): void {
+    this.calcularMetricas();
+  }
+
+  // Ação do Botão Branco: Marcar Todos Presentes
+  marcarTodosPresentes(): void {
+    this.alunos.forEach(aluno => aluno.presente = true);
+    this.calcularMetricas();
+  }
+
+  // Recalcula dinamicamente os valores de tela nos cards informativos
+  calcularMetricas(): void {
+    const total = this.alunos.length;
+    const presentes = this.alunos.filter(a => a.presente === true).length;
+    const ausentes = total - presentes;
+    const taxa = total > 0 ? Math.round((presentes / total) * 100) : 0;
+
+    this.stats[0].value = total.toString();
+    this.stats[1].value = presentes.toString();
+    this.stats[2].value = ausentes.toString();
+    this.stats[3].value = `${taxa}%`;
+  }
+
+  salvarFrequencia(): void {
+    alert('Frequência registrada e guardada no banco de dados com sucesso!');
+  }
+
+  atualizarDados(): void {
+    console.log(`Buscando diário de classe da turma: ${this.turmaSelecionada}`);
+  }
+}
