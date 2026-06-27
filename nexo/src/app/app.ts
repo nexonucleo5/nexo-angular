@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Cadastro } from './cadastro/cadastro';
@@ -10,8 +10,6 @@ import { Menu } from './menu/menu';
 import { MenuUsuario } from './menu-usuario/menu-usuario';
 import { MenuDiretor } from './menu-diretor/menu-diretor';
 import { AuthService } from './services/auth.service';
-
-import { UserService } from './services/user';
 import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
 import { GestaoEvasao } from './gestao-evasao/gestao-evasao';
 
@@ -36,9 +34,9 @@ import { GestaoEvasao } from './gestao-evasao/gestao-evasao';
   styleUrl: './app.scss'
 })
 export class App implements OnInit {
+  // Injeção moderna do Angular 17+
+  public authService = inject(AuthService);
   temaEscuro: boolean = false;
-
-  constructor(public authService: AuthService) {}
 
   ngOnInit() {
     this.aplicarTema();
