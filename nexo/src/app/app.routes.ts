@@ -30,5 +30,5 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'menu-diretor', component: MenuDiretor },
   { path: 'diretor-dashboards', component: DashboardDiretor },
-  { path: 'monitoramento', component: MonitoramentoDocente } 
+  { path: 'monitoramento', component: MonitoramentoDocente },
 ];
