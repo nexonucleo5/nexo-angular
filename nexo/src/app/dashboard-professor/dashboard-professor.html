@@ -1,0 +1,278 @@
+<div class="container-fluid dashboard-container p-4 p-md-5">
+        <header class="mb-5">
+            <h1 class="fw-bold text-white mb-1 fs-2">Dashboard Docente</h1>
+            <p class="text-muted mb-0">Visão geral operacional das suas turmas</p>
+        </header>
+
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-metric p-4 h-100 border-0">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="icon-wrapper bg-green-soft text-green">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <span class="badge badge-trend bg-green-soft text-green">
+                            <i class="bi bi-arrow-up-short"></i> +8
+                        </span>
+                    </div>
+                    <span class="text-muted small fw-medium text-uppercase tracking-wider">Alunos Ativos</span>
+                    <h2 class="display-6 fw-bold text-white mt-1 mb-0">156</h2>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-metric p-4 h-100 border-0">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="icon-wrapper bg-blue-soft text-blue">
+                            <i class="bi bi-person-check-fill"></i>
+                        </div>
+                        <span class="badge badge-trend bg-green-soft text-green">
+                            <i class="bi bi-arrow-up-short"></i> 17%
+                        </span>
+                    </div>
+                    <span class="text-muted small fw-medium text-uppercase tracking-wider">Alunos Online Agora</span>
+                    <h2 class="display-6 fw-bold text-white mt-1 mb-0">42</h2>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-metric p-4 h-100 border-0">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="icon-wrapper bg-orange-soft text-orange">
+                            <i class="bi bi-clipboard-check-fill"></i>
+                        </div>
+                        <span class="badge badge-trend bg-red-soft text-red">
+                            <i class="bi bi-arrow-down-short"></i> -5
+                        </span>
+                    </div>
+                    <span class="text-muted small fw-medium text-uppercase tracking-wider">Atividades Pendentes</span>
+                    <h2 class="display-6 fw-bold text-white mt-1 mb-0">23</h2>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-metric p-4 h-100 border-0">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="icon-wrapper bg-purple-soft text-purple">
+                            <i class="bi bi-chat-square-text-fill"></i>
+                        </div>
+                        <span class="badge badge-trend bg-green-soft text-green">
+                            <i class="bi bi-arrow-up-short"></i> +3
+                        </span>
+                    </div>
+                    <span class="text-muted small fw-medium text-uppercase tracking-wider">Mensagens Pendentes</span>
+                    <h2 class="display-6 fw-bold text-white mt-1 mb-0">12</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-container p-4 border-0">
+            <h3 class="fw-bold text-white mb-4 fs-5">Atalhos Rápidos</h3>
+            <div class="row g-3">
+                <div class="col-12 col-sm-6 col-md-3">
+                    <button class="btn btn-shortcut btn-green w-100 py-3">
+                        <i class="bi bi-person-plus d-block mb-2 fs-4"></i>
+                        Lançar Frequência
+                    </button>
+                </div>
+                <div class="col-12 col-sm-6 col-md-3">
+                    <button class="btn btn-shortcut btn-blue w-100 py-3">
+                        <i class="bi bi-file-earmark-check d-block mb-2 fs-4"></i>
+                        Criar Avaliação
+                    </button>
+                </div>
+                <div class="col-12 col-sm-6 col-md-3">
+                    <button class="btn btn-shortcut btn-orange w-100 py-3">
+                        <i class="bi bi-book d-block mb-2 fs-4"></i>
+                        Lançar Notas
+                    </button>
+                </div>
+                <div class="col-12 col-sm-6 col-md-3">
+                    <button class="btn btn-shortcut btn-purple w-100 py-3">
+                        <i class="bi bi-chat-left d-block mb-2 fs-4"></i>
+                        Ver Mensagens
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-2">
+            <!-- Gráfico de Desempenho por Turma -->
+            <div class="col-12 col-lg-8">
+                <div class="card card-container p-4 border-0 h-100">
+                    <h3 class="fw-bold text-white mb-4 fs-5">Desempenho por Turma</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="chartDesempenho"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Próximas Avaliações -->
+            <div class="col-12 col-lg-4">
+                <div class="card card-container p-4 border-0 h-100">
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <i class="bi bi-calendar-check text-green fs-4"></i>
+                        <h3 class="fw-bold text-white mb-0 fs-5">Próximas Avaliações</h3>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <!-- Avaliação 1 -->
+                        <div class="card card-inner-item p-3 border-0">
+                            <h4 class="text-white fw-bold fs-6 mb-1">Prova Bimestral - Matemática</h4>
+                            <span class="text-muted small d-block mb-3">2º Ano A</span>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small d-flex align-items-center gap-1">
+                                    <i class="bi bi-clock"></i> 15 Jun às 14:00
+                                </span>
+                                <span class="text-green small fw-semibold">32 alunos</span>
+                            </div>
+                        </div>
+
+                        <!-- Avaliação 2 -->
+                        <div class="card card-inner-item p-3 border-0">
+                            <h4 class="text-white fw-bold fs-6 mb-1">Trabalho em Grupo - Física</h4>
+                            <span class="text-muted small d-block mb-3">3º Ano B</span>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small d-flex align-items-center gap-1">
+                                    <i class="bi bi-clock"></i> 18 Jun às 10:00
+                                </span>
+                                <span class="text-green small fw-semibold">28 alunos</span>
+                            </div>
+                        </div>
+
+                        <!-- Avaliação 3 -->
+                        <div class="card card-inner-item p-3 border-0">
+                            <h4 class="text-white fw-bold fs-6 mb-1">Quiz Online - Geometria</h4>
+                            <span class="text-muted small d-block mb-3">1º Ano C</span>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small d-flex align-items-center gap-1">
+                                    <i class="bi bi-clock"></i> 20 Jun às 16:00
+                                </span>
+                                <span class="text-green small fw-semibold">35 alunos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+
+    </div>
+
+    <div class="row g-4 mt-2 mb-5">
+            <div class="col-12 col-lg-6">
+                <div class="card card-container p-4 border-0 h-100">
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <i class="bi bi-exclamation-circle text-warning fs-5"></i>
+                        <h3 class="fw-bold text-white mb-0 fs-5">Atividades Pendentes de Correção</h3>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <div class="card card-inner-item p-3 border-0">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h4 class="text-white fw-bold fs-6 mb-0">Correção de Provas</h4>
+                                <span class="badge bg-danger-soft text-danger-custom rounded-pill px-2.5 py-1 text-lowercase fw-semibold font-xs">alta</span>
+                            </div>
+                            <span class="text-muted small d-block mb-3">Prova de Matemática - 2º Ano A</span>
+                            <div class="d-flex justify-content-between align-items-center text-muted small">
+                                <span>32 itens</span>
+                                <span>Prazo: Amanhã</span>
+                            </div>
+                        </div>
+
+                        <div class="card card-inner-item p-3 border-0">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h4 class="text-white fw-bold fs-6 mb-0">Lançamento de Notas</h4>
+                                <span class="badge bg-warning-soft text-warning rounded-pill px-2.5 py-1 text-lowercase fw-semibold font-xs">média</span>
+                            </div>
+                            <span class="text-muted small d-block mb-3">Trabalho de Física - 3º Ano B</span>
+                            <div class="d-flex justify-content-between align-items-center text-muted small">
+                                <span>28 itens</span>
+                                <span>Prazo: 2 dias</span>
+                            </div>
+                        </div>
+
+                        <div class="card card-inner-item p-3 border-0">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h4 class="text-white fw-bold fs-6 mb-0">Feedback Pendente</h4>
+                                <span class="badge bg-blue-soft text-blue rounded-pill px-2.5 py-1 text-lowercase fw-semibold font-xs">baixa</span>
+                            </div>
+                            <span class="text-muted small d-block mb-3">Redações - 1º Ano C</span>
+                            <div class="d-flex justify-content-between align-items-center text-muted small">
+                                <span>35 itens</span>
+                                <span>Prazo: 5 dias</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                <div class="card card-container p-4 border-0 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold text-white mb-0 fs-5">Alunos em Risco</h3>
+                        <a href="#" class="text-green text-decoration-none small fw-semibold link-hover">Ver todos</a>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <div class="card card-inner-item p-3 border-0">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&auto=format&fit=crop&q=80" alt="Lucas Ferreira" class="avatar-student rounded-circle">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-baseline">
+                                        <h4 class="text-white fw-bold fs-6 mb-0">Lucas Ferreira</h4>
+                                        <span class="text-danger-custom fw-bold small">Nota: 5.2</span>
+                                    </div>
+                                    <span class="text-muted small d-block mb-2">2º Ano A</span>
+                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                        <div class="progress flex-grow-1 custom-progress">
+                                            <div class="progress-bar bg-purple" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <span class="text-muted font-xs">65%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card card-inner-item p-3 border-0">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" alt="Mariana Costa" class="avatar-student rounded-circle">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-baseline">
+                                        <h4 class="text-white fw-bold fs-6 mb-0">Mariana Costa</h4>
+                                        <span class="text-danger-custom fw-bold small">Nota: 6.1</span>
+                                    </div>
+                                    <span class="text-muted small d-block mb-2">3º Ano B</span>
+                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                        <div class="progress flex-grow-1 custom-progress">
+                                            <div class="progress-bar bg-purple" role="progressbar" style="width: 72%" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <span class="text-muted font-xs">72%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card card-inner-item p-3 border-0">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" alt="Pedro Souza" class="avatar-student rounded-circle">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-baseline">
+                                        <h4 class="text-white fw-bold fs-6 mb-0">Pedro Souza</h4>
+                                        <span class="text-danger-custom fw-bold small">Nota: 4.8</span>
+                                    </div>
+                                    <span class="text-muted small d-block mb-2">1º Ano C</span>
+                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                        <div class="progress flex-grow-1 custom-progress">
+                                            <div class="progress-bar bg-purple" role="progressbar" style="width: 58%" aria-valuenow="58" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <span class="text-muted font-xs">58%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>

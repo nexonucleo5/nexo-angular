@@ -13,6 +13,7 @@ import { RelatoriosDiretor } from './relatorios-diretor/relatorios-diretor';
 import { DashboardDiretor } from './diretor-dashboard/diretor-dashboard';
 import { GestaoEvasao } from './gestao-evasao/gestao-evasao'; 
 import { MonitoramentoDocente } from './monitoramento-docente/monitoramento-docente';
+import { DashboardProfessor } from './dashboard-professor/dashboard-professor';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -30,5 +31,6 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'menu-diretor', component: MenuDiretor },
   { path: 'diretor-dashboards', component: DashboardDiretor },
-  { path: 'monitoramento', component: MonitoramentoDocente } 
+  { path: 'monitoramento', component: MonitoramentoDocente },
+  { path: 'dashboard-professor', component: DashboardProfessor }
 ];

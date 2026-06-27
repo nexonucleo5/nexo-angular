@@ -1,0 +1,186 @@
+// --- VARIÁVEIS DE CORES ---
+$bg-main: #0d1424;
+$bg-card: #182235;
+
+$color-green: #00b67a;
+$color-blue: #1e70ff;
+$color-orange: #e59e00;
+$color-purple: #a832ff;
+$color-red: #ff3b3b;
+
+$text-muted: #6c7a9c;
+
+// --- CONFIGURAÇÕES GERAIS ---
+body {
+    background-color: $bg-main;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+.text-muted {
+    color: $text-muted !important;
+}
+
+// --- CONTAINER DO DASHBOARD ---
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+// --- CONFIGURAÇÃO DOS CARDS ---
+.card-metric, .card-container {
+    background-color: $bg-card;
+    border-radius: 16px;
+}
+
+// Customização de texto reduzido para as labels
+.tracking-wider {
+    letter-spacing: 0.5px;
+}
+
+// --- WRAPPERS DE ÍCONES (MÉTRICAS) ---
+.icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+// --- BADGES DE TENDÊNCIA (TRENDS) ---
+.badge-trend {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+// Cores de Opacidade Suave para as Cores Principais
+.bg-green-soft  { background-color: rgba($color-green, 0.15); }
+.bg-blue-soft   { background-color: rgba($color-blue, 0.15); }
+.bg-orange-soft { background-color: rgba($color-orange, 0.15); }
+.bg-purple-soft { background-color: rgba($color-purple, 0.15); }
+.bg-red-soft    { background-color: rgba($color-red, 0.15); }
+
+.text-green  { color: $color-green; }
+.text-blue   { color: $color-blue; }
+.text-orange { color: $color-orange; }
+.text-purple { color: $color-purple; }
+.text-red    { color: $color-red; }
+
+// --- BOTÕES DE ATALHOS RÁPIDOS ---
+.btn-shortcut {
+    border: none;
+    border-radius: 12px;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        transform: translateY(-3px);
+        filter: brightness(1.1);
+        color: #ffffff;
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
+
+
+    &.btn-green  { background-color: $color-green; }
+    &.btn-blue   { background-color: $color-blue; }
+    &.btn-orange { background-color: $color-orange; }
+    &.btn-purple { background-color: $color-purple; }
+}
+
+// --- RESPONSIVIDADE ADICIONAL ---
+@media (max-width: 576px) {
+    .btn-shortcut {
+        flex-direction: row;
+        gap: 12px;
+        padding: 16px !important;
+        
+        i {
+            margin-bottom: 0 !important;
+            font-size: 1.25rem !important;
+        }
+    }
+}
+
+
+// Container interno para os cards de avaliação da lista lateral
+.card-inner-item {
+    background-color: #0e1726; // Tom ligeiramente mais escuro para contraste
+    border-radius: 12px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: rgba(#0e1726, 0.7);
+    }
+}
+
+// Wrapper do gráfico para controlar a altura responsiva
+.chart-wrapper {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+// Ajustes finos de espaçamento no mobile
+@media (max-width: 991.98px) {
+    .chart-wrapper {
+        height: 250px;
+    }
+}
+
+// Ajuste para vermelho do tema (menos agressivo, combinando com a imagem)
+$color-danger-custom: #ff4a5a;
+.text-danger-custom { color: $color-danger-custom; }
+.bg-danger-soft { background-color: rgba($color-danger-custom, 0.15); }
+
+// Variantes auxiliares de tamanhos
+.font-xs {
+    font-size: 0.75rem !important;
+}
+
+// Configuração dos Avatares
+.avatar-student {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border: 1.5px solid rgba(#ffffff, 0.1);
+}
+
+// Customização da Barra de Progresso Bootstrap
+.custom-progress {
+    height: 6px !important;
+    background-color: #242f47 !important; // Fundo da trilha cinza-escura
+    border-radius: 10px;
+    overflow: hidden;
+
+    .progress-bar {
+        border-radius: 10px;
+        &.bg-purple {
+            background-color: $color-purple !important;
+        }
+    }
+}
+
+// Link "Ver todos"
+.link-hover {
+    transition: opacity 0.2s ease;
+    &:hover {
+        opacity: 0.8;
+    }
+}
