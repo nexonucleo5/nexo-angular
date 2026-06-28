@@ -1,0 +1,171 @@
+<div class="page-container">
+  <header class="dashboard-header mb-4">
+    <h1 class="page-title fw-bold">Gestão de Avaliações e Correções</h1>
+    <p class="text-soft m-0">Criação, configuration e correção de avaliações pedagógicas</p>
+  </header>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-3" *ngFor="let stat of stats">
+      <div class="metric-card">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <p class="text-soft small mb-1">{{stat.label}}</p>
+            <h2 class="fw-bold mb-0 text-main">{{stat.value}}</h2>
+          </div>
+          <div class="icon-square" [ngClass]="stat.color">
+            <i [class]="'bi ' + stat.icon"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs-container mb-4">
+    <button class="tab-btn" [class.active]="abaAtiva === 'ativas'" (click)="setAba('ativas')">Avaliações Ativas</button>
+    <button class="tab-btn" [class.active]="abaAtiva === 'correcao'" (click)="setAba('correcao')">Fila de Correção</button>
+    <button class="tab-btn" [class.active]="abaAtiva === 'questoes'" (click)="setAba('questoes')">Banco de Questões</button>
+    <button class="tab-btn" [class.active]="abaAtiva === 'criar'" (click)="setAba('criar')">Criar Avaliação</button>
+  </div>
+
+  <div *ngIf="abaAtiva === 'ativas'">
+    <div class="main-card p-3 mb-4">
+      <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input type="text" class="form-control-custom" [(ngModel)]="buscaTermo" placeholder="Buscar avaliações...">
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-12" *ngFor="let avaliacao of avaliacoesFiltradas">
+        <div class="main-card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <span class="status-badge me-2" [ngClass]="getClasseStatus(avaliacao.status)">{{avaliacao.status}}</span>
+              <h3 class="h5 text-main fw-bold d-inline-block align-middle mb-0">{{avaliacao.titulo}}</h3>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn-action"><i class="bi bi-eye"></i></button>
+              <button class="btn-action btn-delete"><i class="bi bi-trash"></i></button>
+            </div>
+          </div>
+          <p class="text-soft small mb-3">{{avaliacao.tipo}} • {{avaliacao.turma}} • {{avaliacao.data}}</p>
+          <div class="d-flex align-items-center gap-3">
+            <span class="text-soft small mb-0 text-nowrap">Progresso de Correção</span>
+            <div class="progress w-100">
+              <div class="progress-bar" [style.width]="(avaliacao.corrigidas / avaliacao.total * 100) + '%'"></div>
+            </div>
+            <span class="text-main small fw-bold text-nowrap">{{avaliacao.corrigidas}}/{{avaliacao.total}} ({{ (avaliacao.corrigidas / avaliacao.total * 100) | number:'1.0-0' }}%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="abaAtiva === 'correcao'">
+    <div class="main-card p-4 table-responsive-custom">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Avaliação</th>
+            <th>Turma</th>
+            <th>Data Entrega</th>
+            <th>Prioridade</th>
+            <th class="text-end">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of filaCorrecao">
+            <td class="text-main fw-bold">{{item.aluno}}</td>
+            <td class="text-soft">{{item.avaliacao}}</td>
+            <td class="text-soft">{{item.turma}}</td>
+            <td class="text-soft">{{item.dataEntrega}}</td>
+            <td><span class="priority-tag" [ngClass]="item.prioridade">{{item.prioridade}}</span></td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-gradient py-1 px-3"><i class="bi bi-pencil-square me-1"></i> Corrigir</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div *ngIf="abaAtiva === 'questoes'">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="h4 text-main fw-bold mb-0">Banco de Questões</h2>
+      <button class="btn btn-gradient"><i class="bi bi-plus-lg me-2"></i> Nova Questão</button>
+    </div>
+    <div class="row g-3">
+      <div class="col-12" *ngFor="let q of bancoQuestoes">
+        <div class="main-card p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <h4 class="h6 text-main fw-bold mb-0">{{q.enunciado}}</h4>
+            <div class="d-flex gap-2">
+              <button class="btn-action"><i class="bi bi-pencil"></i></button>
+              <button class="btn-action btn-delete"><i class="bi bi-trash"></i></button>
+            </div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap mb-2">
+            <span class="badge-tag type">{{q.tipo}}</span>
+            <span class="badge-tag" [ngClass]="q.dificuldade.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')">{{q.dificuldade}}</span>
+            <span class="badge-tag context" *ngFor="let tag of q.tags">{{tag}}</span>
+          </div>
+          <small class="text-soft">Usada {{q.utilizada}} vezes</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="abaAtiva === 'criar'">
+    <div class="main-card p-4">
+      <h2 class="h4 text-main fw-bold mb-4">Criar Nova Avaliação</h2>
+      <form (submit)="$event.preventDefault()">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="text-soft small mb-1 d-block">Título da Avaliação</label>
+            <input type="text" class="form-control-custom placeholder-padded" placeholder="Ex: Prova Bimestral - Funções Exponenciais">
+          </div>
+          <div class="col-md-6">
+            <label class="text-soft small mb-1 d-block">Tipo de Avaliação</label>
+            <select class="form-select-custom">
+              <option value="">Selecione o tipo</option>
+              <option>Prova</option>
+              <option>Trabalho</option>
+              <option>Quiz</option>
+              <option>Exercício</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="text-soft small mb-1 d-block">Turma</label>
+            <select class="form-select-custom">
+              <option value="">Selecione a turma</option>
+              <option>2º Ano A</option>
+              <option>3º Ano B</option>
+              <option>1º Ano C</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="text-soft small mb-1 d-block">Nota Máxima</label>
+            <input type="number" class="form-control-custom placeholder-padded" value="10.0">
+          </div>
+          <div class="col-md-3">
+            <label class="text-soft small mb-1 d-block">Peso na Média</label>
+            <input type="number" class="form-control-custom placeholder-padded" value="3">
+          </div>
+          <div class="col-md-6">
+            <label class="text-soft small mb-1 d-block">Data de Aplicação</label>
+            <input type="date" class="form-control-custom placeholder-padded">
+          </div>
+          <div class="col-12">
+            <label class="text-soft small mb-1 d-block">Instruções para os Alunos</label>
+            <textarea class="form-control-custom placeholder-padded" rows="3" placeholder="Descreva as instruções e critérios de avaliação..."></textarea>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="button" class="btn btn-outline-main">Salvar como Rascunho</button>
+          <button type="submit" class="btn btn-gradient">Criar e Adicionar Questões</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
