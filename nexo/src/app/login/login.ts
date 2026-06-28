@@ -1,36 +1,33 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 export class Login {
-  // Injeção de dependências
-  private fb = inject(FormBuilder);
-  private router = inject(Router);
-  private authService = inject(AuthService); // Injetando o novo serviço
+  private fb          = inject(FormBuilder);
+  private router      = inject(Router);
+  private authService = inject(AuthService);
 
-  // Estados reativos da tela
   public loginForm: FormGroup;
-  public mostrarSenha = false;
-  public mensagemErro = '';
+  public mostrarSenha   = false;
+  public mensagemErro   = '';
   public mensagemSucesso = '';
 
   constructor() {
-    // Inicializa a estrutura do formulário com validações obrigatórias
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required]],
-      password: ['', [Validators.required]]
+      username: ['', [Validators.required, Validators.minLength(3)]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
-  /** Ação disparada ao submeter o formulário */
   public realizarLogin(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -40,17 +37,13 @@ export class Login {
 
     this.mensagemErro = '';
     const { username, password } = this.loginForm.value;
+    const sucesso = this.authService.login(username, password);
 
-    this.authService.login(username); // Chama o método de login do serviço
-
-    // Prontinho para integrar com o seu serviço de API / Spring Security futuramente
-    console.log('Enviando dados para o servidor:', { username, password });
-
-    this.mensagemSucesso = '✅ Login realizado com sucesso! Redirecionando...';
-
-    // Redireciona para a rota '/dashboard'
-    setTimeout(() => {
-      this.router.navigate(['/dashboards']);
-    }, 120);
+    if (sucesso) {
+      this.mensagemSucesso = '✅ Login realizado com sucesso! Redirecionando...';
+      setTimeout(() => this.router.navigate(['/dashboards']), 120);
+    } else {
+      this.mensagemErro = '❌ Credenciais inválidas. Tente novamente.';
+    }
   }
 }

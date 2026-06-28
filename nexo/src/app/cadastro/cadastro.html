@@ -1,38 +1,53 @@
 <div class="cadastro-container m-3">
-    <form class="cadastro-form" id="formCadastro" novalidate>
+    <form class="cadastro-form" [formGroup]="cadastroForm" (ngSubmit)="finalizarCadastro()" novalidate>
 
         <h2 class="cadastro-title">Cadastrar Aluno</h2>
         <p class="cadastro-subtitle">Preencha os dados para finalizar o cadastro</p>
 
-       
-        <div id="alertSucesso" class="alert alert-success"></div>
-        <div id="alertErro" class="alert alert-danger"></div>
+        <div *ngIf="mensagemSucesso" class="alert alert-success">{{ mensagemSucesso }}</div>
+        <div *ngIf="mensagemErro" class="alert alert-danger">{{ mensagemErro }}</div>
+
+        <!-- Banner de acesso gerado -->
+        <div *ngIf="acessoGerado" class="alert alert-info d-flex align-items-center gap-3 mb-3">
+            <i class="bi bi-key-fill fs-4"></i>
+            <div>
+                <strong>Acesso gerado com sucesso!</strong><br>
+                <small>
+                    Login: <strong>{{ emailGerado }}</strong>
+                    &nbsp;|&nbsp;
+                    Senha provisória: <strong>{{ senhaGerada }}</strong>
+                </small>
+            </div>
+        </div>
 
         <fieldset class="border p-3 rounded">
             <div class="row">
 
-                
+                <!-- ── Coluna esquerda ──────────────────────────── -->
                 <div class="col-md-6 coluna-esquerda">
 
                     <div class="mb-3">
                         <label class="form-label" for="nome">Nome:</label>
-                        <input type="text" id="nome" name="nome" class="form-control"
+                        <input type="text" id="nome" formControlName="nome" class="form-control"
+                            [class.is-invalid]="f['nome'].invalid && f['nome'].touched"
                             placeholder="Digite o nome do aluno">
-                        <div class="invalid-feedback" id="erroNome"></div>
+                        <div class="invalid-feedback">Nome obrigatório (mínimo 3 caracteres).</div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label" for="cpf">CPF:</label>
-                        <input type="text" id="cpf" name="cpf" class="form-control" placeholder="000.000.000-00"
-                            maxlength="14">
-                        <div class="invalid-feedback" id="erroCpf"></div>
+                        <input type="text" id="cpf" formControlName="cpf" class="form-control"
+                            [class.is-invalid]="f['cpf'].invalid && f['cpf'].touched" placeholder="000.000.000-00"
+                            maxlength="14" (input)="aplicarMascaraCpf($event, 'cpf')">
+                        <div class="invalid-feedback">CPF inválido.</div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <label class="form-label" for="sexo">Sexo:</label>
-                            <select id="sexo" name="sexo" class="form-select">
-                                <option value="" disabled selected>Selecione</option>
+                            <select id="sexo" formControlName="sexo" class="form-select"
+                                [class.is-invalid]="f['sexo'].invalid && f['sexo'].touched">
+                                <option value="" disabled>Selecione</option>
                                 <option value="M">Masculino</option>
                                 <option value="F">Feminino</option>
                                 <option value="N">Não informar</option>
@@ -41,66 +56,70 @@
 
                         <div class="col-4">
                             <label class="form-label" for="telefone">Telefone:</label>
-                            <input type="text" id="telefone" name="telefone" class="form-control"
-                                placeholder="(DDD) 00000-0000" maxlength="15">
+                            <input type="text" id="telefone" formControlName="telefone" class="form-control"
+                                placeholder="(DDD) 00000-0000" maxlength="15"
+                                (input)="aplicarMascaraTelefone($event, 'telefone')">
                         </div>
 
                         <div class="col-4">
                             <label class="form-label" for="dataNascimento">Data de Nascimento:</label>
-                            <input type="date" id="dataNascimento" name="dataNascimento" class="form-control">
-                            <div class="invalid-feedback" id="erroData"></div>
+                            <input type="date" id="dataNascimento" formControlName="dataNascimento" class="form-control"
+                                [class.is-invalid]="f['dataNascimento'].invalid && f['dataNascimento'].touched">
+                            <div class="invalid-feedback">Data obrigatória.</div>
                         </div>
                     </div>
 
-                   
-                    <input type="hidden" id="emailGerado" name="email">
-                    <input type="hidden" id="senhaGerada" name="password">
-
-                    <button type="button" id="btnGerarAcesso" class="btn btn-cadastro w-100 mt-3">
-                        Gerar Acesso
+                    <button type="button" class="btn btn-cadastro w-100 mt-3" (click)="gerarAcesso()">
+                        <i class="bi bi-key me-2"></i>Gerar Acesso
                     </button>
 
                 </div>
 
-              
+                <!-- ── Coluna direita ──────────────────────────── -->
                 <div class="col-md-6 coluna-direita">
 
                     <div class="mb-3">
                         <label class="form-label" for="emailResponsavel">E-mail do responsável:</label>
-                        <input type="email" id="emailResponsavel" name="emailResponsavel" class="form-control"
+                        <input type="email" id="emailResponsavel" formControlName="emailResponsavel"
+                            class="form-control"
+                            [class.is-invalid]="f['emailResponsavel'].invalid && f['emailResponsavel'].touched"
                             placeholder="exemplo@gmail.com">
-                        <div class="invalid-feedback" id="erroEmailResponsavel"></div>
+                        <div class="invalid-feedback">E-mail inválido.</div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-6">
                             <label class="form-label" for="cpfResponsavel">CPF Responsável:</label>
-                            <input type="text" id="cpfResponsavel" name="cpfResponsavel" class="form-control"
-                                placeholder="000.000.000-00" maxlength="14">
+                            <input type="text" id="cpfResponsavel" formControlName="cpfResponsavel" class="form-control"
+                                [class.is-invalid]="f['cpfResponsavel'].invalid && f['cpfResponsavel'].touched"
+                                placeholder="000.000.000-00" maxlength="14"
+                                (input)="aplicarMascaraCpf($event, 'cpfResponsavel')">
                         </div>
 
                         <div class="col-6">
                             <label class="form-label" for="telefoneResponsavel">Telefone Responsável:</label>
-                            <input type="text" id="telefoneResponsavel" name="telefoneResponsavel" class="form-control"
-                                placeholder="(DDD) 00000-0000" maxlength="15">
+                            <input type="text" id="telefoneResponsavel" formControlName="telefoneResponsavel"
+                                class="form-control" placeholder="(DDD) 00000-0000" maxlength="15"
+                                (input)="aplicarMascaraTelefone($event, 'telefoneResponsavel')">
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label" for="endereco">Endereço:</label>
-                        <input type="text" id="endereco" name="endereco" class="form-control"
+                        <input type="text" id="endereco" formControlName="endereco" class="form-control"
+                            [class.is-invalid]="f['endereco'].invalid && f['endereco'].touched"
                             placeholder="Digite o endereço">
-                        <div class="invalid-feedback" id="erroEndereco"></div>
+                        <div class="invalid-feedback">Endereço obrigatório.</div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label" for="complemento">Complemento:</label>
-                        <input type="text" id="complemento" name="complemento" class="form-control"
+                        <input type="text" id="complemento" formControlName="complemento" class="form-control"
                             placeholder="Apto, bloco, casa...">
                     </div>
 
-                    <button type="submit" id="btnFinalizar" class="btn btn-cadastro w-100 mt-3">
-                        Finalizar Cadastro
+                    <button type="submit" class="btn btn-cadastro w-100 mt-3">
+                        <i class="bi bi-check-circle me-2"></i>Finalizar Cadastro
                     </button>
 
                 </div>
