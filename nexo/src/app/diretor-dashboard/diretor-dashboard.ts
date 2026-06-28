@@ -93,7 +93,7 @@ export class DashboardDiretor {
 
   // Restante dos dados estruturais do Dashboard
   metrics = [
-    { label: 'Total de Alunos', value: '1,247', trend: '+5.2%', icon: 'bi-people-fill', color: 'blue' },
+    { label: 'Total de Alunos', value: '1.247', trend: '+5.2%', icon: 'bi-people-fill', color: 'blue' },
     { label: 'Taxa de Evasão', value: '3.8%', trend: '-1.2%', icon: 'bi-person-x-fill', color: 'red' },
     { label: 'Engajamento Médio', value: '87.5%', trend: '+3.1%', icon: 'bi-bullseye', color: 'green' },
     { label: 'Desempenho Geral', value: '8.2', trend: '+0.4', icon: 'bi-graph-up-arrow', color: 'purple' }

@@ -9,6 +9,7 @@ import { Materias } from './materias/materias';
 import { Menu } from './menu/menu';
 import { MenuUsuario } from './menu-usuario/menu-usuario';
 import { MenuDiretor } from './menu-diretor/menu-diretor';
+import { MenuProfessor } from './menu-professor/menu-professor';
 import { AuthService } from './services/auth.service';
 import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
 import { GestaoEvasao } from './gestao-evasao/gestao-evasao';
@@ -27,14 +28,14 @@ import { GestaoEvasao } from './gestao-evasao/gestao-evasao';
     Login,
     MenuUsuario,
     MenuDiretor,
+    MenuProfessor,
     MatriculasWrapper,
-    GestaoEvasao
+    GestaoEvasao,
   ],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
 })
 export class App implements OnInit {
-  // Injeção moderna do Angular 17+
   public authService = inject(AuthService);
   temaEscuro: boolean = false;
 
