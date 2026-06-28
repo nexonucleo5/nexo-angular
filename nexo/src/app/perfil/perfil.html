@@ -1,6 +1,7 @@
 <main class="main-content flex-grow-1" *ngIf="usuarioLogado() as usuario">
     <section class="page-content">
 
+        <!-- ── Card principal do perfil ────────────────────── -->
         <section class="profile-main-card">
             <div class="profile-header-content d-flex align-items-center gap-4">
                 <div class="profile-image-wrapper">
@@ -12,9 +13,10 @@
                     <p class="profile-page-level">{{ usuario.cargo }}</p>
 
                     <div class="profile-tags">
+                        <!-- E-mail gerado dinamicamente a partir do nome do usuário -->
                         <div class="profile-tag" *ngIf="usuario.role === 'aluno'">
                             <i class="bi bi-envelope"></i>
-                            <span>gabriel.zapelini@escola.com</span>
+                            <span>{{ gerarEmail(usuario.nome) }}</span>
                         </div>
                         <div class="profile-tag">
                             <i class="bi bi-person-badge"></i>
@@ -29,13 +31,17 @@
             </div>
         </section>
 
+        <!-- ── Seção exclusiva para alunos ─────────────────── -->
         <ng-container *ngIf="usuario.role === 'aluno'">
+
             <section class="profile-summary-section">
                 <div class="row g-4">
                     <div class="col-md-6 col-xl-4">
                         <div class="summary-card">
                             <div class="summary-card-top">
-                                <div class="summary-icon purple-summary"><i class="bi bi-arrow-up-right"></i></div>
+                                <div class="summary-icon purple-summary">
+                                    <i class="bi bi-arrow-up-right"></i>
+                                </div>
                                 <div>
                                     <p class="summary-title">Progresso Geral</p>
                                     <h3 class="summary-number">{{ alunoConfig.progressoGeral }}%</h3>
@@ -51,14 +57,20 @@
                     <div class="col-md-6 col-xl-4">
                         <div class="summary-card">
                             <div class="summary-card-top">
-                                <div class="summary-icon gold-summary"><i class="bi bi-award"></i></div>
+                                <div class="summary-icon gold-summary">
+                                    <i class="bi bi-award"></i>
+                                </div>
                                 <div>
                                     <p class="summary-title">Conquistas</p>
-                                    <h3 class="summary-number">{{ alunoConfig.conquistas.atual }}/{{ alunoConfig.conquistas.total }}</h3>
+                                    <h3 class="summary-number">
+                                        {{ alunoConfig.conquistas.atual }}/{{ alunoConfig.conquistas.total }}
+                                    </h3>
                                 </div>
                             </div>
                             <div class="summary-progress-track">
-                                <div class="summary-progress-fill" [style.width.%]="(alunoConfig.conquistas.atual / alunoConfig.conquistas.total) * 100"></div>
+                                <div class="summary-progress-fill"
+                                    [style.width.%]="(alunoConfig.conquistas.atual / alunoConfig.conquistas.total) * 100">
+                                </div>
                             </div>
                             <p class="summary-footer-text">{{ alunoConfig.conquistas.atual }} badges conquistadas</p>
                         </div>
@@ -67,7 +79,9 @@
                     <div class="col-md-6 col-xl-4">
                         <div class="summary-card">
                             <div class="summary-card-top">
-                                <div class="summary-icon fire-summary"><i class="bi bi-fire"></i></div>
+                                <div class="summary-icon fire-summary">
+                                    <i class="bi bi-fire"></i>
+                                </div>
                                 <div>
                                     <p class="summary-title">Sequência de Estudos</p>
                                     <h3 class="summary-number">{{ alunoConfig.sequenciaDias }} dias</h3>
@@ -86,7 +100,9 @@
                 <div class="row g-4">
                     <div class="col-xl-6">
                         <div class="content-card">
-                            <h2 class="section-card-title"><i class="bi bi-award title-icon gold-text"></i> Conquistas Recentes</h2>
+                            <h2 class="section-card-title">
+                                <i class="bi bi-award title-icon gold-text"></i> Conquistas Recentes
+                            </h2>
                             <div class="row g-3 achievements-grid">
                                 <div class="col-6 col-sm-4" *ngFor="let conquista of conquistasRecentes">
                                     <div class="achievement-item">
@@ -101,7 +117,9 @@
 
                     <div class="col-xl-6">
                         <div class="content-card">
-                            <h2 class="section-card-title"><i class="bi bi-arrow-up-right title-icon green-text"></i> Progresso por Matéria</h2>
+                            <h2 class="section-card-title">
+                                <i class="bi bi-arrow-up-right title-icon green-text"></i> Progresso por Matéria
+                            </h2>
                             <div class="subject-progress-list">
                                 <div class="subject-progress-item" *ngFor="let materia of materiasProgresso">
                                     <div class="subject-progress-header">
@@ -109,7 +127,10 @@
                                         <span>{{ materia.porcentagem }}%</span>
                                     </div>
                                     <div class="subject-line-track">
-                                        <div class="subject-line-fill" [ngClass]="materia.classeCor" [style.width.%]="materia.porcentagem"></div>
+                                        <div class="subject-line-fill"
+                                            [ngClass]="materia.classeCor"
+                                            [style.width.%]="materia.porcentagem">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -131,9 +152,15 @@
             </section>
         </ng-container>
 
+        <!-- ── Aviso para diretores ─────────────────────────── -->
         <div class="alert alert-info border-0 rounded-4 p-4 mt-2" *ngIf="usuario.role === 'diretor'">
-            <h5 class="fw-bold"><i class="bi bi-shield-lock-fill me-2"></i>Painel Administrativo</h5>
-            <p class="m-0 text-muted">Dados de gamificação e trilhas individuais são restritos a contas estudantis. Use o cabeçalho superior ou a barra lateral para navegar pelos relatórios consolidados.</p>
+            <h5 class="fw-bold">
+                <i class="bi bi-shield-lock-fill me-2"></i>Painel Administrativo
+            </h5>
+            <p class="m-0 text-muted">
+                Dados de gamificação e trilhas individuais são restritos a contas estudantis.
+                Use o cabeçalho superior ou a barra lateral para navegar pelos relatórios consolidados.
+            </p>
         </div>
 
     </section>
