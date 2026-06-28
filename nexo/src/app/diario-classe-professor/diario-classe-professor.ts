@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './diario-classe-professor.html',   
   styleUrl: './diario-classe-professor.scss'       
 })
-export class DiarioClasseProfessorComponent implements OnInit {
+export class DiarioClasseProfessor implements OnInit {
   // Modelos de Filtro
   buscaDeTermos: string = '';
   turmaSelecionada: string = '2º Ano A';

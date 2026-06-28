@@ -1,18 +1,16 @@
 import { Injectable, signal } from '@angular/core';
 
-// Definindo a estrutura de um usuário
 export interface Usuario {
   nome: string;
   cargo: string;
   foto: string;
-  role: 'aluno' | 'diretor'; // Adicionando um campo opcional para o papel do usuário
+  role: 'aluno' | 'diretor' | 'professor';
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  // O estado começa como 'null' (ninguém logado)
   public usuarioLogado = signal<Usuario | null>(null);
 
   constructor() {
@@ -23,17 +21,18 @@ export class AuthService {
         this.usuarioLogado.set(usuarioObjeto);
       } catch (e) {
         console.error('Erro ao ler usuário do localStorage', e);
-        this.logout(); // Se o dado estiver corrompido, limpa a sessão
+        this.logout();
       }
     }
   }
 
-  /** Método para simular o login no frontend */
-  public login(username: string): void {
+  /** Login agora recebe usuário e senha */
+  public login(username: string, password: string): boolean {
+    if (!username?.trim() || !password?.trim()) return false;
+
     const loginLimpo = username.trim().toLowerCase();
     let usuario: Usuario;
 
-    // Simula o Login do Diretor
     if (loginLimpo === 'diretor' || loginLimpo === 'admin') {
       usuario = {
         nome: 'Diretor Silva',
@@ -41,8 +40,14 @@ export class AuthService {
         foto: 'assets/imagensProjeto/gabrielZapelini.png',
         role: 'diretor',
       };
+    } else if (loginLimpo === 'professor') {
+      usuario = {
+        nome: 'Prof. Roberto Alves',
+        cargo: 'Professor de História',
+        foto: 'assets/imagensProjeto/gabrielZapelini.png',
+        role: 'professor',
+      };
     } else {
-      // Simula o Login do Aluno (qualquer outro username)
       usuario = {
         nome: 'Gabriel Mendes',
         cargo: '2º Ano - Ensino Médio',
@@ -51,23 +56,31 @@ export class AuthService {
       };
     }
 
-    // 3. Salva o objeto modificado no Signal e no LocalStorage
     this.atualizarSessao(usuario);
+    return true;
   }
 
-  /** Método para alternar perfil rapidamente em desenvolvimento */
+  /** Alterna entre Aluno → Diretor → Professor → Aluno */
   public alternarPerfil(): void {
     const usuario = this.usuarioLogado();
     if (!usuario) return;
 
-    const novoRole = usuario.role === 'aluno' ? 'diretor' : 'aluno';
+    const roles: Array<'aluno' | 'diretor' | 'professor'> = ['aluno', 'diretor', 'professor'];
+    const indiceAtual = roles.indexOf(usuario.role);
+    const proximoRole = roles[(indiceAtual + 1) % roles.length];
+
+    const dadosPorRole: Record<string, Pick<Usuario, 'nome' | 'cargo'>> = {
+      aluno:     { nome: 'Gabriel Mendes',      cargo: '2º Ano - Ensino Médio'   },
+      diretor:   { nome: 'Diretor Silva',        cargo: 'Administração Escolar'   },
+      professor: { nome: 'Prof. Roberto Alves',  cargo: 'Professor de História'   },
+    };
 
     const usuarioAtualizado: Usuario = {
       ...usuario,
-      role: novoRole,
-      nome: novoRole === 'diretor' ? 'Diretor Silva' : 'Gabriel Mendes',
-      cargo: novoRole === 'diretor' ? 'Administração Escolar' : '2º Ano - Ensino Médio',
+      role: proximoRole,
+      ...dadosPorRole[proximoRole],
     };
+
     this.atualizarSessao(usuarioAtualizado);
   }
 
@@ -76,7 +89,6 @@ export class AuthService {
     this.usuarioLogado.set(null);
   }
 
-  /** Helper privado para evitar repetição de código (DRY) */
   private atualizarSessao(usuario: Usuario): void {
     this.usuarioLogado.set(usuario);
     localStorage.setItem('usuario_nexo', JSON.stringify(usuario));

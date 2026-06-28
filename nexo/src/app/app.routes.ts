@@ -11,26 +11,41 @@ import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
 import { Auditoria } from './auditoria/auditoria';
 import { RelatoriosDiretor } from './relatorios-diretor/relatorios-diretor';
 import { DashboardDiretor } from './diretor-dashboard/diretor-dashboard';
-import { GestaoEvasao } from './gestao-evasao/gestao-evasao'; 
+import { GestaoEvasao } from './gestao-evasao/gestao-evasao';
 import { MonitoramentoDocente } from './monitoramento-docente/monitoramento-docente';
 import { DashboardProfessor } from './dashboard-professor/dashboard-professor';
+import { DiarioClasseProfessor } from './diario-classe-professor/diario-classe-professor';
+import { Avaliacoes } from './avaliacoes/avaliacoes';
+import { Comunicacao } from './comunicacao/comunicacao';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: 'dashboards', component: Dashboards },
-  { path: 'materias', component: MatriculasWrapper }, 
-  { path: 'matriculas', component: MatriculasWrapper }, 
-  { path: 'evasao', component: GestaoEvasao }, // <-- CONECTADO: Mapeamento do routerLink do seu menu lateral
-  { path: 'auditoria', component: Auditoria },
-  { path: 'relatorios', component: RelatoriosDiretor },
-  { path: 'cadastro', component: Cadastro },
-  { path: 'perfil', component: Perfil },
-  { path: 'desafios', component: Desafios },
-  { path: 'meus_niveis_notas', component: MeusNiveisNotas },
+
+  // ── Compartilhadas ────────────────────────────────────────────────
+  { path: 'login',         component: Login         },
+  { path: 'perfil',        component: Perfil        },
   { path: 'configuracoes', component: Configuracoes },
-  { path: 'login', component: Login },
-  { path: 'menu-diretor', component: MenuDiretor },
-  { path: 'diretor-dashboards', component: DashboardDiretor },
-  { path: 'monitoramento', component: MonitoramentoDocente },
-  { path: 'dashboard-professor', component: DashboardProfessor }
+  { path: 'dashboards',    component: Dashboards    },
+
+  // ── Aluno ─────────────────────────────────────────────────────────
+  { path: 'materias',           component: MatriculasWrapper },
+  { path: 'desafios',           component: Desafios          },
+  { path: 'meus_niveis_notas',  component: MeusNiveisNotas  },
+  { path: 'cadastro',           component: Cadastro          },
+
+  // ── Diretor ───────────────────────────────────────────────────────
+  { path: 'diretor-dashboards', component: DashboardDiretor  },
+  { path: 'matriculas',         component: MatriculasWrapper },
+  { path: 'evasao',             component: GestaoEvasao      },
+  { path: 'auditoria',          component: Auditoria         },
+  { path: 'relatorios',         component: RelatoriosDiretor },
+  { path: 'monitoramento',      component: MonitoramentoDocente },
+  { path: 'menu-diretor',       component: MenuDiretor       },
+
+  // ── Professor ───────────────────────────────────────────────────────
+  { path: 'professor-dashboard', component: DashboardProfessor },
+  { path: 'diario-classe-professor', component: DiarioClasseProfessor },
+  { path: 'avaliacoes',           component: Avaliacoes },
+  { path: 'notas-engajamento',   component: Dashboards },
+  { path: 'comunicacao',         component: Comunicacao },
 ];

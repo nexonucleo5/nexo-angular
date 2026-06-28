@@ -1,25 +1,32 @@
 <div class="app-layout" [class.tela-autenticacao]="!authService.usuarioLogado()">
 
     @if (authService.usuarioLogado(); as usuario) {
-    @if (usuario.role === 'aluno') {
-    <app-menu></app-menu>
-    } @else {
-    <app-menu-diretor></app-menu-diretor>
-    }
+      @if (usuario.role === 'aluno') {
+        <app-menu></app-menu>
+      } @else if (usuario.role === 'professor') {
+        <app-menu-professor></app-menu-professor>
+      } @else {
+        <app-menu-diretor></app-menu-diretor>
+      }
     }
 
-    <main class="main-content" [class.content-aluno]="authService.usuarioLogado()?.role === 'aluno'"
-        [class.content-diretor]="authService.usuarioLogado()?.role === 'diretor'">
+    <main class="main-content"
+        [class.content-aluno]="authService.usuarioLogado()?.role === 'aluno'"
+        [class.content-diretor]="authService.usuarioLogado()?.role === 'diretor'"
+        [class.content-professor]="authService.usuarioLogado()?.role === 'professor'">
 
         @if (authService.usuarioLogado(); as usuario) {
         <header class="top-header">
             <div class="d-flex align-items-center">
                 <h2 class="h4 fw-bold mb-0" style="color: var(--text-main);">
-                    {{ usuario.role === 'aluno' ? 'Portal do Aluno' : 'Portal do Diretor' }}
+                    @if (usuario.role === 'aluno') { Portal do Aluno }
+                    @else if (usuario.role === 'professor') { Portal do Professor }
+                    @else { Portal do Diretor }
                 </h2>
 
                 <button (click)="alternarPerfil()" class="btn btn-sm btn-outline-primary ms-4">
-                    Mudar para {{ usuario.role === 'aluno' ? 'Diretor' : 'Aluno' }}
+                    Mudar para
+                    {{ usuario.role === 'aluno' ? 'Diretor' : usuario.role === 'diretor' ? 'Professor' : 'Aluno' }}
                 </button>
 
                 <button (click)="alternarTema()" class="btn-theme ms-2">
@@ -27,10 +34,14 @@
                 </button>
             </div>
 
-            <app-menu-usuario [userName]="usuario.nome" [userClass]="usuario.cargo" [userPhoto]="usuario.foto">
+            <app-menu-usuario
+                [userName]="usuario.nome"
+                [userClass]="usuario.cargo"
+                [userPhoto]="usuario.foto">
             </app-menu-usuario>
         </header>
         }
+
         <div class="container-fluid p-4">
             <router-outlet></router-outlet>
         </div>
