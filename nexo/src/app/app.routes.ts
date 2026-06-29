@@ -19,6 +19,7 @@ import { Avaliacoes } from './avaliacoes/avaliacoes';
 import { Comunicacao } from './comunicacao/comunicacao';
 
 export const routes: Routes = [
+
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 
   // ── Compartilhadas ────────────────────────────────────────────────
@@ -28,24 +29,24 @@ export const routes: Routes = [
   { path: 'dashboards',    component: Dashboards    },
 
   // ── Aluno ─────────────────────────────────────────────────────────
-  { path: 'materias',           component: MatriculasWrapper },
-  { path: 'desafios',           component: Desafios          },
-  { path: 'meus_niveis_notas',  component: MeusNiveisNotas  },
-  { path: 'cadastro',           component: Cadastro          },
+  { path: 'materias',          component: MatriculasWrapper },
+  { path: 'desafios',          component: Desafios          },
+  { path: 'meus_niveis_notas', component: MeusNiveisNotas  },
+  { path: 'cadastro',          component: Cadastro          },
 
   // ── Diretor ───────────────────────────────────────────────────────
-  { path: 'diretor-dashboards', component: DashboardDiretor  },
-  { path: 'matriculas',         component: MatriculasWrapper },
-  { path: 'evasao',             component: GestaoEvasao      },
-  { path: 'auditoria',          component: Auditoria         },
-  { path: 'relatorios',         component: RelatoriosDiretor },
+  { path: 'diretor-dashboards', component: DashboardDiretor    },
+  { path: 'matriculas',         component: MatriculasWrapper   },
+  { path: 'evasao',             component: GestaoEvasao        },
+  { path: 'auditoria',          component: Auditoria           },
+  { path: 'relatorios',         component: RelatoriosDiretor   },
   { path: 'monitoramento',      component: MonitoramentoDocente },
-  { path: 'menu-diretor',       component: MenuDiretor       },
+  { path: 'menu-diretor',       component: MenuDiretor         },
 
-  // ── Professor ───────────────────────────────────────────────────────
-  { path: 'professor-dashboard', component: DashboardProfessor },
-  { path: 'diario-classe-professor', component: DiarioClasseProfessor },
-  { path: 'avaliacoes',           component: Avaliacoes },
-  { path: 'notas-engajamento',   component: Dashboards },
-  { path: 'comunicacao',         component: Comunicacao },
+  // ── Professor ─────────────────────────────────────────────────────
+  { path: 'professor-dashboard', component: DashboardProfessor    },
+  { path: 'diario',              component: DiarioClasseProfessor },
+  { path: 'avaliacao',           component: Avaliacoes            },
+  { path: 'comunicacao',         component: Comunicacao           },
+  { path: 'notas-engajamento',   component: Dashboards            }, // TODO: componente próprio
 ];
