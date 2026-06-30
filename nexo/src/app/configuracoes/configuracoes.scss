@@ -1,298 +1,99 @@
+/* configuracoes.scss — usa apenas variáveis do styles.scss */
 
-/* HEADER */
-.settings-header {
-    margin-bottom: 30px;
-
-    .settings-page-title {
-        font-size: 38px;
-        font-weight: 800;
-        color: var(--text-main);
-        margin-bottom: 6px;
-    }
-
-    .settings-page-subtitle {
-        color: var(--text-muted);
-        font-size: 16px;
-    }
+.page-content {
+  padding: 34px;
+  background-color: var(--bg-primary);
+  min-height: 100vh;
 }
 
-/* ============================================================
-   WRAPPER
-   ============================================================ */
+.settings-header {
+  margin-bottom: 32px;
+  .settings-page-title    { font-size: 36px; font-weight: 800; color: var(--text-main); margin: 0 0 8px; }
+  .settings-page-subtitle { font-size: 15px; color: var(--text-muted); margin: 0; }
+}
 
 .settings-wrapper {
-    display: grid;
-    gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 800px;
 }
-
-/* ============================================================
-   CARD BASE
-   ============================================================ */
 
 .settings-card {
-    background: var(--bg-card);
-    border-radius: 24px;
-    padding: 28px;
-    border: 1px solid var(--border-color);
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-
-    &:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-    }
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 28px;
 }
-
-/* ============================================================
-   TÍTULO NEON (PILL)
-   ============================================================ */
 
 .section-card-title {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-
-    padding: 10px 16px;
-    border-radius: 14px;
-
-    font-size: 18px;
-    font-weight: 700;
-
-    color: #fff;
-
-    position: relative;
-    overflow: hidden;
-
-    margin-bottom: 25px;
-
-    isolation: isolate;
+  font-size: 18px; font-weight: 700; color: var(--text-main);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+  .title-icon { font-size: 20px; }
 }
 
-.section-card-title i {
-    color: #fff !important;
-}
+/* Cores dos ícones de secção */
+.purple-text { color: #9b2fff !important; }
+.pink-text   { color: #f2389d !important; }
+.green-text  { color: #06d25e !important; }
+.blue-text   { color: #2196f3 !important; }
+.orange-text { color: #f59e0b !important; }
 
-/* fundo base */
-.section-card-title::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    opacity: 0.9;
-}
-
-/* brilho leve */
-.section-card-title::after {
-    content: "";
-    position: absolute;
-    inset: -40%;
-    z-index: -1;
-
-    background: radial-gradient(
-        circle,
-        rgba(255,255,255,0.15),
-        transparent 60%
-    );
-}
-
-/* ============================================================
-   CORES DAS SEÇÕES (MESMO PADRÃO DOS ÍCONES)
-   ============================================================ */
-
-.settings-card:nth-child(1) .section-card-title::before {
-    background: linear-gradient(135deg, #8f24ff, #2e73f6);
-}
-
-.settings-card:nth-child(2) .section-card-title::before {
-    background: linear-gradient(135deg, #ff2bd6, #8f24ff);
-}
-
-.settings-card:nth-child(3) .section-card-title::before {
-    background: linear-gradient(135deg, #0fcd5c, #00d4ff);
-}
-
-.settings-card:nth-child(4) .section-card-title::before {
-    background: linear-gradient(135deg, #2e73f6, #00d4ff);
-}
-
-.settings-card:nth-child(5) .section-card-title::before {
-    background: linear-gradient(135deg, #ff8a00, #ff2bd6);
-}
-
-.settings-card:nth-child(6) .section-card-title::before {
-    background: linear-gradient(135deg, #8f24ff, #0fcd5c);
-}
-
-/* ============================================================
-   ITENS
-   ============================================================ */
-
+/* Item de configuração */
 .settings-item {
-    padding: 18px 0;
-    border-bottom: 1px solid var(--border-color);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-color);
+  &:last-child { border-bottom: none; padding-bottom: 0; }
 
-    &:last-child {
-        border-bottom: none;
-    }
+  span {
+    color: var(--text-main);
+    font-weight: 600; font-size: 15px; display: block; margin-bottom: 4px;
+  }
 
-    &:hover {
-        background: rgba(255,255,255,0.03);
-        border-radius: 12px;
-        padding-left: 10px;
-    }
+  small { color: var(--text-muted); font-size: 12px; }
 }
 
-.toggle-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
+.toggle-item { gap: 20px; }
 
-    span {
-        font-weight: 600;
-        color: var(--text-main);
-    }
-
-    small {
-        display: block;
-        color: var(--text-muted);
-        font-size: 13px;
-        margin-top: 4px;
-    }
-}
-
-/* ============================================================
-   SWITCH
-   ============================================================ */
-
+/* Toggle switch */
 .custom-switch {
-    appearance: none;
-    width: 46px;
-    height: 26px;
-    background: #444;
-    border-radius: 20px;
-    position: relative;
-    cursor: pointer;
-    transition: 0.3s;
+  width: 48px; height: 26px; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  background: var(--border-color);
+  border-radius: 13px; position: relative;
+  transition: background 0.3s; flex-shrink: 0;
+  outline: none;
 
-    &::before {
-        content: "";
-        width: 20px;
-        height: 20px;
-        background: #fff;
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        border-radius: 50%;
-        transition: 0.3s;
-    }
+  &::before {
+    content: ''; position: absolute;
+    width: 20px; height: 20px; border-radius: 50%;
+    top: 3px; left: 3px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform 0.3s;
+  }
 
-    &:checked {
-        background: linear-gradient(135deg, #8f24ff, #00d4ff, #0fcd5c);
-        box-shadow: 0 0 12px rgba(0,212,255,0.4);
-    }
-
-    &:checked::before {
-        transform: translateX(20px);
-    }
+  &:checked {
+    background: linear-gradient(135deg, #9b2fff, #06d25e);
+    &::before { transform: translateX(22px); }
+  }
 }
 
-/* ============================================================
-   BOTÕES (IGUAL PADRÃO DOS ÍCONES)
-   ============================================================ */
-
-.settings-card button.btn {
-    font-weight: 600 !important;
-    border-radius: 14px !important;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    border: none !important;
-
-    color: #fff !important;
-
-    position: relative;
-    overflow: hidden;
-
-    transition: all 0.3s ease !important;
+/* Botões de conta */
+.btn-gradient {
+  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  color: white; border: none; border-radius: 12px;
+  padding: 12px 20px; font-weight: 600; cursor: pointer;
+  transition: opacity 0.2s; width: 100%;
+  &:hover { opacity: 0.9; }
 }
 
-/* brilho igual ícones */
-.settings-card button.btn::after {
-    content: "";
-    position: absolute;
-    inset: -40%;
-    z-index: 0;
-
-    background: radial-gradient(
-        circle,
-        rgba(255,255,255,0.15),
-        transparent 60%
-    );
-}
-
-/* garantir texto acima */
-.settings-card button.btn {
-    z-index: 1;
-    position: relative;
-}
-
-/* ============================================================
-   EDITAR PERFIL (AZUL = MESMA LÓGICA DOS ÍCONES)
-   ============================================================ */
-
-.settings-card:last-child button.btn.btn-gradient:nth-of-type(1) {
-    background: linear-gradient(135deg, #2e73f6, #00d4ff) !important;
-    box-shadow: 0 0 14px rgba(46,115,246,0.25);
-}
-
-.settings-card:last-child button.btn.btn-gradient:nth-of-type(1):hover {
-    transform: translateY(-2px);
-    filter: brightness(1.1);
-}
-
-/* ============================================================
-   ALTERAR SENHA (ROXO = MESMA LÓGICA DOS ÍCONES)
-   ============================================================ */
-
-.settings-card:last-child button.btn.btn-gradient:nth-of-type(2) {
-    background: linear-gradient(135deg, #8f24ff, #ff2bd6) !important;
-    box-shadow: 0 0 14px rgba(143,36,255,0.25);
-}
-
-.settings-card:last-child button.btn.btn-gradient:nth-of-type(2):hover {
-    transform: translateY(-2px);
-    filter: brightness(1.1);
-}
-
-/* ============================================================
-   ENCERRAR SESSÃO
-   ============================================================ */
-
-button.btn.btn-danger-soft {
-    background: transparent !important;
-    border: 1px solid #ff4d4d !important;
-    color: #ff4d4d !important;
-
-    &:hover {
-        background: rgba(255, 77, 77, 0.12) !important;
-        transform: translateY(-2px);
-    }
-}
-
-/* ============================================================
-   RESPONSIVO
-   ============================================================ */
-
-@media (max-width: 768px) {
-    .settings-page-title {
-        font-size: 28px;
-    }
-
-    .settings-wrapper {
-        gap: 18px;
-    }
+.btn-danger-soft {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px; padding: 12px 20px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s; width: 100%;
+  &:hover { background: rgba(239, 68, 68, 0.18); }
 }

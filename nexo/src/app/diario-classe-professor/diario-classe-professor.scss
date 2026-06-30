@@ -1,98 +1,12 @@
-// Layout principal em Grid (Sidebar fixa e Main rolável)
-.dashboard-layout {
-  display: table;
-  width: 100%;
+.page-content {
+  background-color: var(--bg-primary);
   min-height: 100vh;
-  background-color: #0d121f; // Fundo geral dark idêntico à imagem
 }
 
-// Sidebar Style
-.sidebar {
-  display: table-cell;
-  width: 260px;
-  background: #111827;
-  border-right: 1px solid #1f2937;
-  vertical-align: top;
-  padding: 2rem 0;
-  position: relative;
-  
-  .sidebar-brand {
-    padding: 0 2rem;
-    margin-bottom: 2rem;
-    .brand-title { color: #06d25e; font-weight: bold; font-size: 24px; margin: 0; }
-    .brand-subtitle { color: #9ca3af; font-size: 12px; margin: 0; }
-  }
-
-  .sidebar-nav {
-    .nav-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 2rem; color: #9ca3af; text-decoration: none;
-      font-weight: 500; transition: all 0.2s;
-      i { font-size: 18px; }
-      
-      &:hover { background: rgba(255,255,255,0.02); color: #fff; }
-      &.active {
-        background: #06d25e; color: white;
-        border-radius: 0 25px 25px 0; margin-right: 15px;
-      }
-    }
-  }
-  
-  .sidebar-footer {
-    position: absolute; bottom: 20px; left: 2rem;
-    color: #4b5563; font-size: 11px;
-  }
-}
-
-// Main Content
-.main-content {
-  display: table-cell;
-  padding: 2rem;
-  vertical-align: top;
-}
-
-// Topbar Header
-.topbar {
-  display: flex; justify-content: space-between; align-items: center;
-  
-  .search-box-top {
-    display: flex; align-items: center; background: #161f30;
-    padding: 10px 18px; border-radius: 12px; border: 1px solid #243048; width: 400px;
-    i { color: #6b7280; margin-right: 10px; }
-    input {
-      background: transparent; border: none; color: #fff; width: 100%; font-size: 13px;
-      &:focus { outline: none; }
-    }
-  }
-
-  .user-profile-zone {
-    display: flex; align-items: center; gap: 20px;
-    
-    .notification-icon {
-      position: relative; color: #6b7280; font-size: 20px; cursor: pointer;
-      .notification-dot {
-        position: absolute; top: 2px; right: 2px; width: 8px; height: 8px;
-        background: #06d25e; border-radius: 50%;
-      }
-    }
-    
-    .profile-info {
-      display: flex; align-items: center; gap: 12px;
-      .profile-text {
-        display: flex; flex-direction: column; text-align: right;
-        .profile-name { color: #fff; font-weight: 600; font-size: 14px; }
-        .profile-role { color: #6b7280; font-size: 11px; }
-      }
-      .profile-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid #06d25e;}
-    }
-  }
-}
-
-// Reutilização padronizada dos estilos
 .main-card {
-  background: #161f30; 
-  border-radius: 20px; 
-  border: 1px solid #243048;
+  background: var(--bg-card);
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
 }
 
 .metric-card {
@@ -100,101 +14,101 @@
   text-align: left;
 }
 
-// Custom Inputs
-.form-control-custom, .form-select-custom {
-  width: 100%; 
-  background-color: #0d121f !important; 
-  color: #fff !important;
-  border: 1px solid #243048; 
+/* Inputs */
+.form-control-custom,
+.form-select-custom {
+  width: 100%;
+  background-color: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 10px 15px;
-  font-size: 13px;
-  &:focus { border-color: #06d25e; outline: none; }
+  font-size: 14px;
+  transition: border-color 0.2s;
+
+  &:focus { border-color: #9b2fff; outline: none; }
+  &::placeholder { color: var(--text-muted); }
+
+  option {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+  }
 }
 
-.purple-focus:focus {
-  border-color: #9b2fff !important;
-}
+.purple-focus:focus { border-color: #9b2fff !important; }
+.text-area-custom   { resize: none; }
 
-.text-area-custom {
-  resize: none;
-}
-
-// Botões Padronizados
-.btn-gradient { 
-  background: linear-gradient(90deg, #9b2fff, #06d25e); 
-  color: white; border: none; font-weight: 600; padding: 10px 20px; border-radius: 12px;
-  font-size: 13px; transition: opacity 0.2s;
-  &:hover { opacity: 0.9; color: white;}
-}
-
+/* Botões */
 .btn-export {
-  background: #06d25e; color: white; font-weight: bold; border: none;
-  padding: 10px 20px; border-radius: 12px; font-size: 14px;
+  background: #06d25e; color: white; font-weight: bold;
+  border: none; padding: 10px 20px; border-radius: 12px; font-size: 14px;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.9; }
 }
 
 .btn-light-custom {
-  background: #ffffff;
-  color: #0d121f;
-  font-weight: bold;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-size: 13px;
+  background: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  font-weight: bold; border-radius: 12px;
+  padding: 10px 20px; font-size: 13px;
   transition: background 0.2s;
-  &:hover { background: #f3f4f6; color: #0d121f; }
+  &:hover { border-color: #9b2fff; }
 }
 
-// Estilização das tabelas
+/* Tabela de frequência */
 .table-custom {
-  width: 100%;
-  border-collapse: collapse;
+  width: 100%; border-collapse: collapse;
   th {
-    color: #6b7280; font-size: 12px; font-weight: 600; padding-bottom: 12px;
+    color: var(--text-muted); font-size: 12px;
+    font-weight: 600; padding-bottom: 12px;
   }
   td {
-    padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
     vertical-align: middle;
+    color: var(--text-main);
   }
+  tr:last-child td { border-bottom: none; }
 }
+
 .table-body-scroll {
   max-height: 320px; overflow-y: auto; padding-right: 5px;
   &::-webkit-scrollbar { width: 5px; }
-  &::-webkit-scrollbar-thumb { background: #243048; border-radius: 3px; }
+  &::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
 }
 
 .avatar-student {
   width: 35px; height: 35px; border-radius: 50%; object-fit: cover;
+  border: 1px solid var(--border-color);
 }
 
-// Botões Redondos de Presença
+/* Botões de presença */
 .btn-presence {
   width: 32px; height: 32px; border-radius: 50%; border: none;
-  background: #243048; color: #6b7280; font-size: 14px; transition: all 0.2s;
-  
-  &.correct:hover, &.correct.active {
-    background: #06d25e; color: white;
-  }
-  &.wrong:hover, &.wrong.active {
-    background: #ff3d00; color: white;
-  }
+  background: var(--bg-input); color: var(--text-muted); font-size: 14px;
+  transition: all 0.2s; cursor: pointer;
+
+  &.correct:hover, &.correct.active { background: #06d25e; color: white; }
+  &.wrong:hover,   &.wrong.active   { background: #ff3d00; color: white; }
 }
 
 .btn-icon-obs {
-  background: transparent; border: none; color: #4b5563; font-size: 16px;
+  background: transparent; border: none;
+  color: var(--text-muted); font-size: 16px; cursor: pointer;
   &:hover { color: #9b2fff; }
 }
 
-// Lista do Histórico de Aulas
-.history-list {
-  max-height: 250px; overflow-y: auto;
-}
-.history-item {
-  background: #0d121f; border-radius: 12px; border: 1px solid #1f2937;
-  .class-title { color: #fff; font-size: 13px; }
-  .edit-icon-small { cursor: pointer; font-size: 12px; &:hover { color: #fff; } }
-}
+/* Histórico */
+.history-list { max-height: 250px; overflow-y: auto; }
 
-// Cores Utilitárias
-.text-main { color: #ffffff; }
-.text-soft { color: #9ca3af; }
+.history-item {
+  background: var(--bg-input);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+
+  .class-title  { color: var(--text-main); font-size: 13px; }
+  .edit-icon-small { cursor: pointer; font-size: 12px; color: var(--text-muted);
+    &:hover { color: var(--text-main); }
+  }
+}

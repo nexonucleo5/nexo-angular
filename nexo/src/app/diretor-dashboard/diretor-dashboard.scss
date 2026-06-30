@@ -1,106 +1,96 @@
-.page-title { font-size: 42px; color: var(--text-main); }
-.text-main { color: var(--text-main); }
-.text-soft { color: var(--text-soft) !important; }
-.text-soft-muted { color: var(--text-soft); opacity: 0.6; font-size: 11px; }
-
-.metric-card, .main-card {
-  background-color: var(--bg-card);
-  border-radius: 20px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+.dashboard-executivo {
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: 100vh;
 }
 
+.dashboard-header {
+  .page-title { font-size: 32px; font-weight: 800; color: var(--text-main); margin-bottom: 4px; }
+  .text-soft  { color: var(--text-muted); }
+}
+
+/* KPI cards */
 .metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
   padding: 22px;
-  
-  .icon-square {
-    width: 50px; height: 50px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center; color: white;
-    
-    &.blue { background: linear-gradient(135deg, #2196f3, #00bcd4); }
-    &.red { background: linear-gradient(135deg, #ff3d00, #ff1744); }
-    &.green { background: linear-gradient(135deg, #06d25e, #00c853); }
-    &.orange { background: linear-gradient(135deg, #ff9800, #ff5722); }
-    &.purple { background: linear-gradient(135deg, #9b2fff, #673ab7); }
-  }
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
+
+  .text-main  { color: var(--text-main)  !important; }
+  .text-soft  { color: var(--text-muted) !important; }
+}
+
+.icon-square {
+  width: 46px; height: 46px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; color: white;
+  &.blue   { background: linear-gradient(135deg, #2196f3, #00bcd4); }
+  &.red    { background: linear-gradient(135deg, #ff3d00, #ff1744); }
+  &.green  { background: linear-gradient(135deg, #06d25e, #00c853); }
+  &.purple { background: linear-gradient(135deg, #9b2fff, #673ab7); }
 }
 
 .trend-tag {
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  background: rgba(6, 210, 94, 0.12);
-  color: #06d25e;
-  
-  &.negative {
-    background: rgba(255, 61, 0, 0.12);
-    color: #ff3d00;
-  }
+  font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+  &.green  { background: rgba(6, 210, 94, 0.12);   color: #06d25e; }
+  &.red    { background: rgba(239, 68, 68, 0.12);  color: #ef4444; }
+  &.blue   { background: rgba(33, 150, 243, 0.12); color: #2196f3; }
+  &.purple { background: rgba(155, 47, 255, 0.12); color: #9b2fff; }
+  &.negative { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
 }
 
-/* Área customizada para renderizar o Canvas do Chart.js responsivamente */
-.chart-area {
-  width: 100%;
-  height: 320px; 
-  position: relative;
-}
-
-.student-row {
+/* Card principal / gráfico */
+.main-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
-  transition: transform 0.2s, border-color 0.2s;
-  
-  &:hover {
-    transform: translateY(-2px);
-    border-color: #9b2fff;
-    background-color: rgba(155, 47, 255, 0.02);
-  }
+  border-radius: 20px;
+  transition: background-color 0.3s;
+}
+
+.chart-area {
+  height: 220px;
+  position: relative;
+  canvas { max-height: 220px !important; }
+}
+
+/* Alunos em risco */
+.student-row {
+  border-radius: 14px;
+  transition: background 0.2s;
+  &:hover { background: var(--hover-overlay); }
 }
 
 .avatar-circle {
-  width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
+  width: 42px; height: 42px; border-radius: 50%; object-fit: cover;
   border: 2px solid var(--border-color);
 }
 
 .risk-tag {
-  font-size: 11px; font-weight: bold; padding: 4px 12px; border-radius: 20px;
-  display: inline-block;
-  
-  &.alto { background: rgba(255, 61, 0, 0.12); color: #ff3d00; }
-  &.medio { background: rgba(255, 193, 7, 0.12); color: #ffc107; }
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: capitalize;
+  &.alto  { background: rgba(239, 68, 68, 0.12);  color: #ef4444; }
+  &.medio { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
 }
 
+/* Alertas críticos */
 .alert-card {
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 16px;
+  background: var(--hover-overlay);
   border: 1px solid var(--border-color);
-  border-left: 5px solid transparent;
-  transition: background-color 0.2s;
-  
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.04);
-  }
-  
-  &:has(.priority-tag.alta) { border-left-color: #ff3d00; }
-  &:has(.priority-tag.media) { border-left-color: #ffc107; }
-}
-
-body.light-mode .alert-card {
-  background: rgba(0, 0, 0, 0.02);
+  border-radius: 14px;
+  transition: transform 0.2s;
+  &:hover { transform: translateX(4px); }
 }
 
 .priority-tag {
-  font-size: 10px; font-weight: bold; text-transform: uppercase;
-  padding: 2px 8px; border-radius: 4px;
-  
-  &.alta { background: rgba(255, 61, 0, 0.15); color: #ff3d00; }
-  &.media { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+  &.alta  { background: rgba(239, 68, 68, 0.12);  color: #ef4444; }
+  &.media { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+  &.baixa { background: rgba(6, 210, 94, 0.12);   color: #06d25e; }
 }
 
 .custom-link-btn {
-  color: #9b2fff !important;
-  font-weight: 600;
-  font-size: 14px;
-  &:hover { opacity: 0.8; }
+  color: var(--text-muted) !important;
+  font-size: 13px;
+  transition: color 0.2s;
+  &:hover { color: #9b2fff !important; }
 }

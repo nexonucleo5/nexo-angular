@@ -1,63 +1,91 @@
-.page-container { padding: 2rem; }
+/* desafios.scss — usa apenas variáveis do styles.scss */
 
-.main-card {
-  background: var(--bg-card); 
-  border-radius: 20px; 
-  border: 1px solid var(--border-color);
+.page-container {
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: 100vh;
 }
 
+/* Metric card */
 .metric-card {
-  @extend .main-card;
-  padding: 20px;
-  .icon-square {
-    width: 45px; height: 45px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center; color: white;
-    &.orange { background: linear-gradient(135deg, #ff9800, #ff5722); }
-    &.green { background: linear-gradient(135deg, #06d25e, #00c853); }
-    &.red { background: linear-gradient(135deg, #ff3d00, #ff1744); }
-  }
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px; padding: 20px;
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-3px); }
+}
+
+.icon-square {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 18px;
+  &.orange { background: linear-gradient(135deg, #ff9800, #ff5722); }
+  &.green  { background: linear-gradient(135deg, #06d25e, #00c853); }
+  &.red    { background: linear-gradient(135deg, #ff3d00, #ff1744); }
+  &.blue   { background: linear-gradient(135deg, #2196f3, #00bcd4); }
+  &.purple { background: linear-gradient(135deg, #9b2fff, #673ab7); }
+}
+
+/* Filtros */
+.main-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
 }
 
 .search-box {
-  display: flex; align-items: center; background: var(--bg-body);
-  padding: 8px 15px; border-radius: 20px; border: 1px solid var(--border-color);
-  i { color: var(--text-soft); margin-right: 10px; }
-  .form-control-custom { 
-    background: transparent; border: none; color: var(--text-main); width: 100%;
+  display: flex; align-items: center;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 14px; padding: 8px 14px;
+  i { color: var(--text-muted); margin-right: 8px; }
+  input {
+    background: transparent; border: none;
+    color: var(--text-main); width: 100%;
     &:focus { outline: none; }
-    &::placeholder { color: var(--text-soft); }
+    &::placeholder { color: var(--text-muted); }
   }
 }
+
+.form-control-custom { background: transparent; border: none; color: var(--text-main); width: 100%; }
 
 .form-select-custom {
-  width: 100%; 
-  background-color: var(--bg-body) !important; 
-  color: var(--text-main) !important;
-  border: 1px solid var(--border-color); 
-  border-radius: 20px; /* Bordas bem redondas */
-  padding: 10px 15px;
-  cursor: pointer;
-  appearance: none; /* Remove seta padrão para maior controle se necessário */
-  
-  option {
-    background-color: var(--bg-card);
-    color: var(--text-main);
-    padding: 10px;
-  }
-  
-  &:focus { border-color: #9b2fff; outline: none; }
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 12px; color: var(--text-main);
+  padding: 10px 14px; width: 100%;
+  &:focus { outline: none; border-color: #9b2fff; }
+  option { background: var(--bg-card); color: var(--text-main); }
 }
 
+/* Cards de desafio */
+.main-card.active-border { border-color: #9b2fff; }
+
+/* Level tags */
 .level-tag {
-  font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 8px;
-  &.facil { background: rgba(6, 210, 94, 0.1); color: #06d25e; }
-  &.medio { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
-  &.dificil { background: rgba(255, 61, 0, 0.1); color: #ff3d00; }
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 8px;
+  &.facil   { background: rgba(6, 210, 94, 0.1);  color: #06d25e; }
+  &.medio   { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+  &.dificil { background: rgba(255, 61, 0, 0.1);  color: #ff3d00; }
 }
 
-.status-badge.success { background: rgba(6, 210, 94, 0.1); color: #06d25e; padding: 4px 10px; border-radius: 8px; font-size: 11px; }
-.btn-gradient { background: linear-gradient(90deg, #9b2fff, #06d25e); color: white; border: none; }
-.btn-outline-main { border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; border-radius: 12px; }
-.progress { height: 6px; background: var(--border-color); border-radius: 3px; }
-.progress-bar { background: #9b2fff; border-radius: 3px; }
-.active-border { border-color: #9b2fff; }
+.status-badge {
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 8px;
+  &.success { background: rgba(6, 210, 94, 0.1); color: #06d25e; }
+}
+
+.btn-outline-main {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main); border-radius: 12px;
+  padding: 10px 20px; font-weight: 600;
+  transition: all 0.2s; cursor: pointer;
+  &:hover { border-color: #9b2fff; color: #9b2fff; }
+}
+
+/* Barra de progresso */
+.progress { height: 6px; background: var(--border-color); border-radius: 10px; overflow: hidden; }
+.progress-bar { background: linear-gradient(90deg, #9b2fff, #06d25e); border-radius: 10px; }
+
+.text-main { color: var(--text-main) !important; }
+.text-soft { color: var(--text-muted) !important; }

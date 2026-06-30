@@ -1,148 +1,71 @@
-.page-title { 
-  font-size: 42px; 
-  color: var(--text-main); 
-}
+/* gestao-evasao.scss — usa apenas variáveis do styles.scss */
+
+.page-content { background-color: var(--bg-primary); min-height: 100vh; padding: 32px; }
+.page-title { font-size: 44px; font-weight: 800; color: var(--text-main); }
 
 .stat-card {
-  background: var(--bg-card);
-  padding: 22px;
-  border-radius: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  position: relative;
-  overflow: hidden;
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: 18px; padding: 22px; transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
+  h2 { color: var(--text-main); font-size: 36px; font-weight: 800; margin: 4px 0 0; }
 }
+.border-bottom-indicator { border-bottom: 4px solid transparent; }
+.red-indicator    { border-bottom-color: #ef4444; }
+.yellow-indicator { border-bottom-color: #f59e0b; }
+.green-indicator  { border-bottom-color: #06d25e; }
+.badge-trend { font-size: 12px; color: var(--text-muted); margin-left: 6px; }
 
-.border-bottom-indicator {
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 4px;
-  }
-  &.red-indicator::after { background: #ff1744; }
-  &.yellow-indicator::after { background: #ffc107; }
-  &.green-indicator::after { background: #00c853; }
-}
-
-.badge-trend {
-  font-size: 14px;
-  margin-left: 6px;
-  font-weight: 600;
-}
-
-.filters-box {
-  background: var(--bg-card);
-  border-radius: 20px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
-}
+.filters-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; }
 
 .search-box {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
-  
-  input { 
-    color: var(--text-main); 
-    &::placeholder { color: #777; } 
+  display: flex; align-items: center;
+  background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 14px; padding: 8px 14px;
+  transition: border-color 0.2s;
+  &:focus-within { border-color: #9b2fff; }
+  i { color: var(--text-muted); margin-right: 8px; }
+  input { background: transparent; border: none; color: var(--text-main); width: 100%;
+    &::placeholder { color: var(--text-muted); } &:focus { outline: none; }
   }
-  &:focus-within { border-color: #3b82f6; }
 }
-
 .filter-select {
-  background-color: var(--bg-card);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
-  padding: 12px;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23777' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background: var(--bg-input); border: 1px solid var(--border-color);
+  border-radius: 12px; padding: 10px 14px; color: var(--text-main); width: 100%;
+  option { background: var(--bg-card); color: var(--text-main); }
 }
-
-.student-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
-  transition: transform 0.2s;
-  
-  &:hover {
-    transform: translateY(-2px);
-    border-color: #3b82f6;
-  }
-}
-
-.student-avatar {
-  width: 64px;
-  height: 64px;
-  object-fit: cover;
-}
-
-.status-badge-icon {
-  bottom: -2px;
-  right: -2px;
-  font-size: 18px;
-  border-radius: 50%;
-  background-color: var(--bg-card);
-  line-height: 1;
-  &.alto { color: #ff1744; }
-  &.medio { color: #ffc107; }
-}
-
 .gradient-btn {
-  background: #2563eb;
-  color: white; 
-  border: none; 
-  border-radius: 12px; 
-  padding: 12px 20px;
-  font-weight: bold; 
-  transition: 0.2s;
-  &:hover { background: #1d4ed8; }
+  background: linear-gradient(90deg, #9b2fff, #06d25e);
+  color: white; border: none; border-radius: 12px;
+  font-weight: 600; padding: 10px 20px; cursor: pointer; transition: opacity 0.2s;
+  &:hover { opacity: 0.9; }
 }
-
-.gradient-btn-blue {
-  background: #2563eb;
-  color: white; 
-  border: none; 
-  border-radius: 14px; 
-  padding: 10px 18px;
-  font-weight: 600; 
-  font-size: 14px;
-  &:hover { background: #1d4ed8; }
-}
-
-.btn-dark-custom {
-  background-color: #ffffff; 
-  color: #1e293b;
-  border: 1px solid #e2e8f0; 
-  border-radius: 14px; 
-  padding: 10px 18px;
-  font-weight: 600; 
-  font-size: 14px;
-  &:hover { background-color: #f8fafc; }
-}
-
 .btn-export {
-  background-color: #ffffff;
-  color: #1e293b;
-  font-weight: 600;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 10px 20px;
-  font-size: 14px;
-  &:hover { background-color: #f8fafc; }
+  background: var(--bg-input); border: 1px solid var(--border-color);
+  color: var(--text-main); border-radius: 12px; padding: 10px 20px;
+  font-weight: 600; cursor: pointer; transition: border-color 0.2s;
+  &:hover { border-color: #9b2fff; }
 }
-
-.progress { 
-  height: 6px; 
-  border-radius: 10px; 
-  background: rgba(255,255,255,0.1); 
+.student-card {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: 20px; transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
 }
-
-.progress-bar.bg-purple { 
-  background: #a855f7; 
-  border-radius: 10px; 
+.student-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+.status-badge-icon {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 12px; bottom: 0; right: 0;
+  border: 2px solid var(--bg-card);
+  &.alto  { background: #ef4444; color: white; }
+  &.medio { background: #f59e0b; color: white; }
 }
-
-.text-soft { color: #94a3b8; }
-.action-buttons { min-width: 140px; }
+.gradient-btn-blue {
+  background: linear-gradient(90deg, #2196f3, #00bcd4); color: white; border: none;
+  border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: opacity 0.2s; &:hover { opacity: 0.9; }
+}
+.btn-dark-custom {
+  background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main);
+  border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: border-color 0.2s; &:hover { border-color: #9b2fff; }
+}
+.progress { height: 6px; background: var(--border-color); border-radius: 10px; overflow: hidden; }
+.bg-purple { background: linear-gradient(90deg, #9b2fff, #673ab7) !important; }

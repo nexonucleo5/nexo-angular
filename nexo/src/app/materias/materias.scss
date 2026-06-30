@@ -1,66 +1,74 @@
-.page-content {
-  background-color: var(--bg-page);
-  min-height: 100vh;
-  padding-bottom: 2rem;
-}
+/* materias.scss — usa apenas variáveis do styles.scss */
 
-.card-theme {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-}
+.page-content { background-color: var(--bg-primary); min-height: 100vh; }
+
+.page-title { color: var(--text-main); font-size: 44px !important; }
 
 .filters-box {
-  @extend .card-theme;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
 }
 
 .custom-input {
-  background: var(--bg-input) !important;
-  border: 1px solid var(--border-color) !important;
-  color: var(--text-main) !important;
-  transition: all 0.3s ease;
-  cursor: pointer;
-
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 30px;
+  color: var(--text-main);
+  transition: border-color 0.2s;
+  &:focus-within { border-color: #9b2fff; }
+  i     { color: var(--text-muted); }
   input {
-    color: var(--text-main) !important;
-    &::placeholder { color: var(--text-soft); }
-  }
-
-  &:focus-within {
-    border: 1px solid #4c8bf5 !important;
+    background: transparent; border: none; color: var(--text-main);
+    &:focus { outline: none; }
+    &::placeholder { color: var(--text-muted); }
   }
 }
 
-.search-box i { color: var(--text-soft); }
-
-/* Correção principal do dropdown */
-.custom-dropdown {
-  position: relative; /* Pai precisa de relative */
-}
-
+/* Dropdown customizado */
+.custom-dropdown { position: relative; }
 .dropdown-menu-custom {
-  position: absolute;
-  top: 105%; /* Logo abaixo do input */
-  left: 0;
-  z-index: 9999; /* Garante que fique por cima de tudo */
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 200;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 8px;
-  width: 100%;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-
-  .dropdown-item {
-    color: var(--text-main);
-    padding: 10px;
-    border-radius: 10px;
-    cursor: pointer;
-    &:hover { background: var(--dropdown-hover); }
-  }
+  border-radius: 14px;
+  box-shadow: 0 8px 20px var(--shadow-color);
+  overflow: hidden;
+}
+.dropdown-item {
+  padding: 12px 18px; font-size: 14px; color: var(--text-main); cursor: pointer;
+  transition: background 0.2s;
+  &:hover { background: var(--hover-overlay); }
 }
 
-.stat-number {
-  font-size: 2rem;
-  font-weight: bold;
+/* Cards de matéria */
+.subject-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 24px; transition: transform 0.2s;
+  &:hover { transform: translateY(-3px); }
 }
 
-.text-soft { color: var(--text-soft); }
+.card-theme {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color);
+}
+
+.subject-title { font-size: 1.25rem; color: var(--text-main) !important; font-weight: 700; margin: 0; }
+
+/* Botões de acesso */
+.btn-primary { background: linear-gradient(135deg, #2e73f6, #10c6df) !important; border: none !important; }
+.btn-info    { background: linear-gradient(135deg, #10c6df, #2e73f6) !important; border: none !important; }
+.btn-warning { background: linear-gradient(135deg, #f59e0b, #ff6a00) !important; border: none !important; }
+
+/* Stats */
+.stats-section h2 { color: var(--text-main) !important; }
+
+.stat-box {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 20px; padding: 24px; text-align: center;
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
+  .stat-number { font-size: 28px; font-weight: 800; color: var(--text-main) !important; margin-bottom: 4px; }
+}

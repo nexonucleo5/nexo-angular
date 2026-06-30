@@ -1,132 +1,100 @@
-// Variáveis e classes de texto integradas
-.page-title { font-size: 44px; color: var(--text-main); }
-.text-main { color: var(--text-main); }
-.text-soft { color: var(--text-soft) !important; }
+/* monitoramento-docente.scss — usa apenas variáveis do styles.scss */
 
+.page-content { background-color: var(--bg-primary); min-height: 100vh; padding: 32px; }
+
+.page-title { color: var(--text-main); font-size: 32px; font-weight: 800; }
+
+/* Stat cards */
 .stat-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    padding: 24px;
-    border-radius: 20px;
-    height: 140px;
-    display: flex;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.04);
-
-    h2 { font-size: 32px; font-weight: 700; margin-bottom: 0; }
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px; padding: 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
 }
 
-.border-bottom-indicator {
-    &::after {
-        content: '';
-        position: absolute;
-        bottom: 0; left: 0; right: 0; height: 5px;
-    }
-    &.orange-indicator::after { background: #f59e0b; }
-    &.green-indicator::after { background: #10b981; }
-    &.blue-indicator::after { background: #3b82f6; }
-    &.purple-indicator::after { background: #a855f7; }
-}
+/* Indicadores coloridos na borda inferior */
+.border-bottom-indicator { border-bottom: 4px solid transparent; }
+.red-indicator    { border-bottom-color: #ef4444; }
+.orange-indicator { border-bottom-color: #f59e0b; }
+.green-indicator  { border-bottom-color: #06d25e; }
+.blue-indicator   { border-bottom-color: #2196f3; }
+.purple-indicator { border-bottom-color: #9b2fff; }
 
+/* Trend badges */
 .badge-trend {
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    &.positive { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-    &.negative { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-    &.soft { background: rgba(148, 163, 184, 0.1); color: #94a3b8; }
+  font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 8px;
+  &.positive { background: rgba(6,210,94,0.1);   color: #06d25e; }
+  &.negative { background: rgba(239,68,68,0.1);  color: #ef4444; }
+  &.soft     { background: rgba(100,116,139,0.1); color: var(--text-muted); }
 }
 
-// Gráfico Mock e Cards
+/* Cards de gráfico e performers */
 .chart-card, .top-performers-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.04);
-    height: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
 }
 
-.chart-container-mock {
-    height: 250px;
-    .bars-wrapper {
-        height: 180px;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .bar-multi {
-        display: flex; gap: 4px; align-items: flex-end;
-        .bar { width: 8px; border-radius: 4px 4px 0 0; }
-        .blue { background: #3b82f6; }
-        .green { background: #10b981; }
-        .orange { background: #f59e0b; }
-    }
-}
+/* Barras do gráfico simulado */
+.chart-container-mock { width: 100%; }
+.bars-wrapper { height: 150px; gap: 20px; padding: 0 10px; }
+.bar-group    { display: flex; flex-direction: column; align-items: center; width: 100%; }
+.bar-multi    { display: flex; gap: 4px; align-items: flex-end; height: 130px; width: 100%; }
 
-// Top Performers Ranking
-.performer-avatar { 
-    width: 45px; height: 45px; object-fit: cover; 
-    border: 2px solid var(--border-color); 
+.bar {
+  flex: 1; border-radius: 6px 6px 0 0; transition: height 0.6s ease;
+  &.blue   { background: rgba(33,150,243,0.5); }
+  &.green  { background: rgba(6,210,94,0.5); }
+  &.orange { background: rgba(245,158,11,0.5); }
 }
+.text-blue   { color: #2196f3 !important; }
+.text-green  { color: #06d25e !important; }
+.text-orange { color: #f59e0b !important; }
+
+/* Performers */
 .rank-badge {
-    width: 24px; height: 24px; 
-    background: var(--border-color);
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 12px; color: var(--text-main); font-weight: bold;
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  color: white; font-weight: 700; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.performer-avatar {
+  width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
+  border: 2px solid var(--border-color);
 }
 
-// Teacher Card
+/* Professores */
 .teacher-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    transition: 0.3s;
-    &:hover { 
-        border-color: #a855f7; 
-        transform: translateX(5px); 
-        background-color: rgba(168, 85, 247, 0.02);
-    }
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px; transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
 }
-
-.teacher-avatar { 
-    width: 70px; height: 70px; object-fit: cover; 
-    border: 2px solid var(--border-color); 
+.teacher-avatar {
+  width: 52px; height: 52px; border-radius: 50%; object-fit: cover;
+  border: 2px solid var(--border-color);
 }
 
 .badge-status {
-    padding: 2px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    &.excelente { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-    &.bom { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-    &.atencao { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+  &.excelente { background: rgba(6,210,94,0.12);  color: #06d25e; }
+  &.bom       { background: rgba(33,150,243,0.12); color: #2196f3; }
+  &.atencao   { background: rgba(239,68,68,0.12);  color: #ef4444; }
 }
 
+.border-top-custom { border-top: 1px solid var(--border-color); }
+
+/* Barra de produtividade */
+.progress { height: 6px; background: var(--border-color); border-radius: 10px; overflow: hidden; }
+.bg-gradient-purple { background: linear-gradient(90deg, #9b2fff, #06d25e) !important; }
+
+/* Botões de ação */
 .btn-action-icon {
-    background: var(--border-color);
-    color: var(--text-soft);
-    border: none;
-    border-radius: 12px;
-    width: 42px; height: 42px;
-    transition: 0.2s;
-    &:hover { background: #a855f7; color: #fff; }
+  width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-color);
+  background: var(--bg-input); color: var(--text-muted); font-size: 16px;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: all 0.2s; cursor: pointer;
+  &:hover { border-color: #9b2fff; color: #9b2fff; }
 }
-
-.border-top-custom {
-    border-top: 1px solid var(--border-color);
-}
-
-.progress { 
-    height: 8px; border-radius: 10px; 
-    background: var(--border-color); 
-}
-
-.bg-gradient-purple { 
-    background: linear-gradient(90deg, #a855f7, #6366f1); 
-    border-radius: 10px; 
-}
-
-.text-orange { color: #f59e0b; }
-.text-green { color: #10b981; }
-.text-blue { color: #3b82f6; }

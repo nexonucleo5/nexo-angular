@@ -1,27 +1,37 @@
-/* ==========================================================================
-   1. VARIÁVEIS E TEMAS (Light/Dark)
-   ========================================================================== */
 html[data-theme='light'] {
-  --bg-primary: #f6f6f7 !important;
-  --bg-card: #ffffff !important;
-  --text-main: #12284a !important;
-  --text-muted: #6c757d !important;
-  --border-color: #dddddf !important;
+  --bg-primary:    #f6f6f7;
+  --bg-card:       #ffffff;
+  --bg-input:      #f0f2f5;
+  --bg-body:       #f0f2f5;
+  --text-main:     #12284a;
+  --text-muted:    #6c757d;
+  --text-soft:     #6c757d;
+  --border-color:  #dddddf;
+  --shadow-color:  rgba(0, 0, 0, 0.06);
+  --hover-overlay: rgba(0, 0, 0, 0.03);
+  --dropdown-hover: rgba(0, 0, 0, 0.05);
 }
 
 html[data-theme='dark'] {
-  --bg-primary: #121212 !important;
-  --bg-card: #1e1e1e !important;
-  --text-main: #e1e1e1 !important;
-  --text-muted: #a0a0a0 !important;
-  --border-color: #333333 !important;
+  --bg-primary:    #0d1117;
+  --bg-card:       #161f30;
+  --bg-input:      #0d121f;
+  --bg-body:       #0d121f;
+  --text-main:     #e2e8f0;
+  --text-muted:    #8892a4;
+  --text-soft:     #8892a4;
+  --border-color:  #243048;
+  --shadow-color:  rgba(0, 0, 0, 0.25);
+  --hover-overlay: rgba(255, 255, 255, 0.02);
+  --dropdown-hover: rgba(255, 255, 255, 0.05);
 }
 
 /* ==========================================================================
-   2. ESTILOS GLOBAIS DE BASE
+   2. BASE GLOBAL
    ========================================================================== */
-html,
-body {
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -32,30 +42,15 @@ body {
   overflow-x: hidden;
 }
 
-// Utilitários de Gradientes (Seus botões e ícones)
-.green-gradient   { background: linear-gradient(135deg, #0fcd5c, #08d6a2); }
-.blue-gradient    { background: linear-gradient(135deg, #2e73f6, #10c6df); }
-.orange-gradient  { background: linear-gradient(135deg, #ff6a00, #ff5f79); }
-.pink-gradient    { background: linear-gradient(135deg, #8f24ff, #f2389d); }
-
-.green-button, .blue-button, .orange-button, .pink-button {
-  border: none;
-  transition: opacity 0.2s;
-  &:hover {
-    opacity: 0.9;
-    color: white;
-  }
-}
-
 /* ==========================================================================
-   3. ESTRUTURA DO DASHBOARD (Ajustado para os 240px reais da barra)
+   3. LAYOUT PRINCIPAL
    ========================================================================== */
 .app-layout {
   display: flex;
   width: 100%;
   min-height: 100vh;
   position: relative;
-  box-sizing: border-box;
+  background-color: var(--bg-primary);
 
   &.tela-autenticacao {
     justify-content: center;
@@ -72,9 +67,12 @@ body {
   }
 }
 
-// Força a marcação do componente a alinhar com o push do conteúdo
-app-menu, app-menu-diretor, .sidebar {
-  width: 300px !important; // Sincronizado com o tamanho real das imagens
+/* Sidebar global — todos os menus herdam isso */
+app-menu,
+app-menu-diretor,
+app-menu-professor,
+.sidebar {
+  width: 300px !important;
   height: 100vh;
   position: fixed;
   top: 0;
@@ -83,40 +81,26 @@ app-menu, app-menu-diretor, .sidebar {
   background-color: var(--bg-card);
   border-right: 1px solid var(--border-color);
   box-sizing: border-box;
+  overflow-y: auto;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
+/* Área de conteúdo */
 .main-content {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--bg-primary);
-  
-  // CORREÇÃO DO BURACO: Alinhado perfeitamente em 300px
-  margin-left: 300px; 
+  margin-left: 300px;
   width: calc(100% - 300px);
   max-width: calc(100% - 300px);
-  
   box-sizing: border-box;
   overflow-x: hidden;
-}
-
-.top-header {
-  background-color: var(--bg-card);
-  padding: 20px 34px;
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   transition: background-color 0.3s;
-  position: sticky;
-  top: 0;
-  width: 100%;
-  box-sizing: border-box;
-  z-index: 999;
 }
 
-/* RENDEREZAÇÃO DAS PÁGINAS FILHAS (Router) */
+/* Páginas filhas do router */
 .main-content > router-outlet + *,
 .main-content > ng-component,
 .main-content > div,
@@ -127,65 +111,164 @@ app-menu, app-menu-diretor, .sidebar {
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box;
-  padding: 32px !important; // Margem interna confortável para respirar os cards
-  margin-left: 0 !important; // Remove qualquer resquício de empurrão duplo
+  padding: 32px !important;
+  margin-left: 0 !important;
+  background-color: var(--bg-primary);
 }
 
-.profile-image {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #9b2fff;
+/* Header fixo */
+.top-header {
+  background-color: var(--bg-card);
+  padding: 16px 34px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 999;
 }
 
 /* ==========================================================================
-   4. ELEMENTOS INTERNOS (Cards e Inputs)
+   4. UTILITÁRIOS GLOBAIS DE COR
    ========================================================================== */
-.bg-white {
-  background-color: var(--bg-card) !important;
+.text-soft   { color: var(--text-soft)  !important; }
+.text-main   { color: var(--text-main)  !important; }
+.text-muted  { color: var(--text-muted) !important; }
+
+.purple-text { color: #9b2fff !important; }
+.green-text  { color: #06d25e !important; }
+.blue-text   { color: #2196f3 !important; }
+.gold-text   { color: #ffd700 !important; }
+.orange-text { color: #f59e0b !important; }
+.red-text    { color: #ef4444 !important; }
+
+.green-gradient  { background: linear-gradient(135deg, #0fcd5c, #08d6a2); }
+.blue-gradient   { background: linear-gradient(135deg, #2e73f6, #10c6df); }
+.orange-gradient { background: linear-gradient(135deg, #ff6a00, #ff5f79); }
+.pink-gradient   { background: linear-gradient(135deg, #8f24ff, #f2389d); }
+
+.btn-gradient {
+  background: linear-gradient(90deg, #9b2fff, #06d25e);
+  color: white; border: none; border-radius: 12px;
+  font-weight: 600; padding: 10px 20px; cursor: pointer;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.9; color: white; }
 }
 
-.card-custom {
+/* ==========================================================================
+   5. COMPONENTES GLOBAIS COMPARTILHADOS
+   ========================================================================== */
+
+/* Cards genéricos */
+.card-custom, .content-card, .main-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 20px;
-  padding: 20px;
 }
 
-input.form-control {
-  background-color: var(--bg-primary);
+/* Inputs e selects */
+input.form-control,
+.form-control-custom,
+.form-select-custom {
+  background-color: var(--bg-input);
   color: var(--text-main);
   border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 10px 15px;
+  width: 100%;
+  transition: border-color 0.2s;
 
   &:focus {
-    background-color: var(--bg-primary);
+    background-color: var(--bg-input);
     color: var(--text-main);
     border-color: #9b2fff;
     box-shadow: none;
+    outline: none;
+  }
+
+  &::placeholder { color: var(--text-muted); }
+
+  option {
+    background-color: var(--bg-card);
+    color: var(--text-main);
   }
 }
 
-/* ==========================================================================
-   5. ACESSIBILIDADE E REGRAS ESPECÍFICAS
-   ========================================================================== */
+/* Search box */
+.search-box {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 8px 14px;
+  transition: border-color 0.2s;
+
+  i { color: var(--text-muted); margin-right: 10px; }
+
+  input {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    width: 100%;
+    &:focus { outline: none; }
+    &::placeholder { color: var(--text-muted); }
+  }
+
+  &:focus-within { border-color: #9b2fff; }
+}
+
+/* Progress bars */
+.progress {
+  height: 6px;
+  background-color: var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.progress-bar {
+  background: linear-gradient(90deg, #9b2fff, #06d25e);
+  border-radius: 10px;
+}
+
+/* Metric card (compartilhado entre dashboards) */
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 20px;
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
+
+  .icon-square {
+    width: 45px; height: 45px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; color: white;
+    &.blue   { background: linear-gradient(135deg, #2196f3, #00bcd4); }
+    &.green  { background: linear-gradient(135deg, #06d25e, #00c853); }
+    &.orange { background: linear-gradient(135deg, #ff9800, #ff5722); }
+    &.purple { background: linear-gradient(135deg, #9b2fff, #673ab7); }
+    &.red    { background: linear-gradient(135deg, #ff3d00, #ff1744); }
+  }
+}
+
+/* Imagem de perfil no header */
+.profile-image {
+  width: 50px; height: 50px;
+  border-radius: 50%; object-fit: cover;
+  border: 2px solid #9b2fff;
+}
+
+
 body.modo-foco-ativo {
-  .sidebar,
-  .top-header {
-    display: none;
-  }
-  .main-content {
-    margin-left: 0 !important;
-    max-width: 800px;
-    margin: 0 auto;
-  }
+  .sidebar, .top-header { display: none; }
+  .main-content { margin-left: 0 !important; max-width: 800px; margin: 0 auto; }
 }
 
 .sem-animacoes {
   *, *::before, *::after {
     transition-duration: 0s !important;
-    transition-property: none !important;
     animation-duration: 0s !important;
-    animation-iteration-count: 1 !important;
   }
 }

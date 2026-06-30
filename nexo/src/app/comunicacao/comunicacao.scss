@@ -1,19 +1,15 @@
-// Cores de Fallback Seguras (Tema Dark Nexo)
-$bg-body-dark: #0d121f;
-$border-dark: #243048;
-$text-soft-dark: #9ca3af;
-$text-main-dark: #ffffff;
+/* comunicacao.scss — usa apenas variáveis do styles.scss */
 
 .tabs-container {
   display: flex;
   gap: 10px;
-  border-bottom: 1px solid #243048;
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 8px;
 
   .tab-link {
     background: transparent;
     border: none;
-    color: $text-soft-dark;
+    color: var(--text-muted);
     padding: 8px 16px;
     font-weight: 600;
     font-size: 14px;
@@ -21,9 +17,7 @@ $text-main-dark: #ffffff;
     transition: all 0.2s ease;
     cursor: pointer;
 
-    &:hover {
-      color: $text-main-dark;
-    }
+    &:hover { color: var(--text-main); }
 
     &.active {
       background: rgba(155, 47, 255, 0.1);
@@ -44,54 +38,39 @@ $text-main-dark: #ffffff;
   transition: background 0.2s;
   border: 1px solid transparent;
 
-  &:hover {
-    background: #0d121f;
-  }
+  &:hover { background: var(--hover-overlay); }
 
   &.active {
-    background: rgba(155, 47, 255, 0.05);
+    background: rgba(155, 47, 255, 0.06);
     border-color: #9b2fff;
   }
 }
 
 .avatar-img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
+  width: 40px; height: 40px;
+  border-radius: 50%; object-fit: cover;
 }
 
 .avatar-big {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  object-fit: cover;
+  width: 70px; height: 70px;
+  border-radius: 50%; object-fit: cover;
 }
 
-.extra-small {
-  font-size: 11px;
-}
+.extra-small { font-size: 11px; }
 
-.text-soft-light {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.border-bottom-custom {
-  border-bottom: 1px solid #243048;
-}
+.border-bottom-custom { border-bottom: 1px solid var(--border-color); }
 
 .border-custom {
-  border: 1px solid #243048;
+  border: 1px solid var(--border-color);
   border-radius: 16px;
 }
 
-.chat-window-box {
-  min-height: 480px;
-}
+.chat-window-box { min-height: 480px; }
 
+/* Bolhas de mensagem */
 .message-bubble {
-  background: #0d121f;
-  color: $text-main-dark;
+  background: var(--bg-input);
+  color: var(--text-main);
   padding: 12px 16px;
   border-radius: 4px 16px 16px 16px;
   max-width: 75%;
@@ -100,41 +79,46 @@ $text-main-dark: #ffffff;
     background: #9b2fff;
     color: white;
     border-radius: 16px 16px 4px 16px;
-    
-    .text-soft-light {
-      color: rgba(255, 255, 255, 0.7);
-    }
+
+    .text-soft-light { color: rgba(255, 255, 255, 0.7); }
   }
 }
 
-.bg-body-custom {
-  background-color: #0d121f !important;
-}
+.text-soft-light { color: var(--text-muted); }
+
+/* Fundo de elementos internos */
+.bg-body-custom { background-color: var(--bg-input) !important; }
 
 .rounded-20 { border-radius: 20px; }
 .rounded-12 { border-radius: 12px; }
 
 .text-success-color { color: #06d25e !important; }
-.text-purple { color: #9b2fff !important; }
+.text-purple        { color: #9b2fff !important; }
 
 .badge-nota {
   background: rgba(6, 210, 94, 0.1);
+  color: #06d25e;
   padding: 4px 12px;
   border-radius: 8px;
 }
 
 .notice-card {
-  background: transparent;
+  background: var(--hover-overlay);
+  border-radius: 12px;
   transition: transform 0.2s;
-  &:hover {
-    transform: translateY(-2px);
-  }
+  &:hover { transform: translateY(-2px); }
 }
 
 .duvida-row {
   background: transparent;
+  border-radius: 12px;
   transition: background 0.2s;
-  &:hover {
-    background: rgba(255, 255, 255, 0.02);
-  }
+  &:hover { background: var(--hover-overlay); }
+}
+
+.level-tag {
+  font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 6px;
+  &.dificil { background: rgba(255, 61, 0, 0.1);  color: #ff3d00; }
+  &.medio   { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+  &.facil   { background: rgba(6, 210, 94, 0.1);  color: #06d25e; }
 }

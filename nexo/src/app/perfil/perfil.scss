@@ -1,261 +1,118 @@
-/* ============================================================
-   1. VARIÁVEIS E CONFIGURAÇÕES GERAIS
-   ============================================================ */
-:root {
-    --bg-main: #121212;
-    --bg-card: #1e1e1e;
-    --border-color: #333333;
-    --text-main: #ffffff;
-    --text-muted: #b3b3b3;
-    
-    /* Seus Gradientes */
-    --green-gradient: linear-gradient(135deg, #0fcd5c, #08d6a2);
-    --blue-gradient: linear-gradient(135deg, #2e73f6, #10c6df);
-    --orange-gradient: linear-gradient(135deg, #ff6a00, #ff5f79);
-    --pink-gradient: linear-gradient(135deg, #8f24ff, #f2389d);
-    
-    /* Novo Gradiente solicitado para o botão (Roxo para Verde) */
-    --grad-purple-green: linear-gradient(135deg, #8f24ff, #0fcd5c);
-}
 
-.main-content {
-    margin-left: 130px !important; /* Alinhado perfeitamente com o menu */
-    width: calc(100% - 130px) !important; /* Ajustado para não passar da tela */
-    background-color: var(--bg-main) !important;
-    transition: all 0.3s ease;
-}
+.page-content { padding: 34px; width: 100%; box-sizing: border-box; }
 
-.page-content {
-    padding: 34px;
-    width: 100%;
-    box-sizing: border-box;
-}
+/* Gradientes locais */
+$grad-green:  linear-gradient(135deg, #0fcd5c, #08d6a2);
+$grad-blue:   linear-gradient(135deg, #2e73f6, #10c6df);
+$grad-orange: linear-gradient(135deg, #ff6a00, #ff5f79);
+$grad-pink:   linear-gradient(135deg, #8f24ff, #f2389d);
 
-/* ============================================================
-   2. CARD PRINCIPAL DO PERFIL (HEADER)
-   ============================================================ */
+/* Card principal */
 .profile-main-card {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border-color);
-    border-radius: 26px;
-    padding: 34px;
-    margin-bottom: 38px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    
-    /* AJUSTE NECESSÁRIO: Mantém o alinhamento lado a lado */
-    display: flex;
-    align-items: center;
-    gap: 30px;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 26px; padding: 34px; margin-bottom: 38px;
+  box-shadow: 0 10px 30px var(--shadow-color);
+  display: flex; align-items: center; gap: 30px;
 
-    .profile-info-content { /* Recomendado envolver seu texto em uma div com essa classe */
-        flex: 1;
-    }
-
-    .profile-page-name {
-        font-size: 38px;
-        font-weight: 800;
-        color: var(--text-main) !important;
-        margin: 0 0 10px 0;
-    }
-
-    .profile-page-level {
-        font-size: 22px;
-        color: var(--text-muted) !important;
-        font-weight: 500;
-        margin-bottom: 24px;
-    }
+  .profile-page-name  { font-size: 38px; font-weight: 800; color: var(--text-main) !important; margin: 0 0 10px 0; }
+  .profile-page-level { font-size: 22px; color: var(--text-muted) !important; font-weight: 500; margin-bottom: 24px; }
 }
 
 .profile-main-image {
-    width: 170px;
-    height: 170px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 5px solid #8f24ff; 
-    box-shadow: 0 0 20px rgba(143, 36, 255, 0.3);
-    /* AJUSTE NECESSÁRIO: Impede a imagem de encolher */
-    flex-shrink: 0;
+  width: 170px; height: 170px; border-radius: 50%; object-fit: cover;
+  border: 5px solid #8f24ff; box-shadow: 0 0 20px rgba(143, 36, 255, 0.3);
+  flex-shrink: 0;
 }
 
-.profile-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-}
+.profile-tags { display: flex; flex-wrap: wrap; gap: 14px; }
 
 .profile-tag {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid var(--border-color);
-    border-radius: 18px;
-    padding: 12px 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--text-main) !important;
-    font-size: 16px;
-
-    i {
-        color: #8f24ff;
-        font-size: 18px;
-    }
+  background: var(--hover-overlay) !important;
+  border: 1px solid var(--border-color); border-radius: 18px; padding: 12px 18px;
+  display: flex; align-items: center; gap: 10px; color: var(--text-main) !important; font-size: 16px;
+  i { color: #8f24ff; font-size: 18px; }
 }
 
-/* ============================================================
-   4. CARDS DE RESUMO (PROGRESSO, CONQUISTAS, SEQUÊNCIA)
-   ============================================================ */
+/* Cards de resumo */
 .summary-card {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border-color);
-    border-radius: 24px;
-    padding: 30px;
-    height: 100%;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color); border-radius: 24px; padding: 30px; height: 100%;
 }
 
-.summary-card-top {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 25px;
-}
+.summary-card-top { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; }
 
 .summary-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-
-    &.purple-summary { background: rgba(143, 36, 255, 0.1); color: #8f24ff; }
-    &.gold-summary { background: rgba(255, 215, 0, 0.1); color: #ffd700; }
-    &.fire-summary { background: rgba(255, 106, 0, 0.1); color: #ff6a00; }
+  width: 60px; height: 60px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 24px;
+  &.purple-summary { background: rgba(143, 36, 255, 0.1); color: #8f24ff; }
+  &.gold-summary   { background: rgba(255, 215, 0, 0.1);  color: #ffd700; }
+  &.fire-summary   { background: rgba(255, 106, 0, 0.1);  color: #ff6a00; }
 }
 
-.summary-title {
-    margin: 0;
-    font-size: 16px;
-    color: var(--text-muted) !important;
-}
-
-.summary-number {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--text-main) !important;
-}
+.summary-title  { margin: 0; font-size: 16px; color: var(--text-muted) !important; }
+.summary-number { margin: 0; font-size: 28px; font-weight: 800; color: var(--text-main) !important; }
 
 .summary-progress-track {
-    height: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    margin-bottom: 15px;
-    overflow: hidden;
+  height: 10px; background: var(--border-color); border-radius: 10px; margin-bottom: 15px; overflow: hidden;
 }
+.summary-progress-fill { height: 100%; background: $grad-blue !important; border-radius: 10px; }
 
-.summary-progress-fill {
-    height: 100%;
-    background: var(--blue-gradient) !important;
-    border-radius: 10px;
-}
+.summary-footer-text { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
 
-/* ============================================================
-   5. CONQUISTAS RECENTES E PROGRESSO POR MATÉRIA
-   ============================================================ */
+/* Content cards */
 .content-card {
-    background: var(--bg-card) !important;
-    border-radius: 24px;
-    padding: 28px;
-    border: 1px solid var(--border-color);
-    height: 100%;
+  background: var(--bg-card) !important;
+  border-radius: 24px; padding: 28px;
+  border: 1px solid var(--border-color); height: 100%;
 }
 
 .section-card-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text-main) !important;
-    margin-bottom: 25px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  font-size: 22px; font-weight: 700; color: var(--text-main) !important;
+  margin-bottom: 25px; display: flex; align-items: center; gap: 12px;
 }
 
 .achievement-item {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 22px;
-    padding: 20px 10px;
-    text-align: center;
-    transition: all 0.3s ease;
-
-    &:hover {
-        background: rgba(255, 255, 255, 0.06) !important;
-        transform: scale(1.05);
-    }
-
-    .achievement-emoji { font-size: 32px; margin-bottom: 10px; }
-    .achievement-title { font-size: 16px; font-weight: 700; color: var(--text-main) !important; margin: 0; }
-    .achievement-date { font-size: 12px; color: var(--text-muted) !important; margin-top: 4px; }
+  background: var(--hover-overlay) !important;
+  border: 1px solid var(--border-color); border-radius: 22px; padding: 20px 10px; text-align: center;
+  transition: all 0.3s ease;
+  &:hover { transform: scale(1.05); }
+  .achievement-emoji  { font-size: 32px; margin-bottom: 10px; }
+  .achievement-title  { font-size: 16px; font-weight: 700; color: var(--text-main) !important; margin: 0; }
+  .achievement-date   { font-size: 12px; color: var(--text-muted) !important; margin-top: 4px; }
 }
 
-.subject-progress-item { margin-bottom: 20px; }
-.subject-progress-header {
-    display: flex;
-    justify-content: space-between;
-    color: var(--text-main) !important;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
+.subject-progress-item  { margin-bottom: 20px; }
+.subject-progress-header { display: flex; justify-content: space-between; color: var(--text-main) !important; font-weight: 600; margin-bottom: 8px; }
+.subject-line-track { height: 8px; background: var(--border-color); border-radius: 10px; overflow: hidden; }
+.subject-line-fill  { height: 100%; border-radius: 10px; }
 
-.subject-line-track { height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
-.subject-line-fill { height: 100%; border-radius: 10px; }
+.green-fill  { background: $grad-green  !important; }
+.blue-fill   { background: $grad-blue   !important; }
+.orange-fill { background: $grad-orange !important; }
+.pink-fill   { background: $grad-pink   !important; }
 
-.green-fill { background: var(--green-gradient) !important; }
-.blue-fill { background: var(--blue-gradient) !important; }
-.orange-fill { background: var(--orange-gradient) !important; }
-.pink-fill { background: var(--pink-gradient) !important; }
-
-/* ============================================================
-   6. ESTATÍSTICAS DETALHADAS (RODAPÉ)
-   ============================================================ */
-.stats-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text-main) !important;
-    margin: 40px 0 25px 0;
-}
+/* Estatísticas */
+.stats-title { font-size: 24px; font-weight: 700; color: var(--text-main) !important; margin: 40px 0 25px; }
 
 .stat-box {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border-color);
-    padding: 30px;
-    border-radius: 24px;
-    transition: transform 0.3s ease;
-
-    &:hover { transform: translateY(-5px); }
-    
-    .stat-number { font-size: 32px; font-weight: 800; margin-bottom: 5px; }
-    .stat-label { color: var(--text-muted) !important; font-size: 16px; margin: 0; }
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color); padding: 30px; border-radius: 24px;
+  transition: transform 0.3s ease;
+  &:hover { transform: translateY(-5px); }
+  .stat-number { font-size: 32px; font-weight: 800; margin-bottom: 5px; }
+  .stat-label  { color: var(--text-muted) !important; font-size: 16px; margin: 0; }
 }
 
 .purple-text { color: #8f24ff !important; }
-.green-text { color: #0fcd5c !important; }
-.blue-text { color: #2e73f6 !important; }
-.gold-text { color: #ffd700 !important; }
+.green-text  { color: #0fcd5c !important; }
+.blue-text   { color: #2e73f6 !important; }
+.gold-text   { color: #ffd700 !important; }
 
-/* ============================================================
-   7. RESPONSIVIDADE
-   ============================================================ */
 @media (max-width: 992px) {
-    .profile-main-card { 
-        text-align: center; 
-        flex-direction: column; /* Coloca a foto em cima do texto no mobile */
-    }
-    .profile-tags { justify-content: center; }
-    .account-settings-btn { margin-top: 20px; }
+  .profile-main-card { text-align: center; flex-direction: column; }
+  .profile-tags { justify-content: center; }
 }
-
 @media (max-width: 768px) {
-    .page-content { padding: 20px; }
-    .profile-page-name { font-size: 28px; }
+  .page-content { padding: 20px; }
+  .profile-page-name { font-size: 28px !important; }
 }

@@ -4,73 +4,61 @@
 }
 
 .menu-trigger {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 50px;
+  display: flex; align-items: center; gap: 12px;
+  background: none; border: none; cursor: pointer;
+  padding: 4px 8px; border-radius: 50px;
   transition: background 0.2s;
-
-  &:hover { background: rgba(255, 255, 255, 0.05); }
+  &:hover { background: var(--hover-overlay); }
 
   .user-details {
-    display: flex;
-    flex-direction: column;
-    text-align: right;
-    
-    .user-name { color: #fff; font-weight: 600; font-size: 14px; }
-    .user-class { color: #888; font-size: 11px; }
+    display: flex; flex-direction: column; text-align: right;
+    .user-name  { color: var(--text-main); font-weight: 600; font-size: 14px; }
+    .user-class { color: var(--text-muted); font-size: 11px; }
   }
 }
 
 .avatar-ring {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid #9b2fff; // Cor padrão do Nexo
-  overflow: hidden;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 2px solid #9b2fff; overflow: hidden;
   img { width: 100%; height: 100%; object-fit: cover; }
 }
 
 .chevron {
-  font-size: 12px;
-  color: #888;
+  font-size: 12px; color: var(--text-muted);
   transition: transform 0.3s;
   &.open { transform: rotate(180deg); }
 }
 
+/* Dropdown — usa variáveis para funcionar nos 2 temas */
 .dropdown-panel {
   position: absolute;
   top: calc(100% + 12px);
   right: 0;
   width: 200px;
-  background: #fff;
+  background: var(--bg-card);           /* ← era #fff hardcoded */
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 25px var(--shadow-color);
   padding: 8px 0;
-  z-index: 9999; // Fica por cima de tudo
+  z-index: 9999;
 }
 
 .dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 16px;
-  border: none;
-  background: none;
-  color: #333;
-  font-size: 14px;
-  text-align: left;
-  text-decoration: none;
-  cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 16px;
+  border: none; background: none;
+  color: var(--text-main);             /* ← era #333 hardcoded */
+  font-size: 14px; text-align: left;
+  text-decoration: none; cursor: pointer;
+  transition: background 0.15s;
 
-  &:hover:not(.disabled) { background: #f5f5f5; }
-  &.disabled { color: #ccc; cursor: default; }
-  &.danger { color: #dc3545; font-weight: 600; }
+  &:hover:not(.disabled) { background: var(--hover-overlay); }
+  &.disabled { color: var(--text-muted); cursor: default; }
+  &.danger   { color: #dc3545; font-weight: 600; }
 }
 
-.dropdown-divider { height: 1px; background: #eee; margin: 6px 0; }
+.dropdown-divider {
+  height: 1px;
+  background: var(--border-color);     /* ← era #eee hardcoded */
+  margin: 6px 0;
+}
