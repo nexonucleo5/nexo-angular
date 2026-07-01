@@ -1,0 +1,282 @@
+/* notas-engajamento.scss — usa apenas variáveis do styles.scss
+   REMOVIDO: variáveis $bg-main, $bg-card, $text-primary hardcoded.
+   REMOVIDO: body.dashboard-body que sobrescrevia o tema global.
+   TROCADO: todas as cores por var(--bg-card), var(--text-main), etc.
+   ================================================================ */
+
+/* Cores de destaque (permanecem fixas — são de acento, não de tema) */
+$color-green:     #00c853;
+$color-green-dim: rgba(0, 200, 83, 0.15);
+$color-blue:      #2979ff;
+$color-blue-dim:  rgba(41, 121, 255, 0.15);
+$color-amber:     #ffab00;
+$color-amber-dim: rgba(255, 171, 0, 0.15);
+$color-danger:    #ff4d4d;
+$color-purple:    #8b5cf6;
+
+/* ── Botão exportar ───────────────────────────────────── */
+.btn-export {
+  background-color: #00bfa5;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  transition: opacity 0.2s ease;
+  &:hover { opacity: 0.9; color: #000; }
+}
+
+/* ── Filtros ──────────────────────────────────────────── */
+.card-filters {
+  background-color: var(--bg-card);     /* era $bg-filter-card hardcoded */
+  border: 1px solid var(--border-color);
+}
+
+.custom-select {
+  background-color: var(--bg-input);    /* era $bg-select hardcoded */
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0.6rem 1rem;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%238892a4' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+
+  option { background-color: var(--bg-card); color: var(--text-main); }
+
+  &:focus {
+    background-color: var(--bg-input);
+    color: var(--text-main);
+    border-color: #9b2fff;
+    box-shadow: none;
+  }
+}
+
+/* ── KPI Cards ────────────────────────────────────────── */
+.kpi-card {
+  background-color: var(--bg-card);    /* era $bg-card hardcoded */
+  border: 1px solid var(--border-color);
+  min-height: 160px;
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
+}
+
+.icon-wrapper {
+  width: 42px; height: 42px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+}
+
+.badge-trend {
+  font-size: 0.85rem; font-weight: 600;
+  padding: 0.35rem 0.65rem; border-radius: 20px;
+}
+
+/* ── Utilitários de cor (acento — não dependem de tema) ── */
+.text-green  { color: $color-green  !important; }
+.bg-green    { background-color: $color-green     !important; }
+.bg-green-dim{ background-color: $color-green-dim !important; }
+
+.text-blue   { color: $color-blue   !important; }
+.bg-blue     { background-color: $color-blue      !important; }
+.bg-blue-dim { background-color: $color-blue-dim  !important; }
+
+.bg-amber    { background-color: $color-amber     !important; }
+.text-amber  { color: $color-amber  !important; }
+.bg-amber-dim{ background-color: $color-amber-dim !important; }
+
+.text-danger { color: $color-danger !important; }
+
+/* ── Gráficos ─────────────────────────────────────────── */
+.chart-card {
+  background-color: var(--bg-card);    /* era $bg-card hardcoded */
+  border: 1px solid var(--border-color);
+}
+
+.pure-chart-wrapper {
+  position: relative;
+  height: 220px;
+  margin-left: 35px;
+  margin-bottom: 25px;
+}
+
+.chart-grid {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; flex-direction: column; justify-content: space-between;
+
+  .grid-line {
+    position: relative; width: 100%;
+    border-bottom: 1px dashed var(--border-color); /* era rgba(255,255,255,0.05) */
+
+    &::before {
+      content: attr(data-value);
+      position: absolute; left: -35px; bottom: -7px;
+      width: 25px; text-align: right;
+      font-size: 0.75rem; color: var(--text-muted);
+    }
+  }
+}
+
+/* Gráfico 1 — Barras */
+.bars-container {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; justify-content: space-around; align-items: flex-end; z-index: 2;
+
+  .bar-wrapper {
+    display: flex; flex-direction: column; align-items: center;
+    width: 15%; height: 100%; justify-content: flex-end;
+
+    .bar { width: 100%; border-radius: 6px 6px 0 0; transition: opacity 0.2s; &:hover { opacity: 0.85; } }
+  }
+}
+
+/* Gráfico 2 — Linhas */
+.lines-container {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;
+
+  .static-line {
+    position: absolute; left: 0; width: 100%; height: 2px;
+    &.line-green { background-color: $color-green; }
+    &.line-blue  { background-color: $color-blue; }
+  }
+
+  .points-wrapper {
+    width: 100%; height: 100%; display: flex; justify-content: space-around;
+
+    .point-col {
+      position: relative; width: 20px; height: 100%;
+
+      .dot {
+        position: absolute; left: 50%; transform: translate(-50%, 50%);
+        width: 8px; height: 8px; border-radius: 50%; z-index: 3;
+        &.dot-green { background-color: $color-green; box-shadow: 0 0 0 2px var(--bg-card); }
+        &.dot-blue  { background-color: $color-blue;  box-shadow: 0 0 0 2px var(--bg-card); }
+      }
+    }
+  }
+}
+
+.bar-label {
+  position: absolute; bottom: -25px;
+  font-size: 0.8rem; color: var(--text-muted); white-space: nowrap;
+}
+
+.chart-legend {
+  .legend-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  }
+}
+
+/* ── Mapa de Engajamento ──────────────────────────────── */
+.card-engagement {
+  background-color: var(--bg-card);    /* era $bg-card hardcoded */
+  border: 1px solid var(--border-color);
+}
+
+.pie-chart-wrapper {
+  position: relative; width: 200px; height: 200px;
+  display: flex; align-items: center; justify-content: center;
+
+  .pie-chart {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: conic-gradient(
+      #{$color-green}  0%     56.25%,
+      #{$color-blue}  56.25% 87.5%,
+      #{$color-amber} 87.5%  100%
+    );
+    border: 2px solid var(--bg-card);  /* era $bg-card hardcoded */
+  }
+
+  .pie-label {
+    position: absolute; font-size: 0.85rem; font-weight: 600; white-space: nowrap;
+    &.label-alto  { top: -20px; left: 50%; transform: translateX(-50%); }
+    &.label-médio { bottom: -20px; left: 10%; }
+    &.label-baixo { right: -60px; top: 50%; transform: translateY(-50%); }
+  }
+}
+
+.legend-list-item {
+  background-color: var(--bg-input);   /* era $bg-inner-item hardcoded */
+  border: 1px solid var(--border-color);
+}
+
+.criteria-item {
+  background-color: var(--bg-input);   /* era $bg-inner-item hardcoded */
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s ease;
+  &:hover { transform: translateX(4px); border-color: #9b2fff; }
+}
+
+.badge-status {
+  font-size: 0.75rem; font-weight: 700;
+  padding: 0.4rem 0.75rem; border-radius: 20px;
+}
+
+/* ── Tabela de notas ──────────────────────────────────── */
+.card-table {
+  background-color: var(--bg-card);    /* era $bg-card hardcoded */
+  border: 1px solid var(--border-color);
+}
+
+.btn-save {
+  background-color: #00a86b; color: #fff; border: none; border-radius: 8px;
+  transition: background-color 0.2s ease;
+  &:hover { background-color: #008f5d; color: #fff; }
+}
+
+.table-dark-custom {
+  background: transparent;
+  color: var(--text-main);             /* era $text-primary hardcoded */
+  border-collapse: separate;
+  border-spacing: 0 12px;
+
+  thead th {
+    background-color: transparent;
+    color: var(--text-muted);          /* era $text-muted hardcoded */
+    font-size: 0.85rem; font-weight: 600; border: none; padding-bottom: 8px;
+  }
+
+  tbody tr td {
+    background-color: transparent; border: none; padding: 10px 8px;
+  }
+}
+
+.avatar-img {
+  width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+  border: 1px solid var(--border-color);
+}
+
+.student-name { font-size: 0.9rem; font-weight: 600; color: var(--text-main); }
+.student-id   { font-size: 0.75rem; color: var(--text-muted); }
+
+.input-note {
+  background-color: var(--bg-input);  /* era $bg-input hardcoded */
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px; text-align: center;
+  max-width: 60px; margin: 0 auto;
+  font-weight: 600; font-size: 0.9rem; padding: 0.4rem;
+
+  &:focus {
+    background-color: var(--bg-input);
+    color: var(--text-main);
+    border-color: #9b2fff;
+    box-shadow: none;
+  }
+}
+
+.progress-bar-container {
+  background-color: var(--border-color); /* era rgba(255,255,255,0.06) */
+  height: 6px; border-radius: 10px; overflow: hidden; position: relative;
+
+  .progress-fill {
+    height: 100%;
+    background-color: $color-purple;
+    border-radius: 10px;
+  }
+}
+
+.progress-text { font-size: 0.8rem; color: var(--text-muted); min-width: 30px; text-align: right; }
+
+.btn-action-view {
+  background: transparent; border: none;
+  color: var(--text-muted); font-size: 1.1rem; padding: 4px 8px;
+  transition: color 0.2s;
+  &:hover { color: var(--text-main); }
+}

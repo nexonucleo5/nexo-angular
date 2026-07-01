@@ -1,17 +1,27 @@
+/* Mixin interno para evitar repetição */
+%card-base {
+  background: var(--bg-card);
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+}
+
 .page-content {
   background-color: var(--bg-primary);
   min-height: 100vh;
 }
 
 .main-card {
+  @extend %card-base;
+}
+
+/* CORRIGIDO: era @extend .main-card — substituído por propriedades diretas */
+.metric-card {
   background: var(--bg-card);
   border-radius: 20px;
   border: 1px solid var(--border-color);
-}
-
-.metric-card {
-  @extend .main-card;
   text-align: left;
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
 }
 
 /* Inputs */
@@ -26,7 +36,7 @@
   font-size: 14px;
   transition: border-color 0.2s;
 
-  &:focus { border-color: #9b2fff; outline: none; }
+  &:focus   { border-color: #9b2fff; outline: none; }
   &::placeholder { color: var(--text-muted); }
 
   option {
@@ -42,7 +52,7 @@
 .btn-export {
   background: #06d25e; color: white; font-weight: bold;
   border: none; padding: 10px 20px; border-radius: 12px; font-size: 14px;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s; cursor: pointer;
   &:hover { opacity: 0.9; }
 }
 
@@ -52,29 +62,32 @@
   border: 1px solid var(--border-color);
   font-weight: bold; border-radius: 12px;
   padding: 10px 20px; font-size: 13px;
-  transition: background 0.2s;
+  transition: background 0.2s; cursor: pointer;
   &:hover { border-color: #9b2fff; }
 }
 
 /* Tabela de frequência */
 .table-custom {
   width: 100%; border-collapse: collapse;
+
   th {
     color: var(--text-muted); font-size: 12px;
     font-weight: 600; padding-bottom: 12px;
   }
+
   td {
     padding: 12px 0;
     border-bottom: 1px solid var(--border-color);
     vertical-align: middle;
     color: var(--text-main);
   }
+
   tr:last-child td { border-bottom: none; }
 }
 
 .table-body-scroll {
   max-height: 320px; overflow-y: auto; padding-right: 5px;
-  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar       { width: 5px; }
   &::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
 }
 
@@ -107,7 +120,7 @@
   border-radius: 12px;
   border: 1px solid var(--border-color);
 
-  .class-title  { color: var(--text-main); font-size: 13px; }
+  .class-title     { color: var(--text-main); font-size: 13px; }
   .edit-icon-small { cursor: pointer; font-size: 12px; color: var(--text-muted);
     &:hover { color: var(--text-main); }
   }

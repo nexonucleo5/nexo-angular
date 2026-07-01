@@ -1,15 +1,13 @@
-/* ═══════════════════════════════════════════════════════════════
-   SIDEBAR — PORTAL DO PROFESSOR
-   Fiel ao visual da imagem: fundo claro, item ativo com
-   gradiente roxo → verde, sem faixa preta lateral.
-═══════════════════════════════════════════════════════════════ */
+/* menu-professor.scss
+   CORREÇÃO 1: position sticky → position fixed (estava criando a faixa preta)
+   CORREÇÃO 2: z-index explícito para garantir que o sidebar nunca fique coberto
+*/
 
 .sidebar {
   width: 300px;
   min-width: 300px;
-  min-height: 100vh;
+  height: 100vh;
 
-  /* Usa a mesma variável dos outros menus para respeitar o tema */
   background-color: var(--bg-card);
   border-right: 1px solid var(--border-color);
 
@@ -17,21 +15,19 @@
   flex-direction: column;
   justify-content: space-between;
 
-  /* Fica fixo enquanto o conteúdo rola */
+  /* CORRIGIDO: era sticky — com app.scss usando margin-left: 300px,
+     o sidebar precisa ser fixed para o layout funcionar */
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 100;
+  z-index: 1000;  /* alto o suficiente para nunca ser coberto */
 
   box-sizing: border-box;
+  overflow-y: auto;
   transition: background-color 0.3s, border-color 0.3s;
-
-  /* ── CRÍTICO: remove qualquer gap/padding que cause faixa preta ── */
-  margin: 0;
-  padding: 0;
 }
 
-/* ── Brand ──────────────────────────────────────────────────── */
+/* Brand */
 .sidebar-brand {
   padding: 28px 24px 22px;
   border-bottom: 1px solid var(--border-color);
@@ -40,29 +36,27 @@
     display: flex;
     align-items: center;
     gap: 12px;
-  }
 
-  .brand-icon {
-    font-size: 1.8rem;
-    /* Gradiente no ícone do mortarboard */
-    background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+    .brand-icon {
+      font-size: 1.8rem;
+      background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-  .brand-title {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--text-main);
-    margin: 0;
-    letter-spacing: 1px;
+    .brand-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 0;
+    }
   }
 }
 
-/* ── Menu ───────────────────────────────────────────────────── */
+/* Menu */
 .sidebar-menu {
-  padding: 16px 14px;
+  padding: 8px 14px;
   flex-grow: 1;
 }
 
@@ -76,7 +70,7 @@
   }
 }
 
-/* ── Links ──────────────────────────────────────────────────── */
+/* Links */
 .sidebar-link {
   display: flex;
   align-items: center;
@@ -87,14 +81,15 @@
   font-size: 17px;
   font-weight: 600;
   text-decoration: none;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  cursor: pointer; /* garante que o cursor mostre que é clicável */
+  cursor: pointer;           /* garante cursor de clique */
+  pointer-events: auto;      /* garante que o link responde a cliques */
+  transition: background 0.2s, color 0.2s;
 
   i {
     font-size: 22px;
     color: var(--text-muted);
-    transition: color 0.2s ease;
-    /* Reset de qualquer gradient herdado que quebre o ícone */
+    transition: color 0.2s;
+    /* Reset de gradient herdado que quebraria o ícone */
     background: none;
     -webkit-background-clip: unset;
     -webkit-text-fill-color: unset;
@@ -105,33 +100,25 @@
     white-space: nowrap;
   }
 
-  /* Hover — destaque suave roxo */
   &:hover {
-    background-color: rgba(155, 47, 255, 0.08);
+    background-color: rgba(155, 47, 255, 0.1);
     color: var(--text-main);
-
-    i {
-      color: #9b2fff;
-    }
+    i { color: #9b2fff; }
   }
 
-  /* ── Item ATIVO — gradiente roxo → verde conforme a imagem ── */
+  /* Item ativo — gradiente roxo → verde */
   &.active {
     background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
     color: #ffffff !important;
-    box-shadow: 0 8px 24px rgba(102, 65, 190, 0.25);
+    box-shadow: 0 8px 20px rgba(102, 65, 190, 0.25);
 
     i {
       color: #ffffff !important;
-      /* Garante que o ícone não herde gradient de texto */
       background: none;
-      -webkit-background-clip: unset;
       -webkit-text-fill-color: #ffffff;
     }
 
-    span {
-      color: #ffffff;
-    }
+    span { color: #ffffff; }
 
     &:hover {
       background: linear-gradient(90deg, #8825e8 0%, #7a58c9 45%, #05bb54 100%);
@@ -139,15 +126,15 @@
   }
 }
 
-/* ── Footer ─────────────────────────────────────────────────── */
+/* Footer */
 .sidebar-footer {
-  padding: 20px;
+  padding: 24px 20px;
   border-top: 1px solid var(--border-color);
   text-align: center;
+  color: var(--text-muted);
 
   p {
     margin: 0;
-    font-size: 13px;
-    color: var(--text-muted);
+    font-size: 14px;
   }
 }
