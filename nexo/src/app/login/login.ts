@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -17,9 +17,17 @@ export class Login {
   private authService = inject(AuthService);
 
   public loginForm: FormGroup;
-  public mostrarSenha   = false;
-  public mensagemErro   = '';
+  public mostrarSenha    = false;
+  public carregando      = false; // ← estado de loading durante a chamada HTTP
+  public mensagemErro    = '';
   public mensagemSucesso = '';
+
+  /** Destino após login por role */
+  private readonly destinos: Record<string, string> = {
+    aluno:     '/dashboards',
+    diretor:   '/diretor-dashboards',
+    professor: '/professor-dashboard',
+  };
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -35,15 +43,32 @@ export class Login {
       return;
     }
 
-    this.mensagemErro = '';
+    this.mensagemErro  = '';
+    this.carregando    = true;
     const { username, password } = this.loginForm.value;
-    const sucesso = this.authService.login(username, password);
 
-    if (sucesso) {
-      this.mensagemSucesso = '✅ Login realizado com sucesso! Redirecionando...';
-      setTimeout(() => this.router.navigate(['/dashboards']), 120);
-    } else {
-      this.mensagemErro = '❌ Credenciais inválidas. Tente novamente.';
-    }
+    // authService.login() agora retorna Observable<boolean>
+    this.authService.login(username, password).subscribe({
+      next: (sucesso) => {
+        this.carregando = false;
+        if (sucesso) {
+          const role    = this.authService.usuarioLogado()?.role ?? 'aluno';
+          const destino = this.destinos[role] ?? '/dashboards';
+          this.mensagemSucesso = '✅ Login realizado! Redirecionando...';
+          setTimeout(() => this.router.navigate([destino]), 150);
+        } else {
+          this.mensagemErro = '❌ Credenciais inválidas. Tente novamente.';
+        }
+      },
+      error: () => {
+        this.carregando   = false;
+        this.mensagemErro = '❌ Erro de conexão com o servidor. Tente novamente.';
+      },
+    });
+  }
+
+  /** Navega para a tela de cadastro de aluno */
+  public irParaCadastro(): void {
+    this.router.navigate(['/cadastro']);
   }
 }

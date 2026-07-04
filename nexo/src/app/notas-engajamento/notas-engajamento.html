@@ -6,9 +6,7 @@
       <h1 class="h3 fw-bold mb-1" style="color: var(--text-main);">
         Painel de Notas e Engajamento
       </h1>
-      <p class="text-soft mb-0">
-        Dashboard analítico de desempenho e participação dos alunos
-      </p>
+      <p class="text-soft mb-0">Dashboard analítico de desempenho e participação dos alunos</p>
     </div>
     <button class="btn btn-export d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
       <i class="bi bi-download"></i> Exportar Relatório
@@ -16,9 +14,7 @@
   </header>
 
   <!-- Feedback -->
-  <div *ngIf="mensagemSucesso" class="alert alert-success py-2 mb-3">
-    {{ mensagemSucesso }}
-  </div>
+  <div *ngIf="mensagemSucesso" class="alert alert-success py-2 mb-3">{{ mensagemSucesso }}</div>
 
   <!-- ── Filtros ───────────────────────────────────────── -->
   <section class="card-filters p-4 mb-4 rounded-4">
@@ -50,7 +46,7 @@
     </div>
   </section>
 
-  <!-- ── KPI Cards (via *ngFor) ───────────────────────── -->
+  <!-- ── KPI Cards ─────────────────────────────────────── -->
   <section class="row g-4">
     <div class="col-12 col-sm-6 col-xl-3" *ngFor="let kpi of kpis">
       <div class="kpi-card p-4 rounded-4 h-100 d-flex flex-column justify-content-between">
@@ -58,15 +54,11 @@
           <div class="icon-wrapper" [ngClass]="[kpi.iconeBgClasse, kpi.iconeCorClasse]">
             <i class="bi" [ngClass]="kpi.icone"></i>
           </div>
-          <span class="badge badge-trend" [ngClass]="kpi.tendenciaClasse">
-            {{ kpi.tendencia }}
-          </span>
+          <span class="badge badge-trend" [ngClass]="kpi.tendenciaClasse">{{ kpi.tendencia }}</span>
         </div>
         <div>
           <p class="text-soft small fw-medium mb-2">{{ kpi.label }}</p>
-          <h2 class="display-6 fw-bold mb-0" style="color: var(--text-main);">
-            {{ kpi.valor }}
-          </h2>
+          <h2 class="display-6 fw-bold mb-0" style="color: var(--text-main);">{{ kpi.valor }}</h2>
         </div>
       </div>
     </div>
@@ -80,11 +72,8 @@
       <div class="chart-card p-4 rounded-4 h-100">
         <div class="d-flex align-items-center gap-2 mb-4">
           <i class="bi bi-bar-chart text-green fs-5"></i>
-          <h3 class="h5 fw-bold mb-0" style="color: var(--text-main);">
-            Distribuição de Notas
-          </h3>
+          <h3 class="h5 fw-bold mb-0" style="color: var(--text-main);">Distribuição de Notas</h3>
         </div>
-
         <div class="pure-chart-wrapper">
           <div class="chart-grid">
             <div class="grid-line" data-value="16"></div>
@@ -103,98 +92,18 @@
       </div>
     </div>
 
-    <!-- Evolução de desempenho -->
+    <!-- Mapa de Engajamento -->
     <div class="col-12 col-lg-6">
-      <div class="chart-card p-4 rounded-4 h-100 d-flex flex-column justify-content-between">
-        <div>
-          <div class="d-flex align-items-center gap-2 mb-4">
-            <i class="bi bi-graph-up-arrow text-blue fs-5"></i>
-            <h3 class="h5 fw-bold mb-0" style="color: var(--text-main);">
-              Evolução de Desempenho
-            </h3>
-          </div>
-
-          <div class="pure-chart-wrapper">
-            <div class="chart-grid">
-              <div class="grid-line" data-value="100"></div>
-              <div class="grid-line" data-value="75"></div>
-              <div class="grid-line" data-value="50"></div>
-              <div class="grid-line" data-value="25"></div>
-              <div class="grid-line" data-value="0"></div>
-            </div>
-            <div class="lines-container">
-              <div class="static-line line-green" style="bottom: 30%;"></div>
-              <div class="static-line line-blue"  style="bottom: 8%;"></div>
-              <div class="points-wrapper">
-                <div class="point-col" *ngFor="let ponto of pontosEvolucao">
-                  <span class="dot dot-green" [style.bottom.%]="ponto.alturaMedia"></span>
-                  <span class="dot dot-blue"  [style.bottom.%]="ponto.alturaAprovacao"></span>
-                  <span class="bar-label">{{ ponto.rotulo }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div class="card-engagement p-4 rounded-4 h-100">
+        <div class="d-flex align-items-center gap-2 mb-4">
+          <i class="bi bi-activity text-green fs-5"></i>
+          <h3 class="h5 fw-bold mb-0" style="color: var(--text-main);">Mapa de Engajamento</h3>
         </div>
-
-        <div class="chart-legend d-flex justify-content-center gap-4 mt-3">
-          <span class="small text-soft d-flex align-items-center gap-2">
-            <span class="legend-dot bg-green"></span> Média da Turma
-          </span>
-          <span class="small text-soft d-flex align-items-center gap-2">
-            <span class="legend-dot bg-blue"></span> Taxa de Aprovação (%)
-          </span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Mapa de Engajamento ───────────────────────────── -->
-  <section class="card-engagement p-4 mt-4 rounded-4">
-    <div class="d-flex align-items-center gap-2 mb-4">
-      <i class="bi bi-activity text-green fs-5"></i>
-      <h3 class="h5 fw-bold mb-0" style="color: var(--text-main);">
-        Mapa de Engajamento da Turma
-      </h3>
-    </div>
-
-    <div class="row g-4">
-      <!-- Pizza -->
-      <div class="col-12 col-lg-5 d-flex flex-column align-items-center justify-content-center">
-        <div class="pie-chart-wrapper mb-4">
-          <div class="pie-chart"></div>
-          <span *ngFor="let nivel of niveisEngajamento"
-                class="pie-label"
-                [ngClass]="['label-' + nivel.label.toLowerCase(), nivel.textClasse]">
-            {{ nivel.label }}: {{ nivel.qtd }}
-          </span>
-        </div>
-
-        <div class="w-100 px-md-4">
-          <div class="legend-list-item d-flex justify-content-between align-items-center p-2 mb-2 rounded-3"
-               *ngFor="let nivel of niveisEngajamento">
-            <span class="small d-flex align-items-center gap-2">
-              <span class="legend-dot" [ngClass]="nivel.corClasse"></span>
-              {{ nivel.label }}
-            </span>
-            <span class="small fw-bold" style="color: var(--text-main);">
-              {{ nivel.qtd }} alunos
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Critérios -->
-      <div class="col-12 col-lg-7">
-        <h4 class="h6 fw-bold mb-3" style="color: var(--text-main);">
-          Critérios de Engajamento
-        </h4>
         <div class="d-flex flex-column gap-3">
           <div class="criteria-item p-3 rounded-3 d-flex justify-content-between align-items-center"
                *ngFor="let criterio of criterios">
             <div>
-              <h5 class="small fw-bold mb-1" style="color: var(--text-main);">
-                {{ criterio.titulo }}
-              </h5>
+              <h5 class="small fw-bold mb-1" style="color: var(--text-main);">{{ criterio.titulo }}</h5>
               <p class="small text-soft mb-0">{{ criterio.descricao }}</p>
             </div>
             <span class="badge badge-status" [ngClass]="[criterio.nivelTextClasse, criterio.nivelBgClasse]">
@@ -202,18 +111,23 @@
             </span>
           </div>
         </div>
+        <div class="d-flex gap-3 mt-4 flex-wrap">
+          <span class="small text-soft d-flex align-items-center gap-2"
+                *ngFor="let nivel of niveisEngajamento">
+            <span class="legend-dot" [ngClass]="nivel.corClasse"></span>
+            {{ nivel.label }}: {{ nivel.qtd }} alunos
+          </span>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ── Tabela de Notas ───────────────────────────────── -->
+  <!-- ── Tabela de Notas (ITEM 2) ─────────────────────── -->
   <section class="card-table p-4 mt-4 rounded-4">
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 gap-3">
       <h3 class="h5 fw-bold mb-0" style="color: var(--text-main);">
         Lançamento e Visualização de Notas
-        <small class="text-soft fw-normal ms-2 fs-6">
-          ({{ alunosFiltrados.length }} aluno(s))
-        </small>
+        <small class="text-soft fw-normal ms-2 fs-6">({{ alunosFiltrados.length }} aluno(s))</small>
       </h3>
       <button class="btn btn-save px-3 py-2 fw-semibold" (click)="salvarAlteracoes()">
         Salvar Alterações
@@ -229,6 +143,7 @@
             <th scope="col" class="text-center">P2</th>
             <th scope="col" class="text-center">T1</th>
             <th scope="col" class="text-center">Part.</th>
+            <!-- Média calculada em tempo real (ITEM 2) -->
             <th scope="col" class="text-center">Média</th>
             <th scope="col" style="min-width: 120px;">Freq.</th>
             <th scope="col" style="min-width: 120px;">Eng.</th>
@@ -250,15 +165,16 @@
               </div>
             </td>
 
-            <!-- Notas editáveis vinculadas ao TypeScript -->
-            <td><input type="text" class="form-control input-note" [(ngModel)]="aluno.p1"></td>
-            <td><input type="text" class="form-control input-note" [(ngModel)]="aluno.p2"></td>
-            <td><input type="text" class="form-control input-note" [(ngModel)]="aluno.t1"></td>
-            <td><input type="text" class="form-control input-note" [(ngModel)]="aluno.part"></td>
+            <!-- Inputs de nota — qualquer edição recalcula a média ao exibir -->
+            <td><input type="text" class="form-control input-note" [(ngModel)]="aluno.p1"   placeholder="0"></td>
+            <td><input type="text" class="form-control input-note" [(ngModel)]="aluno.p2"   placeholder="0"></td>
+            <td><input type="text" class="form-control input-note" [(ngModel)]="aluno.t1"   placeholder="0"></td>
+            <td><input type="text" class="form-control input-note" [(ngModel)]="aluno.part" placeholder="0"></td>
 
-            <!-- Média -->
-            <td class="text-center fw-bold" [ngClass]="aluno.mediaTextClasse">
-              {{ aluno.media | number:'1.2-2' }}
+            <!-- Média calculada dinamicamente (ITEM 2) -->
+            <td class="text-center fw-bold"
+                [ngClass]="getMediaClasse(calcularMedia(aluno))">
+              {{ calcularMedia(aluno) | number:'1.2-2' }}
             </td>
 
             <!-- Frequência -->
@@ -281,11 +197,10 @@
               </div>
             </td>
 
-            <!-- Status -->
+            <!-- Status dinâmico baseado na média calculada (ITEM 2) -->
             <td class="text-center">
-              <span class="badge badge-status"
-                    [ngClass]="[aluno.statusTextClasse, aluno.statusBgClasse]">
-                {{ aluno.status }}
+              <span class="badge badge-status" [ngClass]="getStatusClasses(aluno)">
+                {{ getStatus(aluno) }}
               </span>
             </td>
 
