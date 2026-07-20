@@ -41,7 +41,10 @@ public class SecurityConfig {
                 .requestMatchers("/h2-console/**", "/error").permitAll()
                 .requestMatchers("/ws/**").permitAll() // handshake autenticado por token na query
 
-                .anyRequest().authenticated())
+                // API protegida; todo o resto (index.html, .js, .css, assets e as
+                // rotas do Angular) é público — é o frontend servido pelo monolito
+                .requestMatchers("/api/**").authenticated()
+                .anyRequest().permitAll())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

@@ -28,7 +28,8 @@ spring:
       escape-non-ascii: true
 
 server:
-  port: 8080
+  # Render (e outros PaaS) injetam a porta em $PORT; local cai no 8080
+  port: ${PORT:8080}
 
 nexo:
   jwt:
