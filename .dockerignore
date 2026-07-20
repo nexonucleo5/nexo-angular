@@ -1,0 +1,10 @@
+# Evita mandar lixo pesado pro contexto de build do Docker
+**/node_modules
+**/target
+**/dist
+**/.angular
+backend/data
+.git
+.github
+*.md
+nexo/*.md
