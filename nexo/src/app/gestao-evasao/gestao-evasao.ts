@@ -1,17 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { GestaoDiretorService } from '../api/gestao-diretor.service';
+import { AlunoRiscoDTO, RiscoEvasao } from '../core/api.models';
+import { exportarCsv } from '../core/csv.util';
 
-export interface AlunoRisco {
+/** Aluno em risco já no formato de exibição da tela (derivado do DTO agregado do backend). */
+interface AlunoRiscoView {
   nome: string;
   matricula: string;
-  anoTurma: string;
-  anoFiltro: string;
+  turma: string;
   frequencia: number;
   participacao: number;
   notaMedia: number;
   ultimoAcesso: string;
-  risco: 'Alto' | 'Médio';
+  risco: 'Alto' | 'Médio' | 'Baixo';
   motivoPrincipal: string;
   intervencoes: string;
   tempoIntervencao: string;
@@ -19,6 +22,14 @@ export interface AlunoRisco {
   emailResponsavel: string;
   foto: string;
 }
+
+const FOTO_PADRAO = 'assets/imagensProjeto/gabrielZapelini.png';
+
+const RISCO_LABEL: Record<RiscoEvasao, 'Alto' | 'Médio' | 'Baixo'> = {
+  ALTO: 'Alto',
+  MEDIO: 'Médio',
+  BAIXO: 'Baixo',
+};
 
 @Component({
   selector: 'app-gestao-evasao',
@@ -28,110 +39,135 @@ export interface AlunoRisco {
   styleUrl: './gestao-evasao.scss',
 })
 export class GestaoEvasao {
-  buscaNome         = '';
-  riscoSelecionado  = 'Todos os Riscos';
-  turmaSelecionada  = 'Todas as Turmas';
+  private readonly gestao = inject(GestaoDiretorService);
 
-  riscos: string[] = ['Todos os Riscos', 'Risco Alto', 'Risco Médio'];
-  turmas: string[] = ['Todas as Turmas', '1º Ano', '2º Ano', '3º Ano'];
+  readonly buscaNome = signal('');
+  readonly riscoSelecionado = signal('Todos os Riscos');
+  readonly turmaSelecionada = signal('Todas as Turmas');
 
-  alunos: AlunoRisco[] = [
-    {
-      nome: 'Lucas Ferreira Silva',
-      matricula: '2024001',
-      anoTurma: '2º Ano A - Ensino Médio',
-      anoFiltro: '2º Ano',
-      frequencia: 45,
-      participacao: 32,
-      notaMedia: 4.5,
-      ultimoAcesso: '7 dias atrás',
-      risco: 'Alto',
-      motivoPrincipal: 'Baixa frequência e desempenho',
-      intervencoes: '2 intervenção(ões)',
-      tempoIntervencao: 'Há 3 dias',
-      contatoResponsavel: '(11) 98765-4321',
-      emailResponsavel: 'responsavel.lucas@email.com',
-      foto: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
-    },
-    {
-      nome: 'Mariana Costa Santos',
-      matricula: '2024002',
-      anoTurma: '1º Ano B - Ensino Médio',
-      anoFiltro: '1º Ano',
-      frequencia: 62,
-      participacao: 58,
-      notaMedia: 6.2,
-      ultimoAcesso: '4 dias atrás',
-      risco: 'Médio',
-      motivoPrincipal: 'Queda no engajamento',
-      intervencoes: '1 intervenção(ões)',
-      tempoIntervencao: 'Há 1 semana',
-      contatoResponsavel: '(11) 97654-3210',
-      emailResponsavel: 'responsavel.mariana@email.com',
-      foto: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-    },
-    {
-      nome: 'Pedro Henrique Souza',
-      matricula: '2024003',
-      anoTurma: '3º Ano C - Ensino Médio',
-      anoFiltro: '3º Ano',
-      frequencia: 58,
-      participacao: 51,
-      notaMedia: 5.8,
-      ultimoAcesso: '5 dias atrás',
-      risco: 'Médio',
-      motivoPrincipal: 'Irregular participação',
-      intervencoes: '1 intervenção(ões)',
-      tempoIntervencao: 'Há 5 dias',
-      contatoResponsavel: '(11) 96543-2109',
-      emailResponsavel: 'responsavel.pedro@email.com',
-      foto: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-    },
-    {
-      nome: 'Julia Beatriz Santos',
-      matricula: '2024004',
-      anoTurma: '2º Ano B - Ensino Médio',
-      anoFiltro: '2º Ano',
-      frequencia: 38,
-      participacao: 28,
-      notaMedia: 4.1,
-      ultimoAcesso: '10 dias atrás',
-      risco: 'Alto',
-      motivoPrincipal: 'Inatividade prolongada',
-      intervencoes: '3 intervenção(ões)',
-      tempoIntervencao: 'Há 2 dias',
-      contatoResponsavel: '(11) 95432-1098',
-      emailResponsavel: 'responsavel.julia@email.com',
-      foto: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
-    },
-  ];
+  readonly carregando = signal(true);
+  readonly erro = signal(false);
+  private readonly alunos = signal<AlunoRiscoView[]>([]);
+  readonly detalhe = signal<AlunoRiscoView | null>(null);
 
-  private normalizar(s: string): string {
-    return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  }
+  readonly riscos = ['Todos os Riscos', 'Risco Alto', 'Risco Médio', 'Risco Baixo'];
 
-  get alunosFiltrados(): AlunoRisco[] {
-    return this.alunos.filter(aluno => {
-      const termo = this.normalizar(this.buscaNome);
+  /** Turmas reais derivadas dos dados carregados (antes eram fixas e não batiam com o backend). */
+  readonly turmas = computed(() => {
+    const nomes = Array.from(new Set(this.alunos().map((a) => a.turma))).sort();
+    return ['Todas as Turmas', ...nomes];
+  });
+
+  readonly alunosFiltrados = computed(() => {
+    const termo = this.normalizar(this.buscaNome());
+    const risco = this.riscoSelecionado();
+    const turma = this.turmaSelecionada();
+
+    return this.alunos().filter((aluno) => {
       const condicaoBusca =
         !termo ||
         this.normalizar(aluno.nome).includes(termo) ||
         aluno.matricula.includes(termo) ||
-        this.normalizar(aluno.anoTurma).includes(termo);
+        this.normalizar(aluno.turma).includes(termo);
 
       const condicaoRisco =
-        this.riscoSelecionado === 'Todos os Riscos' ||
-        this.normalizar(this.riscoSelecionado).includes(this.normalizar(aluno.risco));
+        risco === 'Todos os Riscos' || this.normalizar(risco).includes(this.normalizar(aluno.risco));
 
-      const condicaoTurma =
-        this.turmaSelecionada === 'Todas as Turmas' ||
-        aluno.anoFiltro === this.turmaSelecionada;
+      const condicaoTurma = turma === 'Todas as Turmas' || aluno.turma === turma;
 
       return condicaoBusca && condicaoRisco && condicaoTurma;
     });
+  });
+
+  // KPIs derivados da lista real (antes eram números fixos no template)
+  readonly totalEmRisco = computed(() => this.alunos().filter((a) => a.risco !== 'Baixo').length);
+  readonly totalAlto = computed(() => this.alunos().filter((a) => a.risco === 'Alto').length);
+  readonly totalMedio = computed(() => this.alunos().filter((a) => a.risco === 'Médio').length);
+  readonly totalBaixo = computed(() => this.alunos().filter((a) => a.risco === 'Baixo').length);
+
+  constructor() {
+    this.carregar();
+  }
+
+  carregar(): void {
+    this.carregando.set(true);
+    this.erro.set(false);
+    this.gestao.riscoEvasao().subscribe({
+      next: (lista) => {
+        this.alunos.set(lista.map((dto) => this.paraView(dto)));
+        this.carregando.set(false);
+      },
+      error: () => {
+        this.erro.set(true);
+        this.carregando.set(false);
+      },
+    });
+  }
+
+  private paraView(dto: AlunoRiscoDTO): AlunoRiscoView {
+    return {
+      nome: dto.nome,
+      matricula: dto.matricula,
+      turma: dto.turma ?? 'Sem turma',
+      frequencia: Math.max(0, Math.round(100 - dto.percentualFaltas)),
+      participacao: dto.engajamento,
+      notaMedia: dto.media,
+      ultimoAcesso: this.formatarRelativo(dto.ultimoAcessoEm),
+      risco: RISCO_LABEL[dto.risco],
+      motivoPrincipal: dto.motivoPrincipal,
+      intervencoes: `${dto.intervencoes} intervenção(ões)`,
+      tempoIntervencao: dto.ultimaIntervencaoEm ? this.formatarRelativo(dto.ultimaIntervencaoEm) : 'Nenhuma ainda',
+      contatoResponsavel: dto.telefoneResponsavel ?? 'Não informado',
+      emailResponsavel: dto.emailResponsavel ?? '',
+      foto: dto.foto || FOTO_PADRAO,
+    };
+  }
+
+  /** Formata um ISO em texto relativo ("há X dias"), com a formatação no client (padrão do projeto). */
+  private formatarRelativo(iso: string | null): string {
+    if (!iso) return '—';
+    const dias = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+    if (dias <= 0) return 'Hoje';
+    if (dias === 1) return 'Ontem';
+    if (dias < 7) return `Há ${dias} dias`;
+    if (dias < 14) return 'Há 1 semana';
+    if (dias < 30) return `Há ${Math.floor(dias / 7)} semanas`;
+    return `Há ${Math.floor(dias / 30)} mês(es)`;
+  }
+
+  private normalizar(s: string): string {
+    return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   }
 
   getClasseRisco(risco: string): string {
-    return this.normalizar(risco); // 'alto' ou 'medio'
+    return this.normalizar(risco); // 'alto' | 'medio' | 'baixo'
+  }
+
+  /** Exporta a lista filtrada de alunos em risco para CSV. */
+  exportar(): void {
+    const linhas = this.alunosFiltrados().map((a) => [
+      a.nome, a.matricula, a.turma, a.risco, `${a.frequencia}%`, `${a.participacao}%`,
+      a.notaMedia, a.motivoPrincipal, a.contatoResponsavel, a.emailResponsavel,
+    ]);
+    exportarCsv('alunos-em-risco', [
+      'Nome', 'Matrícula', 'Turma', 'Risco', 'Frequência', 'Participação',
+      'Nota Média', 'Motivo Principal', 'Telefone Responsável', 'E-mail Responsável',
+    ], linhas);
+  }
+
+  verDetalhes(aluno: AlunoRiscoView): void {
+    this.detalhe.set(aluno);
+  }
+
+  fecharDetalhes(): void {
+    this.detalhe.set(null);
+  }
+
+  /** Abre o cliente de e-mail para contatar o responsável do aluno. */
+  contatar(aluno: AlunoRiscoView): void {
+    if (aluno.emailResponsavel) {
+      const assunto = encodeURIComponent(`Acompanhamento — ${aluno.nome}`);
+      window.location.href = `mailto:${aluno.emailResponsavel}?subject=${assunto}`;
+    }
   }
 }

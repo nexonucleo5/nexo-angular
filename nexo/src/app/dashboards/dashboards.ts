@@ -1,25 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardDiretor } from '../diretor-dashboard/diretor-dashboard';
 import { AuthService } from '../services/auth.service';
+import { AlunoDashboardService } from '../api/aluno-dashboard.service';
+import { AlunoDashboardDTO } from '../core/api.models';
 
-export interface Atividade {
-  titulo: string;
-  materia: string;
-  xp: number;
-  tempo: string;
-  icone: string;
-  progresso: number;
-  corProgresso: string;
-}
-
-export interface RankingItem {
-  pos: number;
-  nome: string;
-  xp: number;
-  foto: string;
-  isMe: boolean;
-}
+const FOTO_PADRAO = 'assets/imagensProjeto/gabrielZapelini.png';
+const COR_PROGRESSO = ['blue-fill', 'green-fill', 'purple-fill', 'orange-fill'];
 
 @Component({
   selector: 'app-dashboards',
@@ -30,64 +17,83 @@ export interface RankingItem {
 })
 export class Dashboards {
   public authService = inject(AuthService);
+  private readonly alunoDashboard = inject(AlunoDashboardService);
 
-  // ── Getters dinâmicos (Item 1) ─────────────────────────────────────────────
+  readonly carregando = signal(true);
+  readonly erro = signal(false);
+  private readonly dados = signal<AlunoDashboardDTO | null>(null);
 
-  /** Saudação baseada na hora do dia */
-  get saudacao(): string {
-    const h = new Date().getHours();
-    if (h < 12) return 'Bom dia';
-    if (h < 18) return 'Boa tarde';
-    return 'Boa noite';
+  readonly nome = computed(() => this.dados()?.nome ?? '');
+  readonly xpSemana = computed(() => this.dados()?.xpSemana ?? 0);
+  readonly metaSemanalXp = computed(() => this.dados()?.metaSemanalXp ?? 1000);
+  readonly xpPercent = computed(() => {
+    const d = this.dados();
+    if (!d || !d.metaSemanalXp) return 0;
+    return Math.min(100, Math.round((d.xpSemana / d.metaSemanalXp) * 100));
+  });
+  readonly ofensivaDias = computed(() => this.dados()?.ofensivaDias ?? 0);
+  readonly posicao = computed(() => this.dados()?.posicao ?? 0);
+  readonly turmaNome = computed(() => this.dados()?.turmaNome ?? '');
+  readonly tarefasFeitasHoje = computed(() => this.dados()?.tarefasFeitasHoje ?? 0);
+  readonly tarefasHoje = computed(() => this.dados()?.tarefasHoje ?? 0);
+  readonly tarefasPercent = computed(() => {
+    const d = this.dados();
+    if (!d || !d.tarefasHoje) return 0;
+    return Math.round((d.tarefasFeitasHoje / d.tarefasHoje) * 100);
+  });
+  readonly tarefasRestantes = computed(() => Math.max(0, this.tarefasHoje() - this.tarefasFeitasHoje()));
+
+  readonly atividades = computed(() =>
+    (this.dados()?.atividades ?? []).map((a, i) => ({
+      titulo: a.titulo,
+      materia: a.materia,
+      xp: a.xp,
+      progresso: a.progresso,
+      icone: a.icone,
+      tempo: this.formatarRelativo(a.criadaEm),
+      corProgresso: COR_PROGRESSO[i % COR_PROGRESSO.length],
+    }))
+  );
+
+  readonly ranking = computed(() =>
+    (this.dados()?.ranking ?? []).map((r) => ({
+      pos: r.posicao,
+      nome: r.nome,
+      xp: r.xp,
+      foto: r.foto || FOTO_PADRAO,
+      isMe: r.isMe,
+    }))
+  );
+
+  constructor() {
+    if (this.authService.usuarioLogado()?.role !== 'diretor') {
+      this.carregar();
+    } else {
+      this.carregando.set(false);
+    }
   }
 
-  /** Primeiro nome do usuário logado */
-  get primeiroNome(): string {
-    const nome = this.authService.usuarioLogado()?.nome ?? 'Estudante';
-    return nome.split(' ')[0];
+  carregar(): void {
+    this.carregando.set(true);
+    this.erro.set(false);
+    this.alunoDashboard.dashboard().subscribe({
+      next: (d) => {
+        this.dados.set(d);
+        this.carregando.set(false);
+      },
+      error: () => {
+        this.erro.set(true);
+        this.carregando.set(false);
+      },
+    });
   }
 
-  /** Cargo/turma do usuário logado */
-  get cargoUsuario(): string {
-    return this.authService.usuarioLogado()?.cargo ?? '—';
+  private formatarRelativo(iso: string): string {
+    const ms = Date.now() - new Date(iso).getTime();
+    const horas = Math.floor(ms / 3_600_000);
+    if (horas < 1) return 'agora há pouco';
+    if (horas < 24) return `há ${horas} hora(s)`;
+    const dias = Math.floor(horas / 24);
+    return dias === 1 ? 'ontem' : `há ${dias} dias`;
   }
-
-  // ── Dados mockados ─────────────────────────────────────────────────────────
-
-  atividades: Atividade[] = [
-    {
-      titulo: 'Exercícios de Redes',
-      materia: 'Networking',
-      xp: 150,
-      tempo: 'há 2 horas',
-      icone: '🌐',
-      progresso: 100,
-      corProgresso: 'blue-fill',
-    },
-    {
-      titulo: 'Revisão de Biologia',
-      materia: 'Biologia',
-      xp: 80,
-      tempo: 'há 5 horas',
-      icone: '🧬',
-      progresso: 45,
-      corProgresso: 'green-fill',
-    },
-    {
-      titulo: 'Lista de Java',
-      materia: 'Programação',
-      xp: 200,
-      tempo: 'Ontem',
-      icone: '☕',
-      progresso: 70,
-      corProgresso: 'purple-fill',
-    },
-  ];
-
-  ranking: RankingItem[] = [
-    { pos: 1, nome: 'Henrique Silva', xp: 4520, foto: 'assets/imagensProjeto/henrique.png',         isMe: false },
-    { pos: 2, nome: 'Ana Costa',      xp: 3980, foto: 'assets/imagensProjeto/ana.png',              isMe: false },
-    { pos: 3, nome: 'Gabriel Silva',  xp: 3450, foto: 'assets/imagensProjeto/gabrielZapelini.png',  isMe: true  },
-    { pos: 4, nome: 'Carla Souza',    xp: 2100, foto: 'assets/imagensProjeto/carla.png',            isMe: false },
-  ];
 }

@@ -3,17 +3,16 @@
 
         <!-- ── Card principal do perfil ────────────────────── -->
         <section class="profile-main-card">
-            <div class="profile-header-content d-flex align-items-center gap-4">
+            <div class="profile-header-content d-flex align-items-center gap-4 flex-wrap">
                 <div class="profile-image-wrapper">
                     <img [src]="usuario.foto" alt="Foto do perfil" class="profile-main-image">
                 </div>
 
-                <div class="profile-info">
+                <div class="profile-info flex-grow-1">
                     <h1 class="profile-page-name">{{ usuario.nome }}</h1>
                     <p class="profile-page-level">{{ usuario.cargo }}</p>
 
                     <div class="profile-tags">
-                        <!-- E-mail gerado dinamicamente a partir do nome do usuário -->
                         <div class="profile-tag" *ngIf="usuario.role === 'aluno'">
                             <i class="bi bi-envelope"></i>
                             <span>{{ gerarEmail(usuario.nome) }}</span>
@@ -27,6 +26,37 @@
                             <span>{{ alunoConfig.escola }}</span>
                         </div>
                     </div>
+                </div>
+
+                <div class="d-flex flex-column gap-2">
+                    <button class="btn-perfil-acao" (click)="abrirEdicao()">
+                        <i class="bi bi-pencil-square me-2"></i>Editar Perfil
+                    </button>
+                    <button class="btn-perfil-acao secundario" (click)="irParaSenha()">
+                        <i class="bi bi-key me-2"></i>Alterar Senha
+                    </button>
+                </div>
+            </div>
+
+            <div class="alert alert-success py-2 mt-3 mb-0" *ngIf="mensagem()">{{ mensagem() }}</div>
+
+            <!-- Formulário de edição inline -->
+            <div class="edit-form mt-4" *ngIf="editando()">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="edit-label">Nome</label>
+                        <input type="text" class="edit-input" [(ngModel)]="formNome" placeholder="Seu nome">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="edit-label">URL da foto</label>
+                        <input type="text" class="edit-input" [(ngModel)]="formFoto" placeholder="assets/imagensProjeto/...">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <button class="btn-perfil-acao secundario" (click)="cancelarEdicao()">Cancelar</button>
+                    <button class="btn-perfil-acao" (click)="salvarPerfil()" [disabled]="salvando()">
+                        {{ salvando() ? 'Salvando…' : 'Salvar' }}
+                    </button>
                 </div>
             </div>
         </section>
@@ -43,54 +73,14 @@
                                     <i class="bi bi-arrow-up-right"></i>
                                 </div>
                                 <div>
-                                    <p class="summary-title">Progresso Geral</p>
-                                    <h3 class="summary-number">{{ alunoConfig.progressoGeral }}%</h3>
+                                    <p class="summary-title">Progresso Semanal</p>
+                                    <h3 class="summary-number">{{ progressoGeral() }}%</h3>
                                 </div>
                             </div>
                             <div class="summary-progress-track">
-                                <div class="summary-progress-fill" [style.width.%]="alunoConfig.progressoGeral"></div>
+                                <div class="summary-progress-fill" [style.width.%]="progressoGeral()"></div>
                             </div>
-                            <p class="summary-footer-text">Meta: {{ alunoConfig.metaProgresso }}</p>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-card">
-                            <div class="summary-card-top">
-                                <div class="summary-icon gold-summary">
-                                    <i class="bi bi-award"></i>
-                                </div>
-                                <div>
-                                    <p class="summary-title">Conquistas</p>
-                                    <h3 class="summary-number">
-                                        {{ alunoConfig.conquistas.atual }}/{{ alunoConfig.conquistas.total }}
-                                    </h3>
-                                </div>
-                            </div>
-                            <div class="summary-progress-track">
-                                <div class="summary-progress-fill"
-                                    [style.width.%]="(alunoConfig.conquistas.atual / alunoConfig.conquistas.total) * 100">
-                                </div>
-                            </div>
-                            <p class="summary-footer-text">{{ alunoConfig.conquistas.atual }} badges conquistadas</p>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-card">
-                            <div class="summary-card-top">
-                                <div class="summary-icon fire-summary">
-                                    <i class="bi bi-fire"></i>
-                                </div>
-                                <div>
-                                    <p class="summary-title">Sequência de Estudos</p>
-                                    <h3 class="summary-number">{{ alunoConfig.sequenciaDias }} dias</h3>
-                                </div>
-                            </div>
-                            <div class="summary-progress-track">
-                                <div class="summary-progress-fill" style="width: 70%;"></div>
-                            </div>
-                            <p class="summary-footer-text">Recorde: {{ alunoConfig.recordeSequencia }} dias seguidos</p>
+                            <p class="summary-footer-text">Meta: bater a meta semanal de XP</p>
                         </div>
                     </div>
                 </div>
@@ -98,23 +88,6 @@
 
             <section class="middle-section mt-4">
                 <div class="row g-4">
-                    <div class="col-xl-6">
-                        <div class="content-card">
-                            <h2 class="section-card-title">
-                                <i class="bi bi-award title-icon gold-text"></i> Conquistas Recentes
-                            </h2>
-                            <div class="row g-3 achievements-grid">
-                                <div class="col-6 col-sm-4" *ngFor="let conquista of conquistasRecentes">
-                                    <div class="achievement-item">
-                                        <div class="achievement-emoji">{{ conquista.emoji }}</div>
-                                        <h3 class="achievement-title">{{ conquista.titulo }}</h3>
-                                        <p class="achievement-date">{{ conquista.data }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="col-xl-6">
                         <div class="content-card">
                             <h2 class="section-card-title">
@@ -136,21 +109,36 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
 
-            <section class="stats-section detailed-stats-section mt-4">
-                <h2 class="stats-title">Estatísticas Detalhadas</h2>
-                <div class="row text-center g-4">
-                    <div class="col-md-6 col-xl-3" *ngFor="let stat of estatisticas">
-                        <div class="stat-box">
-                            <h3 class="stat-number" [ngClass]="stat.classeCor">{{ stat.valor }}</h3>
-                            <p class="stat-label">{{ stat.label }}</p>
+                    <div class="col-xl-6">
+                        <div class="content-card h-100">
+                            <h2 class="section-card-title">
+                                <i class="bi bi-bar-chart-fill title-icon purple-text"></i> Estatísticas
+                            </h2>
+                            <div class="row text-center g-4 mt-1">
+                                <div class="col-6" *ngFor="let stat of estatisticas()">
+                                    <div class="stat-box">
+                                        <h3 class="stat-number" [ngClass]="stat.classeCor">{{ stat.valor }}</h3>
+                                        <p class="stat-label">{{ stat.label }}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
         </ng-container>
+
+        <!-- ── Painel para professores ──────────────────────── -->
+        <div class="alert alert-info border-0 rounded-4 p-4 mt-2" *ngIf="usuario.role === 'professor'">
+            <h5 class="fw-bold">
+                <i class="bi bi-easel2-fill me-2"></i>Área do Professor
+            </h5>
+            <p class="m-0 text-muted">
+                Acesse o Dashboard, o Diário de Classe, as Avaliações e a Comunicação pela barra lateral
+                para acompanhar suas turmas e alunos.
+            </p>
+        </div>
 
         <!-- ── Aviso para diretores ─────────────────────────── -->
         <div class="alert alert-info border-0 rounded-4 p-4 mt-2" *ngIf="usuario.role === 'diretor'">

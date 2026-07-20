@@ -11,8 +11,8 @@
             <div class="topo-nivel">
                 <div>
                     <p class="nivel-label mb-1">Nível Atual</p>
-                    <h1 class="fw-bold text-white">Nível {{ nivel.atual }}</h1>
-                    <p class="nivel-sub mb-0">{{ nivel.titulo }}</p>
+                    <h1 class="fw-bold text-white">Nível {{ nivel().atual }}</h1>
+                    <p class="nivel-sub mb-0">{{ nivel().titulo }}</p>
                 </div>
                 <div class="box-icone">
                     <img src="assets/imagensProjeto/medalhinha.png" class="img" alt="Medalha">
@@ -22,13 +22,13 @@
             <div class="secao-progresso">
                 <div class="linha-info text-white">
                     <span>Progresso para o próximo nível</span>
-                    <span class="xp">{{ nivel.xpAtual }} / {{ nivel.xpTotal }} XP</span>
+                    <span class="xp">{{ nivel().xpAtual }} / {{ nivel().xpTotal }} XP</span>
                 </div>
                 <div class="barra-progresso">
-                    <div class="fill" [style.width.%]="xpPercentual"></div>
+                    <div class="fill" [style.width.%]="xpPercentual()"></div>
                 </div>
                 <p class="faltam mb-0">
-                    Faltam {{ xpFaltam }} XP para alcançar o Nível {{ nivel.proximoNivel }}
+                    Faltam {{ xpFaltam() }} XP para alcançar o Nível {{ nivel().proximoNivel }}
                 </p>
             </div>
         </div>
@@ -36,7 +36,7 @@
         <!-- ── Stats ─────────────────────────────────────────── -->
         <div class="stats mb-5">
             <div class="row g-4 w-100 m-0">
-                <div class="col-6 col-md-3 p-2" *ngFor="let stat of stats">
+                <div class="col-6 col-md-3 p-2" *ngFor="let stat of stats()">
                     <div class="stat-inner-card shadow-sm">
                         <div class="icon {{ stat.classeIcone }}">{{ stat.icone }}</div>
                         <div>
@@ -48,70 +48,11 @@
             </div>
         </div>
 
-        <!-- ── Gráficos SVG (pontos vindos do TypeScript) ─────── -->
-        <div class="row g-4 mb-5">
-
-            <div class="col-md-6">
-                <h3 class="title-adaptive fw-bold mb-3">Evolução das Notas</h3>
-                <div class="chart-card p-4 shadow-sm">
-                    <div class="chart">
-                        <svg viewBox="0 0 400 200">
-                            <defs>
-                                <linearGradient id="gradNotas" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%"   stop-color="#7b3fe4"/>
-                                    <stop offset="100%" stop-color="#00c853"/>
-                                </linearGradient>
-                            </defs>
-                            <g class="grid">
-                                <line x1="0" y1="40"  x2="400" y2="40"/>
-                                <line x1="0" y1="80"  x2="400" y2="80"/>
-                                <line x1="0" y1="120" x2="400" y2="120"/>
-                                <line x1="0" y1="160" x2="400" y2="160"/>
-                            </g>
-                            <polyline class="line" [attr.points]="notasPolyline" stroke="url(#gradNotas)"/>
-                            <circle *ngFor="let p of notasHistorico"
-                                class="point"
-                                [attr.cx]="p.x"
-                                [attr.cy]="p.y"
-                                r="5"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <h3 class="title-adaptive fw-bold mb-3">Evolução do XP</h3>
-                <div class="chart-card p-4 shadow-sm">
-                    <div class="chart">
-                        <svg viewBox="0 0 400 200">
-                            <defs>
-                                <linearGradient id="gradXp" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%"   stop-color="#7b3fe4"/>
-                                    <stop offset="100%" stop-color="#00c853"/>
-                                </linearGradient>
-                            </defs>
-                            <g class="grid">
-                                <line x1="0" y1="40"  x2="400" y2="40"/>
-                                <line x1="0" y1="80"  x2="400" y2="80"/>
-                                <line x1="0" y1="120" x2="400" y2="120"/>
-                                <line x1="0" y1="160" x2="400" y2="160"/>
-                            </g>
-                            <polyline class="line" [attr.points]="xpPolyline" stroke="url(#gradXp)"/>
-                            <circle *ngFor="let p of xpHistorico"
-                                class="point"
-                                [attr.cx]="p.x"
-                                [attr.cy]="p.y"
-                                r="5"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- ── Desempenho por matéria ─────────────────────────── -->
         <h3 class="title-adaptive fw-bold mb-3">Desempenho por matéria</h3>
+        <p class="text-soft" *ngIf="!carregando() && materias().length === 0">Nenhuma nota lançada ainda.</p>
         <div class="materias-grid mb-5">
-            <div class="materia-card shadow-sm" *ngFor="let m of materias">
+            <div class="materia-card shadow-sm" *ngFor="let m of materias()">
                 <div class="topo">
                     <div>
                         <h4 class="fw-bold text-white mb-1">{{ m.nome }}</h4>
@@ -129,16 +70,16 @@
 
         <!-- ── Atividades recentes ────────────────────────────── -->
         <h3 class="title-adaptive fw-bold mb-3">Atividades Recentes</h3>
+        <p class="text-soft" *ngIf="!carregando() && atividades().length === 0">Nenhuma atividade recente.</p>
         <div class="atividades-lista">
-            <div class="atividade shadow-sm" *ngFor="let a of atividades">
+            <div class="atividade shadow-sm" *ngFor="let a of atividades()">
                 <div class="info">
                     <h4 class="fw-bold text-white mb-1">{{ a.titulo }}</h4>
                     <span class="text-soft small">{{ a.materia }}</span>
                 </div>
                 <div class="meta">
                     <span class="data text-soft">{{ a.data }}</span>
-                    <span class="status {{ a.statusClasse }}">{{ a.statusEmoji }}</span>
-                    <span class="nota text-white">{{ a.nota }}</span>
+                    <span class="nota text-white">+{{ a.xp }} XP</span>
                 </div>
             </div>
         </div>

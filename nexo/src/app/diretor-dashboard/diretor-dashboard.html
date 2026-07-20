@@ -4,16 +4,22 @@
     <p class="text-soft m-0">Visão geral institucional em tempo real</p>
   </header>
 
+  @if (carregando()) {
+    <p class="text-soft">Carregando indicadores institucionais…</p>
+  } @else if (erro()) {
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <p class="text-soft mb-0">Não foi possível carregar o dashboard.</p>
+      <button class="btn btn-link custom-link-btn p-0" (click)="carregar()">Tentar novamente</button>
+    </div>
+  } @else {
+
   <div class="row g-3 mb-4">
-    <div class="col-12 col-md-6 col-xl-3" *ngFor="let m of metrics">
+    <div class="col-12 col-md-6 col-xl-3" *ngFor="let m of metrics()">
       <div class="metric-card">
         <div class="d-flex justify-content-between align-items-start mb-4">
           <div class="icon-square" [ngClass]="m.color">
             <i [class]="'bi ' + m.icon + ' fs-4'"></i>
           </div>
-          <span class="trend-tag fw-bold" [class.negative]="m.trend.includes('-')">
-            {{m.trend}}
-          </span>
         </div>
         <p class="text-soft small mb-1 fw-semibold">{{m.label}}</p>
         <h2 class="fw-bold mb-0 text-main">{{m.value}}</h2>
@@ -41,7 +47,7 @@
         </div>
         
         <div class="student-list">
-          <div class="student-row d-flex align-items-center p-3 mb-2" *ngFor="let a of alunosRisco">
+          <div class="student-row d-flex align-items-center p-3 mb-2" *ngFor="let a of alunosRisco()">
             <img [src]="a.foto" class="avatar-circle me-3" alt="Foto do aluno">
             <div class="flex-grow-1">
               <h6 class="text-main fw-bold mb-0 fs-6">{{a.nome}}</h6>
@@ -69,7 +75,10 @@
         </h3>
         
         <div class="alert-stack">
-          <div class="alert-card p-3 mb-3" *ngFor="let alert of alertas">
+          @if (alertas().length === 0) {
+            <p class="text-soft small mb-0">Nenhum alerta crítico no momento.</p>
+          }
+          <div class="alert-card p-3 mb-3" *ngFor="let alert of alertas()">
             <div class="d-flex justify-content-between align-items-start mb-2">
               <span class="text-main fw-bold">{{alert.titulo}}</span>
               <span class="priority-tag" [ngClass]="alert.nivel">{{alert.nivel}}</span>
@@ -81,4 +90,6 @@
       </div>
     </div>
   </div>
+
+  }
 </div>

@@ -1,33 +1,37 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
+import { AlunoDashboardService } from '../api/aluno-dashboard.service';
+import { AlunoDashboardDTO, AlunoNotaDTO } from '../core/api.models';
 
-export interface StatNivel {
+interface StatNivel {
   icone: string;
   classeIcone: string;
   label: string;
   valor: string;
 }
 
-export interface PontoGrafico {
-  x: number;
-  y: number;
-  label: string;
-}
-
-export interface MateriaNota {
+interface MateriaNota {
   nome: string;
   percentual: number;
   nota: number;
   classeProgresso: string;
 }
 
-export interface AtividadeRecente {
+interface AtividadeRecente {
   titulo: string;
   materia: string;
   data: string;
-  statusEmoji: string;
-  statusClasse: string;
-  nota: number;
+  xp: number;
+}
+
+const CORES_MATERIA = ['bio', 'mat', 'his', 'ing'];
+
+function tituloNivel(nivel: number): string {
+  if (nivel < 5) return 'Iniciante';
+  if (nivel < 10) return 'Estudante Dedicado';
+  if (nivel < 15) return 'Avançado';
+  return 'Mestre dos Estudos';
 }
 
 @Component({
@@ -38,69 +42,72 @@ export interface AtividadeRecente {
   styleUrl: './meus-niveis-notas.scss',
 })
 export class MeusNiveisNotas {
+  private readonly api = inject(AlunoDashboardService);
 
-  // ── Dados de nível ─────────────────────────────────────────────────
-  nivel = {
-    atual:        12,
-    titulo:       'Estudante Dedicado',
-    xpAtual:      3450,
-    xpTotal:      4000,
-    proximoNivel: 13,
-  };
+  readonly carregando = signal(true);
+  private readonly dash = signal<AlunoDashboardDTO | null>(null);
+  private readonly notas = signal<AlunoNotaDTO[]>([]);
 
-  get xpPercentual(): number {
-    return Math.round((this.nivel.xpAtual / this.nivel.xpTotal) * 100);
+  readonly nivel = computed(() => {
+    const d = this.dash();
+    const xpTotal = d?.xpTotal ?? 0;
+    const nivelAtual = d?.nivel ?? 1;
+    return {
+      atual: nivelAtual,
+      titulo: tituloNivel(nivelAtual),
+      xpAtual: xpTotal % 400,
+      xpTotal: 400,
+      proximoNivel: nivelAtual + 1,
+    };
+  });
+
+  readonly xpPercentual = computed(() => Math.round((this.nivel().xpAtual / this.nivel().xpTotal) * 100));
+  readonly xpFaltam = computed(() => this.nivel().xpTotal - this.nivel().xpAtual);
+
+  readonly stats = computed<StatNivel[]>(() => {
+    const medias = this.notas().map((n) => n.media).filter((m): m is number => m != null);
+    const mediaGeral = medias.length ? (medias.reduce((s, m) => s + m, 0) / medias.length).toFixed(1) : '—';
+    const melhor = medias.length ? Math.max(...medias).toFixed(1) : '—';
+    const d = this.dash();
+    return [
+      { icone: '📊', classeIcone: 'roxo', label: 'Média Geral', valor: mediaGeral },
+      { icone: '📈', classeIcone: 'verde', label: 'Melhor Nota', valor: melhor },
+      { icone: '⚡', classeIcone: 'azul', label: 'XP Total', valor: `${d?.xpTotal ?? 0}` },
+      { icone: '🏆', classeIcone: 'laranja', label: 'Ranking', valor: d ? `#${d.posicao}` : '—' },
+    ];
+  });
+
+  readonly materias = computed<MateriaNota[]>(() =>
+    this.notas().map((n, i) => ({
+      nome: n.disciplina,
+      nota: n.media ?? 0,
+      percentual: Math.round((n.media ?? 0) * 10),
+      classeProgresso: CORES_MATERIA[i % CORES_MATERIA.length],
+    })),
+  );
+
+  readonly atividades = computed<AtividadeRecente[]>(() =>
+    (this.dash()?.atividades ?? []).map((a) => ({
+      titulo: a.titulo,
+      materia: a.materia,
+      data: this.formatarData(a.criadaEm),
+      xp: a.xp,
+    })),
+  );
+
+  constructor() {
+    forkJoin({ dash: this.api.dashboard(), notas: this.api.notas() }).subscribe({
+      next: ({ dash, notas }) => {
+        this.dash.set(dash);
+        this.notas.set(notas);
+        this.carregando.set(false);
+      },
+      error: () => this.carregando.set(false),
+    });
   }
 
-  get xpFaltam(): number {
-    return this.nivel.xpTotal - this.nivel.xpAtual;
+  private formatarData(iso: string): string {
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
   }
-
-  // ── Cards de estatísticas ───────────────────────────────────────────
-  stats: StatNivel[] = [
-    { icone: '📊', classeIcone: 'roxo',    label: 'Média Geral', valor: '8.1'  },
-    { icone: '📈', classeIcone: 'verde',   label: 'Melhor Nota', valor: '10.0' },
-    { icone: '🎖️', classeIcone: 'azul',   label: 'Atividades',  valor: '42'   },
-    { icone: '📅', classeIcone: 'laranja', label: 'Este Mês',    valor: '12'   },
-  ];
-
-  // ── Dados dos gráficos SVG ─────────────────────────────────────────
-  notasHistorico: PontoGrafico[] = [
-    { x: 20,  y: 150, label: 'Jan' },
-    { x: 120, y: 130, label: 'Fev' },
-    { x: 220, y: 110, label: 'Mar' },
-    { x: 320, y: 120, label: 'Abr' },
-  ];
-
-  xpHistorico: PontoGrafico[] = [
-    { x: 20,  y: 160, label: 'Jan' },
-    { x: 120, y: 130, label: 'Fev' },
-    { x: 220, y: 100, label: 'Mar' },
-    { x: 320, y: 75,  label: 'Abr' },
-  ];
-
-  get notasPolyline(): string {
-    return this.notasHistorico.map(p => `${p.x},${p.y}`).join(' ');
-  }
-
-  get xpPolyline(): string {
-    return this.xpHistorico.map(p => `${p.x},${p.y}`).join(' ');
-  }
-
-  // ── Matérias ────────────────────────────────────────────────────────
-  materias: MateriaNota[] = [
-    { nome: 'Biologia',   percentual: 75, nota: 8.5, classeProgresso: 'bio' },
-    { nome: 'Matemática', percentual: 60, nota: 7.2, classeProgresso: 'mat' },
-    { nome: 'História',   percentual: 85, nota: 9.0, classeProgresso: 'his' },
-    { nome: 'Inglês',     percentual: 70, nota: 8.0, classeProgresso: 'ing' },
-  ];
-
-  // ── Atividades recentes ─────────────────────────────────────────────
-  atividades: AtividadeRecente[] = [
-    { titulo: 'Quiz: Fotossíntese',     materia: 'Biologia',   data: '30 Mar 2026', statusEmoji: '😊', statusClasse: 'bom',    nota: 9.5  },
-    { titulo: 'Desafio: Funções',       materia: 'Matemática', data: '28 Mar 2026', statusEmoji: '😐', statusClasse: 'medio',  nota: 7.0  },
-    { titulo: 'Segunda Guerra Mundial', materia: 'História',   data: '25 Mar 2026', statusEmoji: '😊', statusClasse: 'bom',    nota: 10.0 },
-    { titulo: 'Present Perfect',        materia: 'Inglês',     data: '22 Mar 2026', statusEmoji: '😊', statusClasse: 'bom',    nota: 8.5  },
-    { titulo: 'Lei de Ohm',             materia: 'Física',     data: '20 Mar 2026', statusEmoji: '😮', statusClasse: 'alerta', nota: 6.5  },
-  ];
 }

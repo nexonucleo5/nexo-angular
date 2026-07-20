@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: nexo-backend
+
+  datasource:
+    url: jdbc:h2:file:./data/nexo;MODE=PostgreSQL;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: nexo
+    password: nexo
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # Escapa não-ASCII como \uXXXX no JSON — imune a double-encoding de charset
+  # (evita mojibake de acentos nas respostas da API); o client decodifica de volta.
+  jackson:
+    generator:
+      escape-non-ascii: true
+
+server:
+  port: 8080
+
+nexo:
+  jwt:
+    # Em produção substituir por segredo externo (variável de ambiente NEXO_JWT_SECRET)
+    secret: ${NEXO_JWT_SECRET:nexo-gestao-escolar-chave-de-desenvolvimento-nao-usar-em-producao-0123456789}
+    access-token-minutes: 15
+    refresh-token-days: 7
+  cors:
+    # Origem do dev-server Angular
+    allowed-origins: http://localhost:4200
+  seed:
+    enabled: true

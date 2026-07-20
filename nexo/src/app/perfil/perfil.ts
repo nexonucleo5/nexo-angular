@@ -1,12 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-
-export interface Conquista {
-  emoji: string;
-  titulo: string;
-  data: string;
-}
+import { UsuariosService } from '../api/usuarios.service';
+import { AlunoDashboardService } from '../api/aluno-dashboard.service';
 
 export interface MateriaProgresso {
   nome: string;
@@ -23,54 +21,98 @@ export interface Estatistica {
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './perfil.html',
   styleUrl: './perfil.scss',
 })
 export class Perfil {
   private authService = inject(AuthService);
+  private usuarios = inject(UsuariosService);
+  private alunoDashboard = inject(AlunoDashboardService);
+  private router = inject(Router);
 
-  /** Expõe o Signal de usuário logado para o template */
   public usuarioLogado = this.authService.usuarioLogado;
 
-  /** Gera e-mail institucional dinamicamente a partir do nome */
-  gerarEmail(nome: string): string {
-    const partes   = nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(' ');
-    const primeiro = partes[0];
-    const ultimo   = partes[partes.length - 1];
-    return `${primeiro}.${ultimo}@nexo.escola.com`;
-  }
+  // ── Edição de perfil ───────────────────────────────────────────────
+  readonly editando = signal(false);
+  readonly salvando = signal(false);
+  readonly mensagem = signal('');
+  formNome = '';
+  formFoto = '';
 
-  // ── Dados do aluno ─────────────────────────────────────────────────
-  alunoConfig = {
-    escola:          'Colégio Modelo',
-    progressoGeral:  68,
-    metaProgresso:   'concluir 80% até julho',
-    conquistas:      { atual: 6, total: 12 },
-    sequenciaDias:   7,
-    recordeSequencia: 7,
-  };
+  // ── Estatísticas do aluno (gamificação real quando disponível) ──────
+  readonly estatisticas = signal<Estatistica[]>([
+    { valor: '—', label: 'XP Total', classeCor: 'purple-text' },
+    { valor: '—', label: 'Ofensiva (dias)', classeCor: 'green-text' },
+    { valor: '—', label: 'Tarefas Hoje', classeCor: 'blue-text' },
+    { valor: '—', label: 'Ranking da Turma', classeCor: 'gold-text' },
+  ]);
 
-  conquistasRecentes: Conquista[] = [
-    { emoji: '🎯', titulo: 'Primeiro Desafio', data: '15 Mar 2026' },
-    { emoji: '🔥', titulo: 'Foco Total',        data: '28 Mar 2026' },
-    { emoji: '🧬', titulo: 'Biologista',        data: '20 Mar 2026' },
-    { emoji: '🏆', titulo: 'Top 3',             data: '01 Abr 2026' },
-    { emoji: '⚡', titulo: '1000 XP',           data: '10 Mar 2026' },
-    { emoji: '✨', titulo: 'Perfeito',           data: '25 Mar 2026' },
-  ];
+  readonly progressoGeral = signal(0);
 
   materiasProgresso: MateriaProgresso[] = [
-    { nome: 'Biologia',   porcentagem: 75, classeCor: 'green-fill'  },
-    { nome: 'Matemática', porcentagem: 60, classeCor: 'blue-fill'   },
-    { nome: 'História',   porcentagem: 85, classeCor: 'orange-fill' },
-    { nome: 'Inglês',     porcentagem: 70, classeCor: 'pink-fill'   },
+    { nome: 'Biologia', porcentagem: 75, classeCor: 'green-fill' },
+    { nome: 'Matemática', porcentagem: 60, classeCor: 'blue-fill' },
+    { nome: 'História', porcentagem: 85, classeCor: 'orange-fill' },
+    { nome: 'Inglês', porcentagem: 70, classeCor: 'pink-fill' },
   ];
 
-  estatisticas: Estatistica[] = [
-    { valor: '3.450', label: 'XP Total',               classeCor: 'purple-text' },
-    { valor: '42',    label: 'Desafios Concluídos',     classeCor: 'green-text'  },
-    { valor: '156h',  label: 'Tempo Total de Estudo',   classeCor: 'blue-text'   },
-    { valor: '#3',    label: 'Ranking da Turma',        classeCor: 'gold-text'   },
-  ];
+  alunoConfig = { escola: 'Colégio Nexo' };
+
+  constructor() {
+    if (this.usuarioLogado()?.role === 'aluno') {
+      this.alunoDashboard.dashboard().subscribe({
+        next: (d) => {
+          this.estatisticas.set([
+            { valor: `${d.xpSemana}`, label: 'XP na Semana', classeCor: 'purple-text' },
+            { valor: `${d.ofensivaDias}`, label: 'Ofensiva (dias)', classeCor: 'green-text' },
+            { valor: `${d.tarefasFeitasHoje}/${d.tarefasHoje}`, label: 'Tarefas Hoje', classeCor: 'blue-text' },
+            { valor: `#${d.posicao}`, label: 'Ranking da Turma', classeCor: 'gold-text' },
+          ]);
+          const meta = d.metaSemanalXp || 1000;
+          this.progressoGeral.set(Math.min(100, Math.round((d.xpSemana / meta) * 100)));
+        },
+        error: () => {},
+      });
+    }
+  }
+
+  gerarEmail(nome: string): string {
+    const partes = nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(' ');
+    return `${partes[0]}.${partes[partes.length - 1]}@nexo.escola.com`;
+  }
+
+  abrirEdicao(): void {
+    const u = this.usuarioLogado();
+    if (!u) return;
+    this.formNome = u.nome;
+    this.formFoto = u.foto;
+    this.mensagem.set('');
+    this.editando.set(true);
+  }
+
+  cancelarEdicao(): void {
+    this.editando.set(false);
+  }
+
+  salvarPerfil(): void {
+    if (!this.formNome.trim() || this.salvando()) return;
+    this.salvando.set(true);
+    this.usuarios.atualizarPerfil({ nome: this.formNome.trim(), foto: this.formFoto.trim() }).subscribe({
+      next: () => {
+        this.salvando.set(false);
+        this.editando.set(false);
+        this.mensagem.set('✅ Perfil atualizado!');
+        setTimeout(() => this.mensagem.set(''), 3000);
+      },
+      error: () => {
+        this.salvando.set(false);
+        this.mensagem.set('❌ Falha ao atualizar o perfil.');
+      },
+    });
+  }
+
+  irParaSenha(): void {
+    this.router.navigate(['/trocar-senha']);
+  }
 }

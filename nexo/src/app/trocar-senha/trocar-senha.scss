@@ -1,0 +1,69 @@
+/* trocar-senha.scss — usa apenas variáveis do styles.scss */
+
+.page-content {
+  padding: 34px;
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+}
+
+.senha-wrapper {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.voltar-link {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+  &:hover { color: #9b2fff; }
+}
+
+.senha-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 32px;
+}
+
+.senha-title { font-size: 26px; font-weight: 800; color: var(--text-main); margin: 0 0 6px; }
+.senha-subtitle { font-size: 14px; color: var(--text-muted); margin: 0 0 24px; }
+
+.campo {
+  margin-bottom: 18px;
+  label { display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
+  input {
+    width: 100%;
+    background: var(--bg-input, var(--bg-primary));
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-main);
+    padding: 12px 14px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    &:focus { border-color: #9b2fff; }
+    &::placeholder { color: var(--text-muted); }
+  }
+}
+
+.btn-salvar {
+  width: 100%;
+  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 8px;
+  &:hover { opacity: 0.9; }
+  &:disabled { opacity: 0.6; cursor: default; }
+}

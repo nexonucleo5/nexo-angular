@@ -1,0 +1,25 @@
+# Perfil de PRODUÇÃO — ativar com SPRING_PROFILES_ACTIVE=prod
+# Todos os segredos vêm de variáveis de ambiente (nada de valor default sensível).
+spring:
+  datasource:
+    url: ${DB_URL}            # ex.: jdbc:postgresql://localhost:5432/nexo
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update        # em produção madura, preferir migrations (Flyway/Liquibase)
+    open-in-view: false
+  h2:
+    console:
+      enabled: false          # console H2 desligado em produção
+
+nexo:
+  jwt:
+    secret: ${NEXO_JWT_SECRET}          # OBRIGATÓRIO — sem default em produção
+    access-token-minutes: ${JWT_ACCESS_MINUTES:15}
+    refresh-token-days: ${JWT_REFRESH_DAYS:7}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:https://nexo-gestao-escolar.com.br}
+  seed:
+    enabled: ${SEED_ENABLED:false}      # não semear dados de exemplo em produção

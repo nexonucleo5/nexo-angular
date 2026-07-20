@@ -1,143 +1,136 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './services/auth.guard';
-import { roleGuard } from './services/role.guard';
+import { authGuard, roleGuard } from './core/guards';
 
-import { Login }             from './login/login';
-import { Cadastro }          from './cadastro/cadastro';
-import { Perfil }            from './perfil/perfil';
-import { Configuracoes }     from './configuracoes/configuracoes';
-import { Dashboards }        from './dashboards/dashboards';
-import { Desafios }          from './desafios/desafios';
-import { MeusNiveisNotas }   from './meus-niveis-notas/meus-niveis-notas';
-import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
-
-import { MenuDiretor }          from './menu-diretor/menu-diretor';
-import { DashboardDiretor }     from './diretor-dashboard/diretor-dashboard';
-import { GestaoEvasao }         from './gestao-evasao/gestao-evasao';
-import { RelatoriosDiretor }    from './relatorios-diretor/relatorios-diretor';
-import { MonitoramentoDocente } from './monitoramento-docente/monitoramento-docente';
-
-import { DashboardProfessor }    from './dashboard-professor/dashboard-professor';
-import { DiarioClasseProfessor } from './diario-classe-professor/diario-classe-professor';
-import { Avaliacoes }            from './avaliacoes/avaliacoes';
-import { NotasEngajamento }      from './notas-engajamento/notas-engajamento';
-import { Comunicacao }           from './comunicacao/comunicacao';
-
+/**
+ * Rotas com lazy loading (loadComponent) por perfil + guards usando a role
+ * vinda do backend — o controle de acesso deixa de ser apenas visual.
+ */
 export const routes: Routes = [
 
+  // Redireciona raiz para login
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 
-  // ── Públicas (sem autenticação) ─────────────────────────────────────────────
-  { path: 'login',    component: Login    },
-  { path: 'cadastro', component: Cadastro },
+  // ── Públicas ────────────────────────────────────────────────────────────────
+  {
+    path: 'login',
+    loadComponent: () => import('./login/login').then((m) => m.Login),
+  },
 
-  // ── Compartilhadas (qualquer role autenticado) ──────────────────────────────
+  // ── Compartilhadas (todos os roles) ─────────────────────────────────────────
   {
     path: 'perfil',
-    component: Perfil,
     canActivate: [authGuard],
+    loadComponent: () => import('./perfil/perfil').then((m) => m.Perfil),
   },
   {
     path: 'configuracoes',
-    component: Configuracoes,
     canActivate: [authGuard],
+    loadComponent: () => import('./configuracoes/configuracoes').then((m) => m.Configuracoes),
+  },
+  {
+    path: 'trocar-senha',
+    canActivate: [authGuard],
+    loadComponent: () => import('./trocar-senha/trocar-senha').then((m) => m.TrocarSenha),
   },
   {
     path: 'dashboards',
-    component: Dashboards,
     canActivate: [authGuard],
+    loadComponent: () => import('./dashboards/dashboards').then((m) => m.Dashboards),
+  },
+  {
+    // Chat em tempo real professor ↔ diretor
+    path: 'mensagens',
+    canActivate: [authGuard, roleGuard('diretor', 'professor')],
+    loadComponent: () => import('./chat/chat').then((m) => m.Chat),
   },
 
-  // ── Aluno ───────────────────────────────────────────────────────────────────
+  // ── Aluno ────────────────────────────────────────────────────────────────────
   {
     path: 'materias',
-    component: MatriculasWrapper,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['aluno'] },
+    canActivate: [authGuard, roleGuard('aluno')],
+    loadComponent: () => import('./matriculas-wrapper/matriculas-wrapper').then((m) => m.MatriculasWrapper),
+  },
+  {
+    path: 'disciplina/:id',
+    canActivate: [authGuard, roleGuard('aluno')],
+    loadComponent: () => import('./disciplina-detalhe/disciplina-detalhe').then((m) => m.DisciplinaDetalhe),
   },
   {
     path: 'desafios',
-    component: Desafios,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['aluno'] },
+    canActivate: [authGuard, roleGuard('aluno')],
+    loadComponent: () => import('./desafios/desafios').then((m) => m.Desafios),
   },
   {
     path: 'meus_niveis_notas',
-    component: MeusNiveisNotas,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['aluno'] },
+    canActivate: [authGuard, roleGuard('aluno')],
+    loadComponent: () => import('./meus-niveis-notas/meus-niveis-notas').then((m) => m.MeusNiveisNotas),
   },
 
-  // ── Diretor ─────────────────────────────────────────────────────────────────
+  // ── Diretor ──────────────────────────────────────────────────────────────────
   {
-    path: 'diretor-dashboards',
-    component: DashboardDiretor,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['diretor'] },
+    path: 'cadastro',
+    canActivate: [authGuard, roleGuard('diretor', 'professor')],
+    loadComponent: () => import('./cadastro/cadastro').then((m) => m.Cadastro),
   },
   {
+    path: 'diretor-dashboards',
+    canActivate: [authGuard, roleGuard('diretor')],
+    loadComponent: () => import('./diretor-dashboard/diretor-dashboard').then((m) => m.DashboardDiretor),
+  },
+  {
+    // wrapper redireciona por role (aluno vê matérias, diretor vê matrículas)
     path: 'matriculas',
-    component: MatriculasWrapper,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['diretor'] },
+    canActivate: [authGuard],
+    loadComponent: () => import('./matriculas-wrapper/matriculas-wrapper').then((m) => m.MatriculasWrapper),
   },
   {
     path: 'evasao',
-    component: GestaoEvasao,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['diretor'] },
+    canActivate: [authGuard, roleGuard('diretor')],
+    loadComponent: () => import('./gestao-evasao/gestao-evasao').then((m) => m.GestaoEvasao),
   },
   {
     path: 'relatorios',
-    component: RelatoriosDiretor,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['diretor'] },
+    canActivate: [authGuard, roleGuard('diretor')],
+    loadComponent: () => import('./relatorios-diretor/relatorios-diretor').then((m) => m.RelatoriosDiretor),
   },
   {
     path: 'monitoramento',
-    component: MonitoramentoDocente,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['diretor'] },
+    canActivate: [authGuard, roleGuard('diretor')],
+    loadComponent: () => import('./monitoramento-docente/monitoramento-docente').then((m) => m.MonitoramentoDocente),
   },
   {
     path: 'menu-diretor',
-    component: MenuDiretor,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['diretor'] },
+    canActivate: [authGuard, roleGuard('diretor')],
+    loadComponent: () => import('./menu-diretor/menu-diretor').then((m) => m.MenuDiretor),
   },
 
-  // ── Professor ────────────────────────────────────────────────────────────────
+  // ── Professor ─────────────────────────────────────────────────────────────────
+  // ATENÇÃO: paths exatamente iguais aos routerLink do menu-professor.html
   {
     path: 'professor-dashboard',
-    component: DashboardProfessor,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['professor'] },
+    canActivate: [authGuard, roleGuard('professor')],
+    loadComponent: () => import('./dashboard-professor/dashboard-professor').then((m) => m.DashboardProfessor),
   },
   {
     path: 'diario-classe-professor',
-    component: DiarioClasseProfessor,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['professor'] },
+    canActivate: [authGuard, roleGuard('professor')],
+    loadComponent: () => import('./diario-classe-professor/diario-classe-professor').then((m) => m.DiarioClasseProfessor),
   },
   {
     path: 'avaliacao',
-    component: Avaliacoes,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['professor'] },
+    canActivate: [authGuard, roleGuard('professor')],
+    loadComponent: () => import('./avaliacoes/avaliacoes').then((m) => m.Avaliacoes),
   },
   {
     path: 'notas-engajamento',
-    component: NotasEngajamento,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['professor'] },
+    canActivate: [authGuard, roleGuard('professor')],
+    loadComponent: () => import('./notas-engajamento/notas-engajamento').then((m) => m.NotasEngajamento),
   },
   {
     path: 'comunicacao',
-    component: Comunicacao,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['professor'] },
+    canActivate: [authGuard, roleGuard('professor')],
+    loadComponent: () => import('./comunicacao/comunicacao').then((m) => m.Comunicacao),
   },
 
-  // Curinga — redireciona URLs inválidas
   { path: '**', redirectTo: '/login' },
 ];

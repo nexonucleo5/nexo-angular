@@ -1,21 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-
-interface DadosCadastro {
-  nome: string;
-  cpf: string;
-  sexo: string;
-  telefone: string;
-  dataNascimento: string;
-  emailResponsavel: string;
-  cpfResponsavel: string;
-  telefoneResponsavel: string;
-  endereco: string;
-  complemento: string;
-  emailGerado: string;
-  senhaGerada: string;
-}
+import { AlunosService } from '../api/alunos.service';
+import { ApiErro } from '../core/api.models';
 
 @Component({
   selector: 'app-cadastro',
@@ -26,13 +13,15 @@ interface DadosCadastro {
 })
 export class Cadastro {
   private fb = inject(FormBuilder);
+  private alunosService = inject(AlunosService);
 
   cadastroForm: FormGroup;
-  emailGerado    = '';
-  senhaGerada    = '';
-  acessoGerado   = false;
+  emailGerado     = '';
+  senhaGerada     = '';
+  acessoGerado    = false;
+  enviando        = false;
   mensagemSucesso = '';
-  mensagemErro   = '';
+  mensagemErro    = '';
 
   constructor() {
     this.cadastroForm = this.fb.group({
@@ -54,27 +43,10 @@ export class Cadastro {
     return this.cadastroForm.controls;
   }
 
-  /** Gera e-mail e senha provisória a partir do nome e CPF */
-  gerarAcesso(): void {
-    const nome = this.cadastroForm.get('nome')?.value as string;
-    const cpf  = this.cadastroForm.get('cpf')?.value  as string;
-
-    if (!nome?.trim() || !cpf?.trim()) {
-      this.mensagemErro = 'Preencha o Nome e o CPF antes de gerar o acesso.';
-      return;
-    }
-
-    const primeiroNome = nome.trim().split(' ')[0].toLowerCase();
-    const cpfNumeros   = cpf.replace(/\D/g, '');
-    const sufixoCpf    = cpfNumeros.slice(-4);
-
-    this.emailGerado  = `${primeiroNome}.${sufixoCpf}@nexo.escola.com`;
-    this.senhaGerada  = `Nexo@${sufixoCpf}`;
-    this.acessoGerado = true;
-    this.mensagemErro = '';
-  }
-
-  /** Submete o formulário */
+  /**
+   * Submete o cadastro para a API. O e-mail institucional e a senha provisória
+   * são gerados e persistidos no backend — o client não decide credenciais.
+   */
   finalizarCadastro(): void {
     if (this.cadastroForm.invalid) {
       this.cadastroForm.markAllAsTouched();
@@ -82,26 +54,25 @@ export class Cadastro {
       return;
     }
 
-    if (!this.acessoGerado) {
-      this.mensagemErro = 'Clique em "Gerar Acesso" antes de finalizar o cadastro.';
-      return;
-    }
+    this.enviando = true;
+    this.mensagemErro = '';
+    this.mensagemSucesso = '';
 
-    const dados: DadosCadastro = {
-      ...this.cadastroForm.value,
-      emailGerado: this.emailGerado,
-      senhaGerada: this.senhaGerada,
-    };
-
-    // TODO: substituir por chamada real à API (ex: this.alunoService.cadastrar(dados))
-    console.log('Dados prontos para envio ao backend:', dados);
-
-    this.mensagemSucesso = `✅ Aluno cadastrado! Login: ${this.emailGerado}`;
-    this.mensagemErro    = '';
-    this.cadastroForm.reset();
-    this.acessoGerado    = false;
-    this.emailGerado     = '';
-    this.senhaGerada     = '';
+    this.alunosService.cadastrar(this.cadastroForm.value).subscribe({
+      next: (criado) => {
+        this.enviando        = false;
+        this.emailGerado     = criado.emailInstitucional;
+        this.senhaGerada     = criado.senhaProvisoria;
+        this.acessoGerado    = true;
+        this.mensagemSucesso = `✅ Aluno cadastrado! Login: ${criado.emailInstitucional}`;
+        this.cadastroForm.reset();
+      },
+      error: (erro: ApiErro) => {
+        this.enviando = false;
+        const detalhes = erro.fields ? ' ' + Object.values(erro.fields).join(' ') : '';
+        this.mensagemErro = `❌ ${erro.message}${detalhes}`;
+      },
+    });
   }
 
   // ── Máscaras ────────────────────────────────────────────────────────

@@ -1,0 +1,67 @@
+/* chat.scss — usa apenas variáveis do styles.scss */
+
+.chat-side,
+.chat-window {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+}
+
+.chat-window { min-height: 520px; }
+
+.avatar-img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+
+.conn-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #ef4444; display: inline-block;
+  &.on { background: #06d25e; box-shadow: 0 0 0 3px rgba(6, 210, 94, 0.2); }
+}
+
+.contato-item {
+  border: 1px solid var(--border-color);
+  border-radius: 14px; cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  &:hover { background: var(--hover-overlay); }
+  &.active { border-color: #9b2fff; background: var(--hover-overlay); }
+}
+
+.extra-small { font-size: 11px; }
+
+.chat-header { border-bottom: 1px solid var(--border-color); }
+
+.chat-body {
+  overflow-y: auto;
+  max-height: 60vh;
+  padding-right: 6px;
+}
+
+.bolha {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: var(--bg-primary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+
+  &.minha {
+    background: linear-gradient(135deg, #9b2fff, #06d25e);
+    color: #fff;
+    border: none;
+  }
+}
+
+.chat-field {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-main);
+  &:focus { border-color: #9b2fff; box-shadow: none; background: var(--bg-primary); color: var(--text-main); }
+  &::placeholder { color: var(--text-muted); }
+}
+
+.btn-enviar {
+  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  color: #fff; border: none; border-radius: 12px;
+  &:hover { opacity: 0.9; color: #fff; }
+  &:disabled { opacity: 0.5; }
+}

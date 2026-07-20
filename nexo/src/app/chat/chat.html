@@ -1,0 +1,68 @@
+<div class="row g-4">
+  <!-- Lista de contatos -->
+  <div class="col-lg-4">
+    <div class="chat-side p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="h6 text-main fw-bold mb-0">Contatos</h3>
+        <span class="conn-dot" [class.on]="conectado()" [title]="conectado() ? 'Conectado' : 'Desconectado'"></span>
+      </div>
+
+      @if (semContatos()) {
+        <p class="text-soft small">Nenhum contato disponível.</p>
+      }
+
+      <div class="contato-item p-3 mb-2" *ngFor="let c of contatos()"
+           [class.active]="contatoSelecionado()?.id === c.id"
+           (click)="selecionar(c)">
+        <div class="d-flex align-items-center gap-3">
+          <img [src]="foto" class="avatar-img" alt="Avatar">
+          <div>
+            <h4 class="small fw-bold text-main mb-0">{{ c.nome }}</h4>
+            <span class="text-soft extra-small">{{ papelLabel(c.papel) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Janela de conversa -->
+  <div class="col-lg-8">
+    <div class="chat-window p-4 h-100 d-flex flex-column">
+      @if (contatoSelecionado(); as c) {
+        <div class="chat-header pb-3 mb-3 d-flex align-items-center gap-3">
+          <img [src]="foto" class="avatar-img" alt="Avatar">
+          <div>
+            <h3 class="h6 text-main fw-bold mb-0">{{ c.nome }}</h3>
+            <span class="text-soft extra-small">{{ papelLabel(c.papel) }} • tempo real</span>
+          </div>
+        </div>
+
+        <div class="chat-body flex-grow-1 mb-3">
+          @if (mensagens().length === 0) {
+            <p class="text-soft small text-center mt-4">Nenhuma mensagem ainda. Diga olá! 👋</p>
+          }
+          <div *ngFor="let m of mensagens()" class="bolha-wrap mb-2 d-flex"
+               [class.justify-content-end]="minha(m)">
+            <div class="bolha" [class.minha]="minha(m)">
+              <p class="m-0 small">{{ m.texto }}</p>
+              <span class="extra-small d-block text-end mt-1 opacity-75">{{ m.criadaEm | date:'dd/MM HH:mm' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input d-flex gap-2">
+          <input type="text" class="form-control chat-field" [(ngModel)]="novoTexto"
+                 placeholder="Digite sua mensagem..." (keyup.enter)="enviar()">
+          <button class="btn btn-enviar px-3" (click)="enviar()" [disabled]="!conectado()">
+            <i class="bi bi-send-fill"></i>
+          </button>
+        </div>
+      } @else {
+        <div class="d-flex flex-column align-items-center justify-content-center m-auto text-center">
+          <i class="bi bi-chat-dots text-soft display-4 mb-3"></i>
+          <p class="text-soft">Selecione um contato para conversar</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

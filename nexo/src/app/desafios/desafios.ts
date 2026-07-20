@@ -1,23 +1,27 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DesafioDTO, DesafiosService } from '../api/desafios.service';
 
-export interface Desafio {
+interface DesafioView {
+  id: number;
   titulo: string;
   materia: string;
-  nivel: 'Fácil' | 'Médio' | 'Difícil';
+  nivel: string;
+  nivelClasse: string;
   xp: number;
   tempo: string;
-  status: 'concluido' | 'progresso' | 'aberto';
-  progresso?: number;
+  status: 'aberto' | 'progresso' | 'concluido';
+  progresso: number;
 }
 
-export interface StatDesafio {
-  label: string;
-  value: string;
-  icon: string;
-  color: string;
-}
+const NIVEL_LABEL: Record<string, string> = { FACIL: 'Fácil', MEDIO: 'Médio', DIFICIL: 'Difícil' };
+const NIVEL_CLASSE: Record<string, string> = { FACIL: 'facil', MEDIO: 'medio', DIFICIL: 'dificil' };
+const STATUS_MAP: Record<string, 'aberto' | 'progresso' | 'concluido'> = {
+  ABERTO: 'aberto',
+  PROGRESSO: 'progresso',
+  CONCLUIDO: 'concluido',
+};
 
 @Component({
   selector: 'app-desafios',
@@ -27,43 +31,89 @@ export interface StatDesafio {
   styleUrl: './desafios.scss',
 })
 export class Desafios {
-  buscaDeTermos     = '';
+  private readonly api = inject(DesafiosService);
+
+  buscaDeTermos = '';
   materiaSelecionada = 'Todas as Matérias';
-  nivelSelecionado   = 'Todos os Níveis';
+  nivelSelecionado = 'Todos os Níveis';
 
-  stats: StatDesafio[] = [
-    { label: 'Desafios Concluídos', value: '42',    icon: 'bi-trophy',  color: 'orange' },
-    { label: 'Taxa de Sucesso',     value: '87%',   icon: 'bi-bullseye', color: 'green'  },
-    { label: 'Sequência Atual',     value: '7 dias', icon: 'bi-fire',    color: 'red'    },
-  ];
+  readonly carregando = signal(true);
+  private readonly desafios = signal<DesafioView[]>([]);
 
-  materias = ['Todas as Matérias', 'Biologia', 'Matemática', 'Inglês', 'História'];
-  niveis   = ['Todos os Níveis',   'Fácil',    'Médio',      'Difícil'];
+  readonly stats = signal([
+    { label: 'Desafios Concluídos', value: '0', icon: 'bi-trophy', color: 'orange' },
+    { label: 'Taxa de Sucesso', value: '0%', icon: 'bi-bullseye', color: 'green' },
+    { label: 'Sequência Atual', value: '0 dias', icon: 'bi-fire', color: 'red' },
+  ]);
 
-  desafios: Desafio[] = [
-    { titulo: 'Quiz: Fotossíntese',         materia: 'Biologia',   nivel: 'Médio',  xp: 150, tempo: '15 min', status: 'concluido'               },
-    { titulo: 'Funções Trigonométricas',    materia: 'Matemática', nivel: 'Difícil', xp: 250, tempo: '30 min', status: 'progresso', progresso: 40 },
-    { titulo: 'Present Perfect',            materia: 'Inglês',     nivel: 'Fácil',  xp: 100, tempo: '20 min', status: 'aberto'                  },
-    { titulo: 'Revolução Industrial',       materia: 'História',   nivel: 'Médio',  xp: 180, tempo: '25 min', status: 'aberto'                  },
-    { titulo: 'Ecossistemas e Biomas',      materia: 'Biologia',   nivel: 'Fácil',  xp: 120, tempo: '15 min', status: 'concluido'               },
-    { titulo: 'Derivadas e Integrais',      materia: 'Matemática', nivel: 'Difícil', xp: 300, tempo: '40 min', status: 'progresso', progresso: 20 },
-  ];
+  readonly materias = computed(() => [
+    'Todas as Matérias',
+    ...Array.from(new Set(this.desafios().map((d) => d.materia))).sort(),
+  ]);
+  readonly niveis = ['Todos os Níveis', 'Fácil', 'Médio', 'Difícil'];
 
-  get desafiosFiltrados(): Desafio[] {
-    return this.desafios.filter(d =>
-      d.titulo.toLowerCase().includes(this.buscaDeTermos.toLowerCase()) &&
-      (this.materiaSelecionada === 'Todas as Matérias' || d.materia === this.materiaSelecionada) &&
-      (this.nivelSelecionado   === 'Todos os Níveis'   || d.nivel   === this.nivelSelecionado)
+  readonly desafiosFiltrados = computed(() => {
+    const termo = this.buscaDeTermos.toLowerCase();
+    return this.desafios().filter(
+      (d) =>
+        d.titulo.toLowerCase().includes(termo) &&
+        (this.materiaSelecionada === 'Todas as Matérias' || d.materia === this.materiaSelecionada) &&
+        (this.nivelSelecionado === 'Todos os Níveis' || d.nivel === this.nivelSelecionado),
     );
+  });
+
+  constructor() {
+    this.carregar();
   }
 
-  /** Retorna a classe CSS correspondente ao nível do desafio */
-  getClasseNivel(nivel: string): string {
-    const mapa: Record<string, string> = {
-      'Fácil':  'facil',
-      'Médio':  'medio',
-      'Difícil': 'dificil',
+  carregar(): void {
+    this.carregando.set(true);
+    this.api.listar().subscribe({
+      next: (resp) => {
+        this.desafios.set(resp.desafios.map((d) => this.paraView(d)));
+        this.stats.set([
+          { label: 'Desafios Concluídos', value: `${resp.stats.concluidos}`, icon: 'bi-trophy', color: 'orange' },
+          { label: 'Taxa de Sucesso', value: `${resp.stats.taxaSucesso}%`, icon: 'bi-bullseye', color: 'green' },
+          { label: 'Sequência Atual', value: `${resp.stats.sequenciaDias} dias`, icon: 'bi-fire', color: 'red' },
+        ]);
+        this.carregando.set(false);
+      },
+      error: () => this.carregando.set(false),
+    });
+  }
+
+  private paraView(d: DesafioDTO): DesafioView {
+    return {
+      id: d.id,
+      titulo: d.titulo,
+      materia: d.materia,
+      nivel: NIVEL_LABEL[d.nivel] ?? d.nivel,
+      nivelClasse: NIVEL_CLASSE[d.nivel] ?? 'medio',
+      xp: d.xp,
+      tempo: `${d.tempoMin} min`,
+      status: STATUS_MAP[d.status] ?? 'aberto',
+      progresso: d.progresso,
     };
+  }
+
+  rotuloBotao(d: DesafioView): string {
+    if (d.status === 'concluido') return 'Ver Resultado';
+    if (d.status === 'progresso') return 'Continuar';
+    return 'Iniciar';
+  }
+
+  acao(d: DesafioView): void {
+    if (d.status === 'aberto') {
+      this.api.iniciar(d.id).subscribe({ next: () => this.carregar() });
+    } else if (d.status === 'progresso') {
+      // Continuar até concluir — credita o XP no backend
+      this.api.concluir(d.id).subscribe({ next: () => this.carregar() });
+    }
+    // 'concluido' → apenas exibe resultado (sem ação de escrita)
+  }
+
+  getClasseNivel(nivel: string): string {
+    const mapa: Record<string, string> = { Fácil: 'facil', Médio: 'medio', Difícil: 'dificil' };
     return mapa[nivel] ?? 'medio';
   }
 }

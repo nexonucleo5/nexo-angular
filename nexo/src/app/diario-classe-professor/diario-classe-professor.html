@@ -6,7 +6,7 @@
       <h1 class="page-title fw-bold">Diário de Classe e Frequência</h1>
       <p class="text-soft m-0">Registro oficial de aulas e acompanhamento acadêmico</p>
     </div>
-    <button class="btn btn-export" (click)="salvarFrequencia()">
+    <button class="btn btn-export" (click)="exportarDiario()">
       <i class="bi bi-download"></i> Exportar Diário
     </button>
   </section>
@@ -21,8 +21,8 @@
     <div class="row g-3">
       <div class="col-12 col-md-3">
         <label class="text-soft small mb-1">Turma</label>
-        <select class="form-select-custom" [(ngModel)]="turmaSelecionada" (change)="atualizarDados()">
-          <option *ngFor="let t of turmas" [value]="t">{{ t }}</option>
+        <select class="form-select-custom" [(ngModel)]="turmaSelecionadaId" (ngModelChange)="atualizarDados()">
+          <option *ngFor="let t of turmas()" [ngValue]="t.id">{{ t.nome }}</option>
         </select>
       </div>
       <div class="col-12 col-md-3">
@@ -33,7 +33,7 @@
       </div>
       <div class="col-12 col-md-3">
         <label class="text-soft small mb-1">Data da Aula</label>
-        <input type="date" class="form-control-custom" [(ngModel)]="dataAula">
+        <input type="date" class="form-control-custom" [(ngModel)]="dataAula" (ngModelChange)="atualizarDados()">
       </div>
       <div class="col-12 col-md-3">
         <label class="text-soft small mb-1">Horário</label>
@@ -44,7 +44,7 @@
 
   <!-- ── Stats ────────────────────────────────────── -->
   <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3" *ngFor="let stat of stats">
+    <div class="col-6 col-md-3" *ngFor="let stat of stats()">
       <div class="metric-card p-3">
         <p class="text-soft small mb-1">{{ stat.label }}</p>
         <h2 class="fw-bold mb-0 text-main">{{ stat.value }}</h2>
@@ -75,11 +75,9 @@
           <table class="table-custom">
             <thead>
               <tr>
-                <th style="width:35%;">Aluno</th>
-                <th style="width:20%; text-align:center;">Matrícula</th>
-                <th style="width:20%; text-align:center;">Presença</th>
-                <th style="width:15%; text-align:center;">Freq. Geral</th>
-                <th style="width:10%; text-align:center;">Obs.</th>
+                <th style="width:45%;">Aluno</th>
+                <th style="width:25%; text-align:center;">Matrícula</th>
+                <th style="width:30%; text-align:center;">Presença</th>
               </tr>
             </thead>
           </table>
@@ -87,37 +85,27 @@
           <div class="table-body-scroll">
             <table class="table-custom">
               <tbody>
-                <tr *ngFor="let aluno of alunos">
-                  <td style="width:35%;">
+                <tr *ngFor="let aluno of alunos()">
+                  <td style="width:45%;">
                     <div class="d-flex align-items-center gap-3">
                       <img [src]="aluno.foto" class="avatar-student" alt="Aluno">
                       <span class="text-main fw-semibold">{{ aluno.nome }}</span>
                     </div>
                   </td>
-                  <td style="width:20%; text-align:center;" class="text-soft">{{ aluno.matricula }}</td>
-                  <td style="width:20%; text-align:center;">
+                  <td style="width:25%; text-align:center;" class="text-soft">{{ aluno.matricula }}</td>
+                  <td style="width:30%; text-align:center;">
                     <div class="d-flex justify-content-center gap-2">
                       <button class="btn-presence correct"
                               [class.active]="aluno.presente === true"
-                              (click)="aluno.presente = true; calcularMetricas()">
+                              (click)="marcarPresenca(aluno, true)">
                         <i class="bi bi-check-lg"></i>
                       </button>
                       <button class="btn-presence wrong"
                               [class.active]="aluno.presente === false"
-                              (click)="aluno.presente = false; calcularMetricas()">
+                              (click)="marcarPresenca(aluno, false)">
                         <i class="bi bi-x-lg"></i>
                       </button>
                     </div>
-                  </td>
-                  <td style="width:15%; text-align:center;">
-                    <span class="fw-bold" [ngClass]="getClasseFreq(aluno.freqGeral)">
-                      {{ aluno.freqGeral }}%
-                    </span>
-                  </td>
-                  <td style="width:10%; text-align:center;">
-                    <button class="btn-icon-obs" title="Adicionar observação">
-                      <i class="bi bi-pencil-square"></i>
-                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -176,16 +164,17 @@
               <i class="bi bi-calendar3 text-primary"></i> Histórico de Aulas
             </h4>
             <div class="history-list">
-              <div class="history-item p-3 mb-2" *ngFor="let aula of historico">
+              @if (historico().length === 0) {
+                <p class="text-soft small mb-0">Nenhuma aula registrada para esta turma ainda.</p>
+              }
+              <div class="history-item p-3 mb-2" *ngFor="let aula of historico()">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                   <h6 class="text-main fw-bold m-0 class-title">{{ aula.titulo }}</h6>
-                  <i class="bi bi-pencil text-soft edit-icon-small"></i>
                 </div>
-                <div class="d-flex gap-3 text-soft small flex-wrap">
+                <div class="d-flex gap-3 text-soft small flex-wrap mb-1">
                   <span><i class="bi bi-clock"></i> {{ aula.data }}</span>
-                  <span class="text-success"><i class="bi bi-check-circle"></i> {{ aula.presentes }} presentes</span>
-                  <span class="text-danger"><i class="bi bi-x-circle"></i>  {{ aula.ausentes }} ausentes</span>
                 </div>
+                <p class="text-soft small m-0" *ngIf="aula.descricao">{{ aula.descricao }}</p>
               </div>
             </div>
           </div>

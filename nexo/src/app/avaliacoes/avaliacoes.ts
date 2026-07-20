@@ -1,53 +1,52 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AvaliacoesService } from '../api/avaliacoes.service';
+import { TurmasService } from '../api/turmas.service';
+import { AvaliacaoDTO, QuestaoDTO, StatusAvaliacao, TurmaDTO } from '../core/api.models';
 
-// ── Interfaces ────────────────────────────────────────────────────────────────
-
-export interface StatAvaliacao {
-  label: string;
-  value: string;
-  icon: string;
-  color: string;
-}
-
-export interface Avaliacao {
+interface AvaliacaoView {
   titulo: string;
   tipo: string;
   turma: string;
   data: string;
-  status: 'Em Correção' | 'Aguardando' | 'Concluída';
+  status: string;
+  statusClasse: string;
   corrigidas: number;
   total: number;
 }
 
-export interface ItemFilaCorrecao {
-  aluno: string;
+interface FilaView {
   avaliacao: string;
   turma: string;
-  dataEntrega: string;
-  prioridade: 'alta' | 'média' | 'baixa';
+  data: string;
+  pendentes: number;
 }
 
-export interface Questao {
+interface QuestaoView {
+  id: number;
   enunciado: string;
-  tipo: 'Objetiva' | 'Discursiva';
-  dificuldade: 'Fácil' | 'Médio' | 'Difícil';
-  tags: string[];
-  utilizada: number;
-}
-
-export interface FormNovaAvaliacao {
-  titulo: string;
   tipo: string;
-  turma: string;
-  notaMaxima: number;
-  peso: number;
-  dataAplicacao: string;
-  instrucoes: string;
+  dificuldade: string;
+  tags: string[];
+  tipoRaw: 'OBJETIVA' | 'DISSERTATIVA';
+  dificuldadeRaw: 'FACIL' | 'MEDIA' | 'DIFICIL';
+  disciplinaRaw: string;
 }
 
-// ── Componente ────────────────────────────────────────────────────────────────
+const STATUS_LABEL: Record<StatusAvaliacao, string> = {
+  RASCUNHO: 'Rascunho',
+  PUBLICADA: 'Aguardando',
+  EM_CORRECAO: 'Em Correção',
+  CORRIGIDA: 'Concluída',
+};
+
+const STATUS_CLASSE: Record<StatusAvaliacao, string> = {
+  RASCUNHO: 'aguardando',
+  PUBLICADA: 'aguardando',
+  EM_CORRECAO: 'em-correcao',
+  CORRIGIDA: 'concluida',
+};
 
 @Component({
   selector: 'app-avaliacoes',
@@ -57,71 +56,132 @@ export interface FormNovaAvaliacao {
   styleUrl: './avaliacoes.scss',
 })
 export class Avaliacoes {
+  private readonly api = inject(AvaliacoesService);
+  private readonly turmasApi = inject(TurmasService);
 
-  abaAtiva   = 'ativas';
+  abaAtiva = 'ativas';
   buscaTermo = '';
   mensagemSucesso = '';
-  mensagemErro    = '';
+  mensagemErro = '';
 
-  stats: StatAvaliacao[] = [
-    { label: 'Avaliações Ativas',      value: '12',  icon: 'bi-journal-text',  color: 'blue'   },
-    { label: 'Pendentes de Correção',  value: '23',  icon: 'bi-clock-history', color: 'orange' },
-    { label: 'Concluídas no Mês',      value: '45',  icon: 'bi-check2-circle', color: 'green'  },
-    { label: 'Média Geral das Turmas', value: '7.8', icon: 'bi-graph-up',      color: 'blue'   },
-  ];
+  readonly carregando = signal(true);
+  private readonly avaliacoes = signal<AvaliacaoView[]>([]);
+  readonly detalhe = signal<AvaliacaoView | null>(null);
+  readonly filaCorrecao = signal<FilaView[]>([]);
+  readonly bancoQuestoes = signal<QuestaoView[]>([]);
+  readonly turmas = signal<TurmaDTO[]>([]);
 
-  avaliacoes: Avaliacao[] = [
-    { titulo: 'Prova Bimestral — Funções',            tipo: 'Prova',    turma: '2º Ano A', data: '15 Jun 2026', status: 'Em Correção', corrigidas: 12, total: 20 },
-    { titulo: 'Trabalho em Grupo — Geometria Espacial', tipo: 'Trabalho', turma: '3º Ano B', data: '18 Jun 2026', status: 'Aguardando',  corrigidas: 2,  total: 5  },
-    { titulo: 'Quiz Online — Trigonometria',           tipo: 'Quiz',     turma: '1º Ano C', data: '20 Jun 2026', status: 'Concluída',   corrigidas: 15, total: 15 },
-  ];
+  tiposAvaliacao = ['Prova', 'Trabalho', 'Quiz', 'Exercício'];
 
-  filaCorrecao: ItemFilaCorrecao[] = [
-    { aluno: 'Ana Carolina Silva',  avaliacao: 'Prova Bimestral — Funções',    turma: '2º Ano A', dataEntrega: '10 Jun 2026', prioridade: 'alta'  },
-    { aluno: 'Bruno Henrique Costa',avaliacao: 'Prova Bimestral — Funções',    turma: '2º Ano A', dataEntrega: '10 Jun 2026', prioridade: 'alta'  },
-    { aluno: 'Camila Rodrigues',    avaliacao: 'Trabalho em Grupo — Geometria', turma: '3º Ano B', dataEntrega: '12 Jun 2026', prioridade: 'média' },
-  ];
-
-  bancoQuestoes: Questao[] = [
-    { enunciado: 'Calcule o valor de x na equação: 2x + 5 = 15',              tipo: 'Objetiva',  dificuldade: 'Fácil',  tags: ['Equações', 'Primeiro Grau'],     utilizada: 12 },
-    { enunciado: 'Explique o conceito de derivada e sua aplicação prática',    tipo: 'Discursiva', dificuldade: 'Difícil', tags: ['Cálculo', 'Derivadas'],          utilizada: 5  },
-    { enunciado: 'Resolva o sistema de equações lineares usando matriz',       tipo: 'Discursiva', dificuldade: 'Médio',  tags: ['Sistemas Lineares', 'Matrizes'], utilizada: 8  },
-  ];
-
-  // ── Formulário de nova avaliação (model binding) ──────────────────
-  novaAvaliacao: FormNovaAvaliacao = {
-    titulo:         '',
-    tipo:           '',
-    turma:          '',
-    notaMaxima:     10,
-    peso:           3,
-    dataAplicacao:  '',
-    instrucoes:     '',
+  novaAvaliacao = {
+    titulo: '',
+    tipo: '',
+    turmaId: null as number | null,
+    notaMaxima: 10,
+    peso: 3,
+    dataAplicacao: '',
+    instrucoes: '',
   };
 
-  turmasDisponiveis = ['2º Ano A', '3º Ano B', '1º Ano C'];
-  tiposAvaliacao    = ['Prova', 'Trabalho', 'Quiz', 'Exercício'];
+  // Nova questão / edição (banco de questões)
+  mostrarFormQuestao = false;
+  editandoQuestaoId: number | null = null;
+  novaQuestao = {
+    enunciado: '',
+    disciplina: '',
+    tipo: 'OBJETIVA' as 'OBJETIVA' | 'DISSERTATIVA',
+    dificuldade: 'MEDIA' as 'FACIL' | 'MEDIA' | 'DIFICIL',
+  };
 
-  // ── Métodos ───────────────────────────────────────────────────────
+  readonly stats = computed(() => {
+    const lista = this.avaliacoes();
+    const ativas = lista.filter((a) => a.status !== 'Concluída').length;
+    const pendentes = lista.reduce((s, a) => s + Math.max(0, a.total - a.corrigidas), 0);
+    const concluidas = lista.filter((a) => a.status === 'Concluída').length;
+    return [
+      { label: 'Avaliações Ativas', value: `${ativas}`, icon: 'bi-journal-text', color: 'blue' },
+      { label: 'Pendentes de Correção', value: `${pendentes}`, icon: 'bi-clock-history', color: 'orange' },
+      { label: 'Concluídas', value: `${concluidas}`, icon: 'bi-check2-circle', color: 'green' },
+      { label: 'Total de Avaliações', value: `${lista.length}`, icon: 'bi-graph-up', color: 'blue' },
+    ];
+  });
+
+  readonly avaliacoesFiltradas = computed(() => {
+    const termo = this.buscaTermo.toLowerCase();
+    return this.avaliacoes().filter(
+      (a) => a.titulo.toLowerCase().includes(termo) || a.tipo.toLowerCase().includes(termo),
+    );
+  });
+
+  constructor() {
+    this.carregarTudo();
+    this.turmasApi.listar().subscribe({ next: (t) => this.turmas.set(t), error: () => {} });
+  }
+
+  carregarTudo(): void {
+    this.carregando.set(true);
+    this.api.listar().subscribe({
+      next: (lista) => {
+        this.avaliacoes.set(lista.map((a) => this.paraView(a)));
+        this.carregando.set(false);
+      },
+      error: () => this.carregando.set(false),
+    });
+    this.api.filaCorrecao().subscribe({
+      next: (lista) =>
+        this.filaCorrecao.set(
+          lista.map((a) => ({
+            avaliacao: a.titulo,
+            turma: a.turma ?? '—',
+            data: this.formatarData(a.data),
+            pendentes: a.pendentesCorrecao,
+          })),
+        ),
+      error: () => this.filaCorrecao.set([]),
+    });
+    this.api.listarQuestoes().subscribe({
+      next: (lista) => this.bancoQuestoes.set(lista.map((q) => this.questaoView(q))),
+      error: () => this.bancoQuestoes.set([]),
+    });
+  }
+
+  private paraView(a: AvaliacaoDTO): AvaliacaoView {
+    return {
+      titulo: a.titulo,
+      tipo: a.tipo,
+      turma: a.turma ?? '—',
+      data: this.formatarData(a.data),
+      status: STATUS_LABEL[a.status],
+      statusClasse: STATUS_CLASSE[a.status],
+      corrigidas: Math.max(0, a.entregas - a.pendentesCorrecao),
+      total: a.entregas,
+    };
+  }
+
+  private questaoView(q: QuestaoDTO): QuestaoView {
+    const dif = { FACIL: 'Fácil', MEDIA: 'Médio', DIFICIL: 'Difícil' }[q.dificuldade] ?? q.dificuldade;
+    return {
+      id: q.id,
+      enunciado: q.enunciado,
+      tipo: q.tipo === 'OBJETIVA' ? 'Objetiva' : 'Discursiva',
+      dificuldade: dif,
+      tags: q.disciplina ? [q.disciplina] : [],
+      tipoRaw: q.tipo,
+      dificuldadeRaw: q.dificuldade,
+      disciplinaRaw: q.disciplina ?? '',
+    };
+  }
 
   setAba(aba: string): void {
     this.abaAtiva = aba;
   }
 
-  get avaliacoesFiltradas(): Avaliacao[] {
-    return this.avaliacoes.filter(a =>
-      a.titulo.toLowerCase().includes(this.buscaTermo.toLowerCase()) ||
-      a.tipo.toLowerCase().includes(this.buscaTermo.toLowerCase())
-    );
+  verDetalhes(a: AvaliacaoView): void {
+    this.detalhe.set(a);
   }
 
-  getClasseStatus(status: string): string {
-    const mapa: Record<string, string> = {
-      'Em Correção': 'em-correcao',
-      'Aguardando':  'aguardando',
-      'Concluída':   'concluida',
-    };
-    return mapa[status] ?? 'aguardando';
+  fecharDetalhes(): void {
+    this.detalhe.set(null);
   }
 
   criarAvaliacao(): void {
@@ -133,37 +193,92 @@ export class Avaliacoes {
       this.mensagemErro = 'Selecione o tipo de avaliação.';
       return;
     }
-    if (!this.novaAvaliacao.turma) {
+    if (this.novaAvaliacao.turmaId == null) {
       this.mensagemErro = 'Selecione a turma.';
       return;
     }
 
-    // TODO: integrar com API — this.avaliacaoService.criar(this.novaAvaliacao)
-    console.log('Nova avaliação para envio ao backend:', this.novaAvaliacao);
-
-    this.avaliacoes.push({
-      titulo:     this.novaAvaliacao.titulo,
-      tipo:       this.novaAvaliacao.tipo,
-      turma:      this.novaAvaliacao.turma,
-      data:       this.novaAvaliacao.dataAplicacao || '—',
-      status:     'Aguardando',
-      corrigidas: 0,
-      total:      0,
-    });
-
-    this.mensagemErro    = '';
-    this.mensagemSucesso = '✅ Avaliação criada com sucesso!';
-    this.novaAvaliacao   = { titulo: '', tipo: '', turma: '', notaMaxima: 10, peso: 3, dataAplicacao: '', instrucoes: '' };
-
-    setTimeout(() => {
-      this.mensagemSucesso = '';
-      this.setAba('ativas');
-    }, 2000);
+    this.mensagemErro = '';
+    this.api
+      .criar({
+        titulo: this.novaAvaliacao.titulo.trim(),
+        tipo: this.novaAvaliacao.tipo,
+        turmaId: this.novaAvaliacao.turmaId,
+        data: this.novaAvaliacao.dataAplicacao || undefined,
+      })
+      .subscribe({
+        next: (criada) => {
+          this.avaliacoes.update((lista) => [this.paraView(criada), ...lista]);
+          this.mensagemSucesso = '✅ Avaliação criada com sucesso!';
+          this.novaAvaliacao = { titulo: '', tipo: '', turmaId: null, notaMaxima: 10, peso: 3, dataAplicacao: '', instrucoes: '' };
+          setTimeout(() => {
+            this.mensagemSucesso = '';
+            this.setAba('ativas');
+          }, 1500);
+        },
+        error: () => (this.mensagemErro = 'Falha ao criar a avaliação.'),
+      });
   }
 
-  salvarRascunho(): void {
-    console.log('Rascunho salvo:', this.novaAvaliacao);
-    this.mensagemSucesso = '💾 Rascunho salvo!';
-    setTimeout(() => (this.mensagemSucesso = ''), 2000);
+  abrirNovaQuestao(): void {
+    this.editandoQuestaoId = null;
+    this.novaQuestao = { enunciado: '', disciplina: '', tipo: 'OBJETIVA', dificuldade: 'MEDIA' };
+    this.mostrarFormQuestao = !this.mostrarFormQuestao;
+  }
+
+  editarQuestao(q: QuestaoView): void {
+    this.editandoQuestaoId = q.id;
+    this.novaQuestao = {
+      enunciado: q.enunciado,
+      disciplina: q.disciplinaRaw,
+      tipo: q.tipoRaw,
+      dificuldade: q.dificuldadeRaw,
+    };
+    this.mostrarFormQuestao = true;
+  }
+
+  salvarQuestao(): void {
+    if (!this.novaQuestao.enunciado.trim()) {
+      this.mensagemErro = 'O enunciado da questão é obrigatório.';
+      return;
+    }
+    this.mensagemErro = '';
+    const payload = {
+      enunciado: this.novaQuestao.enunciado.trim(),
+      disciplina: this.novaQuestao.disciplina.trim() || undefined,
+      tipo: this.novaQuestao.tipo,
+      dificuldade: this.novaQuestao.dificuldade,
+    };
+    const id = this.editandoQuestaoId;
+    const req = id != null ? this.api.atualizarQuestao(id, payload) : this.api.criarQuestao(payload);
+    req.subscribe({
+      next: (q) => {
+        const view = this.questaoView(q);
+        this.bancoQuestoes.update((lista) =>
+          id != null ? lista.map((x) => (x.id === id ? view : x)) : [view, ...lista],
+        );
+        this.novaQuestao = { enunciado: '', disciplina: '', tipo: 'OBJETIVA', dificuldade: 'MEDIA' };
+        this.mostrarFormQuestao = false;
+        this.editandoQuestaoId = null;
+      },
+      error: () => (this.mensagemErro = 'Falha ao salvar a questão.'),
+    });
+  }
+
+  excluirQuestao(q: QuestaoView): void {
+    if (!window.confirm(`Excluir a questão "${q.enunciado.slice(0, 40)}…"?`)) return;
+    this.api.excluirQuestao(q.id).subscribe({
+      next: () => this.bancoQuestoes.update((lista) => lista.filter((x) => x.id !== q.id)),
+      error: () => (this.mensagemErro = 'Falha ao excluir a questão.'),
+    });
+  }
+
+  private formatarData(iso: string): string {
+    if (!iso) return '—';
+    return new Date(iso + (iso.length === 10 ? 'T00:00:00' : '')).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
   }
 }

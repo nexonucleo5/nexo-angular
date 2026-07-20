@@ -1,0 +1,242 @@
+<section class="page-content">
+
+  <div class="settings-header">
+    <h1 class="settings-page-title">Configurações</h1>
+    <p class="settings-page-subtitle">
+      Personalize como você interage com a plataforma
+    </p>
+  </div>
+
+  <div class="settings-wrapper">
+
+    <!-- NOTIFICAÇÕES -->
+    <div class="content-card settings-card">
+      <h2 class="section-card-title">
+        <i class="bi bi-bell title-icon purple-text"></i>
+        Notificações
+      </h2>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Aviso de tarefas novas</span>
+          <small>Receba alertas quando novas tarefas forem publicadas</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="notificacoes().avisoTarefasNovas"
+          (change)="onNotificacoesChange('avisoTarefasNovas', $any($event.target).checked)">
+      </div>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Lembretes de prazos</span>
+          <small>Alertas antes do vencimento de atividades</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="notificacoes().lembretesPrazos"
+          (change)="onNotificacoesChange('lembretesPrazos', $any($event.target).checked)">
+      </div>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Mensagens de professores</span>
+          <small>Notificações de mensagens diretas</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="notificacoes().mensagensProfessores"
+          (change)="onNotificacoesChange('mensagensProfessores', $any($event.target).checked)">
+      </div>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Notificações por e-mail</span>
+          <small>Receber avisos no seu e-mail</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="notificacoes().notificacoesEmail"
+          (change)="onNotificacoesChange('notificacoesEmail', $any($event.target).checked)">
+      </div>
+    </div>
+
+    <!-- GAMIFICAÇÃO -->
+    <div class="content-card settings-card">
+      <h2 class="section-card-title">
+        <i class="bi bi-controller title-icon pink-text"></i>
+        Gamificação
+      </h2>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Exibir XP em tempo real</span>
+          <small>Mostra ganhos de XP durante atividades</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="gamificacao().exibirXpTempoReal"
+          (change)="onGamificacaoChange('exibirXpTempoReal', $any($event.target).checked)">
+      </div>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Animações de conquista</span>
+          <small>Mostrar efeitos ao desbloquear badges</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="gamificacao().animacoesConquista"
+          (change)="onGamificacaoChange('animacoesConquista', $any($event.target).checked)">
+      </div>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Ranking da turma</span>
+          <small>Exibir sua posição no ranking</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="gamificacao().rankingTurma"
+          (change)="onGamificacaoChange('rankingTurma', $any($event.target).checked)">
+      </div>
+    </div>
+
+    <!-- ESTUDOS -->
+    <div class="content-card settings-card">
+      <h2 class="section-card-title">
+        <i class="bi bi-book title-icon green-text"></i>
+        Estudos
+      </h2>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Modo foco</span>
+          <small>Remove distrações durante atividades</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="estudos().modoFoco"
+          (change)="onEstudosChange('modoFoco', $any($event.target).checked)">
+      </div>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Auto avançar tarefas</span>
+          <small>Ir automaticamente para próxima atividade</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="estudos().autoAvancarTarefas"
+          (change)="onEstudosChange('autoAvancarTarefas', $any($event.target).checked)">
+      </div>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Lembrete de estudo diário</span>
+          <small>Notificação para manter sua sequência</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="estudos().lembreteEstudoDiario"
+          (change)="onEstudosChange('lembreteEstudoDiario', $any($event.target).checked)">
+      </div>
+    </div>
+
+    <!-- APARÊNCIA -->
+    <div class="content-card settings-card">
+      <h2 class="section-card-title">
+        <i class="bi bi-palette title-icon blue-text"></i>
+        Aparência
+      </h2>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Modo Escuro</span>
+          <small>Alternar entre tema claro e escuro</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="aparencia().temaEscuro"
+          (change)="onAparenciaChange('temaEscuro', $any($event.target).checked)">
+      </div>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Animações da interface</span>
+          <small>Ativar transições e efeitos visuais</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="aparencia().animacoesInterface"
+          (change)="onAparenciaChange('animacoesInterface', $any($event.target).checked)">
+      </div>
+    </div>
+
+    <!-- ACESSIBILIDADE -->
+    <div class="content-card settings-card">
+      <h2 class="section-card-title">
+        <i class="bi bi-universal-access title-icon teal-text"></i>
+        Acessibilidade
+      </h2>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Fonte ampliada</span>
+          <small>Aumenta o tamanho do texto em toda a plataforma</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="acessibilidade().fonteAmpliada"
+          (change)="onAcessibilidadeChange('fonteAmpliada', $any($event.target).checked)">
+      </div>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Alto contraste</span>
+          <small>Reforça o contraste de textos e bordas</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="acessibilidade().altoContraste"
+          (change)="onAcessibilidadeChange('altoContraste', $any($event.target).checked)">
+      </div>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Leitura em voz alta</span>
+          <small>Permite ouvir enunciados e conteúdos</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="acessibilidade().leituraVozAlta"
+          (change)="onAcessibilidadeChange('leituraVozAlta', $any($event.target).checked)">
+      </div>
+    </div>
+
+    <!-- PRIVACIDADE -->
+    <div class="content-card settings-card">
+      <h2 class="section-card-title">
+        <i class="bi bi-eye-slash title-icon orange-text"></i>
+        Privacidade
+      </h2>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Perfil público</span>
+          <small>Permitir que outros alunos vejam seu perfil</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="privacidade().perfilPublico"
+          (change)="onPrivacidadeChange('perfilPublico', $any($event.target).checked)">
+      </div>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Exibir no ranking</span>
+          <small>Mostrar seu nome nos rankings</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="privacidade().exibirNoRanking"
+          (change)="onPrivacidadeChange('exibirNoRanking', $any($event.target).checked)">
+      </div>
+
+      <div class="settings-item toggle-item">
+        <div>
+          <span>Visível para responsáveis</span>
+          <small>Responsáveis podem acompanhar seu desempenho</small>
+        </div>
+        <input type="checkbox" class="custom-switch" [checked]="privacidade().visivelResponsaveis"
+          (change)="onPrivacidadeChange('visivelResponsaveis', $any($event.target).checked)">
+      </div>
+    </div>
+
+    <!-- CONTA -->
+    <div class="content-card settings-card">
+      <h2 class="section-card-title">
+        <i class="bi bi-person title-icon purple-text"></i>
+        Conta
+      </h2>
+
+      <button class="btn btn-gradient w-100 mb-3" (click)="editarPerfil()">
+        Editar perfil
+      </button>
+      <button class="btn btn-gradient w-100 mb-3" (click)="alterarSenha()">
+        Alterar senha
+      </button>
+      <button class="btn btn-danger-soft w-100" (click)="encerrarSessao()">
+        Encerrar sessão
+      </button>
+    </div>
+
+  </div>
+
+</section>

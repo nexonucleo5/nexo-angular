@@ -1,18 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, Injector, Signal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { Cadastro } from './cadastro/cadastro';
-import { Dashboards } from './dashboards/dashboards';
-import { Login } from './login/login';
-import { Materias } from './materias/materias';
 import { Menu } from './menu/menu';
 import { MenuUsuario } from './menu-usuario/menu-usuario';
 import { MenuDiretor } from './menu-diretor/menu-diretor';
 import { MenuProfessor } from './menu-professor/menu-professor';
-import { AuthService } from './services/auth.service';
-import { MatriculasWrapper } from './matriculas-wrapper/matriculas-wrapper';
-import { GestaoEvasao } from './gestao-evasao/gestao-evasao';
+import { AuthService, RoleCliente } from './services/auth.service';
+import { aplicarTema, temaSalvoEscuro } from './configuracoes/settings-store';
+import { ConfiguracaoAlunoService } from './configuracao-aluno/configuracao-aluno.service';
+import { ConfiguracaoProfessorService } from './configuracao-professor/configuracao-professor.service';
+import { ConfiguracaoDiretorService } from './configuracao-diretor/configuracao-diretor.service';
+
+/** Contrato mínimo comum aos três services de configuração por perfil. */
+interface PerfilSettings {
+  isDarkMode: Signal<boolean>;
+  alternarTema(): void;
+}
 
 @Component({
   selector: 'app-root',
@@ -20,40 +23,55 @@ import { GestaoEvasao } from './gestao-evasao/gestao-evasao';
   imports: [
     CommonModule,
     RouterOutlet,
-    Dashboards,
-    Materias,
-    FormsModule,
     Menu,
-    Cadastro,
-    Login,
     MenuUsuario,
     MenuDiretor,
     MenuProfessor,
-    MatriculasWrapper,
-    GestaoEvasao,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App implements OnInit {
+export class App {
   public authService = inject(AuthService);
-  temaEscuro: boolean = false;
+  private readonly injector = inject(Injector);
 
-  ngOnInit() {
-    this.aplicarTema();
+  /** Tema antes do login (cache compartilhado gravado pelo SettingsStore). */
+  private readonly temaLocal = signal(temaSalvoEscuro());
+  private readonly settingsAtivo = signal<PerfilSettings | null>(null);
+
+  readonly temaEscuro = computed(() => this.settingsAtivo()?.isDarkMode() ?? this.temaLocal());
+
+  constructor() {
+    aplicarTema(this.temaLocal());
+
+    // Instancia o service de configurações do perfil logado: sincroniza com a
+    // API (GET /api/configuracoes) e aplica tema/animações sem precisar
+    // visitar a tela de configurações.
+    effect(() => {
+      const role = this.authService.usuarioLogado()?.role ?? null;
+      this.settingsAtivo.set(role ? untracked(() => this.servicoPara(role)) : null);
+    });
   }
 
-  alternarPerfil() {
-    this.authService.alternarPerfil();
+  alternarTema(): void {
+    const ativo = this.settingsAtivo();
+    if (ativo) {
+      // Persiste na seção Aparência do perfil (localStorage + PATCH na API)
+      ativo.alternarTema();
+      return;
+    }
+    this.temaLocal.update((escuro) => !escuro);
+    aplicarTema(this.temaLocal());
   }
 
-  alternarTema() {
-    this.temaEscuro = !this.temaEscuro;
-    this.aplicarTema();
-  }
-
-  private aplicarTema() {
-    const tema = this.temaEscuro ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', tema);
+  private servicoPara(role: RoleCliente): PerfilSettings {
+    switch (role) {
+      case 'professor':
+        return this.injector.get(ConfiguracaoProfessorService);
+      case 'diretor':
+        return this.injector.get(ConfiguracaoDiretorService);
+      default:
+        return this.injector.get(ConfiguracaoAlunoService);
+    }
   }
 }

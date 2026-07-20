@@ -4,16 +4,13 @@
       <h1 class="page-title fw-bold">Central de Comunicação e Histórico</h1>
       <p class="text-soft m-0">Hub de relacionamento acadêmico e acompanhamento individual</p>
     </div>
-    <button class="btn btn-gradient px-4 py-2" *ngIf="abaAtiva === 'avisos'">
+    <button class="btn btn-gradient px-4 py-2" *ngIf="abaAtiva === 'avisos'" (click)="mostrarFormAviso = !mostrarFormAviso">
       <i class="bi bi-megaphone-fill me-2"></i> Publicar Novo Aviso
-    </button>
-    <button class="btn btn-gradient px-4 py-2" *ngIf="abaAtiva !== 'avisos'">
-      <i class="bi bi-plus-lg me-2"></i> Novo Aviso para Turma
     </button>
   </header>
 
   <div class="row g-3 mb-4">
-    <div class="col-12 col-sm-6 col-xl-3" *ngFor="let stat of stats">
+    <div class="col-12 col-sm-6 col-xl-3" *ngFor="let stat of stats()">
       <div class="metric-card">
         <div class="d-flex justify-content-between align-items-start">
           <div>
@@ -35,99 +32,33 @@
     <button class="tab-link" [class.active]="abaAtiva === 'perfil'" (click)="mudarAba('perfil')">Perfil do Aluno</button>
   </div>
 
-  <div class="row g-4" *ngIf="abaAtiva === 'mensagens'">
-    <div class="col-lg-4">
-      <div class="main-card p-3 h-100">
-        <h3 class="h6 text-main fw-bold mb-3">Caixa de Entrada</h3>
-        <div class="search-box mb-3">
-          <i class="bi bi-search"></i>
-          <input type="text" class="form-control-custom" [(ngModel)]="buscaMensagem" placeholder="Buscar mensagens...">
-        </div>
-        
-        <div class="chat-list">
-          <div class="chat-item p-3 mb-2" 
-               *ngFor="let msg of filtrarMensagens()" 
-               [class.active]="mensagemSelecionada?.id === msg.id"
-               (click)="selecionarMensagem(msg)">
-            <div class="d-flex gap-3">
-              <img [src]="msg.avatar" class="avatar-img" alt="Avatar">
-              <div class="w-100">
-                <div class="d-flex justify-content-between align-items-start">
-                  <h4 class="small fw-bold text-main mb-0">{{msg.aluno}}</h4>
-                  <span class="text-soft extra-small">{{msg.horario}}</span>
-                </div>
-                <p class="text-soft small mb-1 text-truncate">{{msg.assunto}}</p>
-                <span class="level-tag" [ngClass]="msg.prioridade">{{msg.prioridade | titlecase}}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-8">
-      <div class="main-card p-4 h-100 d-flex flex-column justify-content-between chat-window-box">
-        <div *ngIf="!mensagemSelecionada" class="d-flex flex-column align-items-center justify-content-center m-auto text-center">
-          <i class="bi bi-chat-right-text text-soft display-4 mb-3"></i>
-          <p class="text-soft">Selecione uma mensagem para visualizar</p>
-        </div>
-
-        <div *ngIf="mensagemSelecionada" class="w-100 d-flex flex-column h-100">
-          <div class="chat-header pb-3 mb-3 border-bottom-custom d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-3">
-              <img [src]="mensagemSelecionada.avatar" class="avatar-img" alt="Avatar">
-              <div>
-                <h3 class="h6 text-main fw-bold mb-0">{{mensagemSelecionada.aluno}}</h3>
-                <p class="text-soft extra-small m-0">{{mensagemSelecionada.assunto}}</p>
-              </div>
-            </div>
-            <button class="btn btn-outline-main btn-sm px-3">Ver Perfil Completo</button>
-          </div>
-
-          <div class="chat-messages-history flex-grow-1 overflow-y-auto mb-3 pe-2">
-            <div *ngFor="let chat of mensagemSelecionada.historico" 
-                 class="message-bubble-wrapper mb-3 d-flex" 
-                 [class.justify-content-end]="chat.remetente === 'professor'">
-              <div class="message-bubble" [class.professor-bubble]="chat.remetente === 'professor'">
-                <p class="m-0 small">{{chat.texto}}</p>
-                <span class="extra-small d-block text-end mt-1 text-soft-light">{{chat.data}}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="chat-input-box d-flex gap-2">
-            <input type="text" class="form-control-custom bg-body-custom px-3" [disabled]="abaAtiva !== 'mensagens'" [(ngModel)]="textoResposta" placeholder="Digite sua resposta..." (keyup.enter)="enviarResposta()">
-            <button class="btn btn-gradient px-3" (click)="enviarResposta()">
-              <i class="bi bi-send-fill"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div *ngIf="abaAtiva === 'mensagens'">
+    <app-chat></app-chat>
   </div>
 
   <div class="main-card p-4" *ngIf="abaAtiva === 'avisos'">
     <h3 class="h5 text-main fw-bold mb-4">Avisos Publicados</h3>
+
+    <div class="notice-card p-4 border-custom mb-3" *ngIf="mostrarFormAviso">
+      <h4 class="h6 text-main fw-bold mb-3">Novo Aviso</h4>
+      <input type="text" class="form-control-custom mb-2 w-100 p-2" [(ngModel)]="novoAvisoTitulo" placeholder="Título do aviso">
+      <textarea class="form-control-custom w-100 p-2 mb-2 bg-body-custom" rows="3" [(ngModel)]="novoAvisoConteudo" placeholder="Conteúdo do aviso..."></textarea>
+      <div class="d-flex justify-content-end gap-2">
+        <button class="btn btn-outline-main px-3" (click)="mostrarFormAviso = false">Cancelar</button>
+        <button class="btn btn-gradient px-4" (click)="publicarAviso()">Publicar</button>
+      </div>
+    </div>
+
     <div class="d-flex flex-column gap-3">
-      <div class="notice-card p-4 border-custom" *ngFor="let aviso of avisos">
+      <p class="text-soft small" *ngIf="avisos().length === 0">Nenhum aviso publicado ainda.</p>
+      <div class="notice-card p-4 border-custom" *ngFor="let aviso of avisos()">
         <div class="d-flex justify-content-between align-items-start mb-2">
           <h4 class="h6 text-main fw-bold mb-0">{{aviso.titulo}}</h4>
           <span class="text-soft small"><i class="bi bi-clock me-1"></i> {{aviso.horario}}</span>
         </div>
         <p class="text-soft small mb-3">{{aviso.conteudo}}</p>
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="d-flex gap-2">
-            <span class="status-badge pt-1 text-main bg-body-custom" *ngFor="let turma of aviso.turmas">{{turma}}</span>
-          </div>
-          <div class="w-25 text-end">
-            <div class="d-flex justify-content-between text-soft extra-small mb-1">
-              <span>Visualizações</span>
-              <span>{{aviso.vistos}}/{{aviso.total}} ({{getPorcentagem(aviso.vistos, aviso.total)}}%)</span>
-            </div>
-            <div class="progress">
-              <div class="progress-bar" [style.width]="getPorcentagem(aviso.vistos, aviso.total) + '%'"></div>
-            </div>
-          </div>
+        <div class="d-flex gap-2">
+          <span class="status-badge pt-1 text-main bg-body-custom">{{aviso.destino}}</span>
         </div>
       </div>
     </div>
@@ -136,7 +67,8 @@
   <div class="main-card p-4" *ngIf="abaAtiva === 'duvidas'">
     <h3 class="h5 text-main fw-bold mb-4">Fila de Dúvidas dos Alunos</h3>
     <div class="table-responsive-custom">
-      <div class="duvida-row p-3 mb-3 border-custom d-flex justify-content-between align-items-center" *ngFor="let duvida of duvidas">
+      <p class="text-soft small" *ngIf="duvidas().length === 0">Nenhuma dúvida na fila.</p>
+      <div class="duvida-row p-3 mb-3 border-custom d-flex justify-content-between align-items-center" *ngFor="let duvida of duvidas()">
         <div class="d-flex align-items-center gap-3">
           <img [src]="duvida.avatar" class="avatar-img" alt="Avatar">
           <div>
@@ -145,11 +77,12 @@
               <span class="text-soft extra-small">• {{duvida.tempo}}</span>
               <span class="status-badge" [ngClass]="duvida.status === 'Pendente' ? 'dificil' : 'success'">{{duvida.status}}</span>
             </div>
-            <p class="text-soft small mb-1 Episcopal-semibold text-main">{{duvida.pergunta}}</p>
+            <p class="text-soft small mb-1 fw-semibold text-main">{{duvida.pergunta}}</p>
             <span class="text-soft extra-small bg-body-custom px-2 py-1 rounded">{{duvida.materia}}</span>
           </div>
         </div>
-        <button class="btn btn-outline-main px-4" [class.btn-gradient]="duvida.status === 'Pendente'">
+        <button class="btn btn-outline-main px-4" [class.btn-gradient]="duvida.status === 'Pendente'"
+                (click)="responderDuvida(duvida)">
           {{ duvida.status === 'Pendente' ? 'Responder' : 'Respondida' }}
         </button>
       </div>
@@ -162,9 +95,7 @@
         <h3 class="h6 text-main fw-bold mb-3">Selecionar Aluno</h3>
         <div class="mb-3">
           <select class="form-select-custom mb-3" [(ngModel)]="turmaSelecionada">
-            <option value="1º Ano A">1º Ano A</option>
-            <option value="2º Ano A">2º Ano A</option>
-            <option value="3º Ano A">3º Ano A</option>
+            <option *ngFor="let t of turmasDisponiveis()" [value]="t">{{ t }}</option>
           </select>
           <div class="search-box">
             <i class="bi bi-search"></i>
@@ -172,12 +103,12 @@
           </div>
         </div>
         <div class="student-list">
-          <div class="chat-item p-3 mb-2" 
+          <div class="chat-item p-3 mb-2"
                *ngFor="let aluno of alunosFiltrados()"
-               [class.active]="alunoSelecionado?.matricula === aluno.matricula"
-               (click)="alunoSelecionado = aluno">
+               [class.active]="alunoSelecionado?.alunoId === aluno.alunoId"
+               (click)="selecionarAluno(aluno)">
             <div class="d-flex align-items-center gap-3">
-              <img [src]="aluno.avatar" class="avatar-img" alt="Avatar">
+              <img src="assets/imagensProjeto/gabrielZapelini.png" class="avatar-img" alt="Avatar">
               <div>
                 <h4 class="small fw-bold text-main mb-0">{{aluno.nome}}</h4>
                 <p class="text-soft extra-small m-0">Mat: {{aluno.matricula}}</p>
@@ -191,14 +122,10 @@
     <div class="col-lg-8" *ngIf="alunoSelecionado">
       <div class="main-card p-4 mb-4">
         <div class="d-flex gap-4 align-items-center pb-4 border-bottom-custom mb-4">
-          <img [src]="alunoSelecionado.avatar" class="avatar-big" alt="Avatar Aluno">
+          <img src="assets/imagensProjeto/gabrielZapelini.png" class="avatar-big" alt="Avatar Aluno">
           <div>
             <h2 class="h4 text-main fw-bold mb-1">{{alunoSelecionado.nome}}</h2>
-            <p class="text-soft small mb-2">{{alunoSelecionado.turma}} • Mat: {{alunoSelecionado.matricula}}</p>
-            <div class="d-flex gap-3 text-soft extra-small">
-              <span><i class="bi bi-envelope me-1"></i> {{alunoSelecionado.email}}</span>
-              <span><i class="bi bi-telephone me-1"></i> {{alunoSelecionado.telefone}}</span>
-            </div>
+            <p class="text-soft small mb-0">{{alunoSelecionado.turma}} • Mat: {{alunoSelecionado.matricula}}</p>
           </div>
         </div>
 
@@ -206,53 +133,28 @@
           <div class="col-md-4">
             <div class="bg-body-custom p-3 rounded-20 text-center">
               <p class="text-soft small mb-1">Média Geral</p>
-              <h3 class="fw-bold text-main m-0 text-success-color">{{alunoSelecionado.mediaGeral}}</h3>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="bg-body-custom p-3 rounded-20 text-center">
-              <p class="text-soft small mb-1">Frequência</p>
-              <h3 class="fw-bold text-main m-0">{{alunoSelecionado.frequencia}}</h3>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="bg-body-custom p-3 rounded-20 text-center">
-              <p class="text-soft small mb-1">Engajamento</p>
-              <h3 class="fw-bold text-main m-0 text-purple">{{alunoSelecionado.engajamento}}</h3>
+              <h3 class="fw-bold text-main m-0 text-success-color">{{ mediaGeralAluno() }}</h3>
             </div>
           </div>
         </div>
 
         <h4 class="h6 text-main fw-bold mb-3">Notas por Disciplina</h4>
         <div class="row g-3 mb-4">
-          <div class="col-md-4" *ngFor="let nota of alunoSelecionado.notas">
+          <p class="text-soft small col-12" *ngIf="notasAluno().length === 0">Nenhuma nota lançada para este aluno.</p>
+          <div class="col-md-4" *ngFor="let nota of notasAluno()">
             <div class="border-custom p-3 rounded-12 d-flex justify-content-between align-items-center">
               <div>
                 <p class="text-main fw-bold mb-0 small">{{nota.disciplina}}</p>
-                <span class="text-soft extra-small">Peso {{nota.peso}}</span>
               </div>
               <span class="badge-nota fw-bold text-success-color">{{nota.valor}}</span>
             </div>
           </div>
         </div>
 
-        <h4 class="h6 text-main fw-bold mb-3">Histórico Acadêmico Recente</h4>
-        <div class="d-flex flex-column gap-2 mb-4">
-          <div class="border-custom p-3 rounded-12 d-flex justify-content-between align-items-center" *ngFor="let hist of alunoSelecionado.historico">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-check-circle-fill text-success"></i>
-              <div>
-                <p class="text-main small mb-0 fw-semibold">{{hist.atividade}}</p>
-                <span class="text-soft extra-small">{{hist.data}}</span>
-              </div>
-            </div>
-            <span class="fw-bold text-main small">{{hist.nota}}</span>
-          </div>
-        </div>
-
         <h4 class="h6 text-main fw-bold mb-3">Observações Pedagógicas</h4>
         <div class="d-flex flex-column gap-3 mb-4">
-          <div class="bg-body-custom p-3 rounded-12" *ngFor="let obs of alunoSelecionado.observacoes">
+          <p class="text-soft small" *ngIf="observacoesAluno().length === 0">Nenhuma observação registrada.</p>
+          <div class="bg-body-custom p-3 rounded-12" *ngFor="let obs of observacoesAluno()">
             <div class="d-flex justify-content-between mb-1">
               <span class="fw-bold small text-main">{{obs.professor}}</span>
               <span class="text-soft extra-small">{{obs.data}}</span>
