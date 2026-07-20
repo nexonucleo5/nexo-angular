@@ -1,0 +1,60 @@
+<section class="page-content p-4">
+
+  @if (disciplina(); as d) {
+
+    <a routerLink="/materias" class="back-link d-inline-flex align-items-center gap-2 mb-4">
+      <i class="bi bi-arrow-left"></i> Voltar para Minhas Matérias
+    </a>
+
+    <!-- Cabeçalho da disciplina -->
+    <div class="discipline-header d-flex align-items-center gap-4 mb-5 flex-wrap">
+      <div [class]="'discipline-icon d-flex align-items-center justify-content-center rounded-4 ' + d.colorClass">
+        <i *ngIf="d.iconClass" [class]="'bi ' + d.iconClass"></i>
+        <span *ngIf="d.iconText" class="fw-bold">{{ d.iconText }}</span>
+      </div>
+      <div class="flex-grow-1">
+        <h1 class="page-title fw-bold mb-1" style="color: var(--text-main);">{{ d.title }}</h1>
+        <p class="text-soft fs-5 mb-2">{{ d.level }}</p>
+        <div class="d-flex align-items-center gap-3">
+          <div class="progress flex-grow-1" style="height: 10px; max-width: 320px;">
+            <div [class]="'progress-bar ' + d.colorClass" [style.width.%]="d.progress"></div>
+          </div>
+          <span class="text-soft fw-bold">{{ d.progress }}%</span>
+        </div>
+        <small class="text-soft d-block mt-2">
+          {{ d.completedLessons }}/{{ d.totalLessons }} aulas concluídas
+        </small>
+      </div>
+    </div>
+
+    <!-- Conteúdos / matérias da disciplina -->
+    <h2 class="section-title fw-bold mb-4" style="color: var(--text-main);">
+      Conteúdos da disciplina
+    </h2>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-xl-4" *ngFor="let topic of d.topics; let i = index">
+        <div class="topic-card card-theme p-4 rounded-4 h-100 d-flex align-items-center gap-3">
+          <div [class]="'topic-number d-flex align-items-center justify-content-center rounded-3 ' + d.colorClass">
+            {{ i + 1 }}
+          </div>
+          <div>
+            <h3 class="topic-title mb-1" style="color: var(--text-main);">{{ topic }}</h3>
+            <small class="text-soft">Módulo {{ i + 1 }} de {{ d.topics.length }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  } @else {
+
+    <div class="not-found text-center py-5">
+      <i class="bi bi-question-circle display-1 text-soft"></i>
+      <h1 class="fw-bold mt-3" style="color: var(--text-main);">Disciplina não encontrada</h1>
+      <p class="text-soft">A disciplina que você tentou acessar não existe.</p>
+      <a routerLink="/materias" class="btn btn-voltar mt-2">Voltar para Minhas Matérias</a>
+    </div>
+
+  }
+
+</section>

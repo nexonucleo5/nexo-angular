@@ -69,10 +69,6 @@
                         </div>
                     </div>
 
-                    <button type="button" class="btn btn-cadastro w-100 mt-3" (click)="gerarAcesso()">
-                        <i class="bi bi-key me-2"></i>Gerar Acesso
-                    </button>
-
                 </div>
 
                 <!-- ── Coluna direita ──────────────────────────── -->
@@ -118,8 +114,8 @@
                             placeholder="Apto, bloco, casa...">
                     </div>
 
-                    <button type="submit" class="btn btn-cadastro w-100 mt-3">
-                        <i class="bi bi-check-circle me-2"></i>Finalizar Cadastro
+                    <button type="submit" class="btn btn-cadastro w-100 mt-3" [disabled]="enviando">
+                        <i class="bi bi-check-circle me-2"></i>{{ enviando ? 'Enviando...' : 'Finalizar Cadastro' }}
                     </button>
 
                 </div>

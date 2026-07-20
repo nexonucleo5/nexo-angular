@@ -56,10 +56,18 @@
 
 .subject-title { font-size: 1.25rem; color: var(--text-main) !important; font-weight: 700; margin: 0; }
 
-/* Botões de acesso */
-.btn-primary { background: linear-gradient(135deg, #2e73f6, #10c6df) !important; border: none !important; }
-.btn-info    { background: linear-gradient(135deg, #10c6df, #2e73f6) !important; border: none !important; }
-.btn-warning { background: linear-gradient(135deg, #f59e0b, #ff6a00) !important; border: none !important; }
+/* Cores por disciplina (ícone + barra de progresso) */
+.subj-blue   { background: linear-gradient(135deg, #2e73f6, #10c6df) !important; }
+.subj-cyan   { background: linear-gradient(135deg, #10c6df, #22d3ee) !important; }
+.subj-amber  { background: linear-gradient(135deg, #f59e0b, #ff6a00) !important; }
+.subj-green  { background: linear-gradient(135deg, #06d25e, #10c6df) !important; }
+.subj-red    { background: linear-gradient(135deg, #ef4444, #f97316) !important; }
+.subj-purple { background: linear-gradient(135deg, #9b2fff, #d946ef) !important; }
+.subj-pink   { background: linear-gradient(135deg, #f2389d, #9b2fff) !important; }
+.subj-teal   { background: linear-gradient(135deg, #14b8a6, #06d25e) !important; }
+.subj-indigo { background: linear-gradient(135deg, #6366f1, #2e73f6) !important; }
+.subj-orange { background: linear-gradient(135deg, #ff6a00, #f59e0b) !important; }
+
 
 /* Stats */
 .stats-section h2 { color: var(--text-main) !important; }

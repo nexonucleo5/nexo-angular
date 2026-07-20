@@ -5,7 +5,7 @@
   </header>
 
   <div class="row g-3 mb-4">
-    <div class="col-12 col-md-4" *ngFor="let stat of stats">
+    <div class="col-12 col-md-4" *ngFor="let stat of stats()">
       <div class="metric-card">
         <div class="d-flex justify-content-between align-items-start">
           <div>
@@ -30,7 +30,7 @@
       </div>
       <div class="col-lg-3">
         <select class="form-select-custom" [(ngModel)]="materiaSelecionada">
-          <option *ngFor="let m of materias" [value]="m">{{m}}</option>
+          <option *ngFor="let m of materias()" [value]="m">{{m}}</option>
         </select>
       </div>
       <div class="col-lg-3">
@@ -42,10 +42,10 @@
   </div>
 
   <div class="row g-4">
-    <div class="col-md-6 col-xl-4" *ngFor="let desafio of desafiosFiltrados">
+    <div class="col-md-6 col-xl-4" *ngFor="let desafio of desafiosFiltrados()">
       <div class="main-card p-4 h-100 d-flex flex-column" [class.active-border]="desafio.status === 'progresso'">
         <div class="d-flex justify-content-between mb-3">
-          <span class="level-tag" [ngClass]="getClasseNivel(desafio.nivel)">{{desafio.nivel}}</span>
+          <span class="level-tag" [ngClass]="desafio.nivelClasse">{{desafio.nivel}}</span>
           <span *ngIf="desafio.status === 'concluido'" class="status-badge success">Concluído</span>
         </div>
         <h3 class="h5 text-main fw-bold mb-1">{{desafio.titulo}}</h3>
@@ -57,10 +57,14 @@
         <div class="progress mb-3" *ngIf="desafio.status === 'progresso'">
           <div class="progress-bar" [style.width]="desafio.progresso + '%'"></div>
         </div>
-        <button class="btn btn-outline-main w-100 mt-2" [class.btn-gradient]="desafio.status !== 'concluido'">
-          {{ desafio.status === 'concluido' ? 'Ver Resultado' : (desafio.status === 'progresso' ? 'Continuar' : 'Iniciar') }}
+        <button class="btn btn-outline-main w-100 mt-2" [class.btn-gradient]="desafio.status !== 'concluido'"
+                (click)="acao(desafio)">
+          {{ rotuloBotao(desafio) }}
         </button>
       </div>
+    </div>
+    <div class="col-12" *ngIf="!carregando() && desafiosFiltrados().length === 0">
+      <p class="text-soft">Nenhum desafio encontrado.</p>
     </div>
   </div>
 </div>

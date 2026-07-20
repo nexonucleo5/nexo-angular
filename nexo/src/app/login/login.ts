@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
+import { ApiErro } from '../core/api.models';
 
 @Component({
   selector: 'app-login',
@@ -17,8 +18,9 @@ export class Login {
   private authService = inject(AuthService);
 
   public loginForm: FormGroup;
-  public mostrarSenha   = false;
-  public mensagemErro   = '';
+  public mostrarSenha    = false;
+  public carregando      = false;
+  public mensagemErro    = '';
   public mensagemSucesso = '';
 
   constructor() {
@@ -36,14 +38,21 @@ export class Login {
     }
 
     this.mensagemErro = '';
+    this.carregando = true;
     const { username, password } = this.loginForm.value;
-    const sucesso = this.authService.login(username, password);
 
-    if (sucesso) {
-      this.mensagemSucesso = '✅ Login realizado com sucesso! Redirecionando...';
-      setTimeout(() => this.router.navigate(['/dashboards']), 120);
-    } else {
-      this.mensagemErro = '❌ Credenciais inválidas. Tente novamente.';
-    }
+    this.authService.login(username, password).subscribe({
+      next: () => {
+        this.carregando = false;
+        this.mensagemSucesso = '✅ Login realizado com sucesso! Redirecionando...';
+        setTimeout(() => this.router.navigate(['/dashboards']), 120);
+      },
+      error: (erro: ApiErro) => {
+        this.carregando = false;
+        this.mensagemErro = erro.status === 401
+          ? '❌ Credenciais inválidas. Tente novamente.'
+          : `❌ ${erro.message}`;
+      },
+    });
   }
 }

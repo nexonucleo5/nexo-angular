@@ -10,32 +10,32 @@
             <div class="col-md-3">
                 <div class="stat-card shadow-sm border-bottom-indicator red-indicator">
                     <div>
-                        <p class="text-soft mb-1">Total em Risco <span class="badge-trend text-soft">+5</span></p>
-                        <h2>47</h2>
+                        <p class="text-soft mb-1">Total em Risco</p>
+                        <h2>{{ totalEmRisco() }}</h2>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card shadow-sm border-bottom-indicator red-indicator">
                     <div>
-                        <p class="text-soft mb-1">Risco Alto <span class="badge-trend text-soft">+3</span></p>
-                        <h2>18</h2>
+                        <p class="text-soft mb-1">Risco Alto</p>
+                        <h2>{{ totalAlto() }}</h2>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card shadow-sm border-bottom-indicator yellow-indicator">
                     <div>
-                        <p class="text-soft mb-1">Risco Médio <span class="badge-trend text-soft">+2</span></p>
-                        <h2>29</h2>
+                        <p class="text-soft mb-1">Risco Médio</p>
+                        <h2>{{ totalMedio() }}</h2>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card shadow-sm border-bottom-indicator green-indicator">
                     <div>
-                        <p class="text-soft mb-1">Recuperados <span class="badge-trend text-soft">+4</span></p>
-                        <h2>12</h2>
+                        <p class="text-soft mb-1">Risco Baixo</p>
+                        <h2>{{ totalBaixo() }}</h2>
                     </div>
                 </div>
             </div>
@@ -47,17 +47,21 @@
             <div class="col-lg-5">
                 <div class="search-box d-flex align-items-center p-2">
                     <i class="bi bi-search px-2 text-secondary"></i>
-                    <input type="text" [(ngModel)]="buscaNome" class="form-control border-0 bg-transparent shadow-none" placeholder="Buscar por nome, matrícula ou turma...">
+                    <input type="text" [ngModel]="buscaNome()" (ngModelChange)="buscaNome.set($event)"
+                        class="form-control border-0 bg-transparent shadow-none"
+                        placeholder="Buscar por nome, matrícula ou turma...">
                 </div>
             </div>
             <div class="col-lg-3">
-                <select class="form-select filter-select" [(ngModel)]="riscoSelecionado">
+                <select class="form-select filter-select" [ngModel]="riscoSelecionado()"
+                    (ngModelChange)="riscoSelecionado.set($event)">
                     <option *ngFor="let r of riscos" [value]="r">{{ r }}</option>
                 </select>
             </div>
             <div class="col-lg-3">
-                <select class="form-select filter-select" [(ngModel)]="turmaSelecionada">
-                    <option *ngFor="let t of turmas" [value]="t">{{ t }}</option>
+                <select class="form-select filter-select" [ngModel]="turmaSelecionada()"
+                    (ngModelChange)="turmaSelecionada.set($event)">
+                    <option *ngFor="let t of turmas()" [value]="t">{{ t }}</option>
                 </select>
             </div>
             <div class="col-lg-1">
@@ -69,13 +73,22 @@
     </section>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fs-4 fw-bold text-white mb-0">Alunos em Risco ({{ alunosFiltrados.length }})</h2>
-        <button class="btn btn-export shadow-sm">Exportar Relatório</button>
+        <h2 class="fs-4 fw-bold text-white mb-0">Alunos em Risco ({{ alunosFiltrados().length }})</h2>
+        <button class="btn btn-export shadow-sm" (click)="exportar()">Exportar Relatório</button>
     </div>
 
+    @if (carregando()) {
+        <p class="text-soft">Carregando alunos…</p>
+    } @else if (erro()) {
+        <div class="d-flex align-items-center gap-3">
+            <p class="text-soft mb-0">Não foi possível carregar os dados de evasão.</p>
+            <button class="btn gradient-btn" (click)="carregar()">Tentar novamente</button>
+        </div>
+    } @else {
+
     <section class="students-section d-flex flex-column gap-3 mb-5">
-        <div class="student-card p-4 rounded-4 shadow-sm" *ngFor="let aluno of alunosFiltrados">
-            
+        <div class="student-card p-4 rounded-4 shadow-sm" *ngFor="let aluno of alunosFiltrados()">
+
             <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
                 <div class="d-flex gap-3 align-items-center">
                     <div class="avatar-container position-relative">
@@ -86,7 +99,7 @@
                     </div>
                     <div>
                         <h3 class="fs-5 text-white fw-bold mb-1">{{ aluno.nome }}</h3>
-                        <p class="text-soft mb-0 fs-6">{{ aluno.anoTurma }} • <span class="text-secondary">Mat: {{ aluno.matricula }}</span></p>
+                        <p class="text-soft mb-0 fs-6">{{ aluno.turma }} • <span class="text-secondary">Mat: {{ aluno.matricula }}</span></p>
                     </div>
                 </div>
 
@@ -120,10 +133,11 @@
                 </div>
 
                 <div class="d-flex flex-column gap-2 action-buttons">
-                    <button class="btn gradient-btn-blue w-100 d-flex align-items-center justify-content-center gap-2">
+                    <button class="btn gradient-btn-blue w-100 d-flex align-items-center justify-content-center gap-2"
+                        (click)="contatar(aluno)">
                         <i class="bi bi-chat-left-text-fill"></i> Contatar
                     </button>
-                    <button class="btn btn-dark-custom w-100 text-white text-center">
+                    <button class="btn btn-dark-custom w-100 text-white text-center" (click)="verDetalhes(aluno)">
                         Ver Detalhes
                     </button>
                 </div>
@@ -152,5 +166,36 @@
             </div>
 
         </div>
+
+        @if (alunosFiltrados().length === 0) {
+            <p class="text-soft">Nenhum aluno encontrado com os filtros atuais.</p>
+        }
     </section>
+
+    }
+
+    @if (detalhe(); as a) {
+      <div class="detalhe-overlay" (click)="fecharDetalhes()">
+        <div class="detalhe-modal" (click)="$event.stopPropagation()">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <h3>{{ a.nome }}</h3>
+            <button class="detalhe-close" (click)="fecharDetalhes()">&times;</button>
+          </div>
+          <div class="detalhe-row"><span class="rot">Turma</span><span class="val">{{ a.turma }}</span></div>
+          <div class="detalhe-row"><span class="rot">Matrícula</span><span class="val">{{ a.matricula }}</span></div>
+          <div class="detalhe-row"><span class="rot">Nível de risco</span><span class="val">{{ a.risco }}</span></div>
+          <div class="detalhe-row"><span class="rot">Motivo principal</span><span class="val">{{ a.motivoPrincipal }}</span></div>
+          <div class="detalhe-row"><span class="rot">Frequência</span><span class="val">{{ a.frequencia }}%</span></div>
+          <div class="detalhe-row"><span class="rot">Participação</span><span class="val">{{ a.participacao }}%</span></div>
+          <div class="detalhe-row"><span class="rot">Nota média</span><span class="val">{{ a.notaMedia }}</span></div>
+          <div class="detalhe-row"><span class="rot">Último acesso</span><span class="val">{{ a.ultimoAcesso }}</span></div>
+          <div class="detalhe-row"><span class="rot">Intervenções</span><span class="val">{{ a.intervencoes }} ({{ a.tempoIntervencao }})</span></div>
+          <div class="detalhe-row"><span class="rot">Contato responsável</span><span class="val">{{ a.contatoResponsavel }}</span></div>
+          <div class="detalhe-row"><span class="rot">E-mail responsável</span><span class="val">{{ a.emailResponsavel }}</span></div>
+          <button class="btn gradient-btn-blue w-100 mt-3" (click)="contatar(a)">
+            <i class="bi bi-envelope"></i> Contatar responsável
+          </button>
+        </div>
+      </div>
+    }
 </section>

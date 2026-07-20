@@ -1,47 +1,175 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts'; // <-- Importações atualizadas
+import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions, ChartType } from 'chart.js';
+import { forkJoin } from 'rxjs';
+import { GestaoDiretorService } from '../api/gestao-diretor.service';
+import { AlunoRiscoDTO, DesempenhoDTO, ProfessorMonitorDTO } from '../core/api.models';
+
+interface MetricView {
+  label: string;
+  value: string;
+  icon: string;
+  color: string;
+}
+
+interface AlunoRiscoView {
+  nome: string;
+  turma: string;
+  frequencia: number;
+  risco: string;
+  foto: string;
+  tempo: string;
+}
+
+interface AlertaView {
+  titulo: string;
+  desc: string;
+  tempo: string;
+  nivel: string;
+}
+
+const FOTO_PADRAO = 'assets/imagensProjeto/gabrielZapelini.png';
 
 @Component({
   selector: 'app-dashboard-diretor',
   standalone: true,
   imports: [CommonModule, BaseChartDirective],
-  providers: [
-    provideCharts(withDefaultRegisterables()) // <-- ISSO CORRIGE O ERRO DO 'getTheme' REGISTRANDO O CHART.JS CORRETAMENTE
-  ],
-  templateUrl: './diretor-dashboard.html', 
-  styleUrl: './diretor-dashboard.scss'
+  providers: [provideCharts(withDefaultRegisterables())],
+  templateUrl: './diretor-dashboard.html',
+  styleUrl: './diretor-dashboard.scss',
 })
 export class DashboardDiretor {
+  private readonly gestao = inject(GestaoDiretorService);
 
-  public lineChartType: ChartType = 'line';
-  
-  public lineChartData: ChartConfiguration['data'] = {
-    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
-    datasets: [
-      {
-        label: 'Taxa Aprovação (%)',
-        data: [90, 88, 89, 93, 91],
-        borderColor: '#2196f3',
-        backgroundColor: 'rgba(33, 150, 243, 0.15)',
-        fill: true,
-        tension: 0.4,
-        pointBackgroundColor: '#2196f3',
-        pointHoverRadius: 6
+  readonly carregando = signal(true);
+  readonly erro = signal(false);
+
+  private readonly desempenho = signal<DesempenhoDTO | null>(null);
+  private readonly risco = signal<AlunoRiscoDTO[]>([]);
+  private readonly docentes = signal<ProfessorMonitorDTO[]>([]);
+
+  readonly metrics = computed<MetricView[]>(() => {
+    const d = this.desempenho();
+    if (!d) return [];
+    const lista = this.risco();
+    const total = lista.length || d.totalAlunos;
+    const emRiscoAlto = lista.filter((a) => a.risco === 'ALTO').length;
+    const taxaEvasao = total ? Math.round((emRiscoAlto / total) * 1000) / 10 : 0;
+    return [
+      { label: 'Total de Alunos', value: `${d.totalAlunos}`, icon: 'bi-people-fill', color: 'blue' },
+      { label: 'Taxa de Evasão (risco alto)', value: `${taxaEvasao}%`, icon: 'bi-person-x-fill', color: 'red' },
+      { label: 'Engajamento Médio', value: `${d.engajamentoMedio}%`, icon: 'bi-bullseye', color: 'green' },
+      { label: 'Desempenho Geral', value: `${d.mediaGeral}`, icon: 'bi-graph-up-arrow', color: 'purple' },
+    ];
+  });
+
+  readonly alunosRisco = computed<AlunoRiscoView[]>(() =>
+    this.risco()
+      .filter((a) => a.risco !== 'BAIXO')
+      .slice(0, 3)
+      .map((a) => ({
+        nome: a.nome,
+        turma: a.turma ?? 'Sem turma',
+        frequencia: Math.max(0, Math.round(100 - a.percentualFaltas)),
+        risco: a.risco.toLowerCase(),
+        foto: a.foto || FOTO_PADRAO,
+        tempo: this.formatarRelativo(a.ultimoAcessoEm),
+      }))
+  );
+
+  readonly alertas = computed<AlertaView[]>(() => {
+    const lista = this.risco();
+    const alto = lista.filter((a) => a.risco === 'ALTO').length;
+    const baixaFreq = lista.filter((a) => a.percentualFaltas > 40).length;
+    const pendentes = this.docentes().reduce((s, p) => s + p.correcoesPendentes, 0);
+    const alertas: AlertaView[] = [];
+    if (alto > 0) {
+      alertas.push({
+        titulo: 'Risco de Evasão',
+        desc: `${alto} aluno(s) com risco alto de evasão`,
+        tempo: 'Agora',
+        nivel: 'alta',
+      });
+    }
+    if (pendentes > 0) {
+      alertas.push({
+        titulo: 'Correções Pendentes',
+        desc: `${pendentes} correções aguardando os professores`,
+        tempo: 'Hoje',
+        nivel: pendentes > 20 ? 'alta' : 'media',
+      });
+    }
+    if (baixaFreq > 0) {
+      alertas.push({
+        titulo: 'Baixa Frequência',
+        desc: `${baixaFreq} aluno(s) com mais de 40% de faltas`,
+        tempo: 'Hoje',
+        nivel: 'alta',
+      });
+    }
+    return alertas;
+  });
+
+  constructor() {
+    this.carregar();
+  }
+
+  carregar(): void {
+    this.carregando.set(true);
+    this.erro.set(false);
+    forkJoin({
+      desempenho: this.gestao.desempenho(),
+      risco: this.gestao.riscoEvasao(),
+      docentes: this.gestao.monitoramentoProfessores(),
+    }).subscribe({
+      next: ({ desempenho, risco, docentes }) => {
+        this.desempenho.set(desempenho);
+        this.risco.set(risco);
+        this.docentes.set(docentes);
+        this.atualizarGrafico(desempenho);
+        this.carregando.set(false);
       },
-      {
-        label: 'Engajamento (%)',
-        data: [89, 87, 90, 92, 91],
-        borderColor: '#06d25e',
-        backgroundColor: 'rgba(6, 210, 94, 0.15)',
-        fill: true,
-        tension: 0.4,
-        pointBackgroundColor: '#06d25e',
-        pointHoverRadius: 6
-      }
-    ]
-  };
+      error: () => {
+        this.erro.set(true);
+        this.carregando.set(false);
+      },
+    });
+  }
+
+  private formatarRelativo(iso: string | null): string {
+    if (!iso) return '—';
+    const dias = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+    if (dias <= 0) return 'Hoje';
+    if (dias === 1) return 'Ontem';
+    if (dias < 7) return `Há ${dias} dias`;
+    return `Há ${Math.floor(dias / 7)} semana(s)`;
+  }
+
+  // ── Gráfico: desempenho por turma (média x10 e frequência) vindo do backend ──
+  public lineChartType: ChartType = 'bar';
+
+  public lineChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
+
+  private atualizarGrafico(d: DesempenhoDTO): void {
+    this.lineChartData = {
+      labels: d.turmas.map((t) => t.turma),
+      datasets: [
+        {
+          label: 'Média (x10)',
+          data: d.turmas.map((t) => Math.round(t.media * 10)),
+          backgroundColor: 'rgba(33, 150, 243, 0.7)',
+          borderRadius: 6,
+        },
+        {
+          label: 'Frequência (%)',
+          data: d.turmas.map((t) => t.frequencia),
+          backgroundColor: 'rgba(6, 210, 94, 0.7)',
+          borderRadius: 6,
+        },
+      ],
+    };
+  }
 
   public lineChartOptions: ChartOptions = {
     responsive: true,
@@ -50,12 +178,7 @@ export class DashboardDiretor {
       legend: {
         display: true,
         position: 'bottom',
-        labels: {
-          color: '#8a99ad',
-          usePointStyle: true,
-          pointStyle: 'circle',
-          padding: 20
-        }
+        labels: { color: '#8a99ad', usePointStyle: true, pointStyle: 'circle', padding: 20 },
       },
       tooltip: {
         enabled: true,
@@ -65,54 +188,17 @@ export class DashboardDiretor {
         titleColor: '#fff',
         bodyColor: '#fff',
         borderColor: '#334155',
-        borderWidth: 1
-      }
+        borderWidth: 1,
+      },
     },
     scales: {
       y: {
         min: 0,
         max: 100,
-        ticks: {
-          stepSize: 25,
-          color: '#8a99ad'
-        },
-        grid: {
-          color: 'rgba(255, 255, 255, 0.05)'
-        }
+        ticks: { stepSize: 25, color: '#8a99ad' },
+        grid: { color: 'rgba(255, 255, 255, 0.05)' },
       },
-      x: {
-        ticks: {
-          color: '#8a99ad'
-        },
-        grid: {
-          display: false
-        }
-      }
-    }
+      x: { ticks: { color: '#8a99ad' }, grid: { display: false } },
+    },
   };
-
-  // Restante dos dados estruturais do Dashboard
-  metrics = [
-    { label: 'Total de Alunos', value: '1.247', trend: '+5.2%', icon: 'bi-people-fill', color: 'blue' },
-    { label: 'Taxa de Evasão', value: '3.8%', trend: '-1.2%', icon: 'bi-person-x-fill', color: 'red' },
-    { label: 'Engajamento Médio', value: '87.5%', trend: '+3.1%', icon: 'bi-bullseye', color: 'green' },
-    { label: 'Desempenho Geral', value: '8.2', trend: '+0.4', icon: 'bi-graph-up-arrow', color: 'purple' }
-  ];
-
-  alunosRisco = [
-    { nome: 'Lucas Ferreira', turma: '2º Ano A', frequencia: 45, risco: 'alto', foto: 'https://i.pravatar.cc/150?u=lucas', tempo: '7 dias atrás' },
-    { nome: 'Mariana Costa', turma: '1º Ano B', frequencia: 62, risco: 'medio', foto: 'https://i.pravatar.cc/150?u=mariana', tempo: '4 dias atrás' },
-    { nome: 'Pedro Souza', turma: '3º Ano C', frequencia: 58, risco: 'medio', foto: 'https://i.pravatar.cc/150?u=pedro', tempo: '5 dias atrás' }
-  ];
-
-  alertas = [
-    { titulo: 'Documentação Pendente', desc: '15 alunos com documentação incompleta', tempo: 'Há 2 horas', nivel: 'alta' },
-    { titulo: 'Correções Atrasadas', desc: '3 professores com correções pendentes há +7 dias', tempo: 'Há 5 horas', nivel: 'media' },
-    { titulo: 'Baixa Frequência', desc: '8 alunos sem acesso há mais de 7 dias', tempo: 'Hoje', nivel: 'alta' }
-  ];
-
-  eventos = [
-    { dia: '10', mes: 'Mai', titulo: 'Reunião de Pais', tipo: 'Reunião' },
-    { dia: '12', mes: 'Mai', titulo: 'Conselho de Classe', tipo: 'Conselho' }
-  ];
 }

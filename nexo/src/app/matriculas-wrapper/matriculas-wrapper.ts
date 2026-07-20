@@ -1,7 +1,5 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
-import { UserService } from '../services/user';
 import { Materias } from '../materias/materias';
 import { MatriculasDiretor } from '../matriculas-diretor/matriculas-diretor';
 import { AuthService } from '../services/auth.service';

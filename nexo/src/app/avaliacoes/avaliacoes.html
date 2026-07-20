@@ -6,7 +6,7 @@
 
   <!-- ── KPIs ──────────────────────────────────────────── -->
   <div class="row g-3 mb-4">
-    <div class="col-12 col-md-3" *ngFor="let stat of stats">
+    <div class="col-12 col-md-3" *ngFor="let stat of stats()">
       <div class="metric-card">
         <div class="d-flex justify-content-between align-items-start">
           <div>
@@ -39,16 +39,15 @@
     </div>
 
     <div class="row g-4">
-      <div class="col-12" *ngFor="let avaliacao of avaliacoesFiltradas">
+      <div class="col-12" *ngFor="let avaliacao of avaliacoesFiltradas()">
         <div class="main-card p-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-              <span class="status-badge me-2" [ngClass]="getClasseStatus(avaliacao.status)">{{ avaliacao.status }}</span>
+              <span class="status-badge me-2" [ngClass]="avaliacao.statusClasse">{{ avaliacao.status }}</span>
               <h3 class="h5 text-main fw-bold d-inline-block align-middle mb-0">{{ avaliacao.titulo }}</h3>
             </div>
             <div class="d-flex gap-2">
-              <button class="btn-action"><i class="bi bi-eye"></i></button>
-              <button class="btn-action btn-delete"><i class="bi bi-trash"></i></button>
+              <button class="btn-action" (click)="verDetalhes(avaliacao)"><i class="bi bi-eye"></i></button>
             </div>
           </div>
           <p class="text-soft small mb-3">{{ avaliacao.tipo }} • {{ avaliacao.turma }} • {{ avaliacao.data }}</p>
@@ -73,26 +72,27 @@
       <table class="custom-table">
         <thead>
           <tr>
-            <th>Aluno</th>
             <th>Avaliação</th>
             <th>Turma</th>
-            <th>Data Entrega</th>
-            <th>Prioridade</th>
+            <th>Data</th>
+            <th>Pendentes</th>
             <th class="text-end">Ações</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of filaCorrecao">
-            <td class="text-main fw-bold">{{ item.aluno }}</td>
-            <td class="text-soft">{{ item.avaliacao }}</td>
+          <tr *ngFor="let item of filaCorrecao()">
+            <td class="text-main fw-bold">{{ item.avaliacao }}</td>
             <td class="text-soft">{{ item.turma }}</td>
-            <td class="text-soft">{{ item.dataEntrega }}</td>
-            <td><span class="priority-tag" [ngClass]="item.prioridade">{{ item.prioridade }}</span></td>
+            <td class="text-soft">{{ item.data }}</td>
+            <td><span class="priority-tag alta">{{ item.pendentes }} pendente(s)</span></td>
             <td class="text-end">
               <button class="btn btn-sm btn-gradient py-1 px-3">
                 <i class="bi bi-pencil-square me-1"></i> Corrigir
               </button>
             </td>
+          </tr>
+          <tr *ngIf="filaCorrecao().length === 0">
+            <td colspan="5" class="text-soft text-center py-3">Nenhuma avaliação aguardando correção.</td>
           </tr>
         </tbody>
       </table>
@@ -103,27 +103,59 @@
   <div *ngIf="abaAtiva === 'questoes'">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="h4 text-main fw-bold mb-0">Banco de Questões</h2>
-      <button class="btn btn-gradient"><i class="bi bi-plus-lg me-2"></i> Nova Questão</button>
+      <button class="btn btn-gradient" (click)="abrirNovaQuestao()">
+        <i class="bi bi-plus-lg me-2"></i> Nova Questão
+      </button>
+    </div>
+
+    <div class="main-card p-4 mb-3" *ngIf="mostrarFormQuestao">
+      <h4 class="h6 text-main fw-bold mb-3">{{ editandoQuestaoId ? 'Editar Questão' : 'Nova Questão' }}</h4>
+      <textarea class="form-control-custom w-100 p-2 mb-2" rows="2" [(ngModel)]="novaQuestao.enunciado"
+                placeholder="Enunciado da questão"></textarea>
+      <div class="row g-2">
+        <div class="col-md-4">
+          <input type="text" class="form-control-custom w-100 p-2" [(ngModel)]="novaQuestao.disciplina" placeholder="Disciplina">
+        </div>
+        <div class="col-md-4">
+          <select class="form-select-custom" [(ngModel)]="novaQuestao.tipo">
+            <option value="OBJETIVA">Objetiva</option>
+            <option value="DISSERTATIVA">Dissertativa</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <select class="form-select-custom" [(ngModel)]="novaQuestao.dificuldade">
+            <option value="FACIL">Fácil</option>
+            <option value="MEDIA">Médio</option>
+            <option value="DIFICIL">Difícil</option>
+          </select>
+        </div>
+      </div>
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button class="btn btn-outline-main px-3" (click)="mostrarFormQuestao = false">Cancelar</button>
+        <button class="btn btn-gradient px-4" (click)="salvarQuestao()">{{ editandoQuestaoId ? 'Salvar' : 'Adicionar' }}</button>
+      </div>
     </div>
     <div class="row g-3">
-      <div class="col-12" *ngFor="let q of bancoQuestoes">
+      <div class="col-12" *ngFor="let q of bancoQuestoes()">
         <div class="main-card p-4">
           <div class="d-flex justify-content-between align-items-start mb-3">
             <h4 class="h6 text-main fw-bold mb-0">{{ q.enunciado }}</h4>
             <div class="d-flex gap-2">
-              <button class="btn-action"><i class="bi bi-pencil"></i></button>
-              <button class="btn-action btn-delete"><i class="bi bi-trash"></i></button>
+              <button class="btn-action" (click)="editarQuestao(q)"><i class="bi bi-pencil"></i></button>
+              <button class="btn-action btn-delete" (click)="excluirQuestao(q)"><i class="bi bi-trash"></i></button>
             </div>
           </div>
-          <div class="d-flex gap-2 flex-wrap mb-2">
+          <div class="d-flex gap-2 flex-wrap">
             <span class="badge-tag type">{{ q.tipo }}</span>
             <span class="badge-tag" [ngClass]="q.dificuldade === 'Fácil' ? 'facil' : q.dificuldade === 'Difícil' ? 'dificil' : 'medio'">
               {{ q.dificuldade }}
             </span>
             <span class="badge-tag context" *ngFor="let tag of q.tags">{{ tag }}</span>
           </div>
-          <small class="text-soft">Usada {{ q.utilizada }} vezes</small>
         </div>
+      </div>
+      <div class="col-12" *ngIf="bancoQuestoes().length === 0">
+        <p class="text-soft">Nenhuma questão cadastrada ainda.</p>
       </div>
     </div>
   </div>
@@ -152,9 +184,9 @@
         </div>
         <div class="col-md-6">
           <label class="text-soft small mb-1 d-block">Turma *</label>
-          <select class="form-select-custom" [(ngModel)]="novaAvaliacao.turma">
-            <option value="">Selecione a turma</option>
-            <option *ngFor="let t of turmasDisponiveis" [value]="t">{{ t }}</option>
+          <select class="form-select-custom" [(ngModel)]="novaAvaliacao.turmaId">
+            <option [ngValue]="null">Selecione a turma</option>
+            <option *ngFor="let t of turmas()" [ngValue]="t.id">{{ t.nome }}</option>
           </select>
         </div>
         <div class="col-md-3">
@@ -182,13 +214,27 @@
       </div>
 
       <div class="d-flex justify-content-end gap-2 mt-4">
-        <button type="button" class="btn btn-outline-main" (click)="salvarRascunho()">
-          Salvar como Rascunho
-        </button>
         <button type="button" class="btn btn-gradient" (click)="criarAvaliacao()">
-          Criar e Adicionar Questões
+          Criar Avaliação
         </button>
       </div>
     </div>
   </div>
+
+  @if (detalhe(); as a) {
+    <div class="detalhe-overlay" (click)="fecharDetalhes()">
+      <div class="detalhe-modal" (click)="$event.stopPropagation()">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <h3>{{ a.titulo }}</h3>
+          <button class="detalhe-close" (click)="fecharDetalhes()">&times;</button>
+        </div>
+        <div class="detalhe-row"><span class="rot">Tipo</span><span class="val">{{ a.tipo }}</span></div>
+        <div class="detalhe-row"><span class="rot">Turma</span><span class="val">{{ a.turma }}</span></div>
+        <div class="detalhe-row"><span class="rot">Data</span><span class="val">{{ a.data }}</span></div>
+        <div class="detalhe-row"><span class="rot">Status</span><span class="val">{{ a.status }}</span></div>
+        <div class="detalhe-row"><span class="rot">Entregas</span><span class="val">{{ a.total }}</span></div>
+        <div class="detalhe-row"><span class="rot">Correções feitas</span><span class="val">{{ a.corrigidas }} / {{ a.total }}</span></div>
+      </div>
+    </div>
+  }
 </div>

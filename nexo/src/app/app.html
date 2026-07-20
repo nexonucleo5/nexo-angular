@@ -24,13 +24,8 @@
                     @else { Portal do Diretor }
                 </h2>
 
-                <button (click)="alternarPerfil()" class="btn btn-sm btn-outline-primary ms-4">
-                    Mudar para
-                    {{ usuario.role === 'aluno' ? 'Diretor' : usuario.role === 'diretor' ? 'Professor' : 'Aluno' }}
-                </button>
-
                 <button (click)="alternarTema()" class="btn-theme ms-2">
-                    <i class="bi" [ngClass]="temaEscuro ? 'bi-sun-fill' : 'bi-moon-fill'"></i>
+                    <i class="bi" [ngClass]="temaEscuro() ? 'bi-sun-fill' : 'bi-moon-fill'"></i>
                 </button>
             </div>
 

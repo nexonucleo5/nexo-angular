@@ -9,9 +9,9 @@
         <section class="dashboard-welcome-card mb-4">
             <div class="row align-items-center g-4">
                 <div class="col-md-8">
-                    <h1 class="profile-page-name">Boa noite, Gabriel! 👋</h1>
-                    <p class="profile-page-level mb-0">Continue assim! Você está no caminho certo para alcançar sua meta
-                        de 80% até julho.</p>
+                    <h1 class="profile-page-name">Olá, {{ nome() }}! 👋</h1>
+                    <p class="profile-page-level mb-0">Continue assim! Você está no caminho certo para bater sua
+                        meta semanal de {{ metaSemanalXp() }} XP.</p>
                 </div>
                 <div class="col-md-4 text-md-end">
                     <button class="btn-action-primary">
@@ -20,6 +20,15 @@
                 </div>
             </div>
         </section>
+
+        @if (carregando()) {
+          <p class="text-soft">Carregando seu painel…</p>
+        } @else if (erro()) {
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <p class="text-soft mb-0">Não foi possível carregar seu painel.</p>
+            <button class="btn-action-primary" (click)="carregar()">Tentar novamente</button>
+          </div>
+        } @else {
 
         <section class="profile-summary-section mb-4">
             <div class="row g-4">
@@ -31,13 +40,13 @@
                             </div>
                             <div>
                                 <p class="summary-title">XP na Semana</p>
-                                <h3 class="summary-number">850</h3>
+                                <h3 class="summary-number">{{ xpSemana() }}</h3>
                             </div>
                         </div>
                         <div class="summary-progress-track">
-                            <div class="summary-progress-fill" style="width: 85%;"></div>
+                            <div class="summary-progress-fill" [style.width.%]="xpPercent()"></div>
                         </div>
-                        <p class="summary-footer-text mt-2 mb-0">Meta semanal: 1000 XP</p>
+                        <p class="summary-footer-text mt-2 mb-0">Meta semanal: {{ metaSemanalXp() }} XP</p>
                     </div>
                 </div>
 
@@ -49,13 +58,13 @@
                             </div>
                             <div>
                                 <p class="summary-title">Ofensiva</p>
-                                <h3 class="summary-number">7 dias</h3>
+                                <h3 class="summary-number">{{ ofensivaDias() }} dias</h3>
                             </div>
                         </div>
                         <div class="summary-progress-track">
-                            <div class="summary-progress-fill orange-fill" style="width: 100%;"></div>
+                            <div class="summary-progress-fill orange-fill" [style.width.%]="ofensivaDias() > 0 ? 100 : 0"></div>
                         </div>
-                        <p class="summary-footer-text mt-2 mb-0">O dobro da semana passada!</p>
+                        <p class="summary-footer-text mt-2 mb-0">Mantenha sua sequência!</p>
                     </div>
                 </div>
 
@@ -67,13 +76,13 @@
                             </div>
                             <div>
                                 <p class="summary-title">Posição</p>
-                                <h3 class="summary-number">#3</h3>
+                                <h3 class="summary-number">#{{ posicao() }}</h3>
                             </div>
                         </div>
                         <div class="summary-progress-track">
                             <div class="summary-progress-fill blue-fill" style="width: 90%;"></div>
                         </div>
-                        <p class="summary-footer-text mt-2 mb-0">Top 5 da Turma 2A</p>
+                        <p class="summary-footer-text mt-2 mb-0">Turma {{ turmaNome() }}</p>
                     </div>
                 </div>
 
@@ -85,13 +94,15 @@
                             </div>
                             <div>
                                 <p class="summary-title">Tarefas Hoje</p>
-                                <h3 class="summary-number">4/5</h3>
+                                <h3 class="summary-number">{{ tarefasFeitasHoje() }}/{{ tarefasHoje() }}</h3>
                             </div>
                         </div>
                         <div class="summary-progress-track">
-                            <div class="summary-progress-fill green-fill" style="width: 80%;"></div>
+                            <div class="summary-progress-fill green-fill" [style.width.%]="tarefasPercent()"></div>
                         </div>
-                        <p class="summary-footer-text mt-2 mb-0">Falta apenas 1 tarefa</p>
+                        <p class="summary-footer-text mt-2 mb-0">
+                            {{ tarefasRestantes() === 0 ? 'Tudo concluído! 🎉' : 'Faltam ' + tarefasRestantes() + ' tarefa(s)' }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -107,7 +118,7 @@
                         </h2>
 
                         <div class="subject-progress-list mt-4">
-                            <div class="subject-progress-item mb-3" *ngFor="let act of atividades">
+                            <div class="subject-progress-item mb-3" *ngFor="let act of atividades()">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="achievement-emoji" style="font-size: 24px;">{{ act.icone }}</div>
@@ -137,11 +148,10 @@
                                 <i class="bi bi-bar-chart-fill title-icon blue-text"></i>
                                 Ranking
                             </h2>
-                            <a href="#" class="text-soft text-decoration-none small">Ver todos</a>
                         </div>
 
                         <div class="ranking-list d-flex flex-column gap-3">
-                            <div class="rank-item-card" *ngFor="let user of ranking" [class.user-is-me]="user.isMe">
+                            <div class="rank-item-card" *ngFor="let user of ranking()" [class.user-is-me]="user.isMe">
                                 <div class="d-flex align-items-center">
                                     <span class="rank-position" [class.gold-text]="user.pos === 1"
                                         [class.text-soft]="user.pos > 3">
@@ -160,6 +170,8 @@
                 </div>
             </div>
         </section>
+
+        }
 
     </section>
 </main>

@@ -1,0 +1,38 @@
+<section class="page-content">
+  <div class="senha-wrapper">
+    <button class="voltar-link" (click)="voltar()">
+      <i class="bi bi-arrow-left"></i> Voltar para Configurações
+    </button>
+
+    <div class="senha-card">
+      <h1 class="senha-title">Alterar Senha</h1>
+      <p class="senha-subtitle">Para sua segurança, informe a senha atual antes de definir uma nova.</p>
+
+      @if (mensagemErro()) {
+        <div class="alert alert-danger py-2">{{ mensagemErro() }}</div>
+      }
+      @if (mensagemSucesso()) {
+        <div class="alert alert-success py-2">{{ mensagemSucesso() }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="campo">
+          <label>Senha atual</label>
+          <input type="password" formControlName="senhaAtual" placeholder="Digite sua senha atual">
+        </div>
+        <div class="campo">
+          <label>Nova senha</label>
+          <input type="password" formControlName="novaSenha" placeholder="Mínimo 8 caracteres">
+        </div>
+        <div class="campo">
+          <label>Confirmar nova senha</label>
+          <input type="password" formControlName="confirmar" placeholder="Repita a nova senha">
+        </div>
+
+        <button type="submit" class="btn-salvar" [disabled]="enviando()">
+          {{ enviando() ? 'Salvando…' : 'Salvar nova senha' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</section>

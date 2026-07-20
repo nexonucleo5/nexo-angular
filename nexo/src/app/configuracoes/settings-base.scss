@@ -1,4 +1,6 @@
-/* configuracoes.scss — usa apenas variáveis do styles.scss */
+/* settings-base.scss — estilos base compartilhados pelas três telas de
+   configuração (Task 4): .settings-card, .custom-switch, .btn-gradient etc.
+   Usa apenas variáveis do styles.scss. */
 
 .page-content {
   padding: 34px;
@@ -39,6 +41,7 @@
 .green-text  { color: #06d25e !important; }
 .blue-text   { color: #2196f3 !important; }
 .orange-text { color: #f59e0b !important; }
+.teal-text   { color: #14b8a6 !important; }
 
 /* Item de configuração */
 .settings-item {
@@ -79,6 +82,31 @@
     background: linear-gradient(135deg, #9b2fff, #06d25e);
     &::before { transform: translateX(22px); }
   }
+}
+
+/* Campos de texto/horário/seleção (Disponibilidade, Institucional) */
+.field-item { gap: 20px; }
+
+.settings-input {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-main);
+  padding: 10px 14px;
+  font-size: 14px;
+  outline: none;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+  &:focus { border-color: #9b2fff; }
+}
+
+.input-texto { width: 260px; max-width: 100%; }
+
+.settings-error {
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 8px 0 0;
 }
 
 /* Botões de conta */

@@ -9,70 +9,53 @@
             <div class="col-md-3">
                 <div class="stat-card shadow-sm border-bottom-indicator orange-indicator">
                     <div class="w-100">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <p class="text-soft mb-1">Correções Pendentes</p>
-                            <span class="badge-trend negative">-5</span>
-                        </div>
-                        <h2 class="text-main mt-2">28</h2>
+                        <p class="text-soft mb-1">Correções Pendentes</p>
+                        <h2 class="text-main mt-2">{{ totalPendentes() }}</h2>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card shadow-sm border-bottom-indicator green-indicator">
                     <div class="w-100">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <p class="text-soft mb-1">Correções em Dia</p>
-                            <span class="badge-trend positive">+3%</span>
-                        </div>
-                        <h2 class="text-main mt-2">92%</h2>
+                        <p class="text-soft mb-1">Correções em Dia</p>
+                        <h2 class="text-main mt-2">{{ percentualEmDia() }}%</h2>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card shadow-sm border-bottom-indicator blue-indicator">
                     <div class="w-100">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <p class="text-soft mb-1">Tempo Médio Resposta</p>
-                            <span class="badge-trend soft">-0.5</span>
-                        </div>
-                        <h2 class="text-main mt-2">2.3 <small class="fs-6">dias</small></h2>
+                        <p class="text-soft mb-1">Tempo Médio Resposta</p>
+                        <h2 class="text-main mt-2">{{ tempoMedio() }} <small class="fs-6">dias</small></h2>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card shadow-sm border-bottom-indicator purple-indicator">
                     <div class="w-100">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <p class="text-soft mb-1">Interações Semanais</p>
-                            <span class="badge-trend positive">+42</span>
-                        </div>
-                        <h2 class="text-main mt-2">487</h2>
+                        <p class="text-soft mb-1">Interações Semanais</p>
+                        <h2 class="text-main mt-2">{{ interacoesSemanais() }}</h2>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
+    @if (carregando()) {
+        <p class="text-soft">Carregando corpo docente…</p>
+    } @else if (erro()) {
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <p class="text-soft mb-0">Não foi possível carregar o monitoramento docente.</p>
+            <button class="btn btn-action-icon" (click)="carregar()">Tentar novamente</button>
+        </div>
+    } @else {
+
     <div class="row g-4 mb-4">
         <div class="col-lg-8">
             <div class="chart-card p-4 rounded-4 shadow-sm">
-                <h3 class="fs-5 text-main fw-bold mb-4">Produtividade Semanal (Média)</h3>
-                <div class="chart-container-mock">
-                    <div class="bars-wrapper d-flex align-items-end justify-content-around">
-                        <div class="bar-group" *ngFor="let sem of [1,2,3,4]">
-                            <div class="bar-multi">
-                                <div class="bar blue" style="height: 60%;"></div>
-                                <div class="bar green" style="height: 40%;"></div>
-                                <div class="bar orange" style="height: 75%;"></div>
-                            </div>
-                            <span class="text-soft mt-2 d-block">Sem {{sem}}</span>
-                        </div>
-                    </div>
-                    <div class="chart-legend d-flex gap-3 justify-content-center mt-4">
-                        <span class="text-soft"><i class="bi bi-circle-fill text-blue me-1"></i> Correções</span>
-                        <span class="text-soft"><i class="bi bi-circle-fill text-green me-1"></i> Interações</span>
-                        <span class="text-soft"><i class="bi bi-circle-fill text-orange me-1"></i> Postagens</span>
-                    </div>
+                <h3 class="fs-5 text-main fw-bold mb-4">Produtividade por Docente</h3>
+                <div style="height: 280px;">
+                    <canvas baseChart [data]="chartData()" [options]="chartOptions" [type]="barChartType"></canvas>
                 </div>
             </div>
         </div>
@@ -80,7 +63,7 @@
             <div class="top-performers-card p-4 rounded-4 shadow-sm">
                 <h3 class="fs-5 text-main fw-bold mb-4">Top Performers</h3>
                 <div class="performer-list d-flex flex-column gap-3">
-                    <div class="performer-item d-flex align-items-center justify-content-between" *ngFor="let top of topPerformers; let i = index">
+                    <div class="performer-item d-flex align-items-center justify-content-between" *ngFor="let top of topPerformers(); let i = index">
                         <div class="d-flex align-items-center gap-3">
                             <div class="rank-badge">{{ i + 1 }}</div>
                             <img [src]="top.foto" class="rounded-circle performer-avatar">
@@ -100,11 +83,11 @@
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-4 mt-5">
-        <h2 class="fs-4 fw-bold text-main mb-0">Corpo Docente ({{ professores.length }})</h2>
+        <h2 class="fs-4 fw-bold text-main mb-0">Corpo Docente ({{ professores().length }})</h2>
     </div>
 
     <section class="teachers-list d-flex flex-column gap-3 mb-5">
-        <div class="teacher-card p-4 rounded-4 shadow-sm" *ngFor="let prof of professores">
+        <div class="teacher-card p-4 rounded-4 shadow-sm" *ngFor="let prof of professores()">
             <div class="row align-items-center">
                 <div class="col-md-4">
                     <div class="d-flex gap-3 align-items-center">
@@ -158,4 +141,6 @@
             </div>
         </div>
     </section>
+
+    }
 </section>

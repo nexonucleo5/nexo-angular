@@ -44,13 +44,13 @@
     <section class="subjects-section mb-5">
         <div class="row g-4">
             <div class="col-md-6 col-xl-4" *ngFor="let subject of filtroDeBusca">
-                <div class="subject-card card-theme p-4 rounded-5 shadow-sm h-100 d-flex flex-column justify-content-between">
+                <div class="subject-card card-theme p-4 rounded-5 shadow-sm h-100 d-flex flex-column">
                     <div class="subject-header d-flex justify-content-between align-items-start mb-4">
                         <div class="d-flex gap-3">
-                            <div [class]="'subject-icon d-flex align-items-center justify-content-center rounded-4 ' + subject.gradientClass"
+                            <div [class]="'subject-icon d-flex align-items-center justify-content-center rounded-4 ' + subject.colorClass"
                                  style="width: 70px; height: 70px; color: #fff;">
                                 <i *ngIf="subject.iconClass" [class]="'bi ' + subject.iconClass + ' fs-2'"></i>
-                                <span *ngIf="subject.iconText">{{subject.iconText}}</span>
+                                <span *ngIf="subject.iconText" class="fw-bold">{{subject.iconText}}</span>
                             </div>
                             <div>
                                 <h2 class="subject-title" style="color: var(--text-main); font-size: 1.25rem;">{{subject.title}}</h2>
@@ -63,13 +63,14 @@
                     </div>
                     <div class="subject-progress mb-4">
                         <div class="progress mb-2" style="height: 10px;">
-                            <div [class]="'progress-bar ' + subject.gradientClass" [style.width.%]="subject.progress"></div>
+                            <div [class]="'progress-bar ' + subject.colorClass" [style.width.%]="subject.progress"></div>
                         </div>
                         <small class="text-soft">
                             {{subject.completedLessons}}/{{subject.totalLessons}} aulas concluídas
                         </small>
                     </div>
-                    <a href="#" [class]="'btn text-white fw-bold py-3 rounded-4 ' + subject.buttonClass">
+                    <a [routerLink]="['/disciplina', subject.id]"
+                       [class]="'btn text-white fw-bold py-3 rounded-4 mt-auto ' + subject.colorClass">
                         Acessar Disciplina
                     </a>
                 </div>

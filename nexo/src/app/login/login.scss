@@ -17,6 +17,13 @@
   box-shadow: 0 8px 25px var(--shadow-color);
 }
 
+.login-brand {
+  margin-bottom: 20px;
+}
+.login-brand .brand-logo {
+  max-width: 240px;
+}
+
 .login-title {
   font-size: 28px;
   font-weight: 700;

@@ -1,28 +1,36 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatriculasService } from '../api/matriculas.service';
+import { MatriculaDTO, StatusDocumentacao, StatusMatricula } from '../core/api.models';
+import { exportarCsv } from '../core/csv.util';
 
-export interface TagDocumento {
-  nome: string;
-  status: 'ok' | 'pendente';
-}
-
-export interface Matricula {
+interface MatriculaView {
+  id: number;
   nome: string;
   iniciais: string;
-  foto?: string;
   turma: string;
-  nivelTurma: 'facil' | 'medio' | 'dificil';
   matricula: string;
   dataMatricula: string;
-  responsavel: string;
-  contrato: 'ok' | 'pendente' | 'atrasado';
-  mec: 'ok' | 'atrasado';
-  docCompletos: number;
-  docTotal: number;
-  docTags: TagDocumento[];
+  cpf: string;
+  status: StatusMatricula;
+  documentacao: StatusDocumentacao;
+  docPercent: number;
   temAlerta: boolean;
 }
+
+const STATUS_LABEL: Record<StatusMatricula, string> = {
+  ATIVA: 'Ativa',
+  PENDENTE: 'Pendente',
+  TRANCADA: 'Trancada',
+  CANCELADA: 'Cancelada',
+};
+
+const DOC_PERCENT: Record<StatusDocumentacao, number> = {
+  COMPLETA: 100,
+  PENDENTE: 66,
+  INCOMPLETA: 33,
+};
 
 @Component({
   selector: 'app-matriculas-diretor',
@@ -32,114 +40,102 @@ export interface Matricula {
   styleUrl: './matriculas-diretor.scss',
 })
 export class MatriculasDiretor {
+  private readonly api = inject(MatriculasService);
 
-  buscaTermo       = '';
-  statusSelecionado = 'Todos os Status';
+  readonly buscaTermo = signal('');
+  readonly statusSelecionado = signal('Todos os Status');
+  readonly statusOpcoes = ['Todos os Status', 'Ativa', 'Pendente', 'Trancada', 'Cancelada'];
 
-  statusOpcoes = ['Todos os Status', 'Em dia', 'Pendente', 'Atrasado'];
+  readonly carregando = signal(true);
+  readonly erro = signal(false);
+  private readonly matriculas = signal<MatriculaView[]>([]);
+  readonly detalhe = signal<MatriculaView | null>(null);
 
-  matriculas: Matricula[] = [
-    {
-      nome: 'Gabriel Henrique Costa',
-      iniciais: 'GH',
-      foto: '/imagensProjeto/gabrielZapelini.jpeg',
-      turma: '2º Ano A - Ensino Médio',
-      nivelTurma: 'medio',
-      matricula: '2024156',
-      dataMatricula: '15/01/2024',
-      responsavel: 'Maria Costa',
-      contrato: 'ok',
-      mec: 'ok',
-      docCompletos: 5,
-      docTotal: 6,
-      docTags: [
-        { nome: 'RG',      status: 'ok'      },
-        { nome: 'CPF',     status: 'ok'      },
-        { nome: 'Foto 3x4', status: 'pendente' },
-      ],
-      temAlerta: false,
-    },
-    {
-      nome: 'Rafael Oliveira Lima',
-      iniciais: 'RO',
-      foto: undefined,
-      turma: '3º Ano C - Ensino Médio',
-      nivelTurma: 'dificil',
-      matricula: '2024158',
-      dataMatricula: '20/01/2024',
-      responsavel: 'Patricia Lima',
-      contrato: 'pendente',
-      mec: 'atrasado',
-      docCompletos: 4,
-      docTotal: 6,
-      docTags: [
-        { nome: 'RG',               status: 'ok'      },
-        { nome: 'Histórico Escolar', status: 'pendente' },
-        { nome: 'Comprovante',       status: 'pendente' },
-      ],
-      temAlerta: true,
-    },
-    {
-      nome: 'Ana Beatriz Ferreira',
-      iniciais: 'AB',
-      foto: 'https://i.pravatar.cc/150?u=ana',
-      turma: '1º Ano B - Ensino Médio',
-      nivelTurma: 'facil',
-      matricula: '2024162',
-      dataMatricula: '22/01/2024',
-      responsavel: 'Carla Ferreira',
-      contrato: 'ok',
-      mec: 'ok',
-      docCompletos: 6,
-      docTotal: 6,
-      docTags: [
-        { nome: 'RG',      status: 'ok' },
-        { nome: 'CPF',     status: 'ok' },
-        { nome: 'Foto 3x4', status: 'ok' },
-      ],
-      temAlerta: false,
-    },
-    {
-      nome: 'Carlos Eduardo Moreira',
-      iniciais: 'CE',
-      foto: 'https://i.pravatar.cc/150?u=carlos',
-      turma: '2º Ano C - Ensino Médio',
-      nivelTurma: 'medio',
-      matricula: '2024175',
-      dataMatricula: '25/01/2024',
-      responsavel: 'José Moreira',
-      contrato: 'ok',
-      mec: 'atrasado',
-      docCompletos: 3,
-      docTotal: 6,
-      docTags: [
-        { nome: 'RG',               status: 'ok'      },
-        { nome: 'CPF',              status: 'pendente' },
-        { nome: 'Histórico Escolar', status: 'pendente' },
-      ],
-      temAlerta: true,
-    },
-  ];
-
-  get matriculasFiltradas(): Matricula[] {
-    return this.matriculas.filter(m => {
+  readonly matriculasFiltradas = computed(() => {
+    const termo = this.buscaTermo().toLowerCase();
+    const status = this.statusSelecionado();
+    return this.matriculas().filter((m) => {
       const buscaOk =
-        !this.buscaTermo ||
-        m.nome.toLowerCase().includes(this.buscaTermo.toLowerCase()) ||
-        m.matricula.includes(this.buscaTermo) ||
-        m.responsavel.toLowerCase().includes(this.buscaTermo.toLowerCase());
-
-      const statusOk =
-        this.statusSelecionado === 'Todos os Status' ||
-        (this.statusSelecionado === 'Em dia'   && !m.temAlerta) ||
-        (this.statusSelecionado === 'Pendente' && m.contrato === 'pendente') ||
-        (this.statusSelecionado === 'Atrasado' && m.mec === 'atrasado');
-
+        !termo ||
+        m.nome.toLowerCase().includes(termo) ||
+        m.matricula.includes(termo) ||
+        m.cpf.includes(termo);
+      const statusOk = status === 'Todos os Status' || STATUS_LABEL[m.status] === status;
       return buscaOk && statusOk;
+    });
+  });
+
+  // KPIs derivados da lista real
+  readonly totalMatriculas = computed(() => this.matriculas().length);
+  readonly docCompleta = computed(() => this.matriculas().filter((m) => m.documentacao === 'COMPLETA').length);
+  readonly pendencias = computed(() => this.matriculas().filter((m) => m.documentacao !== 'COMPLETA').length);
+  readonly conformidade = computed(() => {
+    const total = this.matriculas().length;
+    return total ? Math.round((this.docCompleta() / total) * 1000) / 10 : 0;
+  });
+
+  constructor() {
+    this.carregar();
+  }
+
+  carregar(): void {
+    this.carregando.set(true);
+    this.erro.set(false);
+    this.api.listar({ size: 100 }).subscribe({
+      next: (page) => {
+        this.matriculas.set(page.content.map((m) => this.paraView(m)));
+        this.carregando.set(false);
+      },
+      error: () => {
+        this.erro.set(true);
+        this.carregando.set(false);
+      },
     });
   }
 
-  getProgressoWidth(m: Matricula): string {
-    return `${Math.round((m.docCompletos / m.docTotal) * 100)}%`;
+  private paraView(m: MatriculaDTO): MatriculaView {
+    return {
+      id: m.id,
+      nome: m.aluno,
+      iniciais: this.iniciais(m.aluno),
+      turma: m.turma ?? 'Sem turma',
+      matricula: `2024${String(m.id).padStart(3, '0')}`,
+      dataMatricula: this.formatarData(m.dataMatricula),
+      cpf: m.cpf,
+      status: m.status,
+      documentacao: m.documentacao,
+      docPercent: DOC_PERCENT[m.documentacao],
+      temAlerta: m.documentacao === 'INCOMPLETA' || m.status === 'PENDENTE',
+    };
+  }
+
+  statusLabel(s: StatusMatricula): string {
+    return STATUS_LABEL[s];
+  }
+
+  verDetalhes(m: MatriculaView): void {
+    this.detalhe.set(m);
+  }
+
+  fecharDetalhes(): void {
+    this.detalhe.set(null);
+  }
+
+  private iniciais(nome: string): string {
+    const partes = nome.trim().split(/\s+/);
+    return ((partes[0]?.[0] ?? '') + (partes[partes.length - 1]?.[0] ?? '')).toUpperCase();
+  }
+
+  private formatarData(iso: string): string {
+    if (!iso) return '';
+    return new Date(iso + (iso.length === 10 ? 'T00:00:00' : '')).toLocaleDateString('pt-BR');
+  }
+
+  /** Exporta a lista filtrada de matrículas para CSV. */
+  exportar(): void {
+    const linhas = this.matriculasFiltradas().map((m) => [
+      m.nome, m.matricula, m.turma, m.cpf, this.statusLabel(m.status), m.documentacao, m.dataMatricula,
+    ]);
+    exportarCsv('matriculas', ['Nome', 'Matrícula', 'Turma', 'CPF', 'Status', 'Documentação', 'Data'], linhas);
   }
 }
