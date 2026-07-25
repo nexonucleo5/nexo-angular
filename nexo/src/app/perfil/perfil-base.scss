@@ -1,0 +1,161 @@
+/* perfil-base.scss — estilos compartilhados pelas telas de perfil (aluno, professor, diretor).
+   Mesmo papel de configuracoes/settings-base.scss para as telas de configuração. */
+
+/* Cartão de conteúdo padrão */
+.content-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 28px;
+  height: 100%;
+}
+
+.section-card-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-main) !important;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Caixa de estatística (KPI) */
+.stat-box {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color);
+  padding: 30px;
+  border-radius: 24px;
+  transition: transform 0.3s ease;
+
+  &:hover { transform: translateY(-5px); }
+
+  .stat-number { font-size: 32px; font-weight: 800; margin-bottom: 5px; }
+  .stat-label  { color: var(--text-muted) !important; font-size: 16px; margin: 0; }
+}
+
+/* Cartão de resumo com ícone */
+.summary-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 30px;
+  height: 100%;
+}
+
+.summary-card-top {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.summary-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+
+  &.purple-summary { background: rgba(143, 36, 255, 0.1); color: #8f24ff; }
+  &.green-summary  { background: rgba(15, 205, 92, 0.1);  color: #0fcd5c; }
+  &.blue-summary   { background: rgba(46, 115, 246, 0.1); color: #2e73f6; }
+  &.orange-summary { background: rgba(255, 106, 0, 0.1);  color: #ff6a00; }
+  &.gold-summary   { background: rgba(255, 215, 0, 0.1);  color: #ffd700; }
+  &.red-summary    { background: rgba(239, 68, 68, 0.1);  color: #ef4444; }
+}
+
+.summary-title  { margin: 0; font-size: 16px; color: var(--text-muted) !important; }
+.summary-number { margin: 0; font-size: 28px; font-weight: 800; color: var(--text-main) !important; }
+
+/* Barras de progresso */
+.linha-track {
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.linha-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+/* Itens de lista (turmas, alunos, docentes) */
+.lista-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-color);
+
+  &:last-child { border-bottom: none; }
+}
+
+.lista-nome  { font-weight: 600; color: var(--text-main) !important; margin: 0; }
+.lista-info  { font-size: 13px; color: var(--text-muted) !important; margin: 0; }
+
+.lista-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid var(--border-color);
+}
+
+/* Etiquetas de status */
+.badge-status {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+
+  &.critico   { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+  &.atencao   { background: rgba(255, 106, 0, 0.12); color: #ff6a00; }
+  &.excelente { background: rgba(15, 205, 92, 0.12); color: #0fcd5c; }
+  &.bom       { background: rgba(46, 115, 246, 0.12); color: #2e73f6; }
+}
+
+/* Estados de carregamento e erro */
+.estado-vazio {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted) !important;
+
+  i { font-size: 34px; display: block; margin-bottom: 12px; opacity: 0.6; }
+}
+
+.btn-tentar {
+  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 12px;
+
+  &:hover { opacity: 0.9; }
+}
+
+/* Cores de texto */
+.purple-text { color: #8f24ff !important; }
+.green-text  { color: #0fcd5c !important; }
+.blue-text   { color: #2e73f6 !important; }
+.gold-text   { color: #ffd700 !important; }
+.orange-text { color: #ff6a00 !important; }
+.red-text    { color: #ef4444 !important; }
+
+/* Preenchimentos de barra */
+.green-fill  { background: linear-gradient(135deg, #0fcd5c, #08d6a2) !important; }
+.blue-fill   { background: linear-gradient(135deg, #2e73f6, #10c6df) !important; }
+.orange-fill { background: linear-gradient(135deg, #ff6a00, #ff5f79) !important; }
+.pink-fill   { background: linear-gradient(135deg, #8f24ff, #f2389d) !important; }
+.red-fill    { background: linear-gradient(135deg, #ef4444, #f2389d) !important; }

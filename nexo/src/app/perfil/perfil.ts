@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { UsuariosService } from '../api/usuarios.service';
 import { AlunoDashboardService } from '../api/aluno-dashboard.service';
+import { PerfilProfessor } from '../perfil-professor/perfil-professor';
+import { PerfilDiretor } from '../perfil-diretor/perfil-diretor';
 
 export interface MateriaProgresso {
   nome: string;
@@ -21,7 +23,7 @@ export interface Estatistica {
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PerfilProfessor, PerfilDiretor],
   templateUrl: './perfil.html',
   styleUrl: './perfil.scss',
 })

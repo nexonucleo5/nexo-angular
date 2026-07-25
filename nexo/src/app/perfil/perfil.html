@@ -1,5 +1,8 @@
-<main class="main-content flex-grow-1" *ngIf="usuarioLogado() as usuario">
-    <section class="page-content">
+<!-- Raiz é <section class="page-content">, igual às demais telas. Usar
+     class="main-content" aqui fazia o bloco herdar do styles.scss global
+     margin-left:300px e min-height:100vh dentro de um container que já os
+     tinha, empurrando o conteúdo para a direita e abrindo um vão sob a navbar. -->
+<section class="page-content" *ngIf="usuarioLogado() as usuario">
 
         <!-- ── Card principal do perfil ────────────────────── -->
         <section class="profile-main-card">
@@ -129,27 +132,13 @@
             </section>
         </ng-container>
 
-        <!-- ── Painel para professores ──────────────────────── -->
-        <div class="alert alert-info border-0 rounded-4 p-4 mt-2" *ngIf="usuario.role === 'professor'">
-            <h5 class="fw-bold">
-                <i class="bi bi-easel2-fill me-2"></i>Área do Professor
-            </h5>
-            <p class="m-0 text-muted">
-                Acesse o Dashboard, o Diário de Classe, as Avaliações e a Comunicação pela barra lateral
-                para acompanhar suas turmas e alunos.
-            </p>
-        </div>
+        <!-- ── Corpo por perfil (mesmo padrão de configuracoes.html) ── -->
+        <ng-container *ngIf="usuario.role === 'professor'">
+            <app-perfil-professor></app-perfil-professor>
+        </ng-container>
 
-        <!-- ── Aviso para diretores ─────────────────────────── -->
-        <div class="alert alert-info border-0 rounded-4 p-4 mt-2" *ngIf="usuario.role === 'diretor'">
-            <h5 class="fw-bold">
-                <i class="bi bi-shield-lock-fill me-2"></i>Painel Administrativo
-            </h5>
-            <p class="m-0 text-muted">
-                Dados de gamificação e trilhas individuais são restritos a contas estudantis.
-                Use o cabeçalho superior ou a barra lateral para navegar pelos relatórios consolidados.
-            </p>
-        </div>
+        <ng-container *ngIf="usuario.role === 'diretor'">
+            <app-perfil-diretor></app-perfil-diretor>
+        </ng-container>
 
-    </section>
-</main>
+</section>
