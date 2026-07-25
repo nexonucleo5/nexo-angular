@@ -13,6 +13,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Monta o dashboard do professor (turmas, próximas aulas, alunos em atenção,
@@ -41,10 +43,12 @@ public class ProfessorDashboardService {
     private final AulaAgendadaRepository aulas;
     private final AtividadeProfessorRepository atividadesProf;
     private final EvasaoService evasao;
+    private final AgregadosAcademicos agregados;
 
     public ProfessorDashboardService(ProfessorRepository professores, TurmaRepository turmas, AlunoRepository alunos,
                                      AvaliacaoRepository avaliacoes, AulaAgendadaRepository aulas,
-                                     AtividadeProfessorRepository atividadesProf, EvasaoService evasao) {
+                                     AtividadeProfessorRepository atividadesProf, EvasaoService evasao,
+                                     AgregadosAcademicos agregados) {
         this.professores = professores;
         this.turmas = turmas;
         this.alunos = alunos;
@@ -52,6 +56,7 @@ public class ProfessorDashboardService {
         this.aulas = aulas;
         this.atividadesProf = atividadesProf;
         this.evasao = evasao;
+        this.agregados = agregados;
     }
 
     @Transactional(readOnly = true)
@@ -62,6 +67,13 @@ public class ProfessorDashboardService {
         List<Turma> minhasTurmas = turmas.findByProfessorIdOrderByNome(prof.getId());
         LocalDate hoje = LocalDate.now();
 
+        // Alunos de todas as turmas e agregados de nota/frequência carregados de uma vez —
+        // antes eram uma query por turma mais seis por aluno (evasao.avaliar era chamado duas vezes).
+        var indices = agregados.carregar(null);
+        Map<Long, List<Aluno>> alunosPorTurma = minhasTurmas.isEmpty() ? Map.of()
+                : alunos.findByTurmaIdInComTurma(minhasTurmas.stream().map(Turma::getId).toList()).stream()
+                        .collect(Collectors.groupingBy(a -> a.getTurma().getId()));
+
         List<TurmaResumo> turmasResumo = new ArrayList<>();
         List<AlunoAtencaoDTO> atencao = new ArrayList<>();
         int totalAlunos = 0;
@@ -69,11 +81,11 @@ public class ProfessorDashboardService {
         int avaliacoesMes = 0;
 
         for (Turma t : minhasTurmas) {
-            List<Aluno> alunosTurma = alunos.findByTurmaIdOrderByNome(t.getId());
+            List<Aluno> alunosTurma = alunosPorTurma.getOrDefault(t.getId(), List.of());
             totalAlunos += alunosTurma.size();
 
             double media = alunosTurma.stream()
-                    .map(a -> evasao.avaliar(a).media())
+                    .map(a -> evasao.avaliar(a, indices).media())
                     .filter(m -> m > 0)
                     .mapToDouble(Double::doubleValue)
                     .average().orElse(0);
@@ -90,7 +102,7 @@ public class ProfessorDashboardService {
             }
 
             for (Aluno a : alunosTurma) {
-                var r = evasao.avaliar(a);
+                var r = evasao.avaliar(a, indices);
                 if (r.risco() != EvasaoService.Risco.BAIXO) {
                     atencao.add(new AlunoAtencaoDTO(a.getNome(), t.getNome(), r.media(),
                             Math.max(0, (int) Math.round(100 - r.percentualFaltas())),

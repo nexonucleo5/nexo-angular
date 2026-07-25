@@ -1,10 +1,7 @@
 package com.nexo.service;
 
 import com.nexo.domain.Aluno;
-import com.nexo.domain.Nota;
 import com.nexo.repository.AlunoRepository;
-import com.nexo.repository.FrequenciaRepository;
-import com.nexo.repository.NotaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,38 +24,37 @@ public class EvasaoService {
                                 String telefoneResponsavel, String emailResponsavel) {}
 
     private final AlunoRepository alunos;
-    private final NotaRepository notas;
-    private final FrequenciaRepository frequencias;
+    private final AgregadosAcademicos agregados;
 
-    public EvasaoService(AlunoRepository alunos, NotaRepository notas, FrequenciaRepository frequencias) {
+    public EvasaoService(AlunoRepository alunos, AgregadosAcademicos agregados) {
         this.alunos = alunos;
-        this.notas = notas;
-        this.frequencias = frequencias;
+        this.agregados = agregados;
     }
 
     @Transactional(readOnly = true)
     public List<AlunoRiscoDTO> calcularRisco(Risco filtroRisco, Long turmaId, String busca) {
-        return alunos.findAll().stream()
+        var indices = agregados.carregar(null);
+        return alunos.findAllComTurma().stream()
                 .filter(a -> turmaId == null || (a.getTurma() != null && Objects.equals(a.getTurma().getId(), turmaId)))
                 .filter(a -> busca == null || busca.isBlank()
                         || a.getNome().toLowerCase().contains(busca.trim().toLowerCase()))
-                .map(this::avaliar)
+                .map(a -> avaliar(a, indices))
                 .filter(dto -> filtroRisco == null || dto.risco() == filtroRisco)
                 .sorted((a, b) -> b.risco().compareTo(a.risco()))
                 .toList();
     }
 
-    public AlunoRiscoDTO avaliar(Aluno aluno) {
-        double media = notas.findByAlunoId(aluno.getId()).stream()
-                .map(Nota::getMedia)
-                .filter(Objects::nonNull)
-                .mapToDouble(Double::doubleValue)
-                .average()
-                .orElse(0.0);
+    /** Avalia vários alunos reaproveitando um único carregamento de agregados (2 queries no total). */
+    @Transactional(readOnly = true)
+    public List<AlunoRiscoDTO> avaliarTodos(List<Aluno> lista) {
+        var indices = agregados.carregar(null);
+        return lista.stream().map(a -> avaliar(a, indices)).toList();
+    }
 
-        long totalAulas = frequencias.countByAlunoId(aluno.getId());
-        long faltas = frequencias.countByAlunoIdAndPresenteFalse(aluno.getId());
-        double percentualFaltas = totalAulas == 0 ? 0 : Math.round(faltas * 1000.0 / totalAulas) / 10.0;
+    /** Classificação pura: não toca no banco, só consulta os agregados já carregados. */
+    public AlunoRiscoDTO avaliar(Aluno aluno, AgregadosAcademicos.Indices indices) {
+        double media = indices.mediaOuZero(aluno.getId());
+        double percentualFaltas = indices.percentualFaltas(aluno.getId());
 
         int engajamento = aluno.getEngajamento();
         Risco risco;

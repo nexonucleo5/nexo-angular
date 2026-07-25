@@ -8,7 +8,7 @@ import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.nexo.api.ApiException;
-import com.nexo.domain.Nota;
+import com.nexo.domain.Aluno;
 import com.nexo.domain.Turma;
 import com.nexo.repository.*;
 import org.apache.poi.ss.usermodel.Row;
@@ -20,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Agregações institucionais (KPIs, séries por turma) e exportação real PDF/Excel —
@@ -35,27 +37,27 @@ public class RelatorioService {
                              double engajamentoMedio, long totalAlunos, List<SerieTurma> turmas) {}
 
     private final AlunoRepository alunos;
-    private final NotaRepository notas;
-    private final FrequenciaRepository frequencias;
     private final TurmaRepository turmas;
-    private final EvasaoService evasaoService;
+    private final AgregadosAcademicos agregados;
 
-    public RelatorioService(AlunoRepository alunos, NotaRepository notas, FrequenciaRepository frequencias,
-                            TurmaRepository turmas, EvasaoService evasaoService) {
+    public RelatorioService(AlunoRepository alunos, TurmaRepository turmas, AgregadosAcademicos agregados) {
         this.alunos = alunos;
-        this.notas = notas;
-        this.frequencias = frequencias;
         this.turmas = turmas;
-        this.evasaoService = evasaoService;
+        this.agregados = agregados;
     }
 
+    /**
+     * KPIs institucionais e série por turma em 4 queries fixas (antes: {@code 4N + T + 4},
+     * com N = alunos — o que fazia esta tela levar segundos em produção).
+     */
     @Transactional(readOnly = true)
     public Desempenho desempenho(String periodo, String visao) {
-        var todosAlunos = alunos.findAll();
+        var indices = agregados.carregar(periodo);
+        var todosAlunos = alunos.findAllComTurma();
         long total = todosAlunos.size();
 
         List<Double> medias = todosAlunos.stream()
-                .map(a -> mediaDoAluno(a.getId(), periodo))
+                .map(a -> indices.media(a.getId()))
                 .filter(Objects::nonNull)
                 .toList();
 
@@ -63,28 +65,28 @@ public class RelatorioService {
         double taxaAprovacao = medias.isEmpty() ? 0
                 : arred(medias.stream().filter(m -> m >= 6.0).count() * 100.0 / medias.size());
 
-        long totalRegistros = frequencias.count();
-        long faltas = frequencias.countByPresenteFalse();
-        double frequenciaMedia = totalRegistros == 0 ? 0
-                : arred((totalRegistros - faltas) * 100.0 / totalRegistros);
+        var geral = indices.totalGeral();
+        double frequenciaMedia = geral.total() == 0 ? 0
+                : arred((geral.total() - geral.faltas()) * 100.0 / geral.total());
 
         double engajamentoMedio = arred(todosAlunos.stream()
                 .mapToInt(a -> a.getEngajamento()).average().orElse(0));
 
+        Map<Long, List<Aluno>> porTurma = todosAlunos.stream()
+                .filter(a -> a.getTurma() != null)
+                .collect(Collectors.groupingBy(a -> a.getTurma().getId()));
+
         List<SerieTurma> series = new ArrayList<>();
         for (Turma turma : turmas.findAll()) {
-            var alunosTurma = alunos.findByTurmaIdOrderByNome(turma.getId());
+            var alunosTurma = porTurma.getOrDefault(turma.getId(), List.of());
             if (alunosTurma.isEmpty()) continue;
             double media = arred(alunosTurma.stream()
-                    .map(a -> mediaDoAluno(a.getId(), periodo))
+                    .map(a -> indices.media(a.getId()))
                     .filter(Objects::nonNull)
                     .mapToDouble(Double::doubleValue).average().orElse(0));
             double freq = arred(alunosTurma.stream()
-                    .mapToDouble(a -> {
-                        long t = frequencias.countByAlunoId(a.getId());
-                        long f = frequencias.countByAlunoIdAndPresenteFalse(a.getId());
-                        return t == 0 ? 0 : (t - f) * 100.0 / t;
-                    }).average().orElse(0));
+                    .mapToDouble(a -> indices.percentualPresenca(a.getId()))
+                    .average().orElse(0));
             series.add(new SerieTurma(turma.getNome(), media, freq, alunosTurma.size()));
         }
 
@@ -170,16 +172,6 @@ public class RelatorioService {
         } catch (Exception e) {
             throw new IllegalStateException("Falha ao gerar Excel", e);
         }
-    }
-
-    private Double mediaDoAluno(Long alunoId, String periodo) {
-        var lista = notas.findByAlunoId(alunoId).stream()
-                .filter(n -> periodo == null || periodo.isBlank() || periodo.equals(n.getPeriodo()))
-                .map(Nota::getMedia)
-                .filter(Objects::nonNull)
-                .toList();
-        if (lista.isEmpty()) return null;
-        return lista.stream().mapToDouble(Double::doubleValue).average().orElse(0);
     }
 
     private static double arred(double v) {

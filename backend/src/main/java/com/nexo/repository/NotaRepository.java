@@ -21,4 +21,33 @@ public interface NotaRepository extends JpaRepository<Nota, Long> {
                               @Param("periodo") String periodo);
 
     List<Nota> findByAlunoId(Long alunoId);
+
+    /**
+     * Notas cruas de TODOS os alunos numa única query, para calcular médias em lote.
+     * Evita o N+1 de chamar {@code findByAlunoId} por aluno em relatórios/evasão —
+     * a média em si continua sendo calculada por {@link Nota#calcularMedia}, já que é
+     * ponderada e arredondada por nota (não dá para reproduzir com {@code avg()} no SQL).
+     */
+    interface NotaBruta {
+        Long getAlunoId();
+        Double getP1();
+        Double getP2();
+        Double getT1();
+        Double getParticipacao();
+    }
+
+    @Query("""
+           select n.aluno.id as alunoId, n.p1 as p1, n.p2 as p2,
+                  n.t1 as t1, n.participacao as participacao
+           from Nota n
+           """)
+    List<NotaBruta> projetarTodas();
+
+    @Query("""
+           select n.aluno.id as alunoId, n.p1 as p1, n.p2 as p2,
+                  n.t1 as t1, n.participacao as participacao
+           from Nota n
+           where n.periodo = :periodo
+           """)
+    List<NotaBruta> projetarPorPeriodo(@Param("periodo") String periodo);
 }

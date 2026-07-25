@@ -34,6 +34,14 @@ public class Nota {
 
     /** Média ponderada oficial calculada no servidor. */
     public Double getMedia() {
+        return calcularMedia(p1, p2, t1, participacao);
+    }
+
+    /**
+     * Mesma fórmula de {@link #getMedia()}, aplicável a projeções — permite calcular
+     * a média sem carregar a entidade inteira (usado nas agregações de relatórios/evasão).
+     */
+    public static Double calcularMedia(Double p1, Double p2, Double t1, Double participacao) {
         double soma = 0;
         double pesos = 0;
         if (p1 != null) { soma += p1 * 3; pesos += 3; }

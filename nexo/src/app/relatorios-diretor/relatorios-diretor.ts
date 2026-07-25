@@ -140,6 +140,9 @@ export class RelatoriosDiretor {
   exportar(formato: 'pdf' | 'xlsx'): void {
     if (this.exportando()) return;
     this.exportando.set(true);
+    // Não repassa periodo/visao: os rótulos da tela ("Este Bimestre"…) não correspondem
+    // aos valores gravados em Nota.periodo ("2026-1"), e enviá-los zera todas as médias
+    // do relatório. Ligar o filtro exige antes definir o vocabulário de período.
     this.gestao.exportarDesempenho(formato).subscribe({
       next: (blob) => {
         const url = URL.createObjectURL(blob);
