@@ -38,9 +38,9 @@ export const routes: Routes = [
     loadComponent: () => import('./dashboards/dashboards').then((m) => m.Dashboards),
   },
   {
-    // Chat em tempo real professor ↔ diretor
+    // Chat em tempo real entre papéis diferentes (aluno ↔ professor ↔ diretor)
     path: 'mensagens',
-    canActivate: [authGuard, roleGuard('diretor', 'professor')],
+    canActivate: [authGuard, roleGuard('diretor', 'professor', 'aluno')],
     loadComponent: () => import('./chat/chat').then((m) => m.Chat),
   },
 

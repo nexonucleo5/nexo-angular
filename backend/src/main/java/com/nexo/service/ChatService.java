@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 
-/** Chat direto em tempo real entre usuários (professor ↔ diretor). Persiste o histórico. */
+/** Chat direto em tempo real entre usuários de papéis diferentes. Persiste o histórico. */
 @Service
 public class ChatService {
 
@@ -32,16 +32,40 @@ public class ChatService {
         this.usuarios = usuarios;
     }
 
-    /** Contatos disponíveis: professor fala com diretores; diretor fala com professores. */
+    /**
+     * Papéis com quem cada perfil pode conversar. A conversa é sempre entre papéis
+     * diferentes — aluno↔aluno, professor↔professor e diretor↔diretor não são permitidos.
+     */
+    private static List<Role> interlocutores(Role role) {
+        return switch (role) {
+            case ALUNO     -> List.of(Role.PROFESSOR, Role.DIRETOR);
+            case PROFESSOR -> List.of(Role.ALUNO, Role.DIRETOR);
+            case DIRETOR   -> List.of(Role.ALUNO, Role.PROFESSOR);
+        };
+    }
+
+    /** Contatos disponíveis para o usuário, conforme {@link #interlocutores(Role)}. */
     @Transactional(readOnly = true)
     public List<ContatoDTO> contatos(Long usuarioId) {
         Usuario eu = usuarios.findById(usuarioId).orElse(null);
         if (eu == null) return List.of();
-        List<Role> alvo = eu.getRole() == Role.DIRETOR ? List.of(Role.PROFESSOR) : List.of(Role.DIRETOR);
-        return usuarios.findByRoleInOrderByNome(alvo).stream()
+        return usuarios.findByRoleInOrderByNome(interlocutores(eu.getRole())).stream()
                 .filter(u -> !u.getId().equals(usuarioId))
                 .map(u -> new ContatoDTO(u.getId(), u.getNome(), u.getRole().name()))
                 .toList();
+    }
+
+    /**
+     * O par pode trocar mensagens? Verificado no servidor a cada envio, já que o
+     * destinatário chega pelo WebSocket e não dá para confiar apenas na lista do cliente.
+     */
+    @Transactional(readOnly = true)
+    public boolean podeConversar(Long remetenteId, Long destinatarioId) {
+        if (remetenteId == null || destinatarioId == null || remetenteId.equals(destinatarioId)) return false;
+        Usuario de = usuarios.findById(remetenteId).orElse(null);
+        Usuario para = usuarios.findById(destinatarioId).orElse(null);
+        if (de == null || para == null) return false;
+        return interlocutores(de.getRole()).contains(para.getRole());
     }
 
     @Transactional(readOnly = true)

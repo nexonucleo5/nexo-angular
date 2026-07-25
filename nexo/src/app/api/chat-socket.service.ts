@@ -15,6 +15,8 @@ export class ChatSocketService {
   private socket: WebSocket | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private fechadoManualmente = false;
+  /** Token com que o socket atual foi autenticado, para detectar troca de usuário. */
+  private tokenConectado: string | null = null;
 
   /** Estado da conexão para a UI. */
   readonly conectado = signal(false);
@@ -23,9 +25,35 @@ export class ChatSocketService {
 
   conectar(): void {
     const token = this.auth.token;
-    if (!token || this.socket) return;
+    if (!token) return;
+
+    // Já conectado com este mesmo usuário: nada a fazer.
+    if (this.socket && this.tokenConectado === token) return;
+
+    // Trocou de conta na mesma aba (logout/login sem recarregar): o serviço é
+    // singleton e o socket antigo continua autenticado com o token anterior, o
+    // que faria as mensagens saírem como o usuário errado. Derruba antes de abrir.
+    if (this.socket) this.fecharSocketAtual();
+
     this.fechadoManualmente = false;
+    this.tokenConectado = token;
     this.abrir(token);
+  }
+
+  /** Fecha o socket vigente sem disparar a reconexão automática dele. */
+  private fecharSocketAtual(): void {
+    const antigo = this.socket;
+    this.socket = null;
+    this.conectado.set(false);
+    if (!antigo) return;
+    antigo.onclose = null; // o onclose padrão agendaria uma reconexão indevida
+    antigo.onerror = null;
+    antigo.onmessage = null;
+    try {
+      antigo.close();
+    } catch {
+      /* socket já encerrado */
+    }
   }
 
   private abrir(token: string): void {
@@ -53,8 +81,12 @@ export class ChatSocketService {
     if (this.reconnectTimer) return;
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
+      // Relê o token: se o usuário mudou nesse intervalo, reconecta como o novo.
       const token = this.auth.token;
-      if (token && !this.fechadoManualmente) this.abrir(token);
+      if (token && !this.fechadoManualmente) {
+        this.tokenConectado = token;
+        this.abrir(token);
+      }
     }, 3000);
   }
 
@@ -74,6 +106,7 @@ export class ChatSocketService {
     }
     this.socket?.close();
     this.socket = null;
+    this.tokenConectado = null;
     this.conectado.set(false);
   }
 }

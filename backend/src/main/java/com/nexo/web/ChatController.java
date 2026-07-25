@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/** Histórico e contatos do chat direto (professor ↔ diretor). O envio é via WebSocket. */
+/** Histórico e contatos do chat direto. O envio é via WebSocket. */
 @RestController
 @RequestMapping("/api/chat")
-@PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
+@PreAuthorize("hasAnyRole('ALUNO','PROFESSOR','DIRETOR')")
 public class ChatController {
 
     private final ChatService chat;

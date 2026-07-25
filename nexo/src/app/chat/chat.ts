@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -31,7 +31,40 @@ export class Chat implements OnInit, OnDestroy {
 
   readonly semContatos = computed(() => this.contatos().length === 0);
 
+  /** Área rolável das bolhas — usada para manter a conversa no fim. */
+  private readonly corpo = viewChild<ElementRef<HTMLElement>>('corpoChat');
+
   private sub?: Subscription;
+  /** Ao trocar de conversa o scroll vai para o fim mesmo que o usuário estivesse lendo o histórico. */
+  private forcarFim = true;
+
+  constructor() {
+    // Sem isto a lista crescia para baixo da dobra e as mensagens novas ficavam
+    // invisíveis: o contêiner rolava, mas nunca era rolado.
+    effect(() => {
+      const lista = this.mensagens();
+      const forcar = this.forcarFim;
+      // Só consome a flag quando há mensagens: ao trocar de conversa a lista é
+      // esvaziada antes do histórico chegar, e esse passo intermediário não pode
+      // gastar o "forçar" que pertence à carga seguinte.
+      if (lista.length) this.forcarFim = false;
+      // Espera o Angular pintar as bolhas novas antes de medir a altura.
+      setTimeout(() => this.rolarParaFim(forcar));
+    });
+  }
+
+  /**
+   * Vai para a última mensagem. Se o usuário rolou para cima para ler o histórico,
+   * respeita a posição dele e só acompanha quando já estava perto do fim.
+   */
+  private rolarParaFim(forcar: boolean): void {
+    const el = this.corpo()?.nativeElement;
+    if (!el) return;
+    const distanciaDoFim = el.scrollHeight - el.scrollTop - el.clientHeight;
+    if (forcar || distanciaDoFim < 120) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }
 
   ngOnInit(): void {
     this.socket.conectar();
@@ -62,6 +95,7 @@ export class Chat implements OnInit, OnDestroy {
   selecionar(contato: ChatContato): void {
     this.contatoSelecionado.set(contato);
     this.mensagens.set([]);
+    this.forcarFim = true;
     this.api.historico(contato.id).subscribe({ next: (h) => this.mensagens.set(h) });
   }
 
@@ -81,6 +115,11 @@ export class Chat implements OnInit, OnDestroy {
   }
 
   papelLabel(papel: string): string {
-    return papel === 'DIRETOR' ? 'Diretor' : papel === 'PROFESSOR' ? 'Professor' : papel;
+    switch (papel) {
+      case 'DIRETOR': return 'Diretor';
+      case 'PROFESSOR': return 'Professor';
+      case 'ALUNO': return 'Aluno';
+      default: return papel;
+    }
   }
 }

@@ -63,6 +63,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String texto = node.hasNonNull("texto") ? node.get("texto").asText() : null;
         if (para == null || texto == null || texto.isBlank()) return;
 
+        // O destinatário vem do cliente: confere no servidor se o par é permitido
+        // (impede, por exemplo, aluno → aluno com um id forjado).
+        if (!chat.podeConversar(de, para)) return;
+
         // Persiste e distribui
         ChatService.ChatMensagemDTO salva = chat.salvar(de, deNome, para, texto);
         String payload = mapper.writeValueAsString(salva);
