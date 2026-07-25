@@ -6,10 +6,28 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      # Cada conexão nova custa um handshake SSL até o Supabase; o pool é mantido
+      # pequeno e sempre quente para reaproveitar conexões em vez de reabri-las.
+      maximum-pool-size: ${DB_POOL_MAX:5}
+      minimum-idle: ${DB_POOL_MIN:2}
+      connection-timeout: 10000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      keepalive-time: 120000
   jpa:
     hibernate:
-      ddl-auto: update        # em produção madura, preferir migrations (Flyway/Liquibase)
+      # 'update' relê todo o metadata do schema a cada boot, o que pesa no cold start
+      # do plano free. Com o schema já criado, DDL_AUTO=validate (ou none) sobe mais rápido.
+      ddl-auto: ${DDL_AUTO:update}
     open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        # Ordena inserts/updates para que o batching acima seja aproveitado.
+        order_inserts: true
+        order_updates: true
   h2:
     console:
       enabled: false          # console H2 desligado em produção
