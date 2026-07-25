@@ -80,7 +80,7 @@
           @for (docente of topDocentes(); track docente.id) {
             <div class="lista-item">
               <img class="lista-avatar"
-                   [src]="docente.foto || 'assets/imagensProjeto/gabrielZapelini.png'"
+                   [src]="fotoDe(docente.foto)"
                    [alt]="docente.nome">
               <div class="flex-grow-1">
                 <p class="lista-nome">{{ docente.nome }}</p>

@@ -7,6 +7,7 @@ import { MatriculasService } from '../api/matriculas.service';
 import { TurmasService } from '../api/turmas.service';
 import { AlunosService } from '../api/alunos.service';
 import { AvisoDTO, ConversaDTO, DuvidaDTO, NotaDTO, TurmaDTO } from '../core/api.models';
+import { AVATAR_PADRAO } from '../core/avatar';
 
 interface ChatMessage {
   remetente: 'aluno' | 'professor';
@@ -59,7 +60,6 @@ interface ObservacaoView {
   texto: string;
 }
 
-const FOTO_PADRAO = 'assets/imagensProjeto/gabrielZapelini.png';
 
 @Component({
   selector: 'app-comunicacao',
@@ -73,6 +73,9 @@ export class Comunicacao implements OnInit {
   private readonly matriculasApi = inject(MatriculasService);
   private readonly turmasApi = inject(TurmasService);
   private readonly alunosApi = inject(AlunosService);
+
+  /** Avatar padrão para os templates (a lista de alunos ainda não traz foto). */
+  readonly avatarPadrao = AVATAR_PADRAO;
 
   abaAtiva = 'mensagens';
   buscaMensagem = '';
@@ -150,7 +153,7 @@ export class Comunicacao implements OnInit {
       assunto: c.assunto,
       horario: this.formatarRelativo(c.atualizadaEm),
       prioridade: 'medio',
-      avatar: FOTO_PADRAO,
+      avatar: AVATAR_PADRAO,
       historico: c.mensagens.map((m) => ({
         remetente: m.minha ? 'professor' : 'aluno',
         texto: m.texto,
@@ -219,7 +222,7 @@ export class Comunicacao implements OnInit {
       status: d.status === 'ABERTA' ? 'Pendente' : 'Respondida',
       pergunta: d.pergunta,
       materia: d.disciplina,
-      avatar: FOTO_PADRAO,
+      avatar: AVATAR_PADRAO,
     };
   }
 

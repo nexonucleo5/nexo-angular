@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { GestaoDiretorService } from '../api/gestao-diretor.service';
 import { AlunoRiscoDTO, RiscoEvasao } from '../core/api.models';
 import { exportarCsv } from '../core/csv.util';
+import { resolverFoto } from '../core/avatar';
 
 /** Aluno em risco já no formato de exibição da tela (derivado do DTO agregado do backend). */
 interface AlunoRiscoView {
@@ -23,7 +24,6 @@ interface AlunoRiscoView {
   foto: string;
 }
 
-const FOTO_PADRAO = 'assets/imagensProjeto/gabrielZapelini.png';
 
 const RISCO_LABEL: Record<RiscoEvasao, 'Alto' | 'Médio' | 'Baixo'> = {
   ALTO: 'Alto',
@@ -119,7 +119,7 @@ export class GestaoEvasao {
       tempoIntervencao: dto.ultimaIntervencaoEm ? this.formatarRelativo(dto.ultimaIntervencaoEm) : 'Nenhuma ainda',
       contatoResponsavel: dto.telefoneResponsavel ?? 'Não informado',
       emailResponsavel: dto.emailResponsavel ?? '',
-      foto: dto.foto || FOTO_PADRAO,
+      foto: resolverFoto(dto.foto),
     };
   }
 

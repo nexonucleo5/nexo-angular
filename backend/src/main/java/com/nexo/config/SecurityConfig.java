@@ -4,6 +4,7 @@ import com.nexo.security.JwtAuthFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,6 +41,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                 .requestMatchers("/h2-console/**", "/error").permitAll()
                 .requestMatchers("/ws/**").permitAll() // handshake autenticado por token na query
+                // <img src> não envia header Authorization; o id da foto é um UUID
+                // aleatório, então não dá para enumerar as fotos dos usuários.
+                .requestMatchers(HttpMethod.GET, "/api/fotos/*").permitAll()
 
                 // API protegida; todo o resto (index.html, .js, .css, assets e as
                 // rotas do Angular) é público — é o frontend servido pelo monolito

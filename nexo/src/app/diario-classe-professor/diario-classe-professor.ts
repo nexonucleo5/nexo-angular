@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TurmasService } from '../api/turmas.service';
 import { PresencaAluno, TurmaDTO } from '../core/api.models';
 import { exportarCsv } from '../core/csv.util';
+import { AVATAR_PADRAO } from '../core/avatar';
 
 interface AlunoFreqView {
   alunoId: number;
@@ -19,7 +20,6 @@ interface HistoricoView {
   descricao: string;
 }
 
-const FOTO_PADRAO = 'assets/imagensProjeto/gabrielZapelini.png';
 
 @Component({
   selector: 'app-diario-classe-professor',
@@ -105,7 +105,7 @@ export class DiarioClasseProfessor implements OnInit {
       matricula: `2024${String(p.alunoId).padStart(3, '0')}`,
       // Sem registro do dia (presente null) assume presente por padrão para a chamada
       presente: p.presente ?? true,
-      foto: FOTO_PADRAO,
+      foto: AVATAR_PADRAO,
     };
   }
 

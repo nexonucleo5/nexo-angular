@@ -5,6 +5,7 @@ import { ChartConfiguration, ChartOptions, ChartType } from 'chart.js';
 import { forkJoin } from 'rxjs';
 import { GestaoDiretorService } from '../api/gestao-diretor.service';
 import { AlunoRiscoDTO, DesempenhoDTO, ProfessorMonitorDTO } from '../core/api.models';
+import { resolverFoto } from '../core/avatar';
 
 interface MetricView {
   label: string;
@@ -29,7 +30,6 @@ interface AlertaView {
   nivel: string;
 }
 
-const FOTO_PADRAO = 'assets/imagensProjeto/gabrielZapelini.png';
 
 @Component({
   selector: 'app-dashboard-diretor',
@@ -73,7 +73,7 @@ export class DashboardDiretor {
         turma: a.turma ?? 'Sem turma',
         frequencia: Math.max(0, Math.round(100 - a.percentualFaltas)),
         risco: a.risco.toLowerCase(),
-        foto: a.foto || FOTO_PADRAO,
+        foto: resolverFoto(a.foto),
         tempo: this.formatarRelativo(a.ultimoAcessoEm),
       }))
   );

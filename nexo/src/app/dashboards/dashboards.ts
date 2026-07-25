@@ -4,8 +4,8 @@ import { DashboardDiretor } from '../diretor-dashboard/diretor-dashboard';
 import { AuthService } from '../services/auth.service';
 import { AlunoDashboardService } from '../api/aluno-dashboard.service';
 import { AlunoDashboardDTO } from '../core/api.models';
+import { resolverFoto } from '../core/avatar';
 
-const FOTO_PADRAO = 'assets/imagensProjeto/gabrielZapelini.png';
 const COR_PROGRESSO = ['blue-fill', 'green-fill', 'purple-fill', 'orange-fill'];
 
 @Component({
@@ -60,7 +60,7 @@ export class Dashboards {
       pos: r.posicao,
       nome: r.nome,
       xp: r.xp,
-      foto: r.foto || FOTO_PADRAO,
+      foto: resolverFoto(r.foto),
       isMe: r.isMe,
     }))
   );

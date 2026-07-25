@@ -27,6 +27,12 @@ spring:
     generator:
       escape-non-ascii: true
 
+  # Envio da foto de perfil; o cliente já reduz a imagem antes de mandar.
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 3MB
+
 server:
   # Render (e outros PaaS) injetam a porta em $PORT; local cai no 8080
   port: ${PORT:8080}

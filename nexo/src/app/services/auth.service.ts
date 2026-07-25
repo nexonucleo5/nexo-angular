@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { resolverFoto } from '../core/avatar';
 
 /** Role no cliente em minúsculo (compatível com os templates/guards existentes). */
 export type RoleCliente = 'aluno' | 'professor' | 'diretor';
@@ -90,7 +91,7 @@ export class AuthService {
       id: resposta.usuario.id,
       nome: resposta.usuario.nome,
       cargo: resposta.usuario.cargo,
-      foto: resposta.usuario.foto || 'assets/imagensProjeto/gabrielZapelini.png',
+      foto: resolverFoto(resposta.usuario.foto),
       role: resposta.usuario.role.toLowerCase() as RoleCliente,
     };
     localStorage.setItem(TOKEN_KEY, resposta.token);

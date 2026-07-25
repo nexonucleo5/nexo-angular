@@ -9,7 +9,10 @@
   border: 1px solid var(--border-color);
   border-radius: 26px; padding: 34px; margin-bottom: 38px;
   box-shadow: 0 10px 30px var(--shadow-color);
-  display: flex; align-items: center; gap: 30px;
+  /* Em coluna: o cabeçalho já se organiza sozinho (.profile-header-content é flex),
+     e o formulário de edição precisa ocupar a largura toda embaixo, não virar
+     uma coluna estreita ao lado dele. */
+  display: flex; flex-direction: column; align-items: stretch; gap: 4px;
 
   .profile-page-name  { font-size: 38px; font-weight: 800; color: var(--text-main) !important; margin: 0 0 10px 0; }
   .profile-page-level { font-size: 22px; color: var(--text-muted) !important; font-weight: 500; margin-bottom: 24px; }
@@ -62,7 +65,8 @@
 .stats-title { font-size: 24px; font-weight: 700; color: var(--text-main) !important; margin: 40px 0 25px; }
 
 @media (max-width: 992px) {
-  .profile-main-card { text-align: center; flex-direction: column; }
+  .profile-main-card { text-align: center; }
+  .profile-header-content { flex-direction: column; }
   .profile-tags { justify-content: center; }
 }
 @media (max-width: 768px) {

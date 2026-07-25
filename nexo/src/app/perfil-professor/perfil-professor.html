@@ -84,7 +84,7 @@
           @for (aluno of alunosAtencao(); track aluno.nome) {
             <div class="lista-item">
               <img class="lista-avatar"
-                   [src]="aluno.foto || 'assets/imagensProjeto/gabrielZapelini.png'"
+                   [src]="fotoDe(aluno.foto)"
                    [alt]="aluno.nome">
               <div class="flex-grow-1">
                 <p class="lista-nome">{{ aluno.nome }}</p>

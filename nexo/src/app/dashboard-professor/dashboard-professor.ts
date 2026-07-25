@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ProfessorDashboardService } from '../api/professor-dashboard.service';
 import { ProfessorDashboardDTO } from '../core/api.models';
+import { resolverFoto } from '../core/avatar';
 
-const FOTO_PADRAO = 'assets/imagensProjeto/gabrielZapelini.png';
 const COR_PROGRESSO = ['blue-fill', 'purple-fill', 'green-fill', 'orange-fill'];
 
 @Component({
@@ -49,7 +49,7 @@ export class DashboardProfessor {
       mediaAtual: a.mediaAtual,
       frequencia: a.frequencia,
       status: a.status,
-      foto: a.foto || FOTO_PADRAO,
+      foto: resolverFoto(a.foto),
       ultimaAtividade: this.formatarRelativo(a.ultimaAtividade),
     }))
   );

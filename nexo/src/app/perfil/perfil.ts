@@ -7,6 +7,7 @@ import { UsuariosService } from '../api/usuarios.service';
 import { AlunoDashboardService } from '../api/aluno-dashboard.service';
 import { PerfilProfessor } from '../perfil-professor/perfil-professor';
 import { PerfilDiretor } from '../perfil-diretor/perfil-diretor';
+import { FotoPerfil } from '../foto-perfil/foto-perfil';
 
 export interface MateriaProgresso {
   nome: string;
@@ -23,7 +24,7 @@ export interface Estatistica {
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, FormsModule, PerfilProfessor, PerfilDiretor],
+  imports: [CommonModule, FormsModule, PerfilProfessor, PerfilDiretor, FotoPerfil],
   templateUrl: './perfil.html',
   styleUrl: './perfil.scss',
 })
@@ -40,7 +41,6 @@ export class Perfil {
   readonly salvando = signal(false);
   readonly mensagem = signal('');
   formNome = '';
-  formFoto = '';
 
   // ── Estatísticas do aluno (gamificação real quando disponível) ──────
   readonly estatisticas = signal<Estatistica[]>([
@@ -88,9 +88,14 @@ export class Perfil {
     const u = this.usuarioLogado();
     if (!u) return;
     this.formNome = u.nome;
-    this.formFoto = u.foto;
     this.mensagem.set('');
     this.editando.set(true);
+  }
+
+  /** A foto já foi trocada no servidor e na sessão; aqui só confirmamos na tela. */
+  aoTrocarFoto(): void {
+    this.mensagem.set('✅ Foto de perfil atualizada!');
+    setTimeout(() => this.mensagem.set(''), 3000);
   }
 
   cancelarEdicao(): void {
@@ -100,7 +105,7 @@ export class Perfil {
   salvarPerfil(): void {
     if (!this.formNome.trim() || this.salvando()) return;
     this.salvando.set(true);
-    this.usuarios.atualizarPerfil({ nome: this.formNome.trim(), foto: this.formFoto.trim() }).subscribe({
+    this.usuarios.atualizarPerfil({ nome: this.formNome.trim() }).subscribe({
       next: () => {
         this.salvando.set(false);
         this.editando.set(false);

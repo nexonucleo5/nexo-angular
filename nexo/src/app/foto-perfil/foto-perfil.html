@@ -1,0 +1,45 @@
+<div class="foto-editor">
+
+  @if (camera()) {
+    <!-- Câmera ao vivo -->
+    <div class="camera-area">
+      <video #video class="camera-video" playsinline muted></video>
+      <div class="camera-acoes">
+        <button type="button" class="btn-foto principal" (click)="capturar()" [disabled]="enviando()">
+          <i class="bi bi-camera-fill me-2"></i>Capturar
+        </button>
+        <button type="button" class="btn-foto" (click)="fecharCamera()">Cancelar</button>
+      </div>
+    </div>
+  } @else {
+    <div class="d-flex align-items-center gap-4 flex-wrap">
+      <div class="previa-wrap">
+        <img [src]="imagemExibida()" class="previa-img" alt="Foto de perfil">
+        @if (enviando()) {
+          <div class="previa-carregando"><i class="bi bi-arrow-repeat"></i></div>
+        }
+      </div>
+
+      <div class="d-flex flex-column gap-2">
+        <button type="button" class="btn-foto principal" (click)="abrirCamera()" [disabled]="enviando()">
+          <i class="bi bi-camera-fill me-2"></i>Tirar foto agora
+        </button>
+        <button type="button" class="btn-foto" (click)="abrirGaleria()" [disabled]="enviando()">
+          <i class="bi bi-images me-2"></i>Escolher da galeria
+        </button>
+        @if (temFoto()) {
+          <button type="button" class="btn-foto remover" (click)="remover()" [disabled]="enviando()">
+            <i class="bi bi-trash me-2"></i>Remover foto
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- accept="image/*" abre a galeria; no celular o próprio sistema oferece a câmera -->
+  <input #arquivoInput type="file" accept="image/*" class="d-none" (change)="aoEscolherArquivo($event)">
+
+  @if (erro()) {
+    <p class="foto-erro mt-3 mb-0">{{ erro() }}</p>
+  }
+</div>

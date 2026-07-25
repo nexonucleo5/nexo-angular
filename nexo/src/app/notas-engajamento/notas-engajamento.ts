@@ -7,6 +7,7 @@ import { forkJoin } from 'rxjs';
 import { TurmasService } from '../api/turmas.service';
 import { AlunosService } from '../api/alunos.service';
 import { NotaDTO, TurmaDTO } from '../core/api.models';
+import { AVATAR_PADRAO } from '../core/avatar';
 
 interface AlunoNotaView {
   alunoId: number;
@@ -27,7 +28,6 @@ interface BarraDistribuicao {
   corClasse: string;
 }
 
-const FOTO_PADRAO = 'assets/imagensProjeto/gabrielZapelini.png';
 
 @Component({
   selector: 'app-notas-engajamento',
@@ -81,7 +81,7 @@ export class NotasEngajamento implements OnInit {
       alunoId: n.alunoId,
       matricula: `2024${String(n.alunoId).padStart(3, '0')}`,
       nome: n.aluno,
-      foto: FOTO_PADRAO,
+      foto: AVATAR_PADRAO,
       disciplina: n.disciplina,
       periodo: n.periodo,
       p1: this.fmt(n.p1),

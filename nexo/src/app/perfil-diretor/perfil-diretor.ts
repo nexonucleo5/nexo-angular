@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { GestaoDiretorService } from '../api/gestao-diretor.service';
 import { DesempenhoDTO, ProfessorMonitorDTO } from '../core/api.models';
+import { resolverFoto } from '../core/avatar';
 
 /**
  * Corpo da tela de perfil quando o usuário logado é diretor.
@@ -64,6 +65,11 @@ export class PerfilDiretor {
         this.carregando.set(false);
       },
     });
+  }
+
+  /** Foto do docente ou o avatar padrão, resolvendo a URL das fotos enviadas. */
+  fotoDe(foto: string | null): string {
+    return resolverFoto(foto);
   }
 
   /** Barra colorida por faixa de média (mesma régua da tela de relatórios). */

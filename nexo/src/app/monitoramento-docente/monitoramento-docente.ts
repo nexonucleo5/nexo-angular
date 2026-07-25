@@ -4,6 +4,7 @@ import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { GestaoDiretorService } from '../api/gestao-diretor.service';
 import { ProfessorMonitorDTO } from '../core/api.models';
+import { resolverFoto } from '../core/avatar';
 
 /** Professor no formato de exibição do monitoramento (derivado do DTO do backend). */
 interface ProfessorView {
@@ -28,7 +29,6 @@ interface TopPerformer {
   foto: string;
 }
 
-const FOTO_PADRAO = 'assets/imagensProjeto/gabrielZapelini.png';
 
 const STATUS_CLASSE: Record<string, string> = {
   Excelente: 'excelente',
@@ -133,7 +133,7 @@ export class MonitoramentoDocente {
       avaliacao: dto.avaliacao,
       tarefasConcluidas: dto.tarefasConcluidas,
       tarefasTotal: dto.tarefasTotal,
-      foto: dto.foto || FOTO_PADRAO,
+      foto: resolverFoto(dto.foto),
     };
   }
 }

@@ -50,10 +50,11 @@
                         <label class="edit-label">Nome</label>
                         <input type="text" class="edit-input" [(ngModel)]="formNome" placeholder="Seu nome">
                     </div>
-                    <div class="col-md-6">
-                        <label class="edit-label">URL da foto</label>
-                        <input type="text" class="edit-input" [(ngModel)]="formFoto" placeholder="assets/imagensProjeto/...">
-                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="edit-label">Foto de perfil</label>
+                    <app-foto-perfil [foto]="usuario.foto" (alterada)="aoTrocarFoto()"></app-foto-perfil>
                 </div>
                 <div class="d-flex justify-content-end gap-2 mt-3">
                     <button class="btn-perfil-acao secundario" (click)="cancelarEdicao()">Cancelar</button>

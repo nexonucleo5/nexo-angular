@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProfessorDashboardService } from '../api/professor-dashboard.service';
 import { ProfessorDashboardDTO } from '../core/api.models';
+import { resolverFoto } from '../core/avatar';
 
 /**
  * Corpo da tela de perfil quando o usuário logado é professor.
@@ -62,6 +63,11 @@ export class PerfilProfessor {
         this.carregando.set(false);
       },
     });
+  }
+
+  /** Foto do aluno ou o avatar padrão, resolvendo a URL das fotos enviadas. */
+  fotoDe(foto: string | null): string {
+    return resolverFoto(foto);
   }
 
   /** Barra colorida por faixa de média (mesma régua da tela de relatórios). */

@@ -108,7 +108,7 @@
                [class.active]="alunoSelecionado?.alunoId === aluno.alunoId"
                (click)="selecionarAluno(aluno)">
             <div class="d-flex align-items-center gap-3">
-              <img src="assets/imagensProjeto/gabrielZapelini.png" class="avatar-img" alt="Avatar">
+              <img [src]="avatarPadrao" class="avatar-img" alt="Avatar">
               <div>
                 <h4 class="small fw-bold text-main mb-0">{{aluno.nome}}</h4>
                 <p class="text-soft extra-small m-0">Mat: {{aluno.matricula}}</p>
@@ -122,7 +122,7 @@
     <div class="col-lg-8" *ngIf="alunoSelecionado">
       <div class="main-card p-4 mb-4">
         <div class="d-flex gap-4 align-items-center pb-4 border-bottom-custom mb-4">
-          <img src="assets/imagensProjeto/gabrielZapelini.png" class="avatar-big" alt="Avatar Aluno">
+          <img [src]="avatarPadrao" class="avatar-big" alt="Avatar Aluno">
           <div>
             <h2 class="h4 text-main fw-bold mb-1">{{alunoSelecionado.nome}}</h2>
             <p class="text-soft small mb-0">{{alunoSelecionado.turma}} • Mat: {{alunoSelecionado.matricula}}</p>
