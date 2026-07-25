@@ -19,10 +19,10 @@ import java.util.Random;
 /**
  * Popula o banco de desenvolvimento com dados equivalentes aos mocks
  * que hoje vivem hardcoded nos componentes Angular. Roda apenas com
- * nexo.seed.enabled=true e banco vazio.
+ * seed.enabled=true e banco vazio.
  */
 @Configuration
-@ConditionalOnProperty(name = "nexo.seed.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "seed.enabled", havingValue = "true")
 public class DataSeeder {
 
     @org.springframework.context.annotation.Bean
