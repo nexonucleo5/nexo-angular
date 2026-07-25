@@ -22,7 +22,9 @@ import java.util.Random;
  * seed.enabled=true e banco vazio.
  */
 @Configuration
-@ConditionalOnProperty(name = "seed.enabled", havingValue = "true")
+// A chave é nexo.seed.enabled (application.yml) — antes estava "seed.enabled",
+// que não existe, então o seeder nunca era criado e o banco vazio continuava vazio.
+@ConditionalOnProperty(name = "nexo.seed.enabled", havingValue = "true")
 public class DataSeeder {
 
     @org.springframework.context.annotation.Bean
@@ -150,7 +152,8 @@ public class DataSeeder {
                 aluno.setEmailResponsavel("resp." + primeiro + "@gmail.com");
                 aluno.setTelefoneResponsavel(String.format("(11) 9%04d-%04d",
                         random.nextInt(10000), random.nextInt(10000)));
-                aluno.setFoto("assets/imagensProjeto/gabrielZapelini.png");
+                // Sem foto: o cliente mostra o avatar padrão até o usuário enviar a dele.
+                aluno.setFoto(null);
                 aluno.setUltimoAcessoEm(hoje.minusDays(random.nextInt(11)).atStartOfDay(ZoneOffset.UTC).toInstant());
                 // Quanto menor o engajamento, mais intervenções pedagógicas registradas
                 int qtdIntervencoes = aluno.getEngajamento() < 50 ? 1 + random.nextInt(3) : random.nextInt(2);
@@ -301,7 +304,7 @@ public class DataSeeder {
             u.setSenhaHash(hash);
             u.setNome(nome);
             u.setCargo(cargo);
-            u.setFoto("assets/imagensProjeto/gabrielZapelini.png");
+            u.setFoto(null); // avatar padrão até o usuário enviar a própria foto
             u.setRole(role);
             return usuarios.save(u);
         }
@@ -314,10 +317,10 @@ public class DataSeeder {
             return turmas.save(t);
         }
 
-        /** Aplica as métricas de produtividade + foto padrão a um docente. */
+        /** Aplica as métricas de produtividade a um docente. */
         private void metricasDocente(Professor p, String turmas, int pendentes, double tempo,
                                      int interacoes, double avaliacao, int concluidas, int total) {
-            p.setFoto("assets/imagensProjeto/gabrielZapelini.png");
+            p.setFoto(null); // avatar padrão até o docente enviar a própria foto
             p.setTurmas(turmas);
             p.setCorrecoesPendentes(pendentes);
             p.setTempoRespostaDias(tempo);
