@@ -37,7 +37,7 @@ public class AlunosController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAnyRole('DIRETOR','PROFESSOR')")
+    @PreAuthorize("hasRole('DIRETOR')")
     public AlunoService.AlunoCriado cadastrar(@RequestBody AlunoService.CadastroAluno request,
                                               @AuthenticationPrincipal UsuarioAutenticado operador) {
         return alunoService.cadastrar(request, operador.nome());

@@ -12,7 +12,6 @@ interface MatriculaView {
   turma: string;
   matricula: string;
   dataMatricula: string;
-  cpf: string;
   status: StatusMatricula;
   documentacao: StatusDocumentacao;
   docPercent: number;
@@ -58,8 +57,7 @@ export class MatriculasDiretor {
       const buscaOk =
         !termo ||
         m.nome.toLowerCase().includes(termo) ||
-        m.matricula.includes(termo) ||
-        m.cpf.includes(termo);
+        m.matricula.includes(termo);
       const statusOk = status === 'Todos os Status' || STATUS_LABEL[m.status] === status;
       return buscaOk && statusOk;
     });
@@ -101,7 +99,6 @@ export class MatriculasDiretor {
       turma: m.turma ?? 'Sem turma',
       matricula: `2024${String(m.id).padStart(3, '0')}`,
       dataMatricula: this.formatarData(m.dataMatricula),
-      cpf: m.cpf,
       status: m.status,
       documentacao: m.documentacao,
       docPercent: DOC_PERCENT[m.documentacao],
@@ -134,8 +131,8 @@ export class MatriculasDiretor {
   /** Exporta a lista filtrada de matrículas para CSV. */
   exportar(): void {
     const linhas = this.matriculasFiltradas().map((m) => [
-      m.nome, m.matricula, m.turma, m.cpf, this.statusLabel(m.status), m.documentacao, m.dataMatricula,
+      m.nome, m.matricula, m.turma, this.statusLabel(m.status), m.documentacao, m.dataMatricula,
     ]);
-    exportarCsv('matriculas', ['Nome', 'Matrícula', 'Turma', 'CPF', 'Status', 'Documentação', 'Data'], linhas);
+    exportarCsv('matriculas', ['Nome', 'Matrícula', 'Turma', 'Status', 'Documentação', 'Data'], linhas);
   }
 }

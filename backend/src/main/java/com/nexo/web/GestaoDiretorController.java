@@ -104,9 +104,9 @@ public class GestaoDiretorController {
 
     @GetMapping("/api/monitoramento/professores")
     public List<ProfessorMonitorDTO> monitoramento() {
-        return professores.findAll().stream()
+        return professores.findAllComMaterias().stream()
                 .sorted((a, b) -> Double.compare(b.getAvaliacao(), a.getAvaliacao()))
-                .map(p -> new ProfessorMonitorDTO(p.getId(), p.getNome(), p.getDisciplina(), p.getFoto(),
+                .map(p -> new ProfessorMonitorDTO(p.getId(), p.getNome(), p.getDisciplinas(), p.getFoto(),
                         p.getTurmas(), p.getCorrecoesPendentes(), p.getTempoRespostaDias(),
                         p.getInteracoesSemana(), p.getAvaliacao(), p.getTarefasConcluidas(),
                         p.getTarefasTotal(), statusDe(p.getAvaliacao())))

@@ -1,9 +1,24 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlunosService } from '../api/alunos.service';
-import { ApiErro } from '../core/api.models';
+import { MateriasService } from '../api/materias.service';
+import { ProfessoresService } from '../api/professores.service';
+import { TurmasService } from '../api/turmas.service';
+import { ApiErro, MateriaDTO, TurmaDTO } from '../core/api.models';
 
+type Aba = 'aluno' | 'professor';
+
+/** Acesso recém-gerado, exibido uma única vez ao diretor. */
+interface AcessoGerado {
+  login: string;
+  senha: string;
+}
+
+/**
+ * Cadastros do diretor: aluno e professor em abas da mesma tela. As credenciais
+ * são sempre geradas no backend — o client apenas exibe o que voltou.
+ */
 @Component({
   selector: 'app-cadastro',
   standalone: true,
@@ -14,83 +29,125 @@ import { ApiErro } from '../core/api.models';
 export class Cadastro {
   private fb = inject(FormBuilder);
   private alunosService = inject(AlunosService);
+  private professoresService = inject(ProfessoresService);
+  private materiasService = inject(MateriasService);
+  private turmasService = inject(TurmasService);
 
-  cadastroForm: FormGroup;
-  emailGerado     = '';
-  senhaGerada     = '';
-  acessoGerado    = false;
-  enviando        = false;
-  mensagemSucesso = '';
-  mensagemErro    = '';
+  readonly abaAtiva = signal<Aba>('aluno');
+  readonly turmas = signal<TurmaDTO[]>([]);
+  readonly materias = signal<MateriaDTO[]>([]);
+
+  readonly enviando = signal(false);
+  readonly acesso = signal<AcessoGerado | null>(null);
+  readonly mensagemSucesso = signal('');
+  readonly mensagemErro = signal('');
+
+  alunoForm: FormGroup;
+  professorForm: FormGroup;
 
   constructor() {
-    this.cadastroForm = this.fb.group({
-      nome:                ['', [Validators.required, Validators.minLength(3)]],
-      cpf:                 ['', [Validators.required, Validators.minLength(14)]],
-      sexo:                ['', Validators.required],
-      telefone:            [''],
-      dataNascimento:      ['', Validators.required],
-      emailResponsavel:    ['', [Validators.required, Validators.email]],
-      cpfResponsavel:      ['', Validators.required],
-      telefoneResponsavel: [''],
-      endereco:            ['', Validators.required],
-      complemento:         [''],
+    this.alunoForm = this.fb.group({
+      nome: ['', [Validators.required, Validators.minLength(3)]],
+      dataNascimento: ['', Validators.required],
+      sexo: ['', Validators.required],
+      turmaId: [null, Validators.required],
     });
+
+    this.professorForm = this.fb.group({
+      nome: ['', [Validators.required, Validators.minLength(3)]],
+      dataNascimento: ['', Validators.required],
+      sexo: ['', Validators.required],
+      materiaIds: [[] as number[], Validators.required],
+    });
+
+    this.turmasService.listar().subscribe({ next: (t) => this.turmas.set(t) });
+    this.materiasService.listar().subscribe({ next: (m) => this.materias.set(m) });
   }
 
-  /** Atalho para acessar os controles no template */
-  get f() {
-    return this.cadastroForm.controls;
+  setAba(aba: Aba): void {
+    if (aba === this.abaAtiva()) return;
+    this.abaAtiva.set(aba);
+    this.limparFeedback();
   }
 
-  /**
-   * Submete o cadastro para a API. O e-mail institucional e a senha provisória
-   * são gerados e persistidos no backend — o client não decide credenciais.
-   */
-  finalizarCadastro(): void {
-    if (this.cadastroForm.invalid) {
-      this.cadastroForm.markAllAsTouched();
-      this.mensagemErro = 'Por favor, preencha todos os campos obrigatórios.';
-      return;
-    }
+  get fa() {
+    return this.alunoForm.controls;
+  }
 
-    this.enviando = true;
-    this.mensagemErro = '';
-    this.mensagemSucesso = '';
+  get fp() {
+    return this.professorForm.controls;
+  }
 
-    this.alunosService.cadastrar(this.cadastroForm.value).subscribe({
+  // ── Matérias (seleção múltipla) ─────────────────────────────────────
+
+  get materiaIdsSelecionadas(): number[] {
+    return this.professorForm.value.materiaIds ?? [];
+  }
+
+  materiaSelecionada(id: number): boolean {
+    return this.materiaIdsSelecionadas.includes(id);
+  }
+
+  alternarMateria(id: number): void {
+    const atuais = this.materiaIdsSelecionadas;
+    const novas = atuais.includes(id) ? atuais.filter((m) => m !== id) : [...atuais, id];
+    // `required` num array considera [] preenchido; o setErrors garante a validação.
+    this.fp['materiaIds'].setValue(novas);
+    this.fp['materiaIds'].markAsTouched();
+    this.fp['materiaIds'].setErrors(novas.length ? null : { required: true });
+  }
+
+  // ── Submissões ──────────────────────────────────────────────────────
+
+  cadastrarAluno(): void {
+    if (!this.validar(this.alunoForm)) return;
+
+    this.enviando.set(true);
+    this.alunosService.cadastrar(this.alunoForm.value).subscribe({
       next: (criado) => {
-        this.enviando        = false;
-        this.emailGerado     = criado.emailInstitucional;
-        this.senhaGerada     = criado.senhaProvisoria;
-        this.acessoGerado    = true;
-        this.mensagemSucesso = `✅ Aluno cadastrado! Login: ${criado.emailInstitucional}`;
-        this.cadastroForm.reset();
+        this.enviando.set(false);
+        this.acesso.set({ login: criado.emailInstitucional, senha: criado.senhaProvisoria });
+        this.mensagemSucesso.set(`Aluno ${criado.nome} cadastrado com sucesso.`);
+        this.alunoForm.reset({ nome: '', dataNascimento: '', sexo: '', turmaId: null });
       },
-      error: (erro: ApiErro) => {
-        this.enviando = false;
-        const detalhes = erro.fields ? ' ' + Object.values(erro.fields).join(' ') : '';
-        this.mensagemErro = `❌ ${erro.message}${detalhes}`;
-      },
+      error: (erro: ApiErro) => this.falhar(erro),
     });
   }
 
-  // ── Máscaras ────────────────────────────────────────────────────────
+  cadastrarProfessor(): void {
+    if (!this.validar(this.professorForm)) return;
 
-  aplicarMascaraCpf(event: Event, campo: string): void {
-    const input = event.target as HTMLInputElement;
-    let v = input.value.replace(/\D/g, '').slice(0, 11);
-    v = v.replace(/(\d{3})(\d)/, '$1.$2');
-    v = v.replace(/(\d{3})(\d)/, '$1.$2');
-    v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    this.cadastroForm.get(campo)?.setValue(v, { emitEvent: false });
+    this.enviando.set(true);
+    this.professoresService.cadastrar(this.professorForm.value).subscribe({
+      next: (criado) => {
+        this.enviando.set(false);
+        this.acesso.set({ login: criado.emailInstitucional, senha: criado.senhaProvisoria });
+        this.mensagemSucesso.set(`Professor ${criado.nome} cadastrado em ${criado.disciplinas}.`);
+        this.professorForm.reset({ nome: '', dataNascimento: '', sexo: '', materiaIds: [] });
+      },
+      error: (erro: ApiErro) => this.falhar(erro),
+    });
   }
 
-  aplicarMascaraTelefone(event: Event, campo: string): void {
-    const input = event.target as HTMLInputElement;
-    let v = input.value.replace(/\D/g, '').slice(0, 11);
-    v = v.replace(/(\d{2})(\d)/, '($1) $2');
-    v = v.replace(/(\d{5})(\d)/, '$1-$2');
-    this.cadastroForm.get(campo)?.setValue(v, { emitEvent: false });
+  private validar(form: FormGroup): boolean {
+    this.limparFeedback();
+    if (form.invalid) {
+      form.markAllAsTouched();
+      this.mensagemErro.set('Preencha todos os campos obrigatórios.');
+      return false;
+    }
+    return true;
+  }
+
+  private falhar(erro: ApiErro): void {
+    this.enviando.set(false);
+    const detalhes = erro.fields ? ' ' + Object.values(erro.fields).join(' ') : '';
+    this.mensagemErro.set(`${erro.message}${detalhes}`);
+  }
+
+  private limparFeedback(): void {
+    this.mensagemSucesso.set('');
+    this.mensagemErro.set('');
+    this.acesso.set(null);
   }
 }

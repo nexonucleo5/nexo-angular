@@ -28,11 +28,10 @@ public class MatriculasController {
         this.auditoria = auditoria;
     }
 
-    public record MatriculaDTO(Long id, Long alunoId, String aluno, String cpf, String turma,
+    public record MatriculaDTO(Long id, Long alunoId, String aluno, String turma,
                                String status, String documentacao, LocalDate dataMatricula) {
         static MatriculaDTO of(Matricula m) {
             return new MatriculaDTO(m.getId(), m.getAluno().getId(), m.getAluno().getNome(),
-                    m.getAluno().getCpf(),
                     m.getTurma() != null ? m.getTurma().getNome() : null,
                     m.getStatus().name(), m.getDocumentacao().name(), m.getDataMatricula());
         }

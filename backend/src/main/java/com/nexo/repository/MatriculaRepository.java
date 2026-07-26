@@ -14,7 +14,7 @@ public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
            select m from Matricula m
            where (:status is null or m.status = :status)
              and (:turmaId is null or m.turma.id = :turmaId)
-             and (:busca is null or lower(m.aluno.nome) like :busca or m.aluno.cpf like :busca)
+             and (:busca is null or lower(m.aluno.nome) like :busca)
            order by m.aluno.nome
            """)
     Page<Matricula> buscar(@Param("status") Matricula.Status status,

@@ -64,7 +64,7 @@
         <input
           type="text"
           class="form-control border-0 bg-transparent p-0"
-          placeholder="Buscar por aluno, matrícula ou CPF..."
+          placeholder="Buscar por aluno ou matrícula..."
           [ngModel]="buscaTermo()" (ngModelChange)="buscaTermo.set($event)">
       </div>
     </div>
@@ -142,12 +142,6 @@
           </div>
         </div>
 
-        <!-- CPF -->
-        <div class="responsible-block text-start text-md-end">
-          <small class="text-soft d-block">CPF do aluno</small>
-          <span class="text-main fw-semibold small">{{ m.cpf }}</span>
-        </div>
-
         <!-- Ações -->
         <div class="d-flex flex-column gap-1 align-items-end">
           <span *ngIf="m.temAlerta" class="text-danger small fw-bold mb-1">
@@ -174,7 +168,6 @@
         </div>
         <div class="detalhe-row"><span class="rot">Matrícula</span><span class="val">{{ m.matricula }}</span></div>
         <div class="detalhe-row"><span class="rot">Turma</span><span class="val">{{ m.turma }}</span></div>
-        <div class="detalhe-row"><span class="rot">CPF</span><span class="val">{{ m.cpf }}</span></div>
         <div class="detalhe-row"><span class="rot">Status</span><span class="val">{{ statusLabel(m.status) }}</span></div>
         <div class="detalhe-row"><span class="rot">Documentação</span><span class="val">{{ m.documentacao }} ({{ m.docPercent }}%)</span></div>
         <div class="detalhe-row"><span class="rot">Data da matrícula</span><span class="val">{{ m.dataMatricula }}</span></div>

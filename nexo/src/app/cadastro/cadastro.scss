@@ -1,35 +1,45 @@
 .cadastro-container {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
   background-color: var(--bg-primary);
+  min-height: 100vh;
+}
+
+/* Abas — mesmo padrão da tela de Avaliações */
+.tabs-container {
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  flex-wrap: wrap;
+
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    &:hover { color: var(--text-main); }
+
+    &.active {
+      background: #06d25e;
+      color: #ffffff;
+    }
+  }
 }
 
 .cadastro-form {
-  width: 100%;
   max-width: 900px;
-  background-color: var(--bg-card);
-  padding: 40px;
-  border-radius: 16px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 8px 25px var(--shadow-color);
 }
 
 .cadastro-title {
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text-main);
-  margin-bottom: 8px;
-  text-align: center;
-}
-
-.cadastro-subtitle {
-  font-size: 14px;
-  color: var(--text-muted);
-  text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .form-label {
@@ -64,25 +74,47 @@
   color: var(--text-main);
 }
 
-.form-text {
-  font-size: 12px;
+/* Seleção múltipla de matérias */
+.materias-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background-color: var(--bg-input);
+
+  &.invalido { border-color: #dc3545; }
+}
+
+.materia-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover { color: var(--text-main); }
+
+  &.selecionada {
+    background: #06d25e;
+    border-color: #06d25e;
+    color: #ffffff;
+  }
+}
+
+.erro-materias {
+  font-size: 12px;
+  color: #ff7b7b;
   margin-top: 6px;
 }
-
-fieldset {
-  border: 1px solid var(--border-color) !important;
-  padding: 20px;
-  border-radius: 12px;
-  background-color: var(--bg-primary);
-}
-
-.coluna-esquerda {
-  border-right: 1px solid var(--border-color) !important;
-  padding-right: 20px;
-}
-
-.coluna-direita { padding-left: 20px; }
 
 /* Botão */
 .btn-cadastro {
@@ -104,9 +136,3 @@ fieldset {
 .form-select.is-invalid { border-color: #dc3545; }
 
 .alert { display: block; }
-
-@media (max-width: 767px) {
-  .cadastro-form { padding: 25px; }
-  .coluna-esquerda { border-right: none !important; padding-right: 12px; margin-bottom: 20px; }
-  .coluna-direita  { padding-left: 12px; }
-}

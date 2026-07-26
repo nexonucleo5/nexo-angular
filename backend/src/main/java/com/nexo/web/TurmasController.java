@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,9 +40,23 @@ public class TurmasController {
         static TurmaDTO of(Turma t) { return new TurmaDTO(t.getId(), t.getNome(), t.getAnoLetivo(), t.getTurno()); }
     }
 
+    /** 6º-9º fundamental antes do ensino médio — ordem pedagógica, não alfabética. */
+    private static final List<String> ORDEM_ANOS = List.of(
+            "6º Ano", "7º Ano", "8º Ano", "9º Ano", "1º Ano EM", "2º Ano EM", "3º Ano EM");
+
     @GetMapping
     public List<TurmaDTO> listar() {
-        return turmas.findAll().stream().map(TurmaDTO::of).toList();
+        return turmas.findAll().stream()
+                .sorted(Comparator.comparingInt(this::ordemDoAno).thenComparing(Turma::getNome))
+                .map(TurmaDTO::of)
+                .toList();
+    }
+
+    private int ordemDoAno(Turma turma) {
+        for (int i = 0; i < ORDEM_ANOS.size(); i++) {
+            if (turma.getNome().startsWith(ORDEM_ANOS.get(i))) return i;
+        }
+        return ORDEM_ANOS.size();
     }
 
     // ── Frequência (Diário de Classe) ────────────────────────────────────────

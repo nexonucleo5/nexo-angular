@@ -69,7 +69,7 @@ export const routes: Routes = [
   // ── Diretor ──────────────────────────────────────────────────────────────────
   {
     path: 'cadastro',
-    canActivate: [authGuard, roleGuard('diretor', 'professor')],
+    canActivate: [authGuard, roleGuard('diretor')],
     loadComponent: () => import('./cadastro/cadastro').then((m) => m.Cadastro),
   },
   {

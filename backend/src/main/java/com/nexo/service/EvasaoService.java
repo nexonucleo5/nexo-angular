@@ -20,8 +20,7 @@ public class EvasaoService {
     public record AlunoRiscoDTO(Long alunoId, String nome, String turma, String matricula,
                                 double media, double percentualFaltas, int engajamento, Risco risco,
                                 String foto, String motivoPrincipal, java.time.Instant ultimoAcessoEm,
-                                int intervencoes, java.time.Instant ultimaIntervencaoEm,
-                                String telefoneResponsavel, String emailResponsavel) {}
+                                int intervencoes, java.time.Instant ultimaIntervencaoEm) {}
 
     private final AlunoRepository alunos;
     private final AgregadosAcademicos agregados;
@@ -71,8 +70,7 @@ public class EvasaoService {
                 String.format("2024%03d", aluno.getId()),
                 Math.round(media * 10.0) / 10.0, percentualFaltas, engajamento, risco,
                 aluno.getFoto(), motivoPrincipal(percentualFaltas, media, engajamento),
-                aluno.getUltimoAcessoEm(), aluno.getIntervencoes(), aluno.getUltimaIntervencaoEm(),
-                aluno.getTelefoneResponsavel(), aluno.getEmailResponsavel());
+                aluno.getUltimoAcessoEm(), aluno.getIntervencoes(), aluno.getUltimaIntervencaoEm());
     }
 
     /** Motivo dominante do risco, derivado dos mesmos fatores usados na classificação. */

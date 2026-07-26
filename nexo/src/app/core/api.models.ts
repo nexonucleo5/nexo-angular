@@ -52,16 +52,32 @@ export interface AlunoCriado {
 
 export interface CadastroAlunoRequest {
   nome: string;
-  cpf: string;
+  dataNascimento: string;
   sexo: string;
-  telefone?: string;
-  dataNascimento?: string;
-  emailResponsavel: string;
-  cpfResponsavel?: string;
-  telefoneResponsavel?: string;
-  endereco?: string;
-  complemento?: string;
-  turmaId?: number;
+  /** Ano do ensino básico em que o aluno entra (turma existente). */
+  turmaId: number | null;
+}
+
+// ── Matérias / Professores ───────────────────────────────────────────────────
+
+export interface MateriaDTO {
+  id: number;
+  nome: string;
+}
+
+export interface CadastroProfessorRequest {
+  nome: string;
+  dataNascimento: string;
+  sexo: string;
+  materiaIds: number[];
+}
+
+export interface ProfessorCriado {
+  id: number;
+  nome: string;
+  disciplinas: string;
+  emailInstitucional: string;
+  senhaProvisoria: string;
 }
 
 export type StatusMatricula = 'ATIVA' | 'PENDENTE' | 'TRANCADA' | 'CANCELADA';
@@ -71,7 +87,6 @@ export interface MatriculaDTO {
   id: number;
   alunoId: number;
   aluno: string;
-  cpf: string;
   turma: string | null;
   status: StatusMatricula;
   documentacao: StatusDocumentacao;
@@ -205,8 +220,6 @@ export interface AlunoRiscoDTO {
   ultimoAcessoEm: string | null;
   intervencoes: number;
   ultimaIntervencaoEm: string | null;
-  telefoneResponsavel: string | null;
-  emailResponsavel: string | null;
 }
 
 export interface SerieTurma {

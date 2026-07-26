@@ -19,8 +19,6 @@ interface AlunoRiscoView {
   motivoPrincipal: string;
   intervencoes: string;
   tempoIntervencao: string;
-  contatoResponsavel: string;
-  emailResponsavel: string;
   foto: string;
 }
 
@@ -117,8 +115,6 @@ export class GestaoEvasao {
       motivoPrincipal: dto.motivoPrincipal,
       intervencoes: `${dto.intervencoes} intervenção(ões)`,
       tempoIntervencao: dto.ultimaIntervencaoEm ? this.formatarRelativo(dto.ultimaIntervencaoEm) : 'Nenhuma ainda',
-      contatoResponsavel: dto.telefoneResponsavel ?? 'Não informado',
-      emailResponsavel: dto.emailResponsavel ?? '',
       foto: resolverFoto(dto.foto),
     };
   }
@@ -147,11 +143,11 @@ export class GestaoEvasao {
   exportar(): void {
     const linhas = this.alunosFiltrados().map((a) => [
       a.nome, a.matricula, a.turma, a.risco, `${a.frequencia}%`, `${a.participacao}%`,
-      a.notaMedia, a.motivoPrincipal, a.contatoResponsavel, a.emailResponsavel,
+      a.notaMedia, a.motivoPrincipal,
     ]);
     exportarCsv('alunos-em-risco', [
       'Nome', 'Matrícula', 'Turma', 'Risco', 'Frequência', 'Participação',
-      'Nota Média', 'Motivo Principal', 'Telefone Responsável', 'E-mail Responsável',
+      'Nota Média', 'Motivo Principal',
     ], linhas);
   }
 
@@ -161,13 +157,5 @@ export class GestaoEvasao {
 
   fecharDetalhes(): void {
     this.detalhe.set(null);
-  }
-
-  /** Abre o cliente de e-mail para contatar o responsável do aluno. */
-  contatar(aluno: AlunoRiscoView): void {
-    if (aluno.emailResponsavel) {
-      const assunto = encodeURIComponent(`Acompanhamento — ${aluno.nome}`);
-      window.location.href = `mailto:${aluno.emailResponsavel}?subject=${assunto}`;
-    }
   }
 }

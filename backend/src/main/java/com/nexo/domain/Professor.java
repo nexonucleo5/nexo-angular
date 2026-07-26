@@ -2,6 +2,11 @@ package com.nexo.domain;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Entity
 @Table(name = "professores")
 public class Professor {
@@ -16,7 +21,17 @@ public class Professor {
     @Column(nullable = false)
     private String nome;
 
-    private String disciplina;
+    private LocalDate dataNascimento;
+
+    private String sexo;
+
+    /** Matérias que o docente leciona (cadastro do diretor). */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "professor_materias",
+            joinColumns = @JoinColumn(name = "professor_id"),
+            inverseJoinColumns = @JoinColumn(name = "materia_id"))
+    @OrderBy("nome")
+    private Set<Materia> materias = new LinkedHashSet<>();
 
     private String email;
 
@@ -33,14 +48,26 @@ public class Professor {
     private int tarefasConcluidas;
     private int tarefasTotal;
 
+    /**
+     * Matérias em uma linha ("História, Geografia") — é o que o monitoramento
+     * docente e o dashboard do professor exibem no lugar do antigo campo texto.
+     */
+    public String getDisciplinas() {
+        return materias.stream().map(Materia::getNome).collect(Collectors.joining(", "));
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
-    public String getDisciplina() { return disciplina; }
-    public void setDisciplina(String disciplina) { this.disciplina = disciplina; }
+    public LocalDate getDataNascimento() { return dataNascimento; }
+    public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }
+    public String getSexo() { return sexo; }
+    public void setSexo(String sexo) { this.sexo = sexo; }
+    public Set<Materia> getMaterias() { return materias; }
+    public void setMaterias(Set<Materia> materias) { this.materias = materias; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     public String getFoto() { return foto; }

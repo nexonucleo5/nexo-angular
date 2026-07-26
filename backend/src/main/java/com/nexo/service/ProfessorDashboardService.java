@@ -90,7 +90,7 @@ public class ProfessorDashboardService {
                     .mapToDouble(Double::doubleValue)
                     .average().orElse(0);
             media = Math.round(media * 10.0) / 10.0;
-            turmasResumo.add(new TurmaResumo(t.getNome(), prof.getDisciplina(),
+            turmasResumo.add(new TurmaResumo(t.getNome(), prof.getDisciplinas(),
                     alunosTurma.size(), media, (int) Math.round(media * 10)));
 
             for (var av : avaliacoes.buscar(t.getId(), null)) {

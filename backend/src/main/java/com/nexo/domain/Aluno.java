@@ -19,24 +19,9 @@ public class Aluno {
     @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false, unique = true)
-    private String cpf;
-
     private String sexo;
 
-    private String telefone;
-
     private LocalDate dataNascimento;
-
-    private String emailResponsavel;
-
-    private String cpfResponsavel;
-
-    private String telefoneResponsavel;
-
-    private String endereco;
-
-    private String complemento;
 
     @Column(unique = true)
     private String emailInstitucional;
@@ -73,24 +58,10 @@ public class Aluno {
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
-    public String getCpf() { return cpf; }
-    public void setCpf(String cpf) { this.cpf = cpf; }
     public String getSexo() { return sexo; }
     public void setSexo(String sexo) { this.sexo = sexo; }
-    public String getTelefone() { return telefone; }
-    public void setTelefone(String telefone) { this.telefone = telefone; }
     public LocalDate getDataNascimento() { return dataNascimento; }
     public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }
-    public String getEmailResponsavel() { return emailResponsavel; }
-    public void setEmailResponsavel(String emailResponsavel) { this.emailResponsavel = emailResponsavel; }
-    public String getCpfResponsavel() { return cpfResponsavel; }
-    public void setCpfResponsavel(String cpfResponsavel) { this.cpfResponsavel = cpfResponsavel; }
-    public String getTelefoneResponsavel() { return telefoneResponsavel; }
-    public void setTelefoneResponsavel(String telefoneResponsavel) { this.telefoneResponsavel = telefoneResponsavel; }
-    public String getEndereco() { return endereco; }
-    public void setEndereco(String endereco) { this.endereco = endereco; }
-    public String getComplemento() { return complemento; }
-    public void setComplemento(String complemento) { this.complemento = complemento; }
     public String getEmailInstitucional() { return emailInstitucional; }
     public void setEmailInstitucional(String emailInstitucional) { this.emailInstitucional = emailInstitucional; }
     public Turma getTurma() { return turma; }

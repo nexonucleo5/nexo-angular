@@ -28,8 +28,10 @@ import java.util.Random;
 public class DataSeeder {
 
     @org.springframework.context.annotation.Bean
+    @org.springframework.core.annotation.Order(2) // depois do CatalogoMaterias
     CommandLineRunner seed(UsuarioRepository usuarios, TurmaRepository turmas, AlunoRepository alunos,
-                           ProfessorRepository professores, MatriculaRepository matriculas,
+                           ProfessorRepository professores, MateriaRepository materias,
+                           MatriculaRepository matriculas,
                            FrequenciaRepository frequencias, NotaRepository notas,
                            AvaliacaoRepository avaliacoes, QuestaoRepository questoes,
                            ConversaRepository conversas, MensagemRepository mensagens,
@@ -43,14 +45,15 @@ public class DataSeeder {
                            DesafioAlunoRepository desafiosAluno,
                            ChatMensagemRepository chatMensagens,
                            PasswordEncoder encoder) {
-        return args -> new Seeder(usuarios, turmas, alunos, professores, matriculas, frequencias, notas,
+        return args -> new Seeder(usuarios, turmas, alunos, professores, materias, matriculas, frequencias, notas,
                 avaliacoes, questoes, conversas, mensagens, avisos, duvidas, observacoes, eventos,
                 atividadesAluno, aulasAgendadas, atividadesProfessor, desafios, desafiosAluno,
                 chatMensagens, encoder).executar();
     }
 
     record Seeder(UsuarioRepository usuarios, TurmaRepository turmas, AlunoRepository alunos,
-                  ProfessorRepository professores, MatriculaRepository matriculas,
+                  ProfessorRepository professores, MateriaRepository materias,
+                  MatriculaRepository matriculas,
                   FrequenciaRepository frequencias, NotaRepository notas,
                   AvaliacaoRepository avaliacoes, QuestaoRepository questoes,
                   ConversaRepository conversas, MensagemRepository mensagens,
@@ -79,31 +82,38 @@ public class DataSeeder {
             Professor professor = new Professor();
             professor.setUsuario(professorUsr);
             professor.setNome(professorUsr.getNome());
-            professor.setDisciplina("História");
+            professor.setSexo("M");
+            professor.setDataNascimento(LocalDate.of(1979, 4, 12));
+            professor.setMaterias(materiasPorNome("História"));
             professor.setEmail("roberto.alves@nexo.escola.com");
             metricasDocente(professor, "1º A, 2º A, 3º C", 2, 1.5, 51, 4.9, 51, 53);
             professores.save(professor);
 
             Professor profMatematica = new Professor();
             profMatematica.setNome("Profa. Carla Nunes");
-            profMatematica.setDisciplina("Matemática");
+            profMatematica.setSexo("F");
+            profMatematica.setDataNascimento(LocalDate.of(1985, 9, 3));
+            profMatematica.setMaterias(materiasPorNome("Matemática"));
             profMatematica.setEmail("carla.nunes@nexo.escola.com");
             metricasDocente(profMatematica, "1º A, 1º B, 2º A", 3, 1.8, 47, 4.8, 47, 50);
             professores.save(profMatematica);
 
             // Demais docentes do corpo (monitoramento docente)
-            professores.save(docente("Profa. Juliana Costa Santos", "Biologia", "juliana.santos@nexo.escola.com",
-                    "1º C, 2º C, 3º B", 5, 2.1, 43, 4.6, 43, 48));
-            professores.save(docente("Profa. Mariana Oliveira", "Química", "mariana.oliveira@nexo.escola.com",
-                    "2º B, 3º B, 3º A", 6, 2.8, 41, 4.4, 44, 50));
-            professores.save(docente("Prof. Carlos Eduardo Silva", "Física", "carlos.silva@nexo.escola.com",
-                    "2º B, 3º A", 12, 4.2, 28, 4.2, 38, 50));
+            professores.save(docente("Profa. Juliana Costa Santos", "F", LocalDate.of(1983, 1, 27),
+                    "juliana.santos@nexo.escola.com", "1º C, 2º C, 3º B", 5, 2.1, 43, 4.6, 43, 48,
+                    "Biologia"));
+            professores.save(docente("Profa. Mariana Oliveira", "F", LocalDate.of(1990, 6, 15),
+                    "mariana.oliveira@nexo.escola.com", "2º B, 3º B, 3º A", 6, 2.8, 41, 4.4, 44, 50,
+                    "Química", "Biologia"));
+            professores.save(docente("Prof. Carlos Eduardo Silva", "M", LocalDate.of(1976, 11, 2),
+                    "carlos.silva@nexo.escola.com", "2º B, 3º A", 12, 4.2, 28, 4.2, 38, 50,
+                    "Física", "Matemática"));
 
             // ── Turmas ──
             Turma t9a = turma("9º Ano A", "Manhã");
             Turma t9b = turma("9º Ano B", "Manhã");
-            Turma t1em = turma("1º Ano EM", "Tarde");
-            Turma t2em = turma("2º Ano EM", "Tarde");
+            Turma t1em = turma("1º Ano EM A", "Tarde");
+            Turma t2em = turma("2º Ano EM A", "Tarde");
 
             // Professor logado (Roberto) leciona 3 turmas; Carla leciona a outra
             t9a.setProfessor(professor);
@@ -115,20 +125,20 @@ public class DataSeeder {
             turmas.save(t2em);
             turmas.save(t1em);
 
-            // ── Alunos ──
+            // ── Alunos (nome, sexo, turma, engajamento) ──
             String[][] dadosAlunos = {
-                    {"Gabriel Mendes", "39053344705", "2em", "88"},
-                    {"Ana Beatriz Souza", "52998224725", "9a", "92"},
-                    {"Carlos Eduardo Lima", "11144477735", "9a", "45"},
-                    {"Mariana Ferreira", "16899535009", "9a", "78"},
-                    {"João Pedro Santos", "71428793860", "9b", "25"},
-                    {"Larissa Oliveira", "87748248800", "9b", "83"},
-                    {"Rafael Costa", "27332996002", "9b", "52"},
-                    {"Beatriz Almeida", "07068093868", "1em", "95"},
-                    {"Lucas Martins", "85350996060", "1em", "38"},
-                    {"Julia Rodrigues", "35657833039", "1em", "72"},
-                    {"Pedro Henrique Silva", "96076994004", "2em", "60"},
-                    {"Camila Barbosa", "51867080020", "2em", "90"},
+                    {"Gabriel Mendes", "M", "2em", "88"},
+                    {"Ana Beatriz Souza", "F", "9a", "92"},
+                    {"Carlos Eduardo Lima", "M", "9a", "45"},
+                    {"Mariana Ferreira", "F", "9a", "78"},
+                    {"João Pedro Santos", "M", "9b", "25"},
+                    {"Larissa Oliveira", "F", "9b", "83"},
+                    {"Rafael Costa", "M", "9b", "52"},
+                    {"Beatriz Almeida", "F", "1em", "95"},
+                    {"Lucas Martins", "M", "1em", "38"},
+                    {"Julia Rodrigues", "F", "1em", "72"},
+                    {"Pedro Henrique Silva", "M", "2em", "60"},
+                    {"Camila Barbosa", "F", "2em", "90"},
             };
 
             Random random = new Random(42);
@@ -143,15 +153,15 @@ public class DataSeeder {
                 };
                 Aluno aluno = new Aluno();
                 aluno.setNome(d[0]);
-                aluno.setCpf(d[1]);
+                aluno.setSexo(d[1]);
                 aluno.setTurma(turma);
                 aluno.setEngajamento(Integer.parseInt(d[3]));
+                // Idade típica da turma: 15 anos no 9º ano, 16/17 no ensino médio.
+                aluno.setDataNascimento(hoje.minusYears(d[2].startsWith("9") ? 15 : 17)
+                        .withDayOfYear(1 + random.nextInt(365)));
                 String primeiro = d[0].split(" ")[0].toLowerCase();
                 String ultimo = d[0].substring(d[0].lastIndexOf(' ') + 1).toLowerCase();
                 aluno.setEmailInstitucional(primeiro + "." + ultimo + "@nexo.escola.com");
-                aluno.setEmailResponsavel("resp." + primeiro + "@gmail.com");
-                aluno.setTelefoneResponsavel(String.format("(11) 9%04d-%04d",
-                        random.nextInt(10000), random.nextInt(10000)));
                 // Sem foto: o cliente mostra o avatar padrão até o usuário enviar a dele.
                 aluno.setFoto(null);
                 aluno.setUltimoAcessoEm(hoje.minusDays(random.nextInt(11)).atStartOfDay(ZoneOffset.UTC).toInstant());
@@ -330,15 +340,25 @@ public class DataSeeder {
             p.setTarefasTotal(total);
         }
 
-        private Professor docente(String nome, String disciplina, String email, String turmas,
+        private Professor docente(String nome, String sexo, LocalDate nascimento, String email, String turmas,
                                   int pendentes, double tempo, int interacoes, double avaliacao,
-                                  int concluidas, int total) {
+                                  int concluidas, int total, String... disciplinas) {
             Professor p = new Professor();
             p.setNome(nome);
-            p.setDisciplina(disciplina);
+            p.setSexo(sexo);
+            p.setDataNascimento(nascimento);
+            p.setMaterias(materiasPorNome(disciplinas));
             p.setEmail(email);
             metricasDocente(p, turmas, pendentes, tempo, interacoes, avaliacao, concluidas, total);
             return p;
+        }
+
+        /** Matérias já semeadas, pelo nome — usado para montar o vínculo dos docentes. */
+        private java.util.Set<Materia> materiasPorNome(String... nomes) {
+            List<String> procurados = List.of(nomes);
+            return materias.findAllByOrderByNome().stream()
+                    .filter(m -> procurados.contains(m.getNome()))
+                    .collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
         }
 
         private void avaliacao(String titulo, String disciplina, Turma turma, String tipo,
