@@ -65,6 +65,14 @@ export interface MateriaDTO {
   nome: string;
 }
 
+/** Conteúdo/documento de uma matéria — só Matemática tem exemplos por enquanto. */
+export interface ConteudoMateriaDTO {
+  id: number;
+  titulo: string;
+  texto: string;
+  ordem: number;
+}
+
 export interface CadastroProfessorRequest {
   nome: string;
   dataNascimento: string;

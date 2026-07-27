@@ -27,24 +27,63 @@
       </div>
     </div>
 
-    <!-- Conteúdos / matérias da disciplina -->
-    <h2 class="section-title fw-bold mb-4" style="color: var(--text-main);">
-      Conteúdos da disciplina
-    </h2>
+    <!-- Leitura de um conteúdo real selecionado -->
+    @if (topicoSelecionado(); as topico) {
 
-    <div class="row g-4">
-      <div class="col-md-6 col-xl-4" *ngFor="let topic of d.topics; let i = index">
-        <div class="topic-card card-theme p-4 rounded-4 h-100 d-flex align-items-center gap-3">
-          <div [class]="'topic-number d-flex align-items-center justify-content-center rounded-3 ' + d.colorClass">
-            {{ i + 1 }}
-          </div>
-          <div>
-            <h3 class="topic-title mb-1" style="color: var(--text-main);">{{ topic }}</h3>
-            <small class="text-soft">Módulo {{ i + 1 }} de {{ d.topics.length }}</small>
+      <button type="button" class="back-link d-inline-flex align-items-center gap-2 mb-4 btn btn-link p-0"
+              (click)="voltarTopicos()">
+        <i class="bi bi-arrow-left"></i> Voltar aos conteúdos
+      </button>
+
+      <article class="reading-card card-theme p-4 rounded-4">
+        <h2 class="section-title fw-bold mb-3" style="color: var(--text-main);">{{ topico.titulo }}</h2>
+        <p class="reading-text text-soft mb-0">{{ topico.texto }}</p>
+      </article>
+
+    } @else {
+
+      <h2 class="section-title fw-bold mb-4" style="color: var(--text-main);">
+        Conteúdos da disciplina
+      </h2>
+
+      <!-- Conteúdo real cadastrado (piloto: Matemática) -->
+      @if (conteudos().length > 0) {
+
+        <div class="row g-4">
+          <div class="col-md-6 col-xl-4" *ngFor="let c of conteudos(); let i = index">
+            <button type="button" class="topic-card card-theme p-4 rounded-4 h-100 d-flex align-items-center gap-3 w-100 text-start border-0"
+                    (click)="selecionarTopico(c)">
+              <div [class]="'topic-number d-flex align-items-center justify-content-center rounded-3 ' + d.colorClass">
+                {{ i + 1 }}
+              </div>
+              <div>
+                <h3 class="topic-title mb-1" style="color: var(--text-main);">{{ c.titulo }}</h3>
+                <small class="text-soft">Módulo {{ i + 1 }} de {{ conteudos().length }}</small>
+              </div>
+            </button>
           </div>
         </div>
-      </div>
-    </div>
+
+      } @else if (!carregandoConteudo()) {
+
+        <!-- Sem conteúdo real cadastrado ainda: tópicos ilustrativos do mock -->
+        <div class="row g-4">
+          <div class="col-md-6 col-xl-4" *ngFor="let topic of d.topics; let i = index">
+            <div class="topic-card card-theme p-4 rounded-4 h-100 d-flex align-items-center gap-3">
+              <div [class]="'topic-number d-flex align-items-center justify-content-center rounded-3 ' + d.colorClass">
+                {{ i + 1 }}
+              </div>
+              <div>
+                <h3 class="topic-title mb-1" style="color: var(--text-main);">{{ topic }}</h3>
+                <small class="text-soft">Módulo {{ i + 1 }} de {{ d.topics.length }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      }
+
+    }
 
   } @else {
 

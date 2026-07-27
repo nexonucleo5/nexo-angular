@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { DesafioDTO, DesafiosService } from '../api/desafios.service';
 
 interface DesafioView {
@@ -32,6 +33,7 @@ const STATUS_MAP: Record<string, 'aberto' | 'progresso' | 'concluido'> = {
 })
 export class Desafios {
   private readonly api = inject(DesafiosService);
+  private readonly router = inject(Router);
 
   buscaDeTermos = '';
   materiaSelecionada = 'Todas as Matérias';
@@ -102,14 +104,9 @@ export class Desafios {
     return 'Iniciar';
   }
 
+  /** Abre o quiz do desafio — 'Iniciar'/'Continuar' vão direto às perguntas; 'Ver Resultado' abre em modo revisão. */
   acao(d: DesafioView): void {
-    if (d.status === 'aberto') {
-      this.api.iniciar(d.id).subscribe({ next: () => this.carregar() });
-    } else if (d.status === 'progresso') {
-      // Continuar até concluir — credita o XP no backend
-      this.api.concluir(d.id).subscribe({ next: () => this.carregar() });
-    }
-    // 'concluido' → apenas exibe resultado (sem ação de escrita)
+    this.router.navigate(['/desafios', d.id, 'quiz']);
   }
 
   getClasseNivel(nivel: string): string {

@@ -1,0 +1,69 @@
+<div class="page-container">
+
+  <a routerLink="/desafios" class="back-link d-inline-flex align-items-center gap-2 mb-4">
+    <i class="bi bi-arrow-left"></i> Voltar para Desafios
+  </a>
+
+  <div *ngIf="carregando()" class="text-soft">Carregando quiz...</div>
+
+  <ng-container *ngIf="!carregando()">
+
+    <div *ngIf="erro() && perguntas().length === 0" class="alert alert-danger">{{ erro() }}</div>
+
+    <ng-container *ngIf="desafio() as d">
+      <header class="dashboard-header mb-4">
+        <h1 class="page-title fw-bold mb-1">{{ d.titulo }}</h1>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <span class="text-soft">{{ d.materia }}</span>
+          <span class="level-tag" [ngClass]="d.nivel.toLowerCase()">{{ nivelLabel() }}</span>
+          <span class="text-soft small"><i class="bi bi-lightning-fill text-warning"></i> {{ d.xp }} XP</span>
+        </div>
+      </header>
+
+      <!-- Banner de resultado -->
+      <div *ngIf="placar() as p" class="main-card p-4 mb-4 resultado-banner">
+        <div class="d-flex align-items-center gap-3 flex-wrap justify-content-between">
+          <div>
+            <h2 class="fw-bold mb-1 text-main">Você acertou {{ p.acertos }} de {{ p.total }}</h2>
+            <p class="text-soft mb-0" *ngIf="p.xpGanho > 0">+{{ p.xpGanho }} XP creditado no seu perfil</p>
+            <p class="text-soft mb-0" *ngIf="p.xpGanho === 0">Desafio já concluído anteriormente</p>
+          </div>
+          <button class="btn btn-outline-main" (click)="voltar()">Voltar aos Desafios</button>
+        </div>
+      </div>
+
+      <div *ngIf="erro() && perguntas().length > 0" class="alert alert-danger">{{ erro() }}</div>
+
+      <!-- Perguntas -->
+      <div class="main-card p-4 mb-3" *ngFor="let pergunta of perguntas(); let i = index">
+        <h3 class="h6 fw-bold text-main mb-3">{{ i + 1 }}. {{ pergunta.enunciado }}</h3>
+        <div class="alternativas">
+          <button type="button" class="alternativa" *ngFor="let alt of pergunta.alternativas; let ai = index"
+                  [class]="classeAlternativa(pergunta, ai)"
+                  [disabled]="modoRevisao()"
+                  (click)="escolher(pergunta.id, ai)">
+            <i class="bi" [ngClass]="{
+                 'bi-check-circle-fill': classeAlternativa(pergunta, ai) === 'selecionada' || classeAlternativa(pergunta, ai) === 'correta',
+                 'bi-x-circle-fill': classeAlternativa(pergunta, ai) === 'incorreta',
+                 'bi-circle': classeAlternativa(pergunta, ai) === ''
+               }"></i>
+            {{ alt }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Envio -->
+      <div *ngIf="!modoRevisao() && perguntas().length > 0" class="d-flex justify-content-end mt-3">
+        <button class="btn btn-gradient" [disabled]="!todasRespondidas() || enviando()" (click)="enviar()">
+          {{ enviando() ? 'Enviando...' : 'Enviar respostas' }}
+        </button>
+      </div>
+
+      <p *ngIf="!modoRevisao() && perguntas().length === 0 && !erro()" class="text-soft">
+        Este desafio ainda não tem perguntas de quiz cadastradas.
+      </p>
+    </ng-container>
+
+  </ng-container>
+
+</div>

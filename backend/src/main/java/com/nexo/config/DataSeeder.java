@@ -291,6 +291,8 @@ public class DataSeeder {
                     "Nova avaliação criada: Revolução Industrial", "9º Ano A", "bi-file-earmark-plus", "text-orange", agora.minus(1, ChronoUnit.DAYS)));
 
             // ── Desafios (catálogo + progresso do aluno logado) ──
+            // Perguntas de quiz para estes desafios são semeadas à parte, em
+            // QuizPerguntasSeed (roda sempre, não só em banco vazio como este).
             Desafio d1 = desafios.save(new Desafio("Quiz: Fotossíntese", "Biologia", "MEDIO", 150, 15));
             Desafio d2 = desafios.save(new Desafio("Funções Trigonométricas", "Matemática", "DIFICIL", 250, 30));
             desafios.save(new Desafio("Present Perfect", "Inglês", "FACIL", 100, 20));
@@ -298,7 +300,10 @@ public class DataSeeder {
             desafios.save(new Desafio("Ecossistemas e Biomas", "Biologia", "FACIL", 120, 15));
             desafios.save(new Desafio("Derivadas e Integrais", "Matemática", "DIFICIL", 300, 40));
 
-            desafiosAluno.save(new DesafioAluno(gabriel, d1, "CONCLUIDO", 100));
+            DesafioAluno da1 = new DesafioAluno(gabriel, d1, "CONCLUIDO", 100);
+            da1.setAcertos(3);
+            da1.setTotalPerguntas(3);
+            desafiosAluno.save(da1);
             desafiosAluno.save(new DesafioAluno(gabriel, d2, "PROGRESSO", 40));
 
             // ── Chat inicial professor ↔ diretor ──

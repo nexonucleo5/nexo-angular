@@ -1,0 +1,96 @@
+/* quiz-desafio.scss — usa apenas variáveis do styles.scss */
+
+.page-container {
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+}
+
+.back-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+  &:hover { color: #9b2fff; }
+}
+
+.main-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+}
+
+.text-main { color: var(--text-main) !important; }
+.text-soft { color: var(--text-muted) !important; }
+
+.level-tag {
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 8px;
+  &.facil   { background: rgba(6, 210, 94, 0.1);  color: #06d25e; }
+  &.medio   { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+  &.dificil { background: rgba(255, 61, 0, 0.1);  color: #ff3d00; }
+}
+
+.resultado-banner { border-color: #06d25e; }
+
+/* Alternativas — mesmo padrão de "chip" selecionável do cadastro de professor */
+.alternativas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alternativa {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) { border-color: #9b2fff; }
+  &:disabled { cursor: default; }
+
+  &.selecionada {
+    border-color: #9b2fff;
+    background: rgba(155, 47, 255, 0.08);
+  }
+
+  &.correta {
+    border-color: #06d25e;
+    background: rgba(6, 210, 94, 0.08);
+    color: #06d25e;
+  }
+
+  &.incorreta {
+    border-color: #ff3d00;
+    background: rgba(255, 61, 0, 0.08);
+    color: #ff3d00;
+  }
+}
+
+.btn-outline-main {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main); border-radius: 12px;
+  padding: 10px 20px; font-weight: 600;
+  transition: all 0.2s; cursor: pointer;
+  &:hover { border-color: #9b2fff; color: #9b2fff; }
+}
+
+.btn-gradient {
+  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  border: none;
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 10px 24px;
+  transition: opacity 0.2s;
+  &:hover:not(:disabled) { opacity: 0.9; color: white; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}

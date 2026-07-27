@@ -61,6 +61,11 @@ export const routes: Routes = [
     loadComponent: () => import('./desafios/desafios').then((m) => m.Desafios),
   },
   {
+    path: 'desafios/:id/quiz',
+    canActivate: [authGuard, roleGuard('aluno')],
+    loadComponent: () => import('./quiz-desafio/quiz-desafio').then((m) => m.QuizDesafio),
+  },
+  {
     path: 'meus_niveis_notas',
     canActivate: [authGuard, roleGuard('aluno')],
     loadComponent: () => import('./meus-niveis-notas/meus-niveis-notas').then((m) => m.MeusNiveisNotas),

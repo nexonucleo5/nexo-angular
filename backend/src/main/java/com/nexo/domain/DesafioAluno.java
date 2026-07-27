@@ -22,6 +22,11 @@ public class DesafioAluno {
 
     private int progresso;
 
+    /** Preenchidos ao finalizar o quiz (null enquanto o desafio não é concluído por quiz). */
+    private Integer acertos;
+
+    private Integer totalPerguntas;
+
     public DesafioAluno() {}
 
     public DesafioAluno(Aluno aluno, Desafio desafio, String status, int progresso) {
@@ -38,4 +43,8 @@ public class DesafioAluno {
     public void setStatus(String status) { this.status = status; }
     public int getProgresso() { return progresso; }
     public void setProgresso(int progresso) { this.progresso = progresso; }
+    public Integer getAcertos() { return acertos; }
+    public void setAcertos(Integer acertos) { this.acertos = acertos; }
+    public Integer getTotalPerguntas() { return totalPerguntas; }
+    public void setTotalPerguntas(Integer totalPerguntas) { this.totalPerguntas = totalPerguntas; }
 }
