@@ -7,6 +7,7 @@ export interface ChatContato {
   id: number;
   nome: string;
   papel: string;
+  foto: string | null;
 }
 
 export interface ChatMensagem {

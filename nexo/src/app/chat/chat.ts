@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { ChatContato, ChatMensagem, ChatService } from '../api/chat.service';
 import { ChatSocketService } from '../api/chat-socket.service';
 import { AuthService } from '../services/auth.service';
-import { AVATAR_PADRAO } from '../core/avatar';
+import { resolverFoto } from '../core/avatar';
 
 
 @Component({
@@ -21,7 +21,6 @@ export class Chat implements OnInit, OnDestroy {
   private readonly auth = inject(AuthService);
 
   readonly meuId = this.auth.usuarioLogado()?.id ?? -1;
-  readonly foto = AVATAR_PADRAO;
 
   readonly contatos = signal<ChatContato[]>([]);
   readonly contatoSelecionado = signal<ChatContato | null>(null);
@@ -112,6 +111,10 @@ export class Chat implements OnInit, OnDestroy {
 
   minha(msg: ChatMensagem): boolean {
     return msg.de === this.meuId;
+  }
+
+  fotoDe(contato: ChatContato): string {
+    return resolverFoto(contato.foto);
   }
 
   papelLabel(papel: string): string {

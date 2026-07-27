@@ -15,7 +15,7 @@
            [class.active]="contatoSelecionado()?.id === c.id"
            (click)="selecionar(c)">
         <div class="d-flex align-items-center gap-3">
-          <img [src]="foto" class="avatar-img" alt="Avatar">
+          <img [src]="fotoDe(c)" class="avatar-img" alt="Avatar">
           <div>
             <h4 class="small fw-bold text-main mb-0">{{ c.nome }}</h4>
             <span class="text-soft extra-small">{{ papelLabel(c.papel) }}</span>
@@ -30,7 +30,7 @@
     <div class="chat-window p-4 h-100 d-flex flex-column">
       @if (contatoSelecionado(); as c) {
         <div class="chat-header pb-3 mb-3 d-flex align-items-center gap-3">
-          <img [src]="foto" class="avatar-img" alt="Avatar">
+          <img [src]="fotoDe(c)" class="avatar-img" alt="Avatar">
           <div>
             <h3 class="h6 text-main fw-bold mb-0">{{ c.nome }}</h3>
             <span class="text-soft extra-small">{{ papelLabel(c.papel) }} • tempo real</span>

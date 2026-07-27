@@ -7,7 +7,9 @@ import com.nexo.api.dto.AuthDtos.UsuarioDTO;
 import com.nexo.domain.EventoAuditoria;
 import com.nexo.domain.FotoPerfil;
 import com.nexo.domain.Usuario;
+import com.nexo.repository.AlunoRepository;
 import com.nexo.repository.FotoPerfilRepository;
+import com.nexo.repository.ProfessorRepository;
 import com.nexo.repository.UsuarioRepository;
 import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AuditoriaService;
@@ -33,13 +35,18 @@ public class UsuariosController {
 
     private final UsuarioRepository usuarios;
     private final FotoPerfilRepository fotos;
+    private final AlunoRepository alunos;
+    private final ProfessorRepository professores;
     private final PasswordEncoder passwordEncoder;
     private final AuditoriaService auditoria;
 
-    public UsuariosController(UsuarioRepository usuarios, FotoPerfilRepository fotos,
-                              PasswordEncoder passwordEncoder, AuditoriaService auditoria) {
+    public UsuariosController(UsuarioRepository usuarios, FotoPerfilRepository fotos, AlunoRepository alunos,
+                              ProfessorRepository professores, PasswordEncoder passwordEncoder,
+                              AuditoriaService auditoria) {
         this.usuarios = usuarios;
         this.fotos = fotos;
+        this.alunos = alunos;
+        this.professores = professores;
         this.passwordEncoder = passwordEncoder;
         this.auditoria = auditoria;
     }
@@ -99,6 +106,7 @@ public class UsuariosController {
 
         usuario.setFoto("/api/fotos/" + id);
         usuarios.save(usuario);
+        sincronizarFotoPerfil(usuario);
         auditoria.registrar(usuario.getNome(), EventoAuditoria.Tipo.ALTERACAO, "Foto de perfil atualizada", null, null);
         return UsuarioDTO.of(usuario);
     }
@@ -111,8 +119,25 @@ public class UsuariosController {
         fotos.deleteByUsuarioId(usuario.getId());
         usuario.setFoto(null);
         usuarios.save(usuario);
+        sincronizarFotoPerfil(usuario);
         auditoria.registrar(usuario.getNome(), EventoAuditoria.Tipo.ALTERACAO, "Foto de perfil removida", null, null);
         return UsuarioDTO.of(usuario);
+    }
+
+    /**
+     * Aluno.foto e Professor.foto são cópias denormalizadas (usadas em ranking,
+     * gestão de evasão e monitoramento docente) — sem sincronizar aqui, elas ficam
+     * presas na foto antiga depois de um novo envio ou remoção.
+     */
+    private void sincronizarFotoPerfil(Usuario usuario) {
+        alunos.findByUsuarioId(usuario.getId()).ifPresent(a -> {
+            a.setFoto(usuario.getFoto());
+            alunos.save(a);
+        });
+        professores.findByUsuarioId(usuario.getId()).ifPresent(p -> {
+            p.setFoto(usuario.getFoto());
+            professores.save(p);
+        });
     }
 
     @PostMapping("/me/senha")

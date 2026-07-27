@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class ChatService {
 
-    public record ContatoDTO(Long id, String nome, String papel) {}
+    public record ContatoDTO(Long id, String nome, String papel, String foto) {}
 
     public record ChatMensagemDTO(Long id, Long de, String deNome, Long para, String texto, Instant criadaEm) {
         static ChatMensagemDTO of(ChatMensagem m) {
@@ -51,7 +51,7 @@ public class ChatService {
         if (eu == null) return List.of();
         return usuarios.findByRoleInOrderByNome(interlocutores(eu.getRole())).stream()
                 .filter(u -> !u.getId().equals(usuarioId))
-                .map(u -> new ContatoDTO(u.getId(), u.getNome(), u.getRole().name()))
+                .map(u -> new ContatoDTO(u.getId(), u.getNome(), u.getRole().name(), u.getFoto()))
                 .toList();
     }
 
