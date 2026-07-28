@@ -1,0 +1,6 @@
+#FileLock
+#Tue Jul 28 19:00:33 BRT 2026
+hostName=172.20.140.166
+id=19faabe614b9d4d576f0dbcb90c66ce2b2bac471764
+method=file
+server=172.20.140.166\:61046
