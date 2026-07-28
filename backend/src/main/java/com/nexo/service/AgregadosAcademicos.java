@@ -6,7 +6,6 @@ import com.nexo.repository.NotaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,30 +83,42 @@ public class AgregadosAcademicos {
         return new Indices(mediasPorAluno(periodo), presencasPorAluno());
     }
 
+    /**
+     * Acumula soma e contagem num único passo, sem guardar as notas individuais:
+     * a versão anterior mantinha um {@code ArrayList<Double>} por aluno e um
+     * {@code Double} boxed por nota só para tirar a média depois — lixo proporcional
+     * ao total de notas da escola, gerado a cada request de relatório/evasão/dashboard.
+     */
     private Map<Long, Double> mediasPorAluno(String periodo) {
         List<NotaRepository.NotaBruta> brutas = (periodo == null || periodo.isBlank())
                 ? notas.projetarTodas()
                 : notas.projetarPorPeriodo(periodo);
 
-        Map<Long, List<Double>> porAluno = new HashMap<>();
+        Map<Long, double[]> acumulado = new HashMap<>(capacidadePara(brutas.size()));
         for (NotaRepository.NotaBruta n : brutas) {
             Double media = Nota.calcularMedia(n.getP1(), n.getP2(), n.getT1(), n.getParticipacao());
-            if (media != null) {
-                porAluno.computeIfAbsent(n.getAlunoId(), k -> new ArrayList<>()).add(media);
-            }
+            if (media == null) continue;
+            double[] soma = acumulado.computeIfAbsent(n.getAlunoId(), k -> new double[2]);
+            soma[0] += media;
+            soma[1]++;
         }
 
-        Map<Long, Double> medias = new HashMap<>();
-        porAluno.forEach((alunoId, lista) ->
-                medias.put(alunoId, lista.stream().mapToDouble(Double::doubleValue).average().orElse(0)));
+        Map<Long, Double> medias = new HashMap<>(capacidadePara(acumulado.size()));
+        acumulado.forEach((alunoId, soma) -> medias.put(alunoId, soma[0] / soma[1]));
         return medias;
     }
 
     private Map<Long, Presenca> presencasPorAluno() {
-        Map<Long, Presenca> presencas = new HashMap<>();
-        for (FrequenciaRepository.FrequenciaResumo r : frequencias.resumoPorAluno()) {
+        List<FrequenciaRepository.FrequenciaResumo> resumos = frequencias.resumoPorAluno();
+        Map<Long, Presenca> presencas = new HashMap<>(capacidadePara(resumos.size()));
+        for (FrequenciaRepository.FrequenciaResumo r : resumos) {
             presencas.put(r.getAlunoId(), new Presenca(r.getTotal(), r.getFaltas()));
         }
         return presencas;
+    }
+
+    /** Capacidade inicial que evita o rehash do HashMap ao inserir {@code n} chaves. */
+    private static int capacidadePara(int n) {
+        return Math.max(16, (int) (n / 0.75f) + 1);
     }
 }

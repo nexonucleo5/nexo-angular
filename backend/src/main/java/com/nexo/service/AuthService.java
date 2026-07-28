@@ -30,6 +30,14 @@ public class AuthService {
     private static final int MAX_TENTATIVAS = 5;
     private static final Duration JANELA_BLOQUEIO = Duration.ofMinutes(15);
 
+    /**
+     * A partir daqui uma nova falha dispara a varredura de entradas vencidas. A chave do
+     * mapa é o login digitado — texto arbitrário vindo de fora —, então sem essa poda um
+     * atacante enche o heap só errando logins diferentes; o mapa só encolhia no login
+     * bem-sucedido ou quando a mesma chave era consultada de novo.
+     */
+    private static final int LIMITE_PODA = 1_000;
+
     private final UsuarioRepository usuarios;
     private final RefreshTokenRepository refreshTokens;
     private final JwtService jwtService;
@@ -139,8 +147,17 @@ public class AuthService {
     }
 
     private void registrarFalha(String chave) {
+        if (tentativasPorLogin.size() >= LIMITE_PODA) {
+            podarVencidas();
+        }
         tentativasPorLogin.merge(chave,
                 new Tentativas(1, Instant.now()),
                 (antiga, ignorada) -> new Tentativas(antiga.quantidade() + 1, antiga.primeiraFalha()));
+    }
+
+    /** Remove as janelas já encerradas — elas não bloqueiam mais ninguém, só ocupam heap. */
+    private void podarVencidas() {
+        Instant limite = Instant.now().minus(JANELA_BLOQUEIO);
+        tentativasPorLogin.values().removeIf(t -> t.primeiraFalha().isBefore(limite));
     }
 }

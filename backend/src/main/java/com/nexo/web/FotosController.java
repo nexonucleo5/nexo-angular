@@ -1,11 +1,11 @@
 package com.nexo.web;
 
 import com.nexo.api.ApiException;
-import com.nexo.domain.FotoPerfil;
 import com.nexo.repository.FotoPerfilRepository;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,8 +27,9 @@ public class FotosController {
     }
 
     @GetMapping("/api/fotos/{id}")
+    @Transactional(readOnly = true)
     public ResponseEntity<byte[]> foto(@PathVariable String id) {
-        FotoPerfil foto = fotos.findById(id)
+        FotoPerfilRepository.Conteudo foto = fotos.findConteudoById(id)
                 .orElseThrow(() -> ApiException.notFound("Foto não encontrada."));
 
         return ResponseEntity.ok()

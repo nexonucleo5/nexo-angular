@@ -33,10 +33,13 @@ public class EvasaoService {
     @Transactional(readOnly = true)
     public List<AlunoRiscoDTO> calcularRisco(Risco filtroRisco, Long turmaId, String busca) {
         var indices = agregados.carregar(null);
+        // Normaliza o termo uma única vez: dentro do filtro ele era reprocessado
+        // (trim + toLowerCase, duas Strings novas) para cada aluno da escola.
+        String termo = (busca == null || busca.isBlank()) ? null : busca.trim().toLowerCase();
+
         return alunos.findAllComTurma().stream()
                 .filter(a -> turmaId == null || (a.getTurma() != null && Objects.equals(a.getTurma().getId(), turmaId)))
-                .filter(a -> busca == null || busca.isBlank()
-                        || a.getNome().toLowerCase().contains(busca.trim().toLowerCase()))
+                .filter(a -> termo == null || a.getNome().toLowerCase().contains(termo))
                 .map(a -> avaliar(a, indices))
                 .filter(dto -> filtroRisco == null || dto.risco() == filtroRisco)
                 .sorted((a, b) -> b.risco().compareTo(a.risco()))
@@ -67,10 +70,24 @@ public class EvasaoService {
 
         return new AlunoRiscoDTO(aluno.getId(), aluno.getNome(),
                 aluno.getTurma() != null ? aluno.getTurma().getNome() : null,
-                String.format("2024%03d", aluno.getId()),
+                matricula(aluno.getId()),
                 Math.round(media * 10.0) / 10.0, percentualFaltas, engajamento, risco,
                 aluno.getFoto(), motivoPrincipal(percentualFaltas, media, engajamento),
                 aluno.getUltimoAcessoEm(), aluno.getIntervencoes(), aluno.getUltimaIntervencaoEm());
+    }
+
+    /**
+     * Mesmo resultado de {@code String.format("2024%03d", id)}, sem o custo de compilar
+     * a máscara e montar um Formatter — este método roda para cada aluno da escola em
+     * toda abertura da tela de evasão e do dashboard do professor.
+     */
+    private static String matricula(Long id) {
+        String sufixo = String.valueOf(id);
+        return switch (sufixo.length()) {
+            case 1 -> "202400" + sufixo;
+            case 2 -> "20240" + sufixo;
+            default -> "2024" + sufixo;
+        };
     }
 
     /** Motivo dominante do risco, derivado dos mesmos fatores usados na classificação. */

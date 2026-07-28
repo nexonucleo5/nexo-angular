@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -56,37 +55,52 @@ public class RelatorioService {
         var todosAlunos = alunos.findAllComTurma();
         long total = todosAlunos.size();
 
-        List<Double> medias = todosAlunos.stream()
-                .map(a -> indices.media(a.getId()))
-                .filter(Objects::nonNull)
-                .toList();
+        // Um único passo pelos alunos alimenta os quatro KPIs. A versão anterior
+        // materializava um List<Double> com uma média boxed por aluno e depois o
+        // percorria três vezes (média, aprovados, engajamento).
+        double somaMedias = 0;
+        int comNota = 0;
+        int aprovados = 0;
+        long somaEngajamento = 0;
+        for (Aluno a : todosAlunos) {
+            Double m = indices.media(a.getId());
+            if (m != null) {
+                somaMedias += m;
+                comNota++;
+                if (m >= 6.0) aprovados++;
+            }
+            somaEngajamento += a.getEngajamento();
+        }
 
-        double mediaGeral = arred(medias.stream().mapToDouble(Double::doubleValue).average().orElse(0));
-        double taxaAprovacao = medias.isEmpty() ? 0
-                : arred(medias.stream().filter(m -> m >= 6.0).count() * 100.0 / medias.size());
+        double mediaGeral = arred(comNota == 0 ? 0 : somaMedias / comNota);
+        double taxaAprovacao = comNota == 0 ? 0 : arred(aprovados * 100.0 / comNota);
+        double engajamentoMedio = arred(total == 0 ? 0 : (double) somaEngajamento / total);
 
         var geral = indices.totalGeral();
         double frequenciaMedia = geral.total() == 0 ? 0
                 : arred((geral.total() - geral.faltas()) * 100.0 / geral.total());
 
-        double engajamentoMedio = arred(todosAlunos.stream()
-                .mapToInt(a -> a.getEngajamento()).average().orElse(0));
-
         Map<Long, List<Aluno>> porTurma = todosAlunos.stream()
                 .filter(a -> a.getTurma() != null)
                 .collect(Collectors.groupingBy(a -> a.getTurma().getId()));
 
-        List<SerieTurma> series = new ArrayList<>();
+        List<SerieTurma> series = new ArrayList<>(porTurma.size());
         for (Turma turma : turmas.findAll()) {
             var alunosTurma = porTurma.getOrDefault(turma.getId(), List.of());
             if (alunosTurma.isEmpty()) continue;
-            double media = arred(alunosTurma.stream()
-                    .map(a -> indices.media(a.getId()))
-                    .filter(Objects::nonNull)
-                    .mapToDouble(Double::doubleValue).average().orElse(0));
-            double freq = arred(alunosTurma.stream()
-                    .mapToDouble(a -> indices.percentualPresenca(a.getId()))
-                    .average().orElse(0));
+            double somaTurma = 0;
+            int comNotaTurma = 0;
+            double somaPresenca = 0;
+            for (Aluno a : alunosTurma) {
+                Double m = indices.media(a.getId());
+                if (m != null) {
+                    somaTurma += m;
+                    comNotaTurma++;
+                }
+                somaPresenca += indices.percentualPresenca(a.getId());
+            }
+            double media = arred(comNotaTurma == 0 ? 0 : somaTurma / comNotaTurma);
+            double freq = arred(somaPresenca / alunosTurma.size());
             series.add(new SerieTurma(turma.getNome(), media, freq, alunosTurma.size()));
         }
 

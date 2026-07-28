@@ -89,9 +89,7 @@ public class AlunosController {
         String disciplina = request.disciplina() != null ? request.disciplina() : "Geral";
         String periodo = request.periodo() != null ? request.periodo() : "2026-1";
 
-        Nota nota = notas.findByAlunoId(alunoId).stream()
-                .filter(n -> n.getDisciplina().equals(disciplina) && n.getPeriodo().equals(periodo))
-                .findFirst()
+        Nota nota = notas.findByAlunoIdAndDisciplinaAndPeriodo(alunoId, disciplina, periodo)
                 .orElseGet(() -> {
                     Nota nova = new Nota();
                     nova.setAluno(aluno);

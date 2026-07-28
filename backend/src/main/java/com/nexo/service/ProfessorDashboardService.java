@@ -66,43 +66,45 @@ public class ProfessorDashboardService {
 
         List<Turma> minhasTurmas = turmas.findByProfessorIdOrderByNome(prof.getId());
         LocalDate hoje = LocalDate.now();
+        List<Long> idsTurmas = minhasTurmas.stream().map(Turma::getId).toList();
 
         // Alunos de todas as turmas e agregados de nota/frequência carregados de uma vez —
         // antes eram uma query por turma mais seis por aluno (evasao.avaliar era chamado duas vezes).
         var indices = agregados.carregar(null);
         Map<Long, List<Aluno>> alunosPorTurma = minhasTurmas.isEmpty() ? Map.of()
-                : alunos.findByTurmaIdInComTurma(minhasTurmas.stream().map(Turma::getId).toList()).stream()
+                : alunos.findByTurmaIdInComTurma(idsTurmas).stream()
                         .collect(Collectors.groupingBy(a -> a.getTurma().getId()));
+
+        // Os dois KPIs de avaliação saem de duas agregações no banco, para todas as turmas
+        // de uma vez. Antes era uma query por turma, cada uma trazendo as avaliações
+        // inteiras como entidades gerenciadas só para somar um int e contar linhas.
+        int correcoesPendentes = 0;
+        int avaliacoesMes = 0;
+        if (!idsTurmas.isEmpty()) {
+            correcoesPendentes = (int) avaliacoes.somarPendentesCorrecao(idsTurmas);
+            avaliacoesMes = (int) avaliacoes.contarPorTurmasNoPeriodo(
+                    idsTurmas, hoje.withDayOfMonth(1), hoje.withDayOfMonth(hoje.lengthOfMonth()));
+        }
 
         List<TurmaResumo> turmasResumo = new ArrayList<>();
         List<AlunoAtencaoDTO> atencao = new ArrayList<>();
         int totalAlunos = 0;
-        int correcoesPendentes = 0;
-        int avaliacoesMes = 0;
 
         for (Turma t : minhasTurmas) {
             List<Aluno> alunosTurma = alunosPorTurma.getOrDefault(t.getId(), List.of());
             totalAlunos += alunosTurma.size();
 
-            double media = alunosTurma.stream()
-                    .map(a -> evasao.avaliar(a, indices).media())
-                    .filter(m -> m > 0)
-                    .mapToDouble(Double::doubleValue)
-                    .average().orElse(0);
-            media = Math.round(media * 10.0) / 10.0;
-            turmasResumo.add(new TurmaResumo(t.getNome(), prof.getDisciplinas(),
-                    alunosTurma.size(), media, (int) Math.round(media * 10)));
-
-            for (var av : avaliacoes.buscar(t.getId(), null)) {
-                correcoesPendentes += av.getPendentesCorrecao();
-                if (av.getData() != null && av.getData().getYear() == hoje.getYear()
-                        && av.getData().getMonthValue() == hoje.getMonthValue()) {
-                    avaliacoesMes++;
-                }
-            }
-
+            // Um único avaliar() por aluno alimenta a média da turma e a lista de atenção.
+            // Antes eram dois, e cada um montava um AlunoRiscoDTO completo (com o
+            // String.format da matrícula) que era descartado logo em seguida.
+            double soma = 0;
+            int comNota = 0;
             for (Aluno a : alunosTurma) {
                 var r = evasao.avaliar(a, indices);
+                if (r.media() > 0) {
+                    soma += r.media();
+                    comNota++;
+                }
                 if (r.risco() != EvasaoService.Risco.BAIXO) {
                     atencao.add(new AlunoAtencaoDTO(a.getNome(), t.getNome(), r.media(),
                             Math.max(0, (int) Math.round(100 - r.percentualFaltas())),
@@ -110,6 +112,10 @@ public class ProfessorDashboardService {
                             a.getFoto(), a.getUltimoAcessoEm()));
                 }
             }
+
+            double media = comNota == 0 ? 0 : Math.round(soma / comNota * 10.0) / 10.0;
+            turmasResumo.add(new TurmaResumo(t.getNome(), prof.getDisciplinas(),
+                    alunosTurma.size(), media, (int) Math.round(media * 10)));
         }
 
         atencao.sort(Comparator.comparingDouble(AlunoAtencaoDTO::mediaAtual));

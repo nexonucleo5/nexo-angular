@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /** Mensagens, avisos e dúvidas — contrato "Comunicação" do arquitetura_java.md. */
 @RestController
@@ -46,11 +48,21 @@ public class ComunicacaoController {
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
     public List<ConversaDTO> listar(@RequestParam(defaultValue = "entrada") String caixa) {
         Conversa.Caixa filtro = "enviada".equalsIgnoreCase(caixa) ? Conversa.Caixa.ENVIADA : Conversa.Caixa.ENTRADA;
-        return conversas.findByCaixaOrderByAtualizadaEmDesc(filtro).stream()
+        List<Conversa> lista = conversas.findByCaixaOrderByAtualizadaEmDesc(filtro);
+        if (lista.isEmpty()) return List.of();
+
+        // Todas as mensagens da caixa numa query só, agrupadas por conversa: antes era
+        // uma consulta por conversa aberta na tela (N+1).
+        Map<Long, List<MensagemDTO>> porConversa =
+                mensagens.findByConversaIdInOrderByCriadaEmAsc(lista.stream().map(Conversa::getId).toList())
+                        .stream()
+                        .collect(Collectors.groupingBy(m -> m.getConversa().getId(),
+                                Collectors.mapping(MensagemDTO::of, Collectors.toList())));
+
+        return lista.stream()
                 .map(c -> new ConversaDTO(c.getId(), c.getAssunto(), c.getParticipanteNome(),
                         c.getParticipantePapel(), c.getAtualizadaEm(),
-                        mensagens.findByConversaIdOrderByCriadaEmAsc(c.getId()).stream()
-                                .map(MensagemDTO::of).toList()))
+                        porConversa.getOrDefault(c.getId(), List.of())))
                 .toList();
     }
 
