@@ -2,9 +2,8 @@ package com.nexo.web;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nexo.security.JwtService;
+import com.nexo.security.WsTicketService;
 import com.nexo.service.ChatService;
-import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -19,36 +18,38 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Chat em tempo real via WebSocket nativo. O handshake é autenticado por um
- * token JWT passado na query (?token=...), já que o navegador não envia header
- * Authorization no WebSocket. Cada mensagem é persistida e entregue ao vivo ao
- * destinatário (se conectado) e ecoada ao remetente.
+ * ticket de uso único (?ticket=...) obtido via GET /api/chat/ws-ticket, já que
+ * o navegador não envia header Authorization no WebSocket e colocar o access
+ * token completo na query string o exporia em logs de proxy/acesso. Cada
+ * mensagem é persistida e entregue ao vivo ao destinatário (se conectado) e
+ * ecoada ao remetente.
  */
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
-    private final JwtService jwt;
+    private final WsTicketService tickets;
     private final ChatService chat;
     private final ObjectMapper mapper;
 
     /** Sessões ativas por usuário (um usuário pode ter várias abas). */
     private final Map<Long, Set<WebSocketSession>> sessoes = new ConcurrentHashMap<>();
 
-    public ChatWebSocketHandler(JwtService jwt, ChatService chat, ObjectMapper mapper) {
-        this.jwt = jwt;
+    public ChatWebSocketHandler(WsTicketService tickets, ChatService chat, ObjectMapper mapper) {
+        this.tickets = tickets;
         this.chat = chat;
         this.mapper = mapper;
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        Optional<Claims> claims = autenticar(session);
-        if (claims.isEmpty()) {
+        Optional<WsTicketService.Titular> titular = autenticar(session);
+        if (titular.isEmpty()) {
             session.close(CloseStatus.POLICY_VIOLATION);
             return;
         }
-        Long uid = ((Number) claims.get().get("uid")).longValue();
+        Long uid = titular.get().uid();
         session.getAttributes().put("uid", uid);
-        session.getAttributes().put("nome", String.valueOf(claims.get().get("nome")));
+        session.getAttributes().put("nome", titular.get().nome());
         sessoes.computeIfAbsent(uid, k -> ConcurrentHashMap.newKeySet()).add(session);
     }
 
@@ -97,13 +98,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private Optional<Claims> autenticar(WebSocketSession session) {
+    private Optional<WsTicketService.Titular> autenticar(WebSocketSession session) {
         URI uri = session.getUri();
         if (uri == null || uri.getQuery() == null) return Optional.empty();
         for (String par : uri.getQuery().split("&")) {
             int i = par.indexOf('=');
-            if (i > 0 && "token".equals(par.substring(0, i))) {
-                return jwt.validar(par.substring(i + 1));
+            if (i > 0 && "ticket".equals(par.substring(0, i))) {
+                return tickets.consumir(par.substring(i + 1));
             }
         }
         return Optional.empty();

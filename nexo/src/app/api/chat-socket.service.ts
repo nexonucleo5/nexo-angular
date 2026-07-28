@@ -2,21 +2,25 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../services/auth.service';
-import { ChatMensagem } from './chat.service';
+import { ChatMensagem, ChatService } from './chat.service';
 
 /**
- * Cliente WebSocket nativo do chat em tempo real. Conecta com o token JWT na
- * query (o navegador não envia header no WebSocket) e reconecta automaticamente.
+ * Cliente WebSocket nativo do chat em tempo real. O navegador não envia header
+ * Authorization em WebSocket, então cada conexão troca o access token por um
+ * ticket de uso único (GET /api/chat/ws-ticket) e abre o socket com ele na
+ * query — assim a URL nunca carrega uma credencial reutilizável. Reconecta
+ * automaticamente, buscando um ticket novo a cada tentativa.
  */
 @Injectable({ providedIn: 'root' })
 export class ChatSocketService {
   private auth = inject(AuthService);
+  private chat = inject(ChatService);
 
   private socket: WebSocket | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private fechadoManualmente = false;
-  /** Token com que o socket atual foi autenticado, para detectar troca de usuário. */
-  private tokenConectado: string | null = null;
+  /** Usuário para o qual o socket atual foi aberto, para detectar troca de conta. */
+  private usuarioConectado: number | null = null;
 
   /** Estado da conexão para a UI. */
   readonly conectado = signal(false);
@@ -24,20 +28,20 @@ export class ChatSocketService {
   readonly mensagens$ = new Subject<ChatMensagem>();
 
   conectar(): void {
-    const token = this.auth.token;
-    if (!token) return;
+    const usuario = this.auth.usuarioLogado();
+    if (!usuario) return;
 
     // Já conectado com este mesmo usuário: nada a fazer.
-    if (this.socket && this.tokenConectado === token) return;
+    if (this.socket && this.usuarioConectado === usuario.id) return;
 
     // Trocou de conta na mesma aba (logout/login sem recarregar): o serviço é
-    // singleton e o socket antigo continua autenticado com o token anterior, o
-    // que faria as mensagens saírem como o usuário errado. Derruba antes de abrir.
+    // singleton e o socket antigo continua autenticado como o usuário anterior,
+    // o que faria as mensagens saírem como o usuário errado. Derruba antes de abrir.
     if (this.socket) this.fecharSocketAtual();
 
     this.fechadoManualmente = false;
-    this.tokenConectado = token;
-    this.abrir(token);
+    this.usuarioConectado = usuario.id;
+    this.abrir();
   }
 
   /** Fecha o socket vigente sem disparar a reconexão automática dele. */
@@ -56,8 +60,15 @@ export class ChatSocketService {
     }
   }
 
-  private abrir(token: string): void {
-    const url = `${environment.wsUrl}/chat?token=${encodeURIComponent(token)}`;
+  private abrir(): void {
+    this.chat.wsTicket().subscribe({
+      next: ({ ticket }) => this.abrirComTicket(ticket),
+      error: () => this.agendarReconexao(),
+    });
+  }
+
+  private abrirComTicket(ticket: string): void {
+    const url = `${environment.wsUrl}/chat?ticket=${encodeURIComponent(ticket)}`;
     const ws = new WebSocket(url);
     this.socket = ws;
 
@@ -81,11 +92,11 @@ export class ChatSocketService {
     if (this.reconnectTimer) return;
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
-      // Relê o token: se o usuário mudou nesse intervalo, reconecta como o novo.
-      const token = this.auth.token;
-      if (token && !this.fechadoManualmente) {
-        this.tokenConectado = token;
-        this.abrir(token);
+      // Relê o usuário: se a conta mudou nesse intervalo, reconecta como a nova.
+      const usuario = this.auth.usuarioLogado();
+      if (usuario && !this.fechadoManualmente) {
+        this.usuarioConectado = usuario.id;
+        this.abrir();
       }
     }, 3000);
   }
@@ -106,7 +117,7 @@ export class ChatSocketService {
     }
     this.socket?.close();
     this.socket = null;
-    this.tokenConectado = null;
+    this.usuarioConectado = null;
     this.conectado.set(false);
   }
 }

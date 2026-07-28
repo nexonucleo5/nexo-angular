@@ -32,4 +32,9 @@ export class ChatService {
   historico(outroId: number): Observable<ChatMensagem[]> {
     return this.http.get<ChatMensagem[]>(`${this.api}/${outroId}`);
   }
+
+  /** Ticket de uso único para autenticar o handshake do WebSocket. */
+  wsTicket(): Observable<{ ticket: string }> {
+    return this.http.get<{ ticket: string }>(`${this.api}/ws-ticket`);
+  }
 }

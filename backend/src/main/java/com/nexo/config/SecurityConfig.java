@@ -40,7 +40,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                 .requestMatchers("/h2-console/**", "/error").permitAll()
-                .requestMatchers("/ws/**").permitAll() // handshake autenticado por token na query
+                .requestMatchers("/ws/**").permitAll() // handshake autenticado por ticket de uso único na query
                 // <img src> não envia header Authorization; o id da foto é um UUID
                 // aleatório, então não dá para enumerar as fotos dos usuários.
                 .requestMatchers(HttpMethod.GET, "/api/fotos/*").permitAll()
