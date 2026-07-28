@@ -16,9 +16,11 @@ permissions:
 jobs:
   # ── Frontend Angular → GitHub Pages ──────────────────────────────────────
   build-frontend:
-    # Publica a partir do master ou de um disparo manual. Em push de outra branch
-    # e em pull request o job é pulado: rodar aqui sobrescreveria o site no ar.
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
+    # O site no ar só sai do master. Vale para qualquer gatilho, inclusive o disparo
+    # manual: rodar este job a partir de uma branch de trabalho publicaria o build
+    # dela por cima da produção. Em pull request a ref é refs/pull/<n>/merge, então
+    # também não passa.
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     # Permissões exigidas pelo actions/deploy-pages (faltavam antes → o deploy falhava)
     permissions:
