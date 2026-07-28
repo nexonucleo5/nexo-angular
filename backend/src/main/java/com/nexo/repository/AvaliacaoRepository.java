@@ -22,6 +22,30 @@ public interface AvaliacaoRepository extends JpaRepository<Avaliacao, Long> {
     List<Avaliacao> findByStatusInOrderByDataAsc(List<Avaliacao.Status> status);
 
     /**
+     * Mesma busca de {@link #buscar}, restrita às turmas do professor logado. Avaliações
+     * sem turma são incluídas: não pertencem a ninguém, então continuam visíveis para
+     * todos, como antes desta restrição existir.
+     */
+    @Query("""
+           select a from Avaliacao a
+           where (a.turma.id in :turmaIds or a.turma is null)
+             and (:status is null or a.status = :status)
+           order by a.data desc
+           """)
+    List<Avaliacao> buscarPorTurmas(@Param("turmaIds") Collection<Long> turmaIds,
+                                    @Param("status") Avaliacao.Status status);
+
+    /** Fila de correção limitada às turmas do professor — ver {@link #buscarPorTurmas}. */
+    @Query("""
+           select a from Avaliacao a
+           where (a.turma.id in :turmaIds or a.turma is null)
+             and a.status in :status
+           order by a.data asc
+           """)
+    List<Avaliacao> findByStatusInAndTurmas(@Param("status") List<Avaliacao.Status> status,
+                                            @Param("turmaIds") Collection<Long> turmaIds);
+
+    /**
      * Correções pendentes somadas no banco para todas as turmas de uma vez. O dashboard
      * do professor só precisa desse total: antes ele rodava uma query por turma e
      * materializava todas as avaliações como entidades gerenciadas para somar um int.

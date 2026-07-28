@@ -58,10 +58,34 @@ public class AvaliacoesController {
         }
     }
 
+    /**
+     * Ids das turmas que o operador pode enxergar, ou {@code null} quando não há
+     * restrição (DIRETOR). Mesma regra de {@link #exigirLeciona}, aplicada a listagens.
+     */
+    private List<Long> turmasVisiveis(UsuarioAutenticado operador) {
+        if (!"PROFESSOR".equals(operador.role())) return null;
+        Professor professor = professores.findByUsuarioId(operador.id()).orElse(null);
+        if (professor == null) return List.of();
+        return turmas.findByProfessorIdOrderByNome(professor.getId()).stream().map(Turma::getId).toList();
+    }
+
     @GetMapping("/api/avaliacoes")
     public List<AvaliacaoDTO> listar(@RequestParam(required = false) Long turma,
-                                     @RequestParam(required = false) Avaliacao.Status status) {
-        return avaliacoes.buscar(turma, status).stream().map(AvaliacaoDTO::of).toList();
+                                     @RequestParam(required = false) Avaliacao.Status status,
+                                     @AuthenticationPrincipal UsuarioAutenticado operador) {
+        // A criação já exigia lecionar a turma, mas a listagem não: qualquer professor
+        // via as avaliações de todas as turmas da escola, inclusive as dos colegas.
+        List<Long> minhas = turmasVisiveis(operador);
+        if (minhas == null) {
+            return avaliacoes.buscar(turma, status).stream().map(AvaliacaoDTO::of).toList();
+        }
+        if (turma != null) {
+            if (!minhas.contains(turma)) {
+                throw ApiException.forbidden("Você não leciona esta turma.");
+            }
+            return avaliacoes.buscarPorTurmas(List.of(turma), status).stream().map(AvaliacaoDTO::of).toList();
+        }
+        return avaliacoes.buscarPorTurmas(minhas, status).stream().map(AvaliacaoDTO::of).toList();
     }
 
     public record NovaAvaliacaoRequest(String titulo, String disciplina, Long turmaId,
@@ -90,9 +114,13 @@ public class AvaliacoesController {
     }
 
     @GetMapping("/api/avaliacoes/fila-correcao")
-    public List<AvaliacaoDTO> filaCorrecao() {
-        return avaliacoes.findByStatusInOrderByDataAsc(
-                        List.of(Avaliacao.Status.EM_CORRECAO, Avaliacao.Status.PUBLICADA)).stream()
+    public List<AvaliacaoDTO> filaCorrecao(@AuthenticationPrincipal UsuarioAutenticado operador) {
+        List<Avaliacao.Status> pendentes = List.of(Avaliacao.Status.EM_CORRECAO, Avaliacao.Status.PUBLICADA);
+        List<Long> minhas = turmasVisiveis(operador);
+        List<Avaliacao> lista = minhas == null
+                ? avaliacoes.findByStatusInOrderByDataAsc(pendentes)
+                : avaliacoes.findByStatusInAndTurmas(pendentes, minhas);
+        return lista.stream()
                 .filter(a -> a.getPendentesCorrecao() > 0)
                 .map(AvaliacaoDTO::of)
                 .toList();

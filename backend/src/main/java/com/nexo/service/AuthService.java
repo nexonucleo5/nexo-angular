@@ -45,6 +45,13 @@ public class AuthService {
     private final AuditoriaService auditoria;
     private final Duration refreshTtl;
 
+    /**
+     * Hash descartável comparado quando o login não existe, para que a verificação de
+     * senha custe o mesmo tempo nos dois casos (ver {@link #login}). É gerado de uma
+     * senha aleatória no arranque: nenhuma senha real precisa casar com ele.
+     */
+    private final String hashFicticio;
+
     /** Controle de tentativas de login por usuário (bloqueio temporário após excesso). */
     private final Map<String, Tentativas> tentativasPorLogin = new ConcurrentHashMap<>();
 
@@ -62,33 +69,64 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
         this.auditoria = auditoria;
         this.refreshTtl = Duration.ofDays(refreshTokenDays);
+        this.hashFicticio = passwordEncoder.encode(UUID.randomUUID().toString());
     }
 
-    @Transactional
+    /**
+     * {@code noRollbackFor}: o registro de auditoria da tentativa inválida é escrito e
+     * logo em seguida a exceção sobe. Sem isso o Spring desfazia a transação junto com
+     * a exceção e <b>nenhum login malsucedido chegava à trilha de auditoria</b> — a tela
+     * do diretor mostrava só os acessos que deram certo.
+     */
+    @Transactional(noRollbackFor = ApiException.class)
     public TokenResponse login(String login, String senha, String ip) {
         String chave = login.trim().toLowerCase();
         verificarBloqueio(chave);
 
-        Usuario usuario = usuarios.findByLoginIgnoreCase(chave)
-                .filter(Usuario::isAtivo)
-                .filter(u -> passwordEncoder.matches(senha, u.getSenhaHash()))
-                .orElseThrow(() -> {
-                    registrarFalha(chave);
-                    auditoria.registrar(chave, EventoAuditoria.Tipo.ERRO, "Tentativa de login inválida", null, ip);
-                    return ApiException.unauthorized("Credenciais inválidas.");
-                });
+        Usuario usuario = usuarios.findByLoginIgnoreCase(chave).orElse(null);
+
+        // A verificação da senha roda sempre, inclusive para login inexistente ou inativo.
+        // Antes o bcrypt era pulado nesses casos e a resposta voltava numa fração do tempo,
+        // o que permitia descobrir quais logins existem só cronometrando as respostas.
+        boolean senhaConfere = passwordEncoder.matches(
+                senha, usuario != null ? usuario.getSenhaHash() : hashFicticio);
+
+        if (usuario == null || !usuario.isAtivo() || !senhaConfere) {
+            registrarFalha(chave);
+            auditoria.registrar(chave, EventoAuditoria.Tipo.ERRO, "Tentativa de login inválida", null, ip);
+            throw ApiException.unauthorized("Credenciais inválidas.");
+        }
 
         tentativasPorLogin.remove(chave);
         auditoria.registrar(usuario.getNome(), EventoAuditoria.Tipo.LOGIN, "Login realizado", null, ip);
         return gerarTokens(usuario);
     }
 
-    @Transactional
+    /** Ver {@link #login} — a revogação em cascata abaixo também precisa sobreviver ao throw. */
+    @Transactional(noRollbackFor = ApiException.class)
     public TokenResponse refresh(String refreshToken) {
         RefreshToken atual = refreshTokens.findByTokenHash(hash(refreshToken))
-                .filter(t -> !t.isRevogado())
-                .filter(t -> t.getExpiraEm().isAfter(Instant.now()))
                 .orElseThrow(() -> ApiException.unauthorized("Refresh token inválido ou expirado."));
+
+        // Reapresentação de um token já rotacionado: o legítimo dono já o trocou, então
+        // quem está usando esta cópia a obteve de outro jeito. Como não dá para saber
+        // qual das duas partes é a legítima, derruba a sessão inteira do usuário e força
+        // um login novo. Antes o replay só levava 401 e o token roubado paralelo seguia
+        // valendo pelos 7 dias restantes.
+        if (atual.isRevogado()) {
+            refreshTokens.revogarTodosDoUsuario(atual.getUsuario().getId());
+            auditoria.registrar(atual.getUsuario().getNome(), EventoAuditoria.Tipo.ERRO,
+                    "Refresh token reutilizado — sessões revogadas", null, null);
+            throw ApiException.unauthorized("Sessão encerrada por segurança. Entre novamente.");
+        }
+        if (!atual.getExpiraEm().isAfter(Instant.now())) {
+            throw ApiException.unauthorized("Refresh token inválido ou expirado.");
+        }
+        // Um usuário desativado mantinha acesso renovando o token por até 7 dias:
+        // o vínculo só era checado no login.
+        if (!atual.getUsuario().isAtivo()) {
+            throw ApiException.unauthorized("Usuário inativo.");
+        }
 
         // Rotação: o token usado é invalidado e um novo é emitido
         atual.setRevogado(true);

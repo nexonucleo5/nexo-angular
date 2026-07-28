@@ -22,16 +22,37 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuariosController {
 
-    /** Só formatos que o navegador exibe direto em <img>. */
-    private static final List<String> TIPOS_ACEITOS = List.of("image/jpeg", "image/png", "image/webp");
     private static final long TAMANHO_MAXIMO = 2 * 1024 * 1024; // 2 MB
+
+    /**
+     * Assinatura dos únicos formatos que o navegador exibe direto em &lt;img&gt;, lida dos
+     * primeiros bytes do arquivo. Devolve {@code null} para qualquer outra coisa.
+     *
+     * <p>Os bytes voltam depois em /api/fotos/{id} com o tipo declarado aqui, servidos
+     * da mesma origem da aplicação — por isso o formato precisa ser confirmado no
+     * conteúdo, e não aceito do cabeçalho que o cliente enviou junto.
+     */
+    private static String detectarTipoImagem(byte[] b) {
+        if (b.length >= 3 && (b[0] & 0xFF) == 0xFF && (b[1] & 0xFF) == 0xD8 && (b[2] & 0xFF) == 0xFF) {
+            return "image/jpeg";
+        }
+        if (b.length >= 8 && (b[0] & 0xFF) == 0x89 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G'
+                && b[4] == 0x0D && b[5] == 0x0A && b[6] == 0x1A && b[7] == 0x0A) {
+            return "image/png";
+        }
+        // RIFF....WEBP
+        if (b.length >= 12 && b[0] == 'R' && b[1] == 'I' && b[2] == 'F' && b[3] == 'F'
+                && b[8] == 'W' && b[9] == 'E' && b[10] == 'B' && b[11] == 'P') {
+            return "image/webp";
+        }
+        return null;
+    }
 
     private final UsuarioRepository usuarios;
     private final FotoPerfilRepository fotos;
@@ -84,16 +105,20 @@ public class UsuariosController {
         if (arquivo.getSize() > TAMANHO_MAXIMO) {
             throw ApiException.badRequest("A imagem deve ter no máximo 2 MB.");
         }
-        String tipo = arquivo.getContentType() == null ? "" : arquivo.getContentType().toLowerCase();
-        if (!TIPOS_ACEITOS.contains(tipo)) {
-            throw ApiException.badRequest("Formato inválido. Envie uma imagem JPEG, PNG ou WebP.");
-        }
 
         byte[] dados;
         try {
             dados = arquivo.getBytes();
         } catch (Exception e) {
             throw ApiException.badRequest("Não foi possível ler a imagem enviada.");
+        }
+
+        // O tipo sai do conteúdo do arquivo, não do cabeçalho que o cliente mandou.
+        // Antes bastava rotular qualquer arquivo como image/png para guardá-lo e
+        // fazer /api/fotos/{id} devolvê-lo com esse tipo, na mesma origem da aplicação.
+        String tipo = detectarTipoImagem(dados);
+        if (tipo == null) {
+            throw ApiException.badRequest("Formato inválido. Envie uma imagem JPEG, PNG ou WebP.");
         }
 
         Usuario usuario = carregar(principal);
