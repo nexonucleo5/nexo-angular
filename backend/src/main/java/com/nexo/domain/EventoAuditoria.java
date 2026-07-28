@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "eventos_auditoria")
+@Table(name = "eventos_auditoria",
+       indexes = @Index(name = "idx_eventos_auditoria_criado_em", columnList = "criado_em"))
 public class EventoAuditoria {
 
     public enum Tipo { LOGIN, LOGOUT, ACESSO, ALTERACAO, ERRO }

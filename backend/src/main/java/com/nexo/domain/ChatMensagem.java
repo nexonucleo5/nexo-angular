@@ -6,7 +6,10 @@ import java.time.Instant;
 
 /** Mensagem direta em tempo real entre dois usuários (chat professor ↔ diretor). */
 @Entity
-@Table(name = "chat_mensagens")
+@Table(name = "chat_mensagens", indexes = {
+        @Index(name = "idx_chat_remetente_destinatario", columnList = "remetente_id, destinatario_id"),
+        @Index(name = "idx_chat_destinatario_remetente", columnList = "destinatario_id, remetente_id")
+})
 public class ChatMensagem {
 
     @Id

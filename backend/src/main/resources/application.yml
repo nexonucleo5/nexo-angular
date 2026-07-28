@@ -36,6 +36,10 @@ spring:
 server:
   # Render (e outros PaaS) injetam a porta em $PORT; local cai no 8080
   port: ${PORT:8080}
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript,text/javascript,image/svg+xml
+    min-response-size: 1024
 
 nexo:
   jwt:

@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "observacoes_pedagogicas")
+@Table(name = "observacoes_pedagogicas",
+       indexes = @Index(name = "idx_observacoes_aluno_criada", columnList = "aluno_id, criada_em"))
 public class ObservacaoPedagogica {
 
     @Id

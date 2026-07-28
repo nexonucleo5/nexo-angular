@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "notas",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"aluno_id", "disciplina", "periodo"}))
+       uniqueConstraints = @UniqueConstraint(columnNames = {"aluno_id", "disciplina", "periodo"}),
+       indexes = @Index(name = "idx_notas_turma", columnList = "turma_id"))
 public class Nota {
 
     @Id

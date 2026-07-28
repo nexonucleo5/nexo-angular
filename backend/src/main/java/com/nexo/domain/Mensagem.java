@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "mensagens")
+@Table(name = "mensagens",
+       indexes = @Index(name = "idx_mensagens_conversa_criada", columnList = "conversa_id, criada_em"))
 public class Mensagem {
 
     @Id
