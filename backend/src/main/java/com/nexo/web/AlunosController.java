@@ -11,6 +11,7 @@ import com.nexo.repository.ObservacaoPedagogicaRepository;
 import com.nexo.repository.ProfessorRepository;
 import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AlunoService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -115,7 +116,7 @@ public class AlunosController {
 
     // ── Observações pedagógicas ──────────────────────────────────────────────
 
-    public record NovaObservacaoRequest(@NotBlank String texto) {}
+    public record NovaObservacaoRequest(@NotBlank(message = "Escreva a observação.") String texto) {}
 
     public record ObservacaoDTO(Long id, Long alunoId, String autor, String texto, Instant criadaEm) {
         static ObservacaoDTO of(ObservacaoPedagogica o) {
@@ -137,7 +138,7 @@ public class AlunosController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
     public ObservacaoDTO criarObservacao(@PathVariable Long alunoId,
-                                         @RequestBody NovaObservacaoRequest request,
+                                         @Valid @RequestBody NovaObservacaoRequest request,
                                          @AuthenticationPrincipal UsuarioAutenticado autor) {
         var aluno = alunos.findById(alunoId)
                 .orElseThrow(() -> ApiException.notFound("Aluno não encontrado."));

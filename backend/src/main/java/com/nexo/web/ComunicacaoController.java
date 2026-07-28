@@ -4,6 +4,7 @@ import com.nexo.api.ApiException;
 import com.nexo.domain.*;
 import com.nexo.repository.*;
 import com.nexo.security.UsuarioAutenticado;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -66,19 +67,16 @@ public class ComunicacaoController {
                 .toList();
     }
 
-    public record ResponderRequest(@NotBlank String texto) {}
+    public record ResponderRequest(@NotBlank(message = "A mensagem não pode ser vazia.") String texto) {}
 
     @PostMapping("/api/mensagens/{conversaId}/responder")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
     public MensagemDTO responder(@PathVariable Long conversaId,
-                                 @RequestBody ResponderRequest request,
+                                 @Valid @RequestBody ResponderRequest request,
                                  @AuthenticationPrincipal UsuarioAutenticado usuario) {
         Conversa conversa = conversas.findById(conversaId)
                 .orElseThrow(() -> ApiException.notFound("Conversa não encontrada."));
-        if (request.texto() == null || request.texto().isBlank()) {
-            throw ApiException.badRequest("A mensagem não pode ser vazia.");
-        }
         Mensagem mensagem = new Mensagem();
         mensagem.setConversa(conversa);
         mensagem.setAutorNome(usuario.nome());
@@ -104,17 +102,15 @@ public class ComunicacaoController {
         return avisos.findAllByOrderByCriadoEmDesc().stream().map(AvisoDTO::of).toList();
     }
 
-    public record NovoAvisoRequest(@NotBlank String titulo, @NotBlank String conteudo, String destino) {}
+    public record NovoAvisoRequest(@NotBlank(message = "Informe o título do aviso.") String titulo,
+                                   @NotBlank(message = "Informe o conteúdo do aviso.") String conteudo,
+                                   String destino) {}
 
     @PostMapping("/api/avisos")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
-    public AvisoDTO publicarAviso(@RequestBody NovoAvisoRequest request,
+    public AvisoDTO publicarAviso(@Valid @RequestBody NovoAvisoRequest request,
                                   @AuthenticationPrincipal UsuarioAutenticado usuario) {
-        if (request.titulo() == null || request.titulo().isBlank()
-                || request.conteudo() == null || request.conteudo().isBlank()) {
-            throw ApiException.badRequest("Título e conteúdo são obrigatórios.");
-        }
         Aviso aviso = new Aviso();
         aviso.setTitulo(request.titulo().trim());
         aviso.setConteudo(request.conteudo().trim());
@@ -142,16 +138,13 @@ public class ComunicacaoController {
         return lista.stream().map(DuvidaDTO::of).toList();
     }
 
-    public record ResponderDuvidaRequest(@NotBlank String texto) {}
+    public record ResponderDuvidaRequest(@NotBlank(message = "A resposta não pode ser vazia.") String texto) {}
 
     @PostMapping("/api/duvidas/{id}/responder")
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
-    public DuvidaDTO responderDuvida(@PathVariable Long id, @RequestBody ResponderDuvidaRequest request) {
+    public DuvidaDTO responderDuvida(@PathVariable Long id, @Valid @RequestBody ResponderDuvidaRequest request) {
         Duvida duvida = duvidas.findById(id)
                 .orElseThrow(() -> ApiException.notFound("Dúvida não encontrada."));
-        if (request.texto() == null || request.texto().isBlank()) {
-            throw ApiException.badRequest("A resposta não pode ser vazia.");
-        }
         duvida.setResposta(request.texto().trim());
         duvida.setStatus(Duvida.Status.RESPONDIDA);
         duvida.setRespondidaEm(Instant.now());

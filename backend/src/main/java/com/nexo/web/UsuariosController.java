@@ -14,6 +14,7 @@ import com.nexo.repository.UsuarioRepository;
 import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AuditoriaService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -165,7 +166,9 @@ public class UsuariosController {
         });
     }
 
+    // Mutação sem corpo de resposta: 204, não 200 com corpo vazio.
     @PostMapping("/me/senha")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void trocarSenha(@AuthenticationPrincipal UsuarioAutenticado principal,
                             @Valid @RequestBody TrocaSenhaRequest request) {
         Usuario usuario = carregar(principal);
