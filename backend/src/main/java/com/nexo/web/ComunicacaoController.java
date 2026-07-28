@@ -43,6 +43,7 @@ public class ComunicacaoController {
                               Instant atualizadaEm, List<MensagemDTO> mensagens) {}
 
     @GetMapping("/api/mensagens")
+    @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
     public List<ConversaDTO> listar(@RequestParam(defaultValue = "entrada") String caixa) {
         Conversa.Caixa filtro = "enviada".equalsIgnoreCase(caixa) ? Conversa.Caixa.ENVIADA : Conversa.Caixa.ENTRADA;
         return conversas.findByCaixaOrderByAtualizadaEmDesc(filtro).stream()
@@ -57,6 +58,7 @@ public class ComunicacaoController {
 
     @PostMapping("/api/mensagens/{conversaId}/responder")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
     public MensagemDTO responder(@PathVariable Long conversaId,
                                  @RequestBody ResponderRequest request,
                                  @AuthenticationPrincipal UsuarioAutenticado usuario) {
