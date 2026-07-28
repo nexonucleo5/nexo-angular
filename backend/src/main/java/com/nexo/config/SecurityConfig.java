@@ -15,6 +15,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ContentSecurityPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -29,12 +34,36 @@ public class SecurityConfig {
     @Value("${nexo.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
+    /**
+     * O index.html carrega Bootstrap/Bootstrap Icons via CDN (ver index.html) e Angular
+     * injeta <style> por componente sem nonce — daí o 'unsafe-inline' em style-src e o
+     * host do jsdelivr. Fora isso, tudo (JS, fotos, API, WebSocket) é same-origin.
+     */
+    private static final String CSP = String.join("; ",
+            "default-src 'self'",
+            "script-src 'self'",
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+            "font-src 'self' https://cdn.jsdelivr.net",
+            "img-src 'self' data:",
+            "connect-src 'self'",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+            "frame-ancestors 'self'");
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // h2-console
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.sameOrigin()) // h2-console
+                .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                // CSP fora do /h2-console: o console do H2 usa inline script/style próprios
+                // e só existe em dev — fica desligado em produção (spring.h2.console.enabled=false).
+                .addHeaderWriter(new DelegatingRequestMatcherHeaderWriter(
+                        new NegatedRequestMatcher(new AntPathRequestMatcher("/h2-console/**")),
+                        new ContentSecurityPolicyHeaderWriter(CSP))))
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(eh -> eh.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
             .authorizeHttpRequests(auth -> auth

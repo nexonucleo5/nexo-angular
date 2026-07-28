@@ -14,8 +14,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,7 +77,7 @@ public class AuthService {
 
     @Transactional
     public TokenResponse refresh(String refreshToken) {
-        RefreshToken atual = refreshTokens.findByToken(refreshToken)
+        RefreshToken atual = refreshTokens.findByTokenHash(hash(refreshToken))
                 .filter(t -> !t.isRevogado())
                 .filter(t -> t.getExpiraEm().isAfter(Instant.now()))
                 .orElseThrow(() -> ApiException.unauthorized("Refresh token inválido ou expirado."));
@@ -99,13 +103,25 @@ public class AuthService {
     private TokenResponse gerarTokens(Usuario usuario) {
         String access = jwtService.gerarAccessToken(usuario);
 
+        // O valor em claro só existe aqui e na resposta ao cliente — o banco guarda o hash.
+        String refreshTokenPlano = UUID.randomUUID().toString();
+
         RefreshToken novo = new RefreshToken();
-        novo.setToken(UUID.randomUUID().toString());
+        novo.setTokenHash(hash(refreshTokenPlano));
         novo.setUsuario(usuario);
         novo.setExpiraEm(Instant.now().plus(refreshTtl));
         refreshTokens.save(novo);
 
-        return new TokenResponse(access, novo.getToken(), UsuarioDTO.of(usuario));
+        return new TokenResponse(access, refreshTokenPlano, UsuarioDTO.of(usuario));
+    }
+
+    private static String hash(String valor) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(valor.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 indisponível na JVM.", e);
+        }
     }
 
     private void verificarBloqueio(String chave) {

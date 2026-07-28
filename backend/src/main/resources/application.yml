@@ -36,6 +36,9 @@ spring:
 server:
   # Render (e outros PaaS) injetam a porta em $PORT; local cai no 8080
   port: ${PORT:8080}
+  # Atrás do proxy do Render a conexão real é HTTP; sem isso, request.isSecure()
+  # sempre dá false e o header HSTS nunca é emitido em produção.
+  forward-headers-strategy: framework
   compression:
     enabled: true
     mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript,text/javascript,image/svg+xml
