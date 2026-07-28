@@ -2,12 +2,17 @@ package com.nexo.web;
 
 import com.nexo.api.ApiException;
 import com.nexo.domain.Avaliacao;
+import com.nexo.domain.Professor;
 import com.nexo.domain.Questao;
+import com.nexo.domain.Turma;
 import com.nexo.repository.AvaliacaoRepository;
+import com.nexo.repository.ProfessorRepository;
 import com.nexo.repository.QuestaoRepository;
 import com.nexo.repository.TurmaRepository;
+import com.nexo.security.UsuarioAutenticado;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -23,11 +28,25 @@ public class AvaliacoesController {
     private final AvaliacaoRepository avaliacoes;
     private final QuestaoRepository questoes;
     private final TurmaRepository turmas;
+    private final ProfessorRepository professores;
 
-    public AvaliacoesController(AvaliacaoRepository avaliacoes, QuestaoRepository questoes, TurmaRepository turmas) {
+    public AvaliacoesController(AvaliacaoRepository avaliacoes, QuestaoRepository questoes, TurmaRepository turmas,
+                                ProfessorRepository professores) {
         this.avaliacoes = avaliacoes;
         this.questoes = questoes;
         this.turmas = turmas;
+        this.professores = professores;
+    }
+
+    /** PROFESSOR só cria avaliação para a turma que leciona; DIRETOR tem acesso irrestrito. */
+    private void exigirLeciona(Turma turma, UsuarioAutenticado operador) {
+        if (!"PROFESSOR".equals(operador.role())) return;
+        Professor professor = professores.findByUsuarioId(operador.id()).orElse(null);
+        boolean leciona = professor != null
+                && turma.getProfessor() != null && turma.getProfessor().getId().equals(professor.getId());
+        if (!leciona) {
+            throw ApiException.forbidden("Você não leciona esta turma.");
+        }
     }
 
     public record AvaliacaoDTO(Long id, String titulo, String disciplina, String turma, String tipo,
@@ -50,7 +69,8 @@ public class AvaliacoesController {
 
     @PostMapping("/api/avaliacoes")
     @ResponseStatus(HttpStatus.CREATED)
-    public AvaliacaoDTO criar(@RequestBody NovaAvaliacaoRequest request) {
+    public AvaliacaoDTO criar(@RequestBody NovaAvaliacaoRequest request,
+                              @AuthenticationPrincipal UsuarioAutenticado operador) {
         if (request.titulo() == null || request.titulo().isBlank()) {
             throw ApiException.validation("Dados inválidos.", Map.of("titulo", "Informe o título da avaliação."));
         }
@@ -61,8 +81,10 @@ public class AvaliacoesController {
         avaliacao.setData(request.data());
         avaliacao.setStatus(Avaliacao.Status.PUBLICADA);
         if (request.turmaId() != null) {
-            avaliacao.setTurma(turmas.findById(request.turmaId())
-                    .orElseThrow(() -> ApiException.badRequest("Turma inexistente.")));
+            Turma turma = turmas.findById(request.turmaId())
+                    .orElseThrow(() -> ApiException.badRequest("Turma inexistente."));
+            exigirLeciona(turma, operador);
+            avaliacao.setTurma(turma);
         }
         return AvaliacaoDTO.of(avaliacoes.save(avaliacao));
     }

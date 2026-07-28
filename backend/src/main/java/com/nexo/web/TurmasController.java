@@ -66,9 +66,10 @@ public class TurmasController {
     @GetMapping("/{turmaId}/frequencia")
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
     public List<PresencaAluno> frequenciaDoDia(@PathVariable Long turmaId,
-                                               @RequestParam(required = false) LocalDate data) {
+                                               @RequestParam(required = false) LocalDate data,
+                                               @AuthenticationPrincipal UsuarioAutenticado operador) {
         LocalDate dia = data != null ? data : LocalDate.now();
-        exigirTurma(turmaId);
+        exigirLeciona(exigirTurma(turmaId), operador);
 
         Map<Long, Boolean> registradas = frequencias.findByTurmaIdAndData(turmaId, dia).stream()
                 .collect(Collectors.toMap(f -> f.getAluno().getId(), Frequencia::isPresente));
@@ -87,8 +88,10 @@ public class TurmasController {
     @PostMapping("/{turmaId}/frequencia")
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
     public ResumoFrequencia salvarFrequencia(@PathVariable Long turmaId,
-                                             @RequestBody SalvarFrequenciaRequest request) {
+                                             @RequestBody SalvarFrequenciaRequest request,
+                                             @AuthenticationPrincipal UsuarioAutenticado operador) {
         Turma turma = exigirTurma(turmaId);
+        exigirLeciona(turma, operador);
         if (request.presencas() == null || request.presencas().isEmpty()) {
             throw ApiException.badRequest("Envie a lista de presenças.");
         }
@@ -130,8 +133,9 @@ public class TurmasController {
 
     @GetMapping("/{turmaId}/conteudos")
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
-    public List<ConteudoDTO> historicoConteudos(@PathVariable Long turmaId) {
-        exigirTurma(turmaId);
+    public List<ConteudoDTO> historicoConteudos(@PathVariable Long turmaId,
+                                                @AuthenticationPrincipal UsuarioAutenticado operador) {
+        exigirLeciona(exigirTurma(turmaId), operador);
         return conteudos.findByTurmaIdOrderByDataDesc(turmaId).stream().map(ConteudoDTO::of).toList();
     }
 
@@ -141,6 +145,7 @@ public class TurmasController {
                                          @RequestBody NovoConteudoRequest request,
                                          @AuthenticationPrincipal UsuarioAutenticado usuario) {
         Turma turma = exigirTurma(turmaId);
+        exigirLeciona(turma, usuario);
         if (request.titulo() == null || request.titulo().isBlank()) {
             throw ApiException.validation("Dados inválidos.", Map.of("titulo", "Informe o título da aula."));
         }
@@ -160,8 +165,9 @@ public class TurmasController {
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
     public List<AlunosController.NotaDTO> notasDaTurma(@PathVariable Long turmaId,
                                                        @RequestParam(required = false) String disciplina,
-                                                       @RequestParam(required = false) String periodo) {
-        exigirTurma(turmaId);
+                                                       @RequestParam(required = false) String periodo,
+                                                       @AuthenticationPrincipal UsuarioAutenticado operador) {
+        exigirLeciona(exigirTurma(turmaId), operador);
         return notas.buscarPorTurma(turmaId, emptyToNull(disciplina), emptyToNull(periodo)).stream()
                 .map(n -> new AlunosController.NotaDTO(n.getId(), n.getAluno().getId(), n.getAluno().getNome(),
                         n.getDisciplina(), n.getPeriodo(), n.getP1(), n.getP2(), n.getT1(),
@@ -176,5 +182,16 @@ public class TurmasController {
     private Turma exigirTurma(Long turmaId) {
         return turmas.findById(turmaId)
                 .orElseThrow(() -> ApiException.notFound("Turma não encontrada."));
+    }
+
+    /** PROFESSOR só acessa a turma que leciona (Turma.professor); DIRETOR tem acesso irrestrito. */
+    private void exigirLeciona(Turma turma, UsuarioAutenticado operador) {
+        if (!"PROFESSOR".equals(operador.role())) return;
+        Professor professor = professores.findByUsuarioId(operador.id()).orElse(null);
+        boolean leciona = professor != null
+                && turma.getProfessor() != null && turma.getProfessor().getId().equals(professor.getId());
+        if (!leciona) {
+            throw ApiException.forbidden("Você não leciona esta turma.");
+        }
     }
 }

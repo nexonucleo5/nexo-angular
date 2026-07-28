@@ -3,9 +3,12 @@ package com.nexo.web;
 import com.nexo.api.ApiException;
 import com.nexo.domain.Nota;
 import com.nexo.domain.ObservacaoPedagogica;
+import com.nexo.domain.Professor;
+import com.nexo.domain.Turma;
 import com.nexo.repository.AlunoRepository;
 import com.nexo.repository.NotaRepository;
 import com.nexo.repository.ObservacaoPedagogicaRepository;
+import com.nexo.repository.ProfessorRepository;
 import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AlunoService;
 import jakarta.validation.constraints.NotBlank;
@@ -26,13 +29,27 @@ public class AlunosController {
     private final AlunoRepository alunos;
     private final NotaRepository notas;
     private final ObservacaoPedagogicaRepository observacoes;
+    private final ProfessorRepository professores;
 
     public AlunosController(AlunoService alunoService, AlunoRepository alunos,
-                            NotaRepository notas, ObservacaoPedagogicaRepository observacoes) {
+                            NotaRepository notas, ObservacaoPedagogicaRepository observacoes,
+                            ProfessorRepository professores) {
         this.alunoService = alunoService;
         this.alunos = alunos;
         this.notas = notas;
         this.observacoes = observacoes;
+        this.professores = professores;
+    }
+
+    /** PROFESSOR só age sobre alunos da turma que leciona; DIRETOR tem acesso irrestrito. */
+    private void exigirLeciona(Turma turma, UsuarioAutenticado operador) {
+        if (!"PROFESSOR".equals(operador.role())) return;
+        Professor professor = professores.findByUsuarioId(operador.id()).orElse(null);
+        boolean leciona = professor != null && turma != null
+                && turma.getProfessor() != null && turma.getProfessor().getId().equals(professor.getId());
+        if (!leciona) {
+            throw ApiException.forbidden("Você não leciona a turma deste aluno.");
+        }
     }
 
     @PostMapping
@@ -58,7 +75,8 @@ public class AlunosController {
 
     @PatchMapping("/{alunoId}/notas")
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
-    public NotaDTO editarNotas(@PathVariable Long alunoId, @RequestBody EditarNotasRequest request) {
+    public NotaDTO editarNotas(@PathVariable Long alunoId, @RequestBody EditarNotasRequest request,
+                               @AuthenticationPrincipal UsuarioAutenticado operador) {
         validarNota("p1", request.p1());
         validarNota("p2", request.p2());
         validarNota("t1", request.t1());
@@ -66,6 +84,7 @@ public class AlunosController {
 
         var aluno = alunos.findById(alunoId)
                 .orElseThrow(() -> ApiException.notFound("Aluno não encontrado."));
+        exigirLeciona(aluno.getTurma(), operador);
 
         String disciplina = request.disciplina() != null ? request.disciplina() : "Geral";
         String periodo = request.periodo() != null ? request.periodo() : "2026-1";
@@ -108,7 +127,11 @@ public class AlunosController {
 
     @GetMapping("/{alunoId}/observacoes")
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
-    public List<ObservacaoDTO> listarObservacoes(@PathVariable Long alunoId) {
+    public List<ObservacaoDTO> listarObservacoes(@PathVariable Long alunoId,
+                                                 @AuthenticationPrincipal UsuarioAutenticado operador) {
+        var aluno = alunos.findById(alunoId)
+                .orElseThrow(() -> ApiException.notFound("Aluno não encontrado."));
+        exigirLeciona(aluno.getTurma(), operador);
         return observacoes.findByAlunoIdOrderByCriadaEmDesc(alunoId).stream().map(ObservacaoDTO::of).toList();
     }
 
@@ -120,6 +143,7 @@ public class AlunosController {
                                          @AuthenticationPrincipal UsuarioAutenticado autor) {
         var aluno = alunos.findById(alunoId)
                 .orElseThrow(() -> ApiException.notFound("Aluno não encontrado."));
+        exigirLeciona(aluno.getTurma(), autor);
         ObservacaoPedagogica obs = new ObservacaoPedagogica();
         obs.setAluno(aluno);
         obs.setAutorNome(autor.nome());
