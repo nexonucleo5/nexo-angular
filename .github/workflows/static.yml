@@ -1,25 +1,36 @@
 name: Deploy Nexo (Angular → GitHub Pages)
 
+# Backend roda em todo push e em pull request, para os testes pegarem a regressão
+# antes do merge — antes o workflow só disparava em push para master, o que fazia a
+# verificação chegar depois de o problema já estar na branch principal.
+# A publicação no Pages continua restrita ao master (ver o "if" do build-frontend).
 on:
   push:
-    branches: [ master ]
+  pull_request:
   workflow_dispatch:
 
-# Permissões exigidas pelo actions/deploy-pages (faltavam antes → o deploy falhava)
+# Padrão mínimo; o job que publica eleva o que precisa.
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-# Evita deploys simultâneos sobrescrevendo um ao outro
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
   # ── Frontend Angular → GitHub Pages ──────────────────────────────────────
   build-frontend:
+    # Publica a partir do master ou de um disparo manual. Em push de outra branch
+    # e em pull request o job é pulado: rodar aqui sobrescreveria o site no ar.
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
+    # Permissões exigidas pelo actions/deploy-pages (faltavam antes → o deploy falhava)
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    # Evita deploys simultâneos sobrescrevendo um ao outro. Fica no job, e não no
+    # workflow: no nível de workflow, um push em qualquer branch entraria no mesmo
+    # grupo e cancelaria um deploy de master em andamento.
+    concurrency:
+      group: pages
+      cancel-in-progress: true
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -56,7 +67,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  # ── Backend Spring (empacota o jar como artefato de CI) ──────────────────
+  # ── Backend Spring (testes + jar como artefato de CI) ────────────────────
   build-backend:
     runs-on: ubuntu-latest
     steps:
@@ -69,9 +80,20 @@ jobs:
           java-version: 17
           cache: maven
 
-      - name: Build jar
+      # "verify" empacota o jar E roda a suíte. Era "package -DskipTests", que não
+      # incomodava enquanto não havia testes — agora significaria mantê-los sem rodar.
+      - name: Build e testes
         working-directory: backend
-        run: mvn -B -ntp clean package -DskipTests
+        run: mvn -B -ntp clean verify
+
+      # Sobe o relatório mesmo com teste vermelho, senão a falha some junto com o job.
+      - name: Relatório de testes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-testes
+          path: backend/target/surefire-reports/
+          if-no-files-found: ignore
 
       - name: Upload jar
         uses: actions/upload-artifact@v4
