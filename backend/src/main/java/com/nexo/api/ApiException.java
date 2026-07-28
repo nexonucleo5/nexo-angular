@@ -11,15 +11,24 @@ public class ApiException extends RuntimeException {
     private final String error;
     private final Map<String, String> fields;
 
+    /** Segundos até a próxima tentativa ser aceita; vira o cabeçalho Retry-After. */
+    private final Long retryAfterSegundos;
+
     public ApiException(HttpStatus status, String error, String message) {
         this(status, error, message, null);
     }
 
     public ApiException(HttpStatus status, String error, String message, Map<String, String> fields) {
+        this(status, error, message, fields, null);
+    }
+
+    public ApiException(HttpStatus status, String error, String message, Map<String, String> fields,
+                        Long retryAfterSegundos) {
         super(message);
         this.status = status;
         this.error = error;
         this.fields = fields;
+        this.retryAfterSegundos = retryAfterSegundos;
     }
 
     public static ApiException notFound(String message) {
@@ -42,7 +51,16 @@ public class ApiException extends RuntimeException {
         return new ApiException(HttpStatus.FORBIDDEN, "FORBIDDEN", message);
     }
 
+    /**
+     * 429 acompanhado de Retry-After. Sem esse cabeçalho o cliente só sabe que foi
+     * barrado, não quando pode voltar — e acaba repetindo em laço (RFC 9110, 15.5.30).
+     */
+    public static ApiException tooManyRequests(String error, String message, long retryAfterSegundos) {
+        return new ApiException(HttpStatus.TOO_MANY_REQUESTS, error, message, null, retryAfterSegundos);
+    }
+
     public HttpStatus getStatus() { return status; }
     public String getError() { return error; }
     public Map<String, String> getFields() { return fields; }
+    public Long getRetryAfterSegundos() { return retryAfterSegundos; }
 }

@@ -179,8 +179,10 @@ public class AuthService {
             return;
         }
         if (t.quantidade() >= MAX_TENTATIVAS) {
-            throw new ApiException(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS,
-                    "LOGIN_BLOQUEADO", "Muitas tentativas de login. Tente novamente em alguns minutos.");
+            long faltam = Duration.between(Instant.now(), t.primeiraFalha().plus(JANELA_BLOQUEIO)).toSeconds();
+            throw ApiException.tooManyRequests("LOGIN_BLOQUEADO",
+                    "Muitas tentativas de login. Tente novamente em alguns minutos.",
+                    Math.max(1, faltam));
         }
     }
 

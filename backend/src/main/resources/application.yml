@@ -2,6 +2,10 @@ spring:
   application:
     name: nexo-backend
 
+  lifecycle:
+    # Teto para o desligamento gracioso abaixo: passou disso, encerra à força.
+    timeout-per-shutdown-phase: 20s
+
   datasource:
     url: jdbc:h2:file:./data/nexo;MODE=PostgreSQL;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
@@ -63,6 +67,10 @@ spring:
 server:
   # Render (e outros PaaS) injetam a porta em $PORT; local cai no 8080
   port: ${PORT:8080}
+  # No deploy, para de aceitar conexão nova e deixa as requisições em voo
+  # terminarem. Sem isto o SIGTERM corta no meio: quem estava salvando a chamada
+  # da turma ou trocando a senha recebe erro de conexão.
+  shutdown: graceful
   # Atrás do proxy do Render a conexão real é HTTP; sem isso, request.isSecure()
   # sempre dá false e o header HSTS nunca é emitido em produção.
   forward-headers-strategy: framework

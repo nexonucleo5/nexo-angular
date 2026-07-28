@@ -48,8 +48,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErroPadrao> handleApi(ApiException ex) {
-        return ResponseEntity.status(ex.getStatus())
-                .body(new ErroPadrao(Instant.now(), ex.getStatus().value(), ex.getError(), ex.getMessage(), ex.getFields()));
+        var resposta = ResponseEntity.status(ex.getStatus());
+        if (ex.getRetryAfterSegundos() != null) {
+            resposta = resposta.header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSegundos()));
+        }
+        return resposta.body(new ErroPadrao(Instant.now(), ex.getStatus().value(), ex.getError(),
+                ex.getMessage(), ex.getFields()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
