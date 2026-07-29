@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Injector, Signal, computed, effect, inject, signal, untracked } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { Menu } from './menu/menu';
 import { MenuUsuario } from './menu-usuario/menu-usuario';
 import { MenuDiretor } from './menu-diretor/menu-diretor';
@@ -34,12 +35,19 @@ interface PerfilSettings {
 export class App {
   public authService = inject(AuthService);
   private readonly injector = inject(Injector);
+  private readonly router = inject(Router);
 
   /** Tema antes do login (cache compartilhado gravado pelo SettingsStore). */
   private readonly temaLocal = signal(temaSalvoEscuro());
   private readonly settingsAtivo = signal<PerfilSettings | null>(null);
 
   readonly temaEscuro = computed(() => this.settingsAtivo()?.isDarkMode() ?? this.temaLocal());
+
+  /**
+   * Sidebar aberta no mobile. No desktop a barra é fixa e este estado não tem
+   * efeito nenhum — quem decide é o @media do styles.scss.
+   */
+  readonly menuAberto = signal(false);
 
   constructor() {
     aplicarTema(this.temaLocal());
@@ -51,6 +59,26 @@ export class App {
       const role = this.authService.usuarioLogado()?.role ?? null;
       this.settingsAtivo.set(role ? untracked(() => this.servicoPara(role)) : null);
     });
+
+    // Trocou de tela, fecha a barra: no mobile ela cobre o conteúdo inteiro e
+    // ficaria por cima da página recém-aberta.
+    this.router.events
+      .pipe(filter((evento) => evento instanceof NavigationEnd))
+      .subscribe(() => this.menuAberto.set(false));
+
+    // Logado ou deslogado, nunca começa com a barra aberta.
+    effect(() => {
+      this.authService.usuarioLogado();
+      untracked(() => this.menuAberto.set(false));
+    });
+  }
+
+  alternarMenu(): void {
+    this.menuAberto.update((aberto) => !aberto);
+  }
+
+  fecharMenu(): void {
+    this.menuAberto.set(false);
   }
 
   alternarTema(): void {

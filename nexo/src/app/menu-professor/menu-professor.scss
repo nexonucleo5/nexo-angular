@@ -27,36 +27,9 @@
   transition: background-color 0.3s, border-color 0.3s;
 }
 
-/* Brand */
-.sidebar-brand {
-  padding: 28px 24px 22px;
-  border-bottom: 1px solid var(--border-color);
-
-  .brand-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    .brand-icon {
-      font-size: 1.8rem;
-      background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .brand-title {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--text-main);
-      margin: 0;
-    }
-  }
-}
-
-/* Menu */
+/* Menu — a logo saiu daqui e virou fundo do sistema (styles.scss) */
 .sidebar-menu {
-  padding: 8px 14px;
+  padding: 28px 14px 16px;
   flex-grow: 1;
 }
 

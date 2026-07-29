@@ -1,13 +1,42 @@
 .login-container {
+  position: relative;
   min-height: 100vh;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
   background-color: var(--bg-primary);
+  overflow: hidden;
+}
+
+/* Logo de fundo — ocupa boa parte da tela e passa por baixo do card. */
+.login-marca {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(760px, 92vw);
+  aspect-ratio: 1 / 1;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+:host-context(html[data-theme='dark']) .login-marca {
+  background-image: url('/assets/imagensProjeto/logo-nexo-dark.png');
+}
+:host-context(html[data-theme='light']) .login-marca {
+  background-image: url('/assets/imagensProjeto/logo-nexo-light.png');
+  opacity: 0.22; /* no claro a logo tem mais contraste e pesa mais */
 }
 
 .login-form {
+  position: relative;
+  z-index: 1;   /* o card fica por cima da logo */
   width: 100%;
   max-width: 400px;
   background-color: var(--bg-card);
@@ -15,13 +44,6 @@
   border-radius: 16px;
   border: 1px solid var(--border-color);
   box-shadow: 0 8px 25px var(--shadow-color);
-}
-
-.login-brand {
-  margin-bottom: 20px;
-}
-.login-brand .brand-logo {
-  max-width: 240px;
 }
 
 .login-title {

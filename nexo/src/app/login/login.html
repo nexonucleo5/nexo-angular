@@ -1,9 +1,10 @@
 <div class="login-container">
+    <!-- A logo é o fundo da tela: fica grande, atrás do card, e é a única
+         marca da página (saiu de dentro do formulário). Decorativa, então
+         fica fora da árvore de acessibilidade. -->
+    <div class="login-marca" aria-hidden="true"></div>
+
     <form class="login-form" [formGroup]="loginForm" (ngSubmit)="realizarLogin()">
-        <div class="login-brand">
-            <img src="assets/imagensProjeto/logo-nexo-dark.png" alt="Nexo - Núcleo de Gestão Acadêmica" class="brand-logo brand-logo-dark">
-            <img src="assets/imagensProjeto/logo-nexo-light.png" alt="Nexo - Núcleo de Gestão Acadêmica" class="brand-logo brand-logo-light">
-        </div>
         <h2 class="login-title">Entrar</h2>
         <p class="login-subtitle">Acesse sua conta para continuar</p>
 
