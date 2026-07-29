@@ -43,5 +43,10 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
+# Segredos locais — o modelo versionado é o .env.example
+.env
+.env.local
+!.env.example
+
 # Ignora todos os arquivos Markdown (documentação) em todo o repositório
 *.md

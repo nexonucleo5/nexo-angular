@@ -18,12 +18,22 @@ import java.util.Optional;
 @Service
 public class JwtService {
 
+    /** HMAC-SHA256 exige chave de pelo menos 256 bits — 32 caracteres ASCII. */
+    private static final int TAMANHO_MINIMO_SEGREDO = 32;
+
     private final SecretKey key;
     private final Duration accessTokenTtl;
 
     public JwtService(@Value("${nexo.jwt.secret}") String secret,
                       @Value("${nexo.jwt.access-token-minutes}") long accessTokenMinutes) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        byte[] bytes = secret == null ? new byte[0] : secret.getBytes(StandardCharsets.UTF_8);
+        if (bytes.length < TAMANHO_MINIMO_SEGREDO) {
+            throw new IllegalStateException(
+                    "nexo.jwt.secret tem " + bytes.length + " bytes; o mínimo é " + TAMANHO_MINIMO_SEGREDO
+                    + " (requisito do HMAC-SHA, que precisa de uma chave de 256 bits). "
+                    + "Defina NEXO_JWT_SECRET no ambiente — gere um com `openssl rand -base64 48`.");
+        }
+        this.key = Keys.hmacShaKeyFor(bytes);
         this.accessTokenTtl = Duration.ofMinutes(accessTokenMinutes);
     }
 

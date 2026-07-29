@@ -2,6 +2,15 @@ spring:
   application:
     name: nexo-backend
 
+  # Carrega o .env local (formato properties) para o segredo do JWT não precisar
+  # estar exportado no shell. Opcional e nos dois caminhos porque o app tanto é
+  # rodado da raiz do repo quanto de dentro de backend/. Em produção não existe
+  # arquivo nenhum: as variáveis vêm do ambiente do Render.
+  config:
+    import:
+      - optional:file:./.env[.properties]
+      - optional:file:../.env[.properties]
+
   datasource:
     url: jdbc:h2:file:./data/nexo;MODE=PostgreSQL;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
@@ -43,8 +52,9 @@ server:
 
 nexo:
   jwt:
-    # Em produção substituir por segredo externo (variável de ambiente NEXO_JWT_SECRET)
-    secret: ${NEXO_JWT_SECRET:nexo-gestao-escolar-chave-de-desenvolvimento-nao-usar-em-producao-0123456789}
+    # Sem default: o segredo vem SEMPRE do ambiente, inclusive em dev (.env local).
+    # Gere o seu com `openssl rand -base64 48` — veja o .env.example.
+    secret: ${NEXO_JWT_SECRET}
     access-token-minutes: 15
     refresh-token-days: 7
   cors:
