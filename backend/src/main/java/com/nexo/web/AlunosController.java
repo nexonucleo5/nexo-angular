@@ -1,6 +1,7 @@
 package com.nexo.web;
 
 import com.nexo.api.ApiException;
+import com.nexo.domain.Aluno;
 import com.nexo.domain.Nota;
 import com.nexo.domain.ObservacaoPedagogica;
 import com.nexo.domain.Professor;
@@ -13,12 +14,15 @@ import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AlunoService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -53,12 +57,46 @@ public class AlunosController {
         }
     }
 
+    public record AlunoDTO(Long id, String nome, String emailInstitucional, String sexo,
+                           LocalDate dataNascimento, Long turmaId, String turma,
+                           int engajamento, String foto) {
+        static AlunoDTO of(Aluno a) {
+            return new AlunoDTO(a.getId(), a.getNome(), a.getEmailInstitucional(), a.getSexo(),
+                    a.getDataNascimento(),
+                    a.getTurma() != null ? a.getTurma().getId() : null,
+                    a.getTurma() != null ? a.getTurma().getNome() : null,
+                    a.getEngajamento(), a.getFoto());
+        }
+    }
+
+    /**
+     * Recurso endereçável do aluno. Sem ele o POST não tinha para onde apontar o
+     * Location, e o aluno só existia dentro de listagens e agregações.
+     */
+    @GetMapping("/{alunoId}")
+    @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
+    public AlunoDTO detalhar(@PathVariable Long alunoId,
+                             @AuthenticationPrincipal UsuarioAutenticado operador) {
+        Aluno aluno = alunos.findById(alunoId)
+                .orElseThrow(() -> ApiException.notFound("Aluno não encontrado."));
+        // Mesmo escopo das demais operações sobre o aluno: um GET novo sem esta
+        // checagem entregaria qualquer aluno da escola a qualquer professor.
+        exigirLeciona(aluno.getTurma(), operador);
+        return AlunoDTO.of(aluno);
+    }
+
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('DIRETOR')")
-    public AlunoService.AlunoCriado cadastrar(@RequestBody AlunoService.CadastroAluno request,
-                                              @AuthenticationPrincipal UsuarioAutenticado operador) {
-        return alunoService.cadastrar(request, operador.nome());
+    public ResponseEntity<AlunoService.AlunoCriado> cadastrar(
+            @RequestBody AlunoService.CadastroAluno request,
+            @AuthenticationPrincipal UsuarioAutenticado operador) {
+        AlunoService.AlunoCriado criado = alunoService.cadastrar(request, operador.nome());
+        return ResponseEntity.created(uriDoItem(criado.id())).body(criado);
+    }
+
+    /** URI do recurso recém-criado, a partir do caminho da própria requisição. */
+    private static URI uriDoItem(Long id) {
+        return ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
     }
 
     // ── Notas ────────────────────────────────────────────────────────────────
@@ -134,12 +172,28 @@ public class AlunosController {
         return observacoes.findByAlunoIdOrderByCriadaEmDesc(alunoId).stream().map(ObservacaoDTO::of).toList();
     }
 
-    @PostMapping("/{alunoId}/observacoes")
-    @ResponseStatus(HttpStatus.CREATED)
+    @GetMapping("/{alunoId}/observacoes/{id}")
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
-    public ObservacaoDTO criarObservacao(@PathVariable Long alunoId,
-                                         @Valid @RequestBody NovaObservacaoRequest request,
-                                         @AuthenticationPrincipal UsuarioAutenticado autor) {
+    public ObservacaoDTO detalharObservacao(@PathVariable Long alunoId, @PathVariable Long id,
+                                            @AuthenticationPrincipal UsuarioAutenticado operador) {
+        var aluno = alunos.findById(alunoId)
+                .orElseThrow(() -> ApiException.notFound("Aluno não encontrado."));
+        exigirLeciona(aluno.getTurma(), operador);
+        ObservacaoPedagogica obs = observacoes.findById(id)
+                .orElseThrow(() -> ApiException.notFound("Observação não encontrada."));
+        // A observação precisa ser mesmo deste aluno: sem isto o id na URI viraria
+        // um atalho para ler a observação de um aluno de outra turma.
+        if (!obs.getAluno().getId().equals(alunoId)) {
+            throw ApiException.notFound("Observação não encontrada.");
+        }
+        return ObservacaoDTO.of(obs);
+    }
+
+    @PostMapping("/{alunoId}/observacoes")
+    @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
+    public ResponseEntity<ObservacaoDTO> criarObservacao(@PathVariable Long alunoId,
+                                                         @Valid @RequestBody NovaObservacaoRequest request,
+                                                         @AuthenticationPrincipal UsuarioAutenticado autor) {
         var aluno = alunos.findById(alunoId)
                 .orElseThrow(() -> ApiException.notFound("Aluno não encontrado."));
         exigirLeciona(aluno.getTurma(), autor);
@@ -147,6 +201,7 @@ public class AlunosController {
         obs.setAluno(aluno);
         obs.setAutorNome(autor.nome());
         obs.setTexto(request.texto());
-        return ObservacaoDTO.of(observacoes.save(obs));
+        ObservacaoDTO dto = ObservacaoDTO.of(observacoes.save(obs));
+        return ResponseEntity.created(uriDoItem(dto.id())).body(dto);
     }
 }
