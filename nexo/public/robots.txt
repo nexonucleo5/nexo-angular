@@ -1,0 +1,41 @@
+# Nexo — Gestão Escolar
+# Só a landing e o login são públicos. Todo o resto exige sessão: o backend
+# devolve 401, mas o SPA responde o index.html em qualquer rota, então sem
+# estas linhas o Google indexaria dezenas de páginas vazias e iguais.
+
+User-agent: *
+
+Disallow: /api/
+Disallow: /ws/
+Disallow: /h2-console/
+
+# Compartilhadas
+Disallow: /perfil
+Disallow: /configuracoes
+Disallow: /trocar-senha
+Disallow: /dashboards
+Disallow: /mensagens
+
+# Aluno
+Disallow: /materias
+Disallow: /disciplina/
+Disallow: /desafios
+Disallow: /meus_niveis_notas
+
+# Diretor
+Disallow: /cadastro
+Disallow: /diretor-dashboards
+Disallow: /matriculas
+Disallow: /evasao
+Disallow: /relatorios
+Disallow: /monitoramento
+Disallow: /menu-diretor
+
+# Professor
+Disallow: /professor-dashboard
+Disallow: /diario-classe-professor
+Disallow: /avaliacao
+Disallow: /notas-engajamento
+Disallow: /comunicacao
+
+Sitemap: https://nexo-gestao-escolar.com.br/sitemap.xml
