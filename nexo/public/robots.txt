@@ -20,6 +20,7 @@ Disallow: /mensagens
 Disallow: /materias
 Disallow: /disciplina/
 Disallow: /desafios
+Disallow: /meus-niveis-notas
 Disallow: /meus_niveis_notas
 
 # Diretor

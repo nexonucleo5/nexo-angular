@@ -66,10 +66,13 @@ export const routes: Routes = [
     loadComponent: () => import('./quiz-desafio/quiz-desafio').then((m) => m.QuizDesafio),
   },
   {
-    path: 'meus_niveis_notas',
+    path: 'meus-niveis-notas',
     canActivate: [authGuard, roleGuard('aluno')],
     loadComponent: () => import('./meus-niveis-notas/meus-niveis-notas').then((m) => m.MeusNiveisNotas),
   },
+  // Era a única rota em snake_case do projeto. Mantido para não quebrar link
+  // já compartilhado; pode sair quando não houver mais acesso pelo path antigo.
+  { path: 'meus_niveis_notas', redirectTo: '/meus-niveis-notas', pathMatch: 'full' },
 
   // ── Diretor ──────────────────────────────────────────────────────────────────
   {
