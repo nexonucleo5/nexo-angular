@@ -26,6 +26,10 @@ jobs:
         working-directory: nexo
         run: npm ci
 
+      - name: Testes
+        working-directory: nexo
+        run: npm run test:ci
+
       - name: Build (produção)
         working-directory: nexo
         run: npx ng build --configuration production --base-href /
