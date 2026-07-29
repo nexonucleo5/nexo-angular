@@ -1,0 +1,232 @@
+package com.nexo.service;
+
+import com.nexo.api.ApiException;
+import com.nexo.api.dto.AuthDtos.TokenResponse;
+import com.nexo.domain.RefreshToken;
+import com.nexo.domain.Role;
+import com.nexo.domain.Usuario;
+import com.nexo.repository.RefreshTokenRepository;
+import com.nexo.repository.UsuarioRepository;
+import com.nexo.security.JwtService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+/** Repositórios mockados — nada de banco nem de Docker. */
+@ExtendWith(MockitoExtension.class)
+class AuthServiceTest {
+
+    private static final String SEGREDO = "segredo-de-teste-com-mais-de-32-caracteres-abcdef";
+    private static final String SENHA_CORRETA = "senha-correta";
+    private static final String IP = "127.0.0.1";
+
+    @Mock private UsuarioRepository usuarios;
+    @Mock private RefreshTokenRepository refreshTokens;
+    @Mock private AuditoriaService auditoria;
+
+    private final PasswordEncoder encoder = new BCryptPasswordEncoder();
+    private AuthService authService;
+    private Usuario usuario;
+
+    @BeforeEach
+    void montar() {
+        authService = new AuthService(usuarios, refreshTokens, new JwtService(SEGREDO, 15),
+                encoder, auditoria, 7);
+
+        usuario = new Usuario();
+        usuario.setId(1L);
+        usuario.setLogin("ana");
+        usuario.setNome("Ana");
+        usuario.setRole(Role.ALUNO);
+        usuario.setAtivo(true);
+        usuario.setSenhaHash(encoder.encode(SENHA_CORRETA));
+    }
+
+    private void usuarioExiste() {
+        when(usuarios.findByLoginIgnoreCase("ana")).thenReturn(Optional.of(usuario));
+    }
+
+    // ── Login ────────────────────────────────────────────────────────────────
+
+    @Test
+    void loginComSenhaCorretaDevolveOsTokens() {
+        usuarioExiste();
+        when(refreshTokens.save(any(RefreshToken.class))).thenAnswer(i -> i.getArgument(0));
+
+        TokenResponse resposta = authService.login("ana", SENHA_CORRETA, IP);
+
+        assertThat(resposta.token()).isNotBlank();
+        assertThat(resposta.refreshToken()).isNotBlank();
+        assertThat(resposta.usuario().nome()).isEqualTo("Ana");
+        assertThat(resposta.usuario().role()).isEqualTo("ALUNO");
+    }
+
+    @Test
+    void senhaErradaNaoAutentica() {
+        usuarioExiste();
+
+        assertThatThrownBy(() -> authService.login("ana", "senha-errada", IP))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("Credenciais inválidas");
+
+        // Nenhum refresh token pode ser emitido numa tentativa que falhou.
+        verify(refreshTokens, never()).save(any());
+    }
+
+    @Test
+    void usuarioInativoNaoAutenticaMesmoComSenhaCerta() {
+        usuario.setAtivo(false);
+        usuarioExiste();
+
+        assertThatThrownBy(() -> authService.login("ana", SENHA_CORRETA, IP))
+                .isInstanceOf(ApiException.class);
+    }
+
+    @Test
+    void usuarioInexistenteDaAMesmaMensagemDeSenhaErrada() {
+        // Mensagens diferentes permitiriam enumerar quais logins existem.
+        when(usuarios.findByLoginIgnoreCase("fantasma")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.login("fantasma", "qualquer", IP))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("Credenciais inválidas");
+    }
+
+    // ── Bloqueio por tentativas ──────────────────────────────────────────────
+
+    @Test
+    void bloqueiaDepoisDeCincoTentativasErradas() {
+        usuarioExiste();
+
+        for (int i = 1; i <= 5; i++) {
+            int tentativa = i;
+            assertThatThrownBy(() -> authService.login("ana", "senha-errada", IP))
+                    .as("tentativa %d ainda deve ser recusada por credencial, não por bloqueio", tentativa)
+                    .isInstanceOf(ApiException.class)
+                    .hasMessageContaining("Credenciais inválidas");
+        }
+
+        // A sexta nem chega a comparar a senha: cai no bloqueio.
+        assertThatThrownBy(() -> authService.login("ana", SENHA_CORRETA, IP))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("Muitas tentativas")
+                .extracting(e -> ((ApiException) e).getStatus())
+                .isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+    }
+
+    @Test
+    void loginBemSucedidoZeraAsTentativas() {
+        usuarioExiste();
+        when(refreshTokens.save(any(RefreshToken.class))).thenAnswer(i -> i.getArgument(0));
+
+        for (int i = 0; i < 4; i++) {
+            assertThatThrownBy(() -> authService.login("ana", "senha-errada", IP))
+                    .isInstanceOf(ApiException.class);
+        }
+        authService.login("ana", SENHA_CORRETA, IP);
+
+        // Sem o reset, mais duas falhas passariam do limite e bloqueariam a conta.
+        for (int i = 0; i < 2; i++) {
+            assertThatThrownBy(() -> authService.login("ana", "senha-errada", IP))
+                    .hasMessageContaining("Credenciais inválidas");
+        }
+    }
+
+    @Test
+    void oBloqueioEhPorLoginENaoDerrubaOsOutrosUsuarios() {
+        usuarioExiste();
+        Usuario outro = new Usuario();
+        outro.setId(2L);
+        outro.setLogin("bruno");
+        outro.setNome("Bruno");
+        outro.setRole(Role.PROFESSOR);
+        outro.setAtivo(true);
+        outro.setSenhaHash(encoder.encode(SENHA_CORRETA));
+        when(usuarios.findByLoginIgnoreCase("bruno")).thenReturn(Optional.of(outro));
+        when(refreshTokens.save(any(RefreshToken.class))).thenAnswer(i -> i.getArgument(0));
+
+        for (int i = 0; i < 5; i++) {
+            assertThatThrownBy(() -> authService.login("ana", "senha-errada", IP))
+                    .isInstanceOf(ApiException.class);
+        }
+
+        assertThat(authService.login("bruno", SENHA_CORRETA, IP).token()).isNotBlank();
+    }
+
+    // ── Rotação do refresh token ─────────────────────────────────────────────
+
+    @Test
+    void refreshRevogaOTokenAnteriorEEmiteUmNovo() {
+        RefreshToken antigo = new RefreshToken();
+        antigo.setToken("refresh-antigo");
+        antigo.setUsuario(usuario);
+        antigo.setExpiraEm(Instant.now().plus(7, ChronoUnit.DAYS));
+        when(refreshTokens.findByToken("refresh-antigo")).thenReturn(Optional.of(antigo));
+        when(refreshTokens.save(any(RefreshToken.class))).thenAnswer(i -> i.getArgument(0));
+
+        TokenResponse resposta = authService.refresh("refresh-antigo");
+
+        assertThat(antigo.isRevogado()).as("o token usado precisa ser invalidado").isTrue();
+        assertThat(resposta.refreshToken()).isNotEqualTo("refresh-antigo");
+
+        ArgumentCaptor<RefreshToken> salvos = ArgumentCaptor.forClass(RefreshToken.class);
+        verify(refreshTokens, org.mockito.Mockito.times(2)).save(salvos.capture());
+        List<RefreshToken> capturados = salvos.getAllValues();
+        assertThat(capturados.get(0)).isSameAs(antigo);
+        assertThat(capturados.get(1).isRevogado()).isFalse();
+    }
+
+    @Test
+    void refreshComTokenJaRevogadoEhRecusado() {
+        // É o caso do token roubado sendo reusado depois da rotação.
+        RefreshToken revogado = new RefreshToken();
+        revogado.setToken("ja-usado");
+        revogado.setUsuario(usuario);
+        revogado.setExpiraEm(Instant.now().plus(7, ChronoUnit.DAYS));
+        revogado.setRevogado(true);
+        when(refreshTokens.findByToken("ja-usado")).thenReturn(Optional.of(revogado));
+
+        assertThatThrownBy(() -> authService.refresh("ja-usado"))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("inválido ou expirado");
+    }
+
+    @Test
+    void refreshComTokenExpiradoEhRecusado() {
+        RefreshToken expirado = new RefreshToken();
+        expirado.setToken("vencido");
+        expirado.setUsuario(usuario);
+        expirado.setExpiraEm(Instant.now().minus(1, ChronoUnit.DAYS));
+        when(refreshTokens.findByToken("vencido")).thenReturn(Optional.of(expirado));
+
+        assertThatThrownBy(() -> authService.refresh("vencido"))
+                .isInstanceOf(ApiException.class);
+    }
+
+    @Test
+    void refreshComTokenDesconhecidoEhRecusado() {
+        when(refreshTokens.findByToken(anyString())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.refresh("nunca-existiu"))
+                .isInstanceOf(ApiException.class);
+    }
+}
