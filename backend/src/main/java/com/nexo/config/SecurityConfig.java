@@ -29,6 +29,14 @@ public class SecurityConfig {
     @Value("${nexo.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
+    /**
+     * A liberação do /h2-console segue a mesma flag que liga o console. Antes o
+     * permitAll era incondicional e só não vazava porque o perfil de produção
+     * desliga o console em outro arquivo — bastava mexer no yml errado pra abrir.
+     */
+    @Value("${spring.h2.console.enabled:false}")
+    private boolean h2ConsoleHabilitado;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
@@ -37,18 +45,28 @@ public class SecurityConfig {
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // h2-console
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(eh -> eh.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
-                .requestMatchers("/h2-console/**", "/error").permitAll()
-                .requestMatchers("/ws/**").permitAll() // handshake autenticado por ticket de uso único na query
-                // <img src> não envia header Authorization; o id da foto é um UUID
-                // aleatório, então não dá para enumerar as fotos dos usuários.
-                .requestMatchers(HttpMethod.GET, "/api/fotos/*").permitAll()
+            .authorizeHttpRequests(auth -> {
+                // Com o console desligado o path é negado explicitamente: sem isso ele
+                // cairia no anyRequest().permitAll() lá embaixo e a flag não teria efeito
+                // nenhum sobre a autorização.
+                if (h2ConsoleHabilitado) {
+                    auth.requestMatchers("/h2-console/**").permitAll();
+                } else {
+                    auth.requestMatchers("/h2-console/**").denyAll();
+                }
 
-                // API protegida; todo o resto (index.html, .js, .css, assets e as
-                // rotas do Angular) é público — é o frontend servido pelo monolito
-                .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll())
+                auth.requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                    .requestMatchers("/error").permitAll()
+                    .requestMatchers("/ws/**").permitAll() // handshake autenticado por ticket de uso único na query
+                    // <img src> não envia header Authorization; o id da foto é um UUID
+                    // aleatório, então não dá para enumerar as fotos dos usuários.
+                    .requestMatchers(HttpMethod.GET, "/api/fotos/*").permitAll()
+
+                    // API protegida; todo o resto (index.html, .js, .css, assets e as
+                    // rotas do Angular) é público — é o frontend servido pelo monolito
+                    .requestMatchers("/api/**").authenticated()
+                    .anyRequest().permitAll();
+            })
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
