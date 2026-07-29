@@ -50,3 +50,9 @@ Thumbs.db
 
 # Ignora todos os arquivos Markdown (documentação) em todo o repositório
 *.md
+
+# Documentos de trabalho não entram no repo. Dentro de src/assets eles ainda
+# seriam copiados para o build e ficariam baixáveis pela URL do site.
+*.docx
+*.xlsx
+*.pptx
