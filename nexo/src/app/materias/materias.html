@@ -1,6 +1,6 @@
 <section class="page-content p-4"> 
     <div class="page-heading mb-4">
-        <h1 class="page-title fw-bold" style="font-size: 44px; color: var(--text-main);">
+        <h1 class="page-title fw-bold">
             Minhas Matérias
         </h1>
         <p class="text-soft fs-5">
@@ -45,8 +45,8 @@
         <div class="row g-4">
             <div class="col-md-6 col-xl-4" *ngFor="let subject of filtroDeBusca">
                 <div class="subject-card card-theme p-4 rounded-5 shadow-sm h-100 d-flex flex-column">
-                    <div class="subject-header d-flex justify-content-between align-items-start mb-4">
-                        <div class="d-flex gap-3">
+                    <div class="subject-header d-flex justify-content-between align-items-start gap-2 mb-4">
+                        <div class="d-flex gap-3 subject-identity">
                             <div [class]="'subject-icon d-flex align-items-center justify-content-center rounded-4 ' + subject.colorClass"
                                  style="width: 70px; height: 70px; color: #fff;">
                                 <i *ngIf="subject.iconClass" [class]="'bi ' + subject.iconClass + ' fs-2'"></i>

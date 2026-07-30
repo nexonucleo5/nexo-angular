@@ -67,5 +67,36 @@
   border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
   transition: border-color 0.2s; &:hover { border-color: #9b2fff; }
 }
+
+/* Rótulo de botão não quebra no meio: "Ver Detalhes" virava duas linhas quando
+   o card estreitava. O botão cresce ou desce de linha, o texto fica inteiro. */
+.btn-export,
+.btn-dark-custom,
+.gradient-btn { white-space: nowrap; }
+
+/* O card do aluno: no celular as três partes (aluno, métricas, botão) viram
+   uma coluna só, cada uma com a largura inteira do card. */
+@media (max-width: 767.98px) {
+  .student-card .action-buttons { width: 100%; }
+}
 .progress { height: 6px; background: var(--border-color); border-radius: 10px; overflow: hidden; }
 .bg-purple { background: linear-gradient(90deg, #9b2fff, #673ab7) !important; }
+
+/* As 4 métricas eram 4 colunas lado a lado sempre. Sem largura para as 4, cada
+   uma encolhia até o texto quebrar no meio ("Último / Acesso", "Há 1 / semana").
+   Vira uma grade que muda de quantidade de colunas: cada célula só existe se
+   couber em 120px, então nenhuma chega estreita a ponto de quebrar o rótulo. */
+.metrics-container {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px 16px;
+  text-align: left !important;
+  align-items: start !important;
+
+  /* Rótulo e valor ocupam uma linha cada, e nunca se partem no meio. */
+  p, span { white-space: nowrap; }
+
+  /* A barrinha de progresso é o único item elástico: ela encolhe no lugar do
+     texto. O width: 60px inline vira o mínimo, não o tamanho fixo. */
+  .progress { width: auto !important; min-width: 40px; }
+}

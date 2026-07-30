@@ -87,3 +87,16 @@
   background: transparent; cursor: pointer;
   &:hover { border-color: #9b2fff; color: #9b2fff; }
 }
+/* Rótulo, barra e contagem dividem uma linha só. Os dois textos têm text-nowrap
+   e a barra tem w-100: juntos eles nunca cabiam num celular e a contagem saía
+   para fora do card. Aqui o rótulo fica em cima e a barra divide a linha de
+   baixo com a contagem. */
+@media (max-width: 767.98px) {
+  .linha-progresso {
+    flex-wrap: wrap;
+    gap: 8px !important;
+
+    > span:first-child { width: 100%; }
+    .progress { flex: 1 1 auto; width: auto !important; }
+  }
+}

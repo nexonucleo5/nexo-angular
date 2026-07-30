@@ -51,7 +51,7 @@
             </div>
           </div>
           <p class="text-soft small mb-3">{{ avaliacao.tipo }} • {{ avaliacao.turma }} • {{ avaliacao.data }}</p>
-          <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center gap-3 linha-progresso">
             <span class="text-soft small mb-0 text-nowrap">Progresso de Correção</span>
             <div class="progress w-100">
               <div class="progress-bar" [style.width]="(avaliacao.corrigidas / avaliacao.total * 100) + '%'"></div>

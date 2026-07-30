@@ -73,6 +73,34 @@
   .page-content { padding: 20px; }
   .profile-page-name { font-size: 28px !important; }
 }
+
+/* Num aparelho de 360px o card ainda vazava: .profile-info tem flex-grow-1 mas
+   não podia encolher (sem min-width: 0, um item flex nunca fica menor que o
+   conteúdo dele), então o nome do aluno definia a largura e empurrava o card
+   para fora da tela. */
+@media (max-width: 767.98px) {
+  .profile-main-card { padding: 20px; border-radius: 20px; }
+
+  .profile-info {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .profile-page-name {
+    font-size: 24px !important;
+    /* Nome comprido quebra em vez de esticar o card. */
+    overflow-wrap: break-word;
+  }
+
+  .profile-page-level { font-size: 17px; }
+
+  .profile-main-image { width: 116px; height: 116px; border-width: 4px; }
+
+  /* As etiquetas viram uma coluna: lado a lado elas não cabiam e a última
+     saía pela borda do card. */
+  .profile-tags { gap: 10px; }
+  .profile-tag  { font-size: 14px; padding: 10px 14px; }
+}
 /* Ações e edição de perfil */
 .btn-perfil-acao {
   background: linear-gradient(135deg, #9b2fff, #06d25e);

@@ -125,3 +125,27 @@
   cursor: pointer; transition: background 0.2s; width: 100%;
   &:hover { background: rgba(239, 68, 68, 0.18); }
 }
+
+/* No celular o rótulo e o campo não cabem na mesma linha: o .settings-input tem
+   flex-shrink: 0, então quem cedia era o texto — que vazava para fora do card.
+   Aqui o campo desce para baixo do rótulo e ocupa a linha inteira. */
+@media (max-width: 767.98px) {
+  .field-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .settings-input,
+  .input-texto {
+    width: 100%;
+    flex-shrink: 1;
+  }
+
+  /* O toggle continua ao lado do rótulo — ele é estreito e cabe. Só o bloco de
+     texto precisa poder encolher para quebrar em vez de empurrar o switch. */
+  .toggle-item {
+    gap: 12px;
+    > div:first-child { min-width: 0; }
+  }
+}

@@ -1,7 +1,7 @@
 <div class="container-fluid relatorios-container p-4">
 
   <!-- ── Cabeçalho ─────────────────────────────────────── -->
-  <header class="d-flex justify-content-between align-items-end mb-4">
+  <header class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
     <div>
       <h1 class="fw-bold m-0" style="color: var(--text-main);">
         Relatórios e Inteligência Educacional
@@ -21,7 +21,9 @@
   </header>
 
   <!-- ── Filtros ── -->
-  <div class="card-glass p-3 mb-4 d-flex gap-4 align-items-center">
+  <!-- flex-wrap: os dois selects e a contagem não cabem lado a lado no celular;
+       sem isso o "N alunos avaliados" era empurrado para fora do card. -->
+  <div class="card-glass p-3 mb-4 d-flex gap-3 gap-lg-4 align-items-center flex-wrap">
     <div class="filter-group">
       <i class="bi bi-funnel small" style="color: var(--text-muted);"></i>
       <select class="custom-select" [ngModel]="periodoSelecionado()" (ngModelChange)="periodoSelecionado.set($event)" style="color: var(--text-main);">

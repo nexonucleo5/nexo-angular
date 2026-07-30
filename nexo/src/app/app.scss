@@ -20,6 +20,11 @@
   }
 }
 
+/* margin-left/width por perfil ficam só no styles.scss global: lá a mesma
+   regra tem um @media que zera o recuo no mobile. Repetir os valores aqui
+   criava uma regra com [_ngcontent] (mais específica que a global) que
+   nunca perdia pro @media — o conteúdo ficava com 300px de recuo cravado
+   mesmo com a sidebar escondida fora da tela. */
 .main-content {
   flex-grow: 1;
   display: flex;
@@ -29,25 +34,6 @@
   overflow-x: hidden;
   background-color: var(--bg-primary);
   transition: margin-left 0.3s ease, width 0.3s ease, background-color 0.3s;
-
-  &.content-aluno {
-    margin-left: 300px;
-    width: calc(100% - 300px);
-    max-width: calc(100% - 300px);
-  }
-
-  &.content-diretor {
-    margin-left: 300px;
-    width: calc(100% - 300px);
-    max-width: calc(100% - 300px);
-  }
-
-  /* Portal do Professor */
-  &.content-professor {
-    margin-left: 300px;
-    width: calc(100% - 300px);
-    max-width: calc(100% - 300px);
-  }
 }
 
 .top-header {
@@ -63,6 +49,16 @@
   width: 100%;
   box-sizing: border-box;
   transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* No celular a barra abre cobrindo a tela inteira (styles.scss, seção 3.2) e o
+   z-index dela é 1000. O header precisa passar por cima, senão a barra cobre o
+   próprio X que a fecha e não sobra jeito de sair dela.
+   Fica aqui, e não no styles.scss, porque a regra base de .top-header é deste
+   arquivo: como estilo de componente ela sai com [_ngcontent] e venceria a
+   global de mesmo nome. */
+@media (max-width: 767.98px) {
+  .top-header { z-index: 1001; }
 }
 
 .container-fluid {

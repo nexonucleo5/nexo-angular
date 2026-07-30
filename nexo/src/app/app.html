@@ -10,12 +10,6 @@
       } @else {
         <app-menu-diretor></app-menu-diretor>
       }
-
-      <!-- Fecha a barra ao tocar fora dela. Só existe no mobile e só com a
-           barra aberta; no desktop o @media esconde. -->
-      @if (menuAberto()) {
-        <div class="backdrop-menu" (click)="fecharMenu()"></div>
-      }
     }
 
     <main class="main-content"
@@ -26,7 +20,7 @@
         @if (authService.usuarioLogado(); as usuario) {
         <header class="top-header">
             <div class="d-flex align-items-center">
-                <!-- Os 3 riscos: abrem e fecham a navbar no celular. -->
+                <!-- Os 3 riscos: abrem e fecham a navbar, em qualquer largura. -->
                 <button type="button"
                         class="btn-hamburguer"
                         [class.aberto]="menuAberto()"

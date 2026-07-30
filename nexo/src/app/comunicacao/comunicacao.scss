@@ -5,6 +5,9 @@
   gap: 10px;
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 8px;
+  /* As 4 abas não cabem lado a lado num celular; sem isso a última era
+     empurrada para fora da tela em vez de descer. */
+  flex-wrap: wrap;
 
   .tab-link {
     background: transparent;

@@ -32,9 +32,7 @@ interface PerfilSettings {
   templateUrl: './app.html',
   styleUrl: './app.scss',
   host: {
-    // Esc fecha a barra. O backdrop já fecha no toque, mas quem está no
-    // teclado (ou num tablet com teclado) não tem como alcançá-lo.
-    '(document:keydown.escape)': 'fecharMenu()',
+    '(document:keydown.escape)': 'fecharSeCobreATela()',
   },
 })
 export class App {
@@ -49,10 +47,27 @@ export class App {
   readonly temaEscuro = computed(() => this.settingsAtivo()?.isDarkMode() ?? this.temaLocal());
 
   /**
-   * Sidebar aberta no mobile. No desktop a barra é fixa e este estado não tem
-   * efeito nenhum — quem decide é o @media do styles.scss.
+   * Sidebar aberta. O botão dos 3 riscos existe em qualquer largura, mas a barra
+   * se comporta de dois jeitos — os mesmos dois do styles.scss:
+   *
+   * - de 768px para cima ela empurra o conteúdo, que reflui ao lado;
+   * - abaixo disso ela cobre a tela e é a própria navegação, porque não sobraria
+   *   largura útil para os dois (ver o @media da seção 3.2).
+   *
+   * Começa aberta só onde sobra largura para os dois. Depois disso quem manda é
+   * o botão: não há listener de resize porque reagir a ele desfaria a escolha
+   * que a pessoa acabou de fazer no clique.
    */
-  readonly menuAberto = signal(false);
+  readonly menuAberto = signal(App.cabeLadoALado());
+
+  private static cabeLadoALado(): boolean {
+    return window.matchMedia('(min-width: 992px)').matches;
+  }
+
+  /** Largura em que a barra cobre a tela inteira em vez de empurrar. */
+  private static cobreATela(): boolean {
+    return window.matchMedia('(max-width: 767.98px)').matches;
+  }
 
   constructor() {
     aplicarTema(this.temaLocal());
@@ -65,21 +80,25 @@ export class App {
       this.settingsAtivo.set(role ? untracked(() => this.servicoPara(role)) : null);
     });
 
-    // Trocou de tela, fecha a barra: no mobile ela cobre o conteúdo inteiro e
-    // ficaria por cima da página recém-aberta.
-    this.router.events
-      .pipe(filter((evento) => evento instanceof NavigationEnd))
-      .subscribe(() => this.menuAberto.set(false));
-
-    // Logado ou deslogado, nunca começa com a barra aberta.
+    // Entrou ou saiu, a barra volta ao padrão da largura atual.
     effect(() => {
       this.authService.usuarioLogado();
-      untracked(() => this.menuAberto.set(false));
+      untracked(() => this.menuAberto.set(App.cabeLadoALado()));
     });
 
-    // Trava o scroll do fundo com a barra aberta: sem isso o dedo que quer
-    // rolar o menu rola a página atrás dele. A classe só tem efeito dentro do
-    // @media mobile, então redimensionar para desktop nunca deixa o body preso.
+    // No celular a barra cobre a tela, então tocar num link precisa fechá-la —
+    // senão a tela recém-aberta fica atrás dela. Onde ela empurra, fica aberta
+    // de propósito: não cobre nada e serve para ir direto à próxima tela.
+    this.router.events
+      .pipe(filter((evento) => evento instanceof NavigationEnd))
+      .subscribe(() => {
+        if (App.cobreATela()) this.menuAberto.set(false);
+      });
+
+    // Trava o scroll do fundo enquanto a barra cobre a tela: sem isso o dedo que
+    // quer rolar a lista de links rola a página atrás dela. A classe só tem
+    // efeito dentro do @media do celular (seção 3.2), então uma janela
+    // redimensionada para o desktop nunca fica com o body preso.
     effect(() => {
       document.body.classList.toggle('menu-travado', this.menuAberto());
     });
@@ -91,6 +110,15 @@ export class App {
 
   fecharMenu(): void {
     this.menuAberto.set(false);
+  }
+
+  /**
+   * Esc só fecha onde a barra cobre a tela — ali ela prende quem está no
+   * teclado. Onde ela empurra é um painel de navegação; fechá-la no Esc
+   * derrubaria a navegação de quem só queria sair de um campo de busca.
+   */
+  fecharSeCobreATela(): void {
+    if (App.cobreATela()) this.fecharMenu();
   }
 
   alternarTema(): void {

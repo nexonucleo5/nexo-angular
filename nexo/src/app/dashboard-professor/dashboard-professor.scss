@@ -46,6 +46,25 @@ $color-red:    #ef4444;
 .student-row {
   transition: background 0.2s;
   &:hover { background: var(--hover-overlay); }
+
+  /* Nome + turma de um lado, métricas do outro. Sem poder encolher, o nome do
+     aluno definia a largura da linha e ela vazava para fora do card no celular. */
+  > div:first-child { min-width: 0; }
+
+  h6, small { overflow-wrap: break-word; }
+
+  .avatar-img { flex-shrink: 0; }
+}
+
+/* Numa tela estreita os dois blocos passam a ocupar linhas separadas, cada um
+   com a largura inteira, em vez de disputarem a mesma linha. */
+@media (max-width: 767.98px) {
+  .student-row {
+    flex-wrap: wrap;
+    gap: 12px;
+
+    > div:last-child { width: 100%; justify-content: space-between; }
+  }
 }
 
 /* Tags de badge */

@@ -26,12 +26,16 @@ html[data-theme='dark'] {
   --dropdown-hover: rgba(255, 255, 255, 0.05);
 }
 
-/* Medidas de layout — não mudam com o tema, então ficam fora dos blocos acima.
-   A altura do header no mobile é usada em dois lugares distantes (aqui e no
-   recuo do topo da sidebar); repetir o número deixaria os dois dessincronizados
-   na primeira vez que alguém mexesse no padding do header. */
+/* Medidas de layout — não mudam com o tema, então ficam fora dos blocos acima. */
 :root {
-  --altura-header-mobile: 68px;
+  /* Largura da barra e, por consequência, o quanto o conteúdo é empurrado
+     quando ela abre. Um número só para os dois lados não saírem de sincronia. */
+  --largura-sidebar: 300px;
+
+  /* Altura do header. No celular a barra abre por baixo dele e precisa saber
+     onde começar; repetir o número deixaria os dois fora de sincronia na
+     primeira vez que alguém mexesse no padding do header. */
+  --altura-header: 68px;
 }
 
 /* ==========================================================================
@@ -80,7 +84,7 @@ app-menu,
 app-menu-diretor,
 app-menu-professor,
 .sidebar {
-  width: 300px !important;
+  width: var(--largura-sidebar) !important;
   height: 100vh;
   position: fixed;
   top: 0;
@@ -89,23 +93,71 @@ app-menu-professor,
   background-color: var(--bg-card);
   border-right: 1px solid var(--border-color);
   box-sizing: border-box;
+  /* A lista rola quando não cabe, mas sem barra à vista.
+     overflow-x precisa ser declarado: com só um dos eixos em `auto`, o outro
+     deixa de ser `visible` e vira `auto` sozinho — era daí que saía a barra
+     horizontal no rodapé da barra. */
   overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* Edge legado */
   transition: background-color 0.3s, border-color 0.3s;
 }
 
-/* Área de conteúdo */
+/* Chrome/Safari/Edge: o pseudo-elemento não entra no grupo acima porque
+   navegadores que não o conhecem descartariam a regra inteira. */
+app-menu::-webkit-scrollbar,
+app-menu-diretor::-webkit-scrollbar,
+app-menu-professor::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Abrir e fechar mora só nos hosts, nunca no .sidebar de dentro: ele é fixed e,
+   com o host transformado, passa a se posicionar por ele — repetir o translate
+   nos dois deslocaria a barra pelo dobro da largura.
+   visibility acompanha o transform porque só o transform a tiraria da vista
+   mas a deixaria focável: o Tab cairia numa lista de links invisível. */
+app-menu,
+app-menu-diretor,
+app-menu-professor {
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition: transform 0.28s ease, visibility 0.28s ease,
+    background-color 0.3s, border-color 0.3s;
+  will-change: transform;
+}
+
+.app-layout.menu-aberto app-menu,
+.app-layout.menu-aberto app-menu-diretor,
+.app-layout.menu-aberto app-menu-professor {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+/* Área de conteúdo. O recuo acompanha a barra: com ela aberta o conteúdo é
+   empurrado e reflui na largura que sobra; fechada, ocupa a tela inteira.
+   Quem liga os dois é a classe .menu-aberto no .app-layout. */
 .main-content {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--bg-primary);
-  margin-left: 300px;
-  width: calc(100% - 300px);
-  max-width: calc(100% - 300px);
+  margin-left: 0;
+  width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
   overflow-x: hidden;
-  transition: background-color 0.3s;
+  transition: margin-left 0.28s ease, width 0.28s ease, max-width 0.28s ease,
+    background-color 0.3s;
+}
+
+.app-layout.menu-aberto .main-content {
+  margin-left: var(--largura-sidebar);
+  width: calc(100% - var(--largura-sidebar));
+  max-width: calc(100% - var(--largura-sidebar));
 }
 
 /* Páginas filhas do router */
@@ -175,12 +227,13 @@ html[data-theme='light'] .main-content::before {
 }
 
 /* ==========================================================================
-   3.1 NAVBAR NO MOBILE — os 3 riscos
+   3.1 A BARRA E OS 3 RISCOS
    ========================================================================== */
 
-/* O botão dos 3 riscos. Escondido no desktop, onde a barra é fixa. */
+/* Os 3 riscos existem em qualquer largura: a barra é recolhível também no
+   desktop, e sem o botão não haveria como trazê-la de volta. */
 .btn-hamburguer {
-  display: none;
+  display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 5px;
@@ -213,47 +266,8 @@ html[data-theme='light'] .main-content::before {
   }
 }
 
-/* Escurece o conteúdo com a barra aberta e fecha ao tocar fora. */
-.backdrop-menu {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 998;
-  background: rgba(0, 0, 0, 0.5);
-}
-
 @media (max-width: 991.98px) {
-  .btn-hamburguer { display: flex; }
-  .backdrop-menu  { display: block; }
-
-  /* A barra sai da tela e volta deslizando. O transform no host também vale
-     para a .sidebar de dentro, que é fixed e passa a se posicionar por ele. */
-  app-menu,
-  app-menu-diretor,
-  app-menu-professor {
-    transform: translateX(-100%);
-    transition: transform 0.28s ease;
-    will-change: transform;
-  }
-
-  .app-layout.menu-aberto app-menu,
-  .app-layout.menu-aberto app-menu-diretor,
-  .app-layout.menu-aberto app-menu-professor {
-    transform: translateX(0);
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.35);
-  }
-
-  /* Sem barra ocupando espaço, o conteúdo usa a largura toda. */
-  .main-content {
-    margin-left: 0;
-    width: 100%;
-    max-width: 100%;
-  }
-
-  /* O header fica acima da barra para os 3 riscos continuarem clicáveis
-     mesmo com ela aberta — é assim que eles fecham a navbar. */
   .top-header {
-    z-index: 1001;
     padding: 12px 16px;
     gap: 8px;
   }
@@ -274,20 +288,6 @@ html[data-theme='light'] .main-content::before {
 
   .top-header app-menu-usuario { flex-shrink: 0; }
 
-  /* Compensa a altura do header, que passa por cima do topo da barra. */
-  .sidebar .sidebar-menu {
-    padding-top: calc(var(--altura-header-mobile) + 16px);
-  }
-
-  /* Barra aberta: o fundo para de rolar. Só aqui dentro, para o desktop nunca
-     herdar um body travado. */
-  body.menu-travado {
-    overflow: hidden;
-    /* iOS ignora overflow: hidden no body em alguns casos; a altura fixa
-       impede que ele ofereça a rolagem elástica da página de trás. */
-    height: 100%;
-  }
-
   .main-content > router-outlet + *,
   .main-content > ng-component,
   .main-content > div,
@@ -296,13 +296,70 @@ html[data-theme='light'] .main-content::before {
   }
 }
 
-@media (max-width: 575.98px) {
+/* ==========================================================================
+   3.2 CELULAR — a barra vira a tela de navegação inteira
+   ==========================================================================
+   Empurrar só funciona enquanto sobra largura útil para os dois lados. Num
+   S25 Ultra (384px) uma barra de 240px deixaria 144px de conteúdo: os títulos
+   ficam mais largos que os cards e vazam. Então aqui ela não empurra nada —
+   abre ocupando a tela toda e é a própria navegação. */
+@media (max-width: 767.98px) {
   app-menu,
   app-menu-diretor,
   app-menu-professor,
   .sidebar {
-    width: 86vw !important;
-    max-width: 320px;
+    width: 100% !important;
+    border-right: none;
+  }
+
+  /* O conteúdo nunca é espremido: ou a barra está aberta cobrindo a tela, ou
+     ele tem os 100% para si. */
+  .app-layout.menu-aberto .main-content {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* O header passa por cima da barra para o X continuar visível e fechável (o
+     z-index disso mora no app.scss, junto da regra base de .top-header), então
+     os links precisam começar abaixo dele.
+     O seletor é mais longo do que parece necessário de propósito: as três
+     sidebars declaram .sidebar-menu no próprio SCSS, e um estilo de componente
+     sai com [_ngcontent], o que empata com `.sidebar .sidebar-menu` e vence no
+     desempate por ordem. Com `.app-layout` na frente a global volta a ganhar. */
+  .app-layout .sidebar .sidebar-menu {
+    padding-top: calc(var(--altura-header) + 16px);
+  }
+
+  /* Barra aberta, o fundo para de rolar: sem isso o dedo que quer rolar a
+     lista de links rola a página atrás dela. Só aqui dentro, para uma janela
+     redimensionada para o desktop nunca herdar um body travado. */
+  body.menu-travado {
+    overflow: hidden;
+    /* iOS ignora overflow: hidden no body em alguns casos; a altura fixa
+       impede a rolagem elástica da página de trás. */
+    height: 100%;
+  }
+
+  /* Cada tela cravava o tamanho do próprio título, de 28px a 44px. Num celular
+     de 384px, 44px é mais largo que os cards embaixo — é o "letra maior que o
+     quadradinho". Aqui todos passam a caber na largura da tela.
+     Os três seletores existem para vencer os estilos de componente: eles saem
+     com [_ngcontent] e empatariam com `.page-title`, ganhando no desempate por
+     ordem. Com o caminho completo a regra global volta a ter a palavra final. */
+  .app-layout .main-content .page-title,
+  .app-layout .main-content .settings-page-title,
+  .app-layout .main-content h1 {
+    font-size: clamp(22px, 6.2vw, 28px);
+    line-height: 1.2;
+    /* Nome de disciplina ou aluno sem espaço não empurra a página para o lado. */
+    overflow-wrap: break-word;
+  }
+
+  /* O subtítulo abaixo do título vinha com .fs-5 (20px) e ficava quase do
+     tamanho do próprio título depois que ele encolheu. */
+  .app-layout .main-content .page-heading p {
+    font-size: 15px;
   }
 }
 

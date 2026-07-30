@@ -1,7 +1,7 @@
 <section class="page-content p-4">
 
     <div class="page-heading mb-4">
-        <h1 class="page-title fw-bold" style="font-size: 44px; color: var(--text-main);">Gestão de Evasão</h1>
+        <h1 class="page-title fw-bold">Gestão de Evasão</h1>
         <p class="text-soft fs-5">Monitoramento e intervenção para retenção de alunos</p>
     </div>
 
@@ -72,7 +72,9 @@
         </div>
     </section>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- flex-wrap + gap: sem espaço para os dois lado a lado, o botão desce para
+         a linha de baixo inteiro em vez de ser espremido até o rótulo quebrar. -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
         <h2 class="fs-4 fw-bold text-white mb-0">Alunos em Risco ({{ alunosFiltrados().length }})</h2>
         <button class="btn btn-export shadow-sm" (click)="exportar()">Exportar Relatório</button>
     </div>

@@ -2,12 +2,32 @@
 
 .page-content { background-color: var(--bg-primary); min-height: 100vh; }
 
-.page-title { color: var(--text-main); font-size: 44px !important; }
+/* Sem !important: no celular o styles.scss reduz .page-title, e um !important
+   aqui venceria essa regra e devolveria os 44px numa tela de 384px. */
+.page-title { color: var(--text-main); font-size: 44px; }
 
 .filters-box {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 20px;
+}
+
+/* Ícone + nome da matéria. Sem min-width: 0 este bloco nunca encolhe abaixo do
+   nome da disciplina, e num celular estreito ele empurrava a etiqueta de
+   progresso para fora do card. */
+.subject-identity {
+  min-width: 0;
+  .subject-title { overflow-wrap: break-word; }
+}
+
+@media (max-width: 767.98px) {
+  /* O quadrado do ícone é fixo em 70px no template; aqui ele cede espaço para
+     o nome, que é o que a pessoa precisa ler. */
+  .subject-icon {
+    width: 52px !important;
+    height: 52px !important;
+    flex-shrink: 0;
+  }
 }
 
 .custom-input {

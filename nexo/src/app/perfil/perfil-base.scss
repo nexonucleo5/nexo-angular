@@ -71,6 +71,44 @@
 .summary-title  { margin: 0; font-size: 16px; color: var(--text-muted) !important; }
 .summary-number { margin: 0; font-size: 28px; font-weight: 800; color: var(--text-main) !important; }
 
+/* No celular estes cards ficam em col-6, ou seja, ~142px. Lado a lado, o ícone
+   (60px) mais o gap (20px) mais o padding (60px) já somavam 140px: o rótulo não
+   tinha onde caber e vazava para fora do card. Empilhando, o texto recebe a
+   largura inteira. */
+@media (max-width: 767.98px) {
+  .summary-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .summary-card-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .summary-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    font-size: 18px;
+  }
+
+  .summary-title  { font-size: 14px; }
+  .summary-number { font-size: 24px; }
+
+  /* Mesmo problema nas caixas de KPI: em col-6 num aparelho de 360px a caixa
+     tem 101px, e 30px de padding de cada lado deixavam 39px para o rótulo. */
+  .stat-box {
+    padding: 16px;
+    border-radius: 18px;
+
+    .stat-number { font-size: 24px; }
+    .stat-label  { font-size: 13px; overflow-wrap: break-word; }
+  }
+}
+
 /* Barras de progresso */
 .linha-track {
   height: 8px;
