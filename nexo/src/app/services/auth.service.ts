@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, finalize, firstValueFrom, shareReplay, tap } from 'rxjs';
+import { Observable, finalize, firstValueFrom, from, shareReplay, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { resolverFoto } from '../core/avatar';
 
@@ -30,6 +30,9 @@ export interface TokenResponse {
 }
 
 const USUARIO_KEY = 'usuario_nexo';
+
+/** Nome da trava do Web Locks que serializa a renovação entre abas — ver {@link AuthService.refresh}. */
+const TRAVA_RENOVACAO = 'nexo-refresh';
 
 /**
  * Autenticação real contra o backend Spring (POST /api/auth/login).
@@ -101,16 +104,45 @@ export class AuthService {
    * virava logout do usuário legítimo a cada expiração.
    */
   public refresh(): Observable<TokenResponse> {
-    this.refreshEmVoo ??= this.http
-      .post<TokenResponse>(`${this.api}/refresh`, {}, { withCredentials: true })
-      .pipe(
-        tap((resposta) => this.guardarSessao(resposta)),
-        // Libera o slot no fim (sucesso ou erro) para que a próxima expiração do
-        // access token rode uma renovação nova em vez de repetir esta.
-        finalize(() => (this.refreshEmVoo = null)),
-        shareReplay({ bufferSize: 1, refCount: false }),
-      );
+    this.refreshEmVoo ??= from(this.renovarSerializado()).pipe(
+      tap((resposta) => this.guardarSessao(resposta)),
+      // Libera o slot no fim (sucesso ou erro) para que a próxima expiração do
+      // access token rode uma renovação nova em vez de repetir esta.
+      finalize(() => (this.refreshEmVoo = null)),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
     return this.refreshEmVoo;
+  }
+
+  /**
+   * Garante que só uma renovação ocorra por vez em <b>todo o navegador</b>, e não apenas
+   * nesta aba.
+   *
+   * <p>O campo {@code refreshEmVoo} vive na instância do serviço, ou seja, uma por aba.
+   * Duas abas paradas além da expiração e reativadas juntas mandavam dois {@code /refresh}
+   * em paralelo: o primeiro rotacionava o cookie e o segundo chegava com o valor antigo,
+   * que o servidor — corretamente — lê como cópia vazada e responde revogando todas as
+   * sessões. As duas abas caíam.
+   *
+   * <p>A trava do Web Locks é compartilhada por todas as abas da mesma origem, então a
+   * segunda espera. Serializar basta: quando ela finalmente roda, o cookie já é o novo
+   * (o navegador aplica o {@code Set-Cookie} antes de a promessa da primeira resolver),
+   * então o que sai é uma rotação legítima e não uma reapresentação.
+   *
+   * <p>O Web Locks exige contexto seguro — HTTPS ou localhost, que cobre produção e o
+   * dev-server. Onde não existir, sobra a dedup por aba, que já resolve o caso comum.
+   */
+  private async renovarSerializado(): Promise<TokenResponse> {
+    const chamar = () =>
+      firstValueFrom(
+        this.http.post<TokenResponse>(`${this.api}/refresh`, {}, { withCredentials: true }),
+      );
+
+    const travas: LockManager | undefined = navigator.locks;
+    if (!travas) return chamar();
+
+    // O await desaninha: a tipagem de request() não desembrulha a promessa do callback.
+    return await travas.request(TRAVA_RENOVACAO, chamar);
   }
 
   public logout(): void {

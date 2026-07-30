@@ -19,9 +19,11 @@ import java.util.List;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final AccessTokensRevogados revogados;
 
-    public JwtAuthFilter(JwtService jwtService) {
+    public JwtAuthFilter(JwtService jwtService, AccessTokensRevogados revogados) {
         this.jwtService = jwtService;
+        this.revogados = revogados;
     }
 
     @Override
@@ -42,14 +44,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
      * adiante com {@code uid} nulo (quebrando toda regra que compara o dono do recurso)
      * ou com a autoridade literal {@code ROLE_null}. Faltando qualquer claim, a requisição
      * segue sem autenticação e o endpoint protegido responde 401.
+     *
+     * <p>O {@code jti} entra nessa exigência: sem ele o token não é revogável, e um token
+     * emitido antes desta versão simplesmente força uma renovação — o cliente toma 401,
+     * o interceptor chama /refresh e segue com um token novo.
      */
     private void autenticar(Claims claims, HttpServletRequest request) {
         String login = claims.getSubject();
         String role = claims.get("role", String.class);
         Long uid = claims.get("uid", Long.class);
-        if (login == null || uid == null || !papelConhecido(role)) return;
+        String jti = claims.getId();
+        if (login == null || uid == null || jti == null || !papelConhecido(role)) return;
 
-        var principal = new UsuarioAutenticado(uid, login, claims.get("nome", String.class), role);
+        // Assinatura boa e prazo em dia não bastam: o logout invalida a emissão na hora.
+        if (revogados.revogado(jti)) return;
+
+        var principal = new UsuarioAutenticado(uid, login, claims.get("nome", String.class), role, jti);
         var auth = new UsernamePasswordAuthenticationToken(
                 principal, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
         SecurityContextHolder.getContext().setAuthentication(auth);

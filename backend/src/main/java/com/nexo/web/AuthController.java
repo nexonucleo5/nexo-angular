@@ -57,7 +57,7 @@ public class AuthController {
             @AuthenticationPrincipal UsuarioAutenticado usuario,
             @CookieValue(name = RefreshTokenCookie.NOME, required = false) String refreshToken,
             HttpServletRequest http) {
-        authService.logout(usuario.id(), usuario.nome(), refreshToken, http.getRemoteAddr());
+        authService.logout(usuario, refreshToken, http.getRemoteAddr());
         return ResponseEntity.noContent()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.limpar(http.isSecure()))
                 .build();

@@ -13,6 +13,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -183,11 +184,38 @@ class AutenticacaoTest extends TesteApiBase {
         mvc.perform(post("/api/auth/refresh").cookie(cookieDeRefresh(disp2)))
                 .andExpect(status().isOk());
 
+        // A revogação do access token também é por sessão: a do disp2 não foi atingida.
+        String bearer2 = "Bearer " + json.readTree(disp2.getContentAsString()).get("token").asText();
+        mvc.perform(get("/api/auth/me").header("Authorization", bearer2))
+                .andExpect(status().isOk());
+
         // Só depois de verificar o disp2: reapresentar o token do disp1 dispara a cascata
         // (a linha ficou revogada, não apagada), o que derrubaria o disp2 junto. É o
         // comportamento desejado — o cookie do disp1 foi limpo no logout, então uma
         // reapresentação só pode vir de uma cópia vazada.
         mvc.perform(post("/api/auth/refresh").cookie(cookieDeRefresh(disp1)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("o access token para de valer no mesmo instante do logout")
+    void logoutInvalidaOAccessTokenNaHora() throws Exception {
+        // "professor" está fora: bloqueioPorTentativas esgota as tentativas dele e a
+        // ordem entre os testes da classe não é garantida (ver o comentário da classe).
+        MockHttpServletResponse sessao = loginHttp("diretor", SENHA_PADRAO);
+        String bearer = "Bearer " + json.readTree(sessao.getContentAsString()).get("token").asText();
+
+        mvc.perform(get("/api/auth/me").header("Authorization", bearer))
+                .andExpect(status().isOk());
+
+        mvc.perform(post("/api/auth/logout")
+                        .header("Authorization", bearer)
+                        .cookie(cookieDeRefresh(sessao)))
+                .andExpect(status().isNoContent());
+
+        // Antes o JWT continuava aceito até o exp chegar: havia uma janela de até 15
+        // minutos em que uma cópia do token abria a conta depois de o dono ter saído.
+        mvc.perform(get("/api/auth/me").header("Authorization", bearer))
                 .andExpect(status().isUnauthorized());
     }
 

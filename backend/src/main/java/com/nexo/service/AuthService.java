@@ -9,7 +9,9 @@ import com.nexo.domain.RefreshToken;
 import com.nexo.domain.Usuario;
 import com.nexo.repository.RefreshTokenRepository;
 import com.nexo.repository.UsuarioRepository;
+import com.nexo.security.AccessTokensRevogados;
 import com.nexo.security.JwtService;
+import com.nexo.security.UsuarioAutenticado;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,7 @@ public class AuthService {
     private final UsuarioRepository usuarios;
     private final RefreshTokenRepository refreshTokens;
     private final JwtService jwtService;
+    private final AccessTokensRevogados accessTokensRevogados;
     private final PasswordEncoder passwordEncoder;
     private final AuditoriaService auditoria;
     private final Duration refreshTtl;
@@ -61,12 +64,14 @@ public class AuthService {
     public AuthService(UsuarioRepository usuarios,
                        RefreshTokenRepository refreshTokens,
                        JwtService jwtService,
+                       AccessTokensRevogados accessTokensRevogados,
                        PasswordEncoder passwordEncoder,
                        AuditoriaService auditoria,
                        @Value("${nexo.jwt.refresh-token-days}") long refreshTokenDays) {
         this.usuarios = usuarios;
         this.refreshTokens = refreshTokens;
         this.jwtService = jwtService;
+        this.accessTokensRevogados = accessTokensRevogados;
         this.passwordEncoder = passwordEncoder;
         this.auditoria = auditoria;
         this.refreshTtl = Duration.ofDays(refreshTokenDays);
@@ -149,17 +154,22 @@ public class AuthService {
      * normalmente e registra a auditoria — é idempotente de propósito.
      */
     @Transactional
-    public void logout(Long usuarioId, String nome, String refreshToken, String ip) {
+    public void logout(UsuarioAutenticado usuario, String refreshToken, String ip) {
         if (refreshToken != null && !refreshToken.isBlank()) {
             refreshTokens.findByTokenHash(hash(refreshToken))
                     // Um cookie de outro usuário não encerra a sessão alheia.
-                    .filter(t -> t.getUsuario().getId().equals(usuarioId))
+                    .filter(t -> t.getUsuario().getId().equals(usuario.id()))
                     .ifPresent(t -> {
                         t.setRevogado(true);
                         refreshTokens.save(t);
                     });
         }
-        auditoria.registrar(nome, EventoAuditoria.Tipo.LOGOUT, "Logout realizado", null, ip);
+
+        // O refresh token morre acima, mas o access token na mão do cliente continuaria
+        // aceito até expirar. Aqui ele para de valer no mesmo instante.
+        accessTokensRevogados.revogar(usuario.jti());
+
+        auditoria.registrar(usuario.nome(), EventoAuditoria.Tipo.LOGOUT, "Logout realizado", null, ip);
     }
 
     public UsuarioDTO me(Long usuarioId) {
