@@ -135,9 +135,30 @@ public class AuthService {
         return gerarTokens(atual.getUsuario());
     }
 
+    /**
+     * Encerra <b>apenas</b> a sessão que apresentou o refresh token — as outras continuam
+     * de pé. Antes o logout chamava {@code deleteByUsuario} e derrubava todos os
+     * dispositivos do usuário de uma vez: sair no celular deslogava o desktop no meio do
+     * trabalho.
+     *
+     * <p>A linha é revogada, não apagada, para preservar o rastro de reuso: se a cópia
+     * vazada desta sessão for reapresentada depois do logout, {@link #refresh} a reconhece
+     * como token já revogado e dispara a cascata, em vez de tratá-la como desconhecida.
+     *
+     * <p>Sem cookie (sessão já encerrada, ou cliente que o perdeu) o logout ainda responde
+     * normalmente e registra a auditoria — é idempotente de propósito.
+     */
     @Transactional
-    public void logout(Long usuarioId, String nome, String ip) {
-        usuarios.findById(usuarioId).ifPresent(refreshTokens::deleteByUsuario);
+    public void logout(Long usuarioId, String nome, String refreshToken, String ip) {
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            refreshTokens.findByTokenHash(hash(refreshToken))
+                    // Um cookie de outro usuário não encerra a sessão alheia.
+                    .filter(t -> t.getUsuario().getId().equals(usuarioId))
+                    .ifPresent(t -> {
+                        t.setRevogado(true);
+                        refreshTokens.save(t);
+                    });
+        }
         auditoria.registrar(nome, EventoAuditoria.Tipo.LOGOUT, "Logout realizado", null, ip);
     }
 

@@ -1,7 +1,6 @@
 package com.nexo.repository;
 
 import com.nexo.domain.RefreshToken;
-import com.nexo.domain.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +11,6 @@ import java.util.Optional;
 
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
     Optional<RefreshToken> findByTokenHash(String tokenHash);
-    void deleteByUsuario(Usuario usuario);
 
     /**
      * Usado pela limpeza agendada. Apaga <b>somente</b> o que já venceu: a linha revogada

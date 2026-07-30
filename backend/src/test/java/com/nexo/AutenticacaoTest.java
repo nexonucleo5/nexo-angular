@@ -167,6 +167,39 @@ class AutenticacaoTest extends TesteApiBase {
     }
 
     @Test
+    @DisplayName("logout encerra só o dispositivo atual e deixa as outras sessões de pé")
+    void logoutEhPorDispositivo() throws Exception {
+        MockHttpServletResponse disp1 = loginHttp("aluno", SENHA_PADRAO);
+        MockHttpServletResponse disp2 = loginHttp("aluno", SENHA_PADRAO);
+        String bearer1 = "Bearer " + json.readTree(disp1.getContentAsString()).get("token").asText();
+
+        mvc.perform(post("/api/auth/logout")
+                        .header("Authorization", bearer1)
+                        .cookie(cookieDeRefresh(disp1)))
+                .andExpect(status().isNoContent());
+
+        // O ponto da mudança: antes o logout chamava deleteByUsuario e este refresh
+        // também morria — sair no celular deslogava o desktop.
+        mvc.perform(post("/api/auth/refresh").cookie(cookieDeRefresh(disp2)))
+                .andExpect(status().isOk());
+
+        // Só depois de verificar o disp2: reapresentar o token do disp1 dispara a cascata
+        // (a linha ficou revogada, não apagada), o que derrubaria o disp2 junto. É o
+        // comportamento desejado — o cookie do disp1 foi limpo no logout, então uma
+        // reapresentação só pode vir de uma cópia vazada.
+        mvc.perform(post("/api/auth/refresh").cookie(cookieDeRefresh(disp1)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("logout sem cookie ainda responde 204 e registra a auditoria")
+    void logoutSemCookieEIdempotente() throws Exception {
+        String bearer = bearer("diretor");
+        mvc.perform(post("/api/auth/logout").header("Authorization", bearer))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
     @DisplayName("refresh sem cookie ou com cookie desconhecido devolve 401")
     void refreshInvalido() throws Exception {
         mvc.perform(post("/api/auth/refresh"))

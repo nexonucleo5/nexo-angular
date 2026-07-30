@@ -48,10 +48,16 @@ public class AuthController {
         return comCookie(authService.refresh(refreshToken), http);
     }
 
+    /**
+     * Encerra só esta sessão. O cookie identifica qual delas — daí ele ser lido aqui
+     * também, e não apenas em {@link #refresh}.
+     */
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@AuthenticationPrincipal UsuarioAutenticado usuario,
-                                       HttpServletRequest http) {
-        authService.logout(usuario.id(), usuario.nome(), http.getRemoteAddr());
+    public ResponseEntity<Void> logout(
+            @AuthenticationPrincipal UsuarioAutenticado usuario,
+            @CookieValue(name = RefreshTokenCookie.NOME, required = false) String refreshToken,
+            HttpServletRequest http) {
+        authService.logout(usuario.id(), usuario.nome(), refreshToken, http.getRemoteAddr());
         return ResponseEntity.noContent()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.limpar(http.isSecure()))
                 .build();

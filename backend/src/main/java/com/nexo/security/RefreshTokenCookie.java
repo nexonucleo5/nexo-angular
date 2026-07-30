@@ -26,8 +26,10 @@ import java.time.Duration;
  *       desligada porque o resto da API se autentica por header Bearer, não por cookie).
  *       Strict não incomoda aqui porque a renovação é XHR depois do carregamento, nunca
  *       uma navegação de entrada vinda de link externo.</li>
- *   <li><b>Path</b> — só o endpoint que consome o token o recebe; nenhuma outra rota da
- *       API vê o cookie passar.</li>
+ *   <li><b>Path</b> — restrito a {@code /api/auth}: o resto da API, que é quase tudo,
+ *       nunca vê o cookie passar. Não dá para apertar mais porque dois endpoints precisam
+ *       lê-lo — {@code /refresh}, que o rotaciona, e {@code /logout}, que revoga só a
+ *       sessão que o apresentou.</li>
  * </ul>
  */
 @Component
@@ -35,8 +37,8 @@ public class RefreshTokenCookie {
 
     public static final String NOME = "nexo_refresh";
 
-    /** Único endpoint que lê o cookie — ver {@code AuthController.refresh}. */
-    private static final String CAMINHO = "/api/auth/refresh";
+    /** Ver a nota sobre Path acima: {@code /refresh} e {@code /logout} consomem o cookie. */
+    private static final String CAMINHO = "/api/auth";
 
     private final Duration ttl;
 
@@ -50,8 +52,8 @@ public class RefreshTokenCookie {
     }
 
     /**
-     * Cookie que apaga o anterior no navegador. Complementa o logout — que já remove as
-     * linhas do banco —, para não deixar no cliente um valor que só renderia 401.
+     * Cookie que apaga o anterior no navegador. Complementa o logout — que já revoga a
+     * linha no banco —, para não deixar no cliente um valor que só renderia 401.
      */
     public String limpar(boolean conexaoSegura) {
         return base(conexaoSegura).value("").maxAge(0).build().toString();
