@@ -54,6 +54,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
+            // A API se autentica por header Bearer, que o navegador não anexa sozinho —
+            // então não há superfície de CSRF nos endpoints protegidos. O único cookie do
+            // sistema é o do refresh token, e ele é SameSite=Strict: requisição partida de
+            // outro site não o carrega, logo /api/auth/refresh também não é forjável.
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .headers(headers -> headers
@@ -91,6 +95,11 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Content-Disposition"));
+        // O refresh token viaja em cookie HttpOnly; sem isto o navegador não o envia
+        // para /api/auth/refresh quando a origem difere da API — que é o caso do
+        // dev-server em :4200 falando com a API em :8080. Só é permitido porque
+        // allowedOrigins é uma lista explícita (com "*" o navegador recusaria).
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

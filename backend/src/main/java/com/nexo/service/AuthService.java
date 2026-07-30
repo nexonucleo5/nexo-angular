@@ -1,6 +1,7 @@
 package com.nexo.service;
 
 import com.nexo.api.ApiException;
+import com.nexo.api.dto.AuthDtos.SessaoEmitida;
 import com.nexo.api.dto.AuthDtos.TokenResponse;
 import com.nexo.api.dto.AuthDtos.UsuarioDTO;
 import com.nexo.domain.EventoAuditoria;
@@ -79,7 +80,7 @@ public class AuthService {
      * do diretor mostrava só os acessos que deram certo.
      */
     @Transactional(noRollbackFor = ApiException.class)
-    public TokenResponse login(String login, String senha, String ip) {
+    public SessaoEmitida login(String login, String senha, String ip) {
         String chave = login.trim().toLowerCase();
         verificarBloqueio(chave);
 
@@ -104,7 +105,7 @@ public class AuthService {
 
     /** Ver {@link #login} — a revogação em cascata abaixo também precisa sobreviver ao throw. */
     @Transactional(noRollbackFor = ApiException.class)
-    public TokenResponse refresh(String refreshToken) {
+    public SessaoEmitida refresh(String refreshToken) {
         RefreshToken atual = refreshTokens.findByTokenHash(hash(refreshToken))
                 .orElseThrow(() -> ApiException.unauthorized("Refresh token inválido ou expirado."));
 
@@ -146,10 +147,11 @@ public class AuthService {
                 .orElseThrow(() -> ApiException.notFound("Usuário não encontrado."));
     }
 
-    private TokenResponse gerarTokens(Usuario usuario) {
+    private SessaoEmitida gerarTokens(Usuario usuario) {
         String access = jwtService.gerarAccessToken(usuario);
 
-        // O valor em claro só existe aqui e na resposta ao cliente — o banco guarda o hash.
+        // O valor em claro só existe aqui e no cookie enviado ao cliente — o banco
+        // guarda o hash, e o corpo da resposta não carrega o refresh token.
         String refreshTokenPlano = UUID.randomUUID().toString();
 
         RefreshToken novo = new RefreshToken();
@@ -158,7 +160,7 @@ public class AuthService {
         novo.setExpiraEm(Instant.now().plus(refreshTtl));
         refreshTokens.save(novo);
 
-        return new TokenResponse(access, refreshTokenPlano, UsuarioDTO.of(usuario));
+        return new SessaoEmitida(new TokenResponse(access, UsuarioDTO.of(usuario)), refreshTokenPlano);
     }
 
     private static String hash(String valor) {

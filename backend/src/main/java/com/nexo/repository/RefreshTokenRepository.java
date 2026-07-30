@@ -14,10 +14,18 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     Optional<RefreshToken> findByTokenHash(String tokenHash);
     void deleteByUsuario(Usuario usuario);
 
-    /** Usado pela limpeza agendada — tokens revogados ou vencidos não servem mais pra nada. */
+    /**
+     * Usado pela limpeza agendada. Apaga <b>somente</b> o que já venceu: a linha revogada
+     * precisa continuar no banco até o fim da validade original, porque é ela que permite
+     * distinguir "token roubado sendo reapresentado" de "token que nunca existiu" em
+     * {@code AuthService.refresh}. Antes a condição incluía {@code revogado = true} e a
+     * varredura das 03:00 apagava justamente esse rastro: a partir dali o replay de um
+     * token vazado caía no ramo de "desconhecido" e levava só 401, sem revogar em cascata
+     * as demais sessões do usuário. Na prática a detecção de reuso se reiniciava todo dia.
+     */
     @Modifying
-    @Query("delete from RefreshToken t where t.revogado = true or t.expiraEm < :agora")
-    int removerExpiradosOuRevogados(@Param("agora") Instant agora);
+    @Query("delete from RefreshToken t where t.expiraEm < :agora")
+    int removerExpirados(@Param("agora") Instant agora);
 
     /**
      * Derruba todas as sessões ativas do usuário de uma vez. Acionado quando um refresh

@@ -1,13 +1,16 @@
 package com.nexo.web;
 
+import com.nexo.api.ApiException;
 import com.nexo.api.dto.AuthDtos.LoginRequest;
-import com.nexo.api.dto.AuthDtos.RefreshRequest;
+import com.nexo.api.dto.AuthDtos.SessaoEmitida;
 import com.nexo.api.dto.AuthDtos.TokenResponse;
 import com.nexo.api.dto.AuthDtos.UsuarioDTO;
+import com.nexo.security.RefreshTokenCookie;
 import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -17,29 +20,53 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final RefreshTokenCookie refreshCookie;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, RefreshTokenCookie refreshCookie) {
         this.authService = authService;
+        this.refreshCookie = refreshCookie;
     }
 
     @PostMapping("/login")
-    public TokenResponse login(@Valid @RequestBody LoginRequest request, HttpServletRequest http) {
-        return authService.login(request.login(), request.senha(), http.getRemoteAddr());
+    public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request,
+                                              HttpServletRequest http) {
+        return comCookie(authService.login(request.login(), request.senha(), http.getRemoteAddr()), http);
     }
 
+    /**
+     * O refresh token vem do cookie HttpOnly, não do corpo: o cliente não tem como lê-lo
+     * para montar um JSON, e é exatamente essa a intenção. O cookie é enviado pelo
+     * navegador só nesta rota (ver {@link RefreshTokenCookie}).
+     */
     @PostMapping("/refresh")
-    public TokenResponse refresh(@Valid @RequestBody RefreshRequest request) {
-        return authService.refresh(request.refreshToken());
+    public ResponseEntity<TokenResponse> refresh(
+            @CookieValue(name = RefreshTokenCookie.NOME, required = false) String refreshToken,
+            HttpServletRequest http) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw ApiException.unauthorized("Refresh token ausente.");
+        }
+        return comCookie(authService.refresh(refreshToken), http);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@AuthenticationPrincipal UsuarioAutenticado usuario, HttpServletRequest http) {
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal UsuarioAutenticado usuario,
+                                       HttpServletRequest http) {
         authService.logout(usuario.id(), usuario.nome(), http.getRemoteAddr());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.limpar(http.isSecure()))
+                .build();
     }
 
     @GetMapping("/me")
     public UsuarioDTO me(@AuthenticationPrincipal UsuarioAutenticado usuario) {
         return authService.me(usuario.id());
+    }
+
+    /** Devolve o corpo da sessão e manda o refresh token recém-emitido no cookie. */
+    private ResponseEntity<TokenResponse> comCookie(SessaoEmitida sessao, HttpServletRequest http) {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE,
+                        refreshCookie.emitir(sessao.refreshTokenPlano(), http.isSecure()))
+                .body(sessao.resposta());
     }
 }

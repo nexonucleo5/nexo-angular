@@ -2,10 +2,14 @@ package com.nexo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.nexo.repository.EventoAuditoriaRepository;
+import com.nexo.security.RefreshTokenCleanupJob;
+import com.nexo.security.RefreshTokenCookie;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,13 +35,31 @@ class AutenticacaoTest extends TesteApiBase {
     @Autowired
     private EventoAuditoriaRepository eventos;
 
+    @Autowired
+    private RefreshTokenCleanupJob limpeza;
+
     @Test
-    @DisplayName("login com credenciais válidas devolve access token e refresh token")
+    @DisplayName("login com credenciais válidas devolve access token e perfil")
     void loginValido() throws Exception {
         JsonNode corpo = autenticar("diretor", SENHA_PADRAO);
         assertThat(corpo.get("token").asText()).isNotBlank();
-        assertThat(corpo.get("refreshToken").asText()).isNotBlank();
         assertThat(corpo.get("usuario").get("role").asText()).isEqualTo("DIRETOR");
+    }
+
+    @Test
+    @DisplayName("refresh token sai em cookie HttpOnly e não aparece no corpo da resposta")
+    void refreshTokenForaDoAlcanceDoJavaScript() throws Exception {
+        MockHttpServletResponse resposta = loginHttp("diretor", SENHA_PADRAO);
+
+        // Enquanto voltava no JSON, o cliente tinha de guardá-lo em algum lugar legível
+        // por script (era localStorage) — e um XSS levava a sessão de 7 dias inteira.
+        assertThat(json.readTree(resposta.getContentAsString()).has("refreshToken")).isFalse();
+
+        // HttpOnly tira do alcance de document.cookie; SameSite=Strict é o que substitui
+        // a proteção CSRF em /api/auth/refresh, que agora se autentica por cookie.
+        String setCookie = setCookieDeRefresh(resposta);
+        assertThat(setCookie).contains("HttpOnly").contains("SameSite=Strict");
+        assertThat(valorDoSetCookie(setCookie)).isNotBlank();
     }
 
     @Test
@@ -104,37 +126,54 @@ class AutenticacaoTest extends TesteApiBase {
     @Test
     @DisplayName("refresh rotaciona o token e o replay do antigo derruba a sessão inteira")
     void rotacaoEDeteccaoDeReuso() throws Exception {
-        String refresh1 = autenticar("aluno", SENHA_PADRAO).get("refreshToken").asText();
+        Cookie refresh1 = cookieDeRefresh(loginHttp("aluno", SENHA_PADRAO));
 
-        String refresh2 = json.readTree(
-                        mvc.perform(post("/api/auth/refresh")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"refreshToken\":\"" + refresh1 + "\"}"))
-                                .andExpect(status().isOk())
-                                .andReturn().getResponse().getContentAsString())
-                .get("refreshToken").asText();
+        Cookie refresh2 = cookieDeRefresh(
+                mvc.perform(post("/api/auth/refresh").cookie(refresh1))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse());
 
-        assertThat(refresh2).isNotEqualTo(refresh1);
+        assertThat(refresh2.getValue()).isNotEqualTo(refresh1.getValue());
 
         // Reapresentar o token já rotacionado indica que uma cópia vazou.
-        mvc.perform(post("/api/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"refreshToken\":\"" + refresh1 + "\"}"))
+        mvc.perform(post("/api/auth/refresh").cookie(refresh1))
                 .andExpect(status().isUnauthorized());
 
         // O ponto da correção: o token paralelo, que ainda era válido, morre junto.
-        mvc.perform(post("/api/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"refreshToken\":\"" + refresh2 + "\"}"))
+        mvc.perform(post("/api/auth/refresh").cookie(refresh2))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("refresh token desconhecido devolve 401")
+    @DisplayName("a linha revogada sobrevive à limpeza, então o replay ainda é detectado")
+    void deteccaoDeReusoSobreviveALimpeza() throws Exception {
+        Cookie refresh1 = cookieDeRefresh(loginHttp("aluno", SENHA_PADRAO));
+        Cookie refresh2 = cookieDeRefresh(
+                mvc.perform(post("/api/auth/refresh").cookie(refresh1))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse());
+
+        // A varredura das 03:00 roda com a sessão ativa. Enquanto ela apagava também os
+        // revogados, levava embora o rastro do token rotacionado — e a partir dali o
+        // replay caía no ramo de "token desconhecido", sem revogação em cascata.
+        limpeza.limpar();
+
+        mvc.perform(post("/api/auth/refresh").cookie(refresh1))
+                .andExpect(status().isUnauthorized());
+
+        // Se o rastro tivesse sido apagado, este ainda estaria valendo.
+        mvc.perform(post("/api/auth/refresh").cookie(refresh2))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("refresh sem cookie ou com cookie desconhecido devolve 401")
     void refreshInvalido() throws Exception {
+        mvc.perform(post("/api/auth/refresh"))
+                .andExpect(status().isUnauthorized());
+
         mvc.perform(post("/api/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"refreshToken\":\"nao-existe\"}"))
+                        .cookie(new Cookie(RefreshTokenCookie.NOME, "nao-existe")))
                 .andExpect(status().isUnauthorized());
     }
 }
