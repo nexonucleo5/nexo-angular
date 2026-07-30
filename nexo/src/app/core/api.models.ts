@@ -248,6 +248,9 @@ export interface DesempenhoDTO {
 
 export interface ProfessorMonitorDTO {
   id: number;
+  /** Id da conta de login — é por ele que o chat identifica o interlocutor.
+   *  Numeração diferente do `id` acima. Nulo para docente ainda sem conta. */
+  usuarioId: number | null;
   nome: string;
   disciplina: string;
   foto: string | null;

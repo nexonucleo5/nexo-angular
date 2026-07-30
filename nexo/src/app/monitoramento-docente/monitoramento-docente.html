@@ -125,8 +125,21 @@
                 </div>
 
                 <div class="col-md-3 text-end">
-                    <button class="btn btn-action-icon me-2"><i class="bi bi-chat-dots"></i></button>
-                    <button class="btn btn-action-icon"><i class="bi bi-chevron-right"></i></button>
+                    <!-- Docente sem conta de login não tem com quem conversar: o botão
+                         fica desabilitado e diz o porquê, em vez de abrir um chat vazio. -->
+                    <button type="button"
+                            class="btn btn-action-icon me-2"
+                            [disabled]="prof.usuarioId === null"
+                            [attr.aria-label]="prof.usuarioId === null
+                                ? prof.nome + ' ainda não tem conta de acesso'
+                                : 'Conversar com ' + prof.nome"
+                            [title]="prof.usuarioId === null
+                                ? prof.nome + ' ainda não tem conta de acesso'
+                                : 'Conversar com ' + prof.nome"
+                            (click)="conversarCom(prof)">
+                        <i class="bi bi-chat-dots"></i>
+                    </button>
+                    <button type="button" class="btn btn-action-icon"><i class="bi bi-chevron-right"></i></button>
                 </div>
             </div>
 

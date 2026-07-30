@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { GestaoDiretorService } from '../api/gestao-diretor.service';
@@ -8,6 +9,8 @@ import { resolverFoto } from '../core/avatar';
 
 /** Professor no formato de exibição do monitoramento (derivado do DTO do backend). */
 interface ProfessorView {
+  /** Conta de login do docente — o destinatário do chat. Nulo se ele ainda não tem. */
+  usuarioId: number | null;
   nome: string;
   materia: string;
   status: string;
@@ -46,6 +49,7 @@ const STATUS_CLASSE: Record<string, string> = {
 })
 export class MonitoramentoDocente {
   private readonly gestao = inject(GestaoDiretorService);
+  private readonly router = inject(Router);
 
   readonly carregando = signal(true);
   readonly erro = signal(false);
@@ -120,8 +124,15 @@ export class MonitoramentoDocente {
     });
   }
 
+  /** Abre a conversa com o docente; o chat pré-seleciona pelo id que vai na URL. */
+  conversarCom(prof: ProfessorView): void {
+    if (prof.usuarioId === null) return;
+    this.router.navigate(['/mensagens'], { queryParams: { com: prof.usuarioId } });
+  }
+
   private paraView(dto: ProfessorMonitorDTO): ProfessorView {
     return {
+      usuarioId: dto.usuarioId,
       nome: dto.nome,
       materia: dto.disciplina,
       status: dto.status,

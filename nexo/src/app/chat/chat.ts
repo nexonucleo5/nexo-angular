@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnDestroy, OnInit, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ChatContato, ChatMensagem, ChatService } from '../api/chat.service';
 import { ChatSocketService } from '../api/chat-socket.service';
@@ -19,6 +20,7 @@ export class Chat implements OnInit, OnDestroy {
   private readonly api = inject(ChatService);
   private readonly socket = inject(ChatSocketService);
   private readonly auth = inject(AuthService);
+  private readonly rota = inject(ActivatedRoute);
 
   readonly meuId = this.auth.usuarioLogado()?.id ?? -1;
 
@@ -70,7 +72,14 @@ export class Chat implements OnInit, OnDestroy {
     this.api.contatos().subscribe({
       next: (lista) => {
         this.contatos.set(lista);
-        if (lista.length) this.selecionar(lista[0]);
+        if (!lista.length) return;
+        // ?com=<id> abre direto a conversa com aquela pessoa — é assim que o
+        // botão de chat do Monitoramento Docente chega aqui. Se o id não estiver
+        // entre os contatos (papel que não pode conversar, ou conta removida),
+        // cai no primeiro da lista em vez de abrir a tela sem conversa nenhuma.
+        const pedido = Number(this.rota.snapshot.queryParamMap.get('com'));
+        const alvo = pedido ? lista.find((c) => c.id === pedido) : undefined;
+        this.selecionar(alvo ?? lista[0]);
       },
     });
 

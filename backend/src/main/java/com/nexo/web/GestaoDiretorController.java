@@ -91,9 +91,17 @@ public class GestaoDiretorController {
 
     // ── Monitoramento Docente ────────────────────────────────────────────────
 
-    public record ProfessorMonitorDTO(Long id, String nome, String disciplina, String foto, String turmas,
-                                      int correcoesPendentes, double tempoRespostaDias, int interacoesSemana,
-                                      double avaliacao, int tarefasConcluidas, int tarefasTotal, String status) {}
+    /**
+     * O {@code id} é o do Professor; {@code usuarioId} é o da conta de login, que é
+     * por onde o chat identifica o interlocutor. São numerações diferentes (tabelas
+     * distintas), então mandar o id do professor para o chat abriria a conversa de
+     * outra pessoa. Vem nulo para docente ainda sem conta — nesse caso não há com
+     * quem conversar, e a tela desabilita o botão.
+     */
+    public record ProfessorMonitorDTO(Long id, Long usuarioId, String nome, String disciplina, String foto,
+                                      String turmas, int correcoesPendentes, double tempoRespostaDias,
+                                      int interacoesSemana, double avaliacao, int tarefasConcluidas,
+                                      int tarefasTotal, String status) {}
 
     /** Classificação de desempenho derivada da avaliação docente. */
     private static String statusDe(double avaliacao) {
@@ -106,7 +114,9 @@ public class GestaoDiretorController {
     public List<ProfessorMonitorDTO> monitoramento() {
         return professores.findAllComMaterias().stream()
                 .sorted((a, b) -> Double.compare(b.getAvaliacao(), a.getAvaliacao()))
-                .map(p -> new ProfessorMonitorDTO(p.getId(), p.getNome(), p.getDisciplinas(), p.getFoto(),
+                .map(p -> new ProfessorMonitorDTO(p.getId(),
+                        p.getUsuario() != null ? p.getUsuario().getId() : null,
+                        p.getNome(), p.getDisciplinas(), p.getFoto(),
                         p.getTurmas(), p.getCorrecoesPendentes(), p.getTempoRespostaDias(),
                         p.getInteracoesSemana(), p.getAvaliacao(), p.getTarefasConcluidas(),
                         p.getTarefasTotal(), statusDe(p.getAvaliacao())))
