@@ -82,21 +82,26 @@
 .progress { height: 6px; background: var(--border-color); border-radius: 10px; overflow: hidden; }
 .bg-purple { background: linear-gradient(90deg, #9b2fff, #673ab7) !important; }
 
-/* As 4 métricas eram 4 colunas lado a lado sempre. Sem largura para as 4, cada
-   uma encolhia até o texto quebrar no meio ("Último / Acesso", "Há 1 / semana").
-   Vira uma grade que muda de quantidade de colunas: cada célula só existe se
-   couber em 120px, então nenhuma chega estreita a ponto de quebrar o rótulo. */
-.metrics-container {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 12px 16px;
-  text-align: left !important;
-  align-items: start !important;
+/* As 4 métricas ficam lado a lado (o d-flex do template) enquanto houver
+   largura. Abaixo disso cada uma encolhia até o texto quebrar no meio
+   ("Último / Acesso", "Há 1 / semana"), então viram uma grade que ajusta a
+   quantidade de colunas: uma célula só existe se couber em 120px, e nenhuma
+   chega estreita a ponto de partir o rótulo.
+   O @media é essencial — sem ele a grade valia também no desktop e empilhava as
+   4 métricas numa coluna só, deixando um vão enorme ao lado do nome do aluno. */
+@media (max-width: 991.98px) {
+  .metrics-container {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px 16px;
+    text-align: left !important;
+    align-items: start !important;
 
-  /* Rótulo e valor ocupam uma linha cada, e nunca se partem no meio. */
-  p, span { white-space: nowrap; }
+    /* Rótulo e valor ocupam uma linha cada, e nunca se partem no meio. */
+    p, span { white-space: nowrap; }
 
-  /* A barrinha de progresso é o único item elástico: ela encolhe no lugar do
-     texto. O width: 60px inline vira o mínimo, não o tamanho fixo. */
-  .progress { width: auto !important; min-width: 40px; }
+    /* A barrinha de progresso é o único item elástico: ela encolhe no lugar do
+       texto. O width: 60px inline vira o mínimo, não o tamanho fixo. */
+    .progress { width: auto !important; min-width: 40px; }
+  }
 }
