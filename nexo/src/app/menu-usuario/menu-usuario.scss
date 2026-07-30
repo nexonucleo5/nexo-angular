@@ -62,3 +62,15 @@
   background: var(--border-color);     /* ← era #eee hardcoded */
   margin: 6px 0;
 }
+
+/* No celular o header não tem espaço para nome + cargo ao lado do título e dos
+   3 riscos: sobra só o avatar, que continua abrindo o mesmo menu. O nome não se
+   perde para leitor de tela — segue no alt da imagem. */
+@media (max-width: 767.98px) {
+  .menu-trigger {
+    gap: 6px;
+    padding: 2px 4px;
+
+    .user-details { display: none; }
+  }
+}

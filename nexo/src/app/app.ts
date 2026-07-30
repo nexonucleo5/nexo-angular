@@ -31,6 +31,11 @@ interface PerfilSettings {
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
+  host: {
+    // Esc fecha a barra. O backdrop já fecha no toque, mas quem está no
+    // teclado (ou num tablet com teclado) não tem como alcançá-lo.
+    '(document:keydown.escape)': 'fecharMenu()',
+  },
 })
 export class App {
   public authService = inject(AuthService);
@@ -70,6 +75,13 @@ export class App {
     effect(() => {
       this.authService.usuarioLogado();
       untracked(() => this.menuAberto.set(false));
+    });
+
+    // Trava o scroll do fundo com a barra aberta: sem isso o dedo que quer
+    // rolar o menu rola a página atrás dele. A classe só tem efeito dentro do
+    // @media mobile, então redimensionar para desktop nunca deixa o body preso.
+    effect(() => {
+      document.body.classList.toggle('menu-travado', this.menuAberto());
     });
   }
 
