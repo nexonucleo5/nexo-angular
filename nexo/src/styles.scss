@@ -54,6 +54,23 @@ html, body {
   overflow-x: hidden;
 }
 
+/* Nenhuma barra de rolagem à vista em lugar nenhum do sistema — a rolagem
+   continua funcionando por roda, toque e teclado.
+   Vale para qualquer elemento, não só a página: as áreas que rolam por conta
+   própria (lista de contatos do chat, tabelas em .table-responsive, modais)
+   mostrariam a sua. */
+* {
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* Edge legado */
+}
+
+/* Chrome/Safari/Edge. Fica separado porque um navegador que não conheça o
+   pseudo-elemento descartaria a regra inteira se ele entrasse no bloco acima. */
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 /* ==========================================================================
    3. LAYOUT PRINCIPAL
    ========================================================================== */
@@ -93,25 +110,13 @@ app-menu-professor,
   background-color: var(--bg-card);
   border-right: 1px solid var(--border-color);
   box-sizing: border-box;
-  /* A lista rola quando não cabe, mas sem barra à vista.
-     overflow-x precisa ser declarado: com só um dos eixos em `auto`, o outro
-     deixa de ser `visible` e vira `auto` sozinho — era daí que saía a barra
-     horizontal no rodapé da barra. */
+  /* A lista rola quando não cabe. Esconder a barra é da regra global da seção 2;
+     aqui só o overflow-x, que precisa ser declarado: com apenas um dos eixos em
+     `auto`, o outro deixa de ser `visible` e vira `auto` sozinho — era daí que
+     saía a barra horizontal no rodapé da barra. */
   overflow-y: auto;
   overflow-x: hidden;
-  scrollbar-width: none;        /* Firefox */
-  -ms-overflow-style: none;     /* Edge legado */
   transition: background-color 0.3s, border-color 0.3s;
-}
-
-/* Chrome/Safari/Edge: o pseudo-elemento não entra no grupo acima porque
-   navegadores que não o conhecem descartariam a regra inteira. */
-app-menu::-webkit-scrollbar,
-app-menu-diretor::-webkit-scrollbar,
-app-menu-professor::-webkit-scrollbar,
-.sidebar::-webkit-scrollbar {
-  width: 0;
-  height: 0;
 }
 
 /* Abrir e fechar mora só nos hosts, nunca no .sidebar de dentro: ele é fixed e,

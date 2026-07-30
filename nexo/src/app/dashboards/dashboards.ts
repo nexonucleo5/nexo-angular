@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardDiretor } from '../diretor-dashboard/diretor-dashboard';
+import { DashboardProfessor } from '../dashboard-professor/dashboard-professor';
 import { AuthService } from '../services/auth.service';
 import { AlunoDashboardService } from '../api/aluno-dashboard.service';
 import { AlunoDashboardDTO } from '../core/api.models';
@@ -11,7 +12,7 @@ const COR_PROGRESSO = ['blue-fill', 'green-fill', 'purple-fill', 'orange-fill'];
 @Component({
   selector: 'app-dashboards',
   standalone: true,
-  imports: [CommonModule, DashboardDiretor],
+  imports: [CommonModule, DashboardDiretor, DashboardProfessor],
   templateUrl: './dashboards.html',
   styleUrl: './dashboards.scss',
 })
@@ -66,7 +67,10 @@ export class Dashboards {
   );
 
   constructor() {
-    if (this.authService.usuarioLogado()?.role !== 'diretor') {
+    // Só o aluno usa os dados desta classe; diretor e professor têm o próprio
+    // componente de painel, que busca os dados dele. Pedir o painel de
+    // gamificação para os outros perfis só rendia o erro de carregamento.
+    if (this.authService.usuarioLogado()?.role === 'aluno') {
       this.carregar();
     } else {
       this.carregando.set(false);

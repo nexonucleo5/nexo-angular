@@ -1,6 +1,14 @@
+<!-- /dashboards é a tela em que todo mundo cai depois do login, então ela
+     despacha para o painel do perfil. Sem o ramo do professor ele caía no
+     layout do aluno, que pede o painel de gamificação a uma API que não existe
+     para ele — daí o "Olá, !" sem nome e o erro de carregamento. -->
 @if (authService.usuarioLogado()?.role === 'diretor') {
 <div class="page-container-pushed">
     <app-dashboard-diretor></app-dashboard-diretor>
+</div>
+} @else if (authService.usuarioLogado()?.role === 'professor') {
+<div class="page-container-pushed">
+    <app-dashboard-professor></app-dashboard-professor>
 </div>
 } @else {
 <main class="main-content page-container-pushed flex-grow-1">
