@@ -28,7 +28,16 @@
   &:hover { transform: translateY(-3px); }
 }
 
-.topic-card { min-height: 96px; }
+.topic-card {
+  min-height: 96px;
+  cursor: pointer;
+
+  /* O card inteiro é um <button>: sem isto o nome longo de um tópico estica a
+     linha e empurra o relógio para fora. */
+  .topic-heading { min-width: 0; }
+
+  &:hover .topic-cta { color: #9b2fff; gap: 10px; }
+}
 
 .topic-number {
   width: 48px; height: 48px;
@@ -38,14 +47,119 @@
   flex-shrink: 0;
 }
 
-.topic-title { font-size: 1.05rem; font-weight: 700; }
+.topic-title { font-size: 1.05rem; font-weight: 700; overflow-wrap: break-word; }
 
-.reading-card { max-width: 860px; }
+.topic-resumo { font-size: 0.9rem; line-height: 1.5; }
+
+.topic-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: color 0.2s, gap 0.2s;
+}
+
+/* Etiqueta de tempo: promessa curta é o que faz o aluno começar. */
+.leitura-tempo,
+.leitura-posicao {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--hover-overlay);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+.reading-card {
+  max-width: 860px;
+  /* O card de leitura não é clicável; o translateY do .card-theme daria a
+     entender que é. */
+  &:hover { transform: none; }
+}
+
+.reading-resumo {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.5;
+  border-left: 3px solid #9b2fff;
+  padding-left: 14px;
+}
 
 .reading-text {
   font-size: 1.05rem;
   line-height: 1.8;
   white-space: pre-line;
+}
+
+/* Caixa do exemplo — fecha a leitura com algo concreto. */
+.exemplo-box {
+  background: rgba(155, 47, 255, 0.07);
+  border: 1px solid rgba(155, 47, 255, 0.25);
+
+  p { color: var(--text-main); line-height: 1.65; font-size: 0.98rem; }
+}
+
+.exemplo-titulo {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9b2fff;
+
+  i { margin-right: 4px; }
+}
+
+.leitura-nav {
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.btn-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, opacity 0.2s;
+  /* O título do próximo tópico entra no rótulo; sem limite ele estica o botão
+     para fora do card em tela estreita. */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) { border-color: #9b2fff; }
+  &:disabled { opacity: 0.4; cursor: default; }
+}
+
+.btn-nav-destaque {
+  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  border-color: transparent;
+  color: #fff;
+  &:hover:not(:disabled) { opacity: 0.9; border-color: transparent; }
+}
+
+.fim-da-materia {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #06d25e;
 }
 
 .btn-voltar {

@@ -36,8 +36,45 @@
       </button>
 
       <article class="reading-card card-theme p-4 rounded-4">
-        <h2 class="section-title fw-bold mb-3" style="color: var(--text-main);">{{ topico.titulo }}</h2>
+        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+          @if (topico.minutos) {
+            <span class="leitura-tempo"><i class="bi bi-clock"></i> {{ topico.minutos }} min de leitura</span>
+          }
+          <span class="leitura-posicao">{{ topico.ordem }} de {{ conteudos().length }}</span>
+        </div>
+
+        <h2 class="section-title fw-bold mb-2" style="color: var(--text-main);">{{ topico.titulo }}</h2>
+        @if (topico.resumo) {
+          <p class="reading-resumo mb-4">{{ topico.resumo }}</p>
+        }
+
+        <!-- pre-line preserva as quebras: o texto vem em parágrafos curtos, e num
+             bloco só ele viraria a parede de texto que a tela tinha antes. -->
         <p class="reading-text text-soft mb-0">{{ topico.texto }}</p>
+
+        @if (topico.exemplo) {
+          <aside class="exemplo-box mt-4 p-3 rounded-3">
+            <h3 class="exemplo-titulo mb-2"><i class="bi bi-lightbulb-fill"></i> Na prática</h3>
+            <p class="mb-0">{{ topico.exemplo }}</p>
+          </aside>
+        }
+
+        <!-- Navegação entre tópicos: sem isto, o aluno precisa voltar à lista a
+             cada leitura, e a sequência de estudo se perde. -->
+        <nav class="leitura-nav d-flex justify-content-between align-items-center gap-2 mt-4 pt-3">
+          <button type="button" class="btn-nav" [disabled]="!topicoAnterior()"
+                  (click)="irParaAnterior()">
+            <i class="bi bi-arrow-left"></i> Anterior
+          </button>
+
+          @if (topicoProximo(); as prox) {
+            <button type="button" class="btn-nav btn-nav-destaque" (click)="irParaProximo()">
+              Próximo: {{ prox.titulo }} <i class="bi bi-arrow-right"></i>
+            </button>
+          } @else {
+            <span class="fim-da-materia"><i class="bi bi-check-circle-fill"></i> Você chegou ao fim</span>
+          }
+        </nav>
       </article>
 
     } @else {
@@ -51,15 +88,25 @@
 
         <div class="row g-4">
           <div class="col-md-6 col-xl-4" *ngFor="let c of conteudos(); let i = index">
-            <button type="button" class="topic-card card-theme p-4 rounded-4 h-100 d-flex align-items-center gap-3 w-100 text-start border-0"
+            <button type="button" class="topic-card card-theme p-4 rounded-4 h-100 d-flex flex-column align-items-start gap-2 w-100 text-start border-0"
                     (click)="selecionarTopico(c)">
-              <div [class]="'topic-number d-flex align-items-center justify-content-center rounded-3 ' + d.colorClass">
-                {{ i + 1 }}
+              <div class="d-flex align-items-center gap-3 w-100">
+                <div [class]="'topic-number d-flex align-items-center justify-content-center rounded-3 ' + d.colorClass">
+                  {{ i + 1 }}
+                </div>
+                <div class="flex-grow-1 topic-heading">
+                  <h3 class="topic-title mb-1" style="color: var(--text-main);">{{ c.titulo }}</h3>
+                  @if (c.minutos) {
+                    <span class="leitura-tempo"><i class="bi bi-clock"></i> {{ c.minutos }} min</span>
+                  }
+                </div>
               </div>
-              <div>
-                <h3 class="topic-title mb-1" style="color: var(--text-main);">{{ c.titulo }}</h3>
-                <small class="text-soft">Módulo {{ i + 1 }} de {{ conteudos().length }}</small>
-              </div>
+
+              <!-- O resumo é o que faz o card valer o clique: o aluno já sabe o
+                   que vai encontrar antes de abrir. -->
+              <p class="topic-resumo text-soft mb-0">{{ c.resumo }}</p>
+
+              <span class="topic-cta mt-auto">Ler agora <i class="bi bi-arrow-right"></i></span>
             </button>
           </div>
         </div>

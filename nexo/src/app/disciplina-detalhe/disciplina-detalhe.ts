@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SUBJECTS } from '../materias/materias.data';
@@ -31,15 +31,31 @@ export class DisciplinaDetalhe {
   readonly topicoSelecionado = signal<ConteudoMateriaDTO | null>(null);
 
   constructor() {
-    const d = this.disciplina();
-    if (!d) {
-      this.carregandoConteudo.set(false);
-      return;
-    }
-    // Resolve o id numérico da Materia pelo título (os dois catálogos usam os mesmos nomes).
+    // Precisa ser um effect, e não código solto no construtor: `id` é um signal
+    // input preenchido pelo withComponentInputBinding depois da construção. Lido
+    // no construtor ele ainda é '', disciplina() é null e o carregamento
+    // desistia antes de começar — nenhuma matéria chegava a ter conteúdo, e a
+    // tela caía sempre na lista estática, que não é clicável.
+    // Como effect, também recarrega ao trocar de disciplina sem sair da rota.
+    effect(() => {
+      const d = this.disciplina();
+      this.topicoSelecionado.set(null);
+      this.conteudos.set([]);
+
+      if (!d) {
+        this.carregandoConteudo.set(false);
+        return;
+      }
+      untracked(() => this.carregarConteudos(d.title));
+    });
+  }
+
+  /** Resolve o id numérico da Materia pelo título (os dois catálogos usam os mesmos nomes). */
+  private carregarConteudos(titulo: string): void {
+    this.carregandoConteudo.set(true);
     this.materiasService.listar().subscribe({
       next: (materias) => {
-        const materia = materias.find((m) => m.nome.toLowerCase() === d.title.toLowerCase());
+        const materia = materias.find((m) => m.nome.toLowerCase() === titulo.toLowerCase());
         if (!materia) {
           this.carregandoConteudo.set(false);
           return;
@@ -56,11 +72,48 @@ export class DisciplinaDetalhe {
     });
   }
 
+  /** Posição do tópico aberto na lista, ou -1 se não há nenhum aberto. */
+  private readonly indiceAtual = computed(() => {
+    const atual = this.topicoSelecionado();
+    return atual ? this.conteudos().findIndex((c) => c.id === atual.id) : -1;
+  });
+
+  readonly topicoAnterior = computed(() => {
+    const i = this.indiceAtual();
+    return i > 0 ? this.conteudos()[i - 1] : null;
+  });
+
+  readonly topicoProximo = computed(() => {
+    const i = this.indiceAtual();
+    const lista = this.conteudos();
+    return i >= 0 && i < lista.length - 1 ? lista[i + 1] : null;
+  });
+
   selecionarTopico(c: ConteudoMateriaDTO): void {
     this.topicoSelecionado.set(c);
   }
 
+  irParaAnterior(): void {
+    const anterior = this.topicoAnterior();
+    if (anterior) this.abrirDoTopo(anterior);
+  }
+
+  irParaProximo(): void {
+    const proximo = this.topicoProximo();
+    if (proximo) this.abrirDoTopo(proximo);
+  }
+
   voltarTopicos(): void {
     this.topicoSelecionado.set(null);
+  }
+
+  /**
+   * Troca o tópico e sobe a página. Sem isso o aluno cai no meio do texto
+   * seguinte, já que o botão de avançar fica no rodapé do anterior.
+   */
+  private abrirDoTopo(c: ConteudoMateriaDTO): void {
+    this.topicoSelecionado.set(c);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.body.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }

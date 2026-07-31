@@ -69,7 +69,14 @@ export interface MateriaDTO {
 export interface ConteudoMateriaDTO {
   id: number;
   titulo: string;
+  /** Uma frase sobre o tópico — aparece no card, antes de abrir. */
+  resumo: string;
+  /** Corpo do texto. Linha em branco separa parágrafos. */
   texto: string;
+  /** Exemplo concreto ou macete; pode não existir. */
+  exemplo: string | null;
+  /** Minutos estimados de leitura. */
+  minutos: number;
   ordem: number;
 }
 

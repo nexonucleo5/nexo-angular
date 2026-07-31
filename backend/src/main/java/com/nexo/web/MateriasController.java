@@ -27,9 +27,13 @@ public class MateriasController {
         static MateriaDTO of(Materia m) { return new MateriaDTO(m.getId(), m.getNome()); }
     }
 
-    public record ConteudoMateriaDTO(Long id, String titulo, String texto, int ordem) {
+    public record ConteudoMateriaDTO(Long id, String titulo, String resumo, String texto,
+                                     String exemplo, int minutos, int ordem) {
         static ConteudoMateriaDTO of(ConteudoMateria c) {
-            return new ConteudoMateriaDTO(c.getId(), c.getTitulo(), c.getTexto(), c.getOrdem());
+            // minutos é nulo em conteúdo gravado antes do campo existir (ver
+            // ConteudoMateria); 0 esconde a etiqueta de tempo em vez de estourar.
+            return new ConteudoMateriaDTO(c.getId(), c.getTitulo(), c.getResumo(), c.getTexto(),
+                    c.getExemplo(), c.getMinutos() == null ? 0 : c.getMinutos(), c.getOrdem());
         }
     }
 
