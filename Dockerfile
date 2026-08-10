@@ -1,33 +1,108 @@
 # syntax=docker/dockerfile:1
 
+# Monolito: o Angular é compilado e embutido como estático dentro do jar do
+# Spring, que é a única coisa que vai para a imagem final.
+#
+# Versões em um lugar só. As tags são de major/LTS de propósito: assim cada
+# build pega o último patch de segurança da base sem precisar editar arquivo.
+ARG NODE_VERSION=22
+ARG JAVA_VERSION=21
+ARG MAVEN_VERSION=3.9
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Stage 1 — build do frontend Angular
+# bookworm-slim (e não a tag cheia do node): mesma glibc, ~10x menor e sem o
+# toolchain de compilação que responde pela maior parte dos CVEs da imagem full.
 # ─────────────────────────────────────────────────────────────────────────────
-FROM node:22 AS frontend
-WORKDIR /app/nexo
+FROM node:${NODE_VERSION}-bookworm-slim AS frontend
+WORKDIR /build
+
+ENV npm_config_fund=false \
+    npm_config_audit=false \
+    npm_config_update_notifier=false
+
+# package*.json antes do resto: mexer no código-fonte não reinstala as deps.
 COPY nexo/package.json nexo/package-lock.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    npm ci
+
 COPY nexo/ ./
 RUN npx ng build --configuration production --base-href /
-# saída: /app/nexo/dist/nexo/ (index.html + assets na raiz — angular.json usa browser:"")
+# saída: /build/dist/nexo/ (index.html + assets na raiz — angular.json usa browser:"")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Stage 2 — build do backend Spring, com o Angular embutido como estáticos
 # ─────────────────────────────────────────────────────────────────────────────
-FROM maven:3.9-eclipse-temurin-17 AS backend
-WORKDIR /app/backend
+FROM maven:${MAVEN_VERSION}-eclipse-temurin-${JAVA_VERSION} AS backend
+WORKDIR /build
+
 COPY backend/pom.xml ./
 COPY backend/src ./src
 # injeta o build do Angular em resources/static → o Spring serve as telas
-COPY --from=frontend /app/nexo/dist/nexo/ ./src/main/resources/static/
-RUN mvn -B clean package -DskipTests
+COPY --from=frontend /build/dist/nexo/ ./src/main/resources/static/
+
+# Quem guarda as dependências é o cache mount do /root/.m2, não uma camada com
+# `dependency:go-offline` — aquele goal resolve até o que é opcional (icu4j e
+# bouncycastle vêm junto do POI e nunca são usados aqui), o que só rende
+# 14MB de download a mais e um ponto extra de falha de rede.
+#
+# As três tentativas não são paranoia: o Maven Central corta download no meio
+# aqui com alguma frequência ("Premature end of Content-Length delimited
+# message body") e um único jar pela metade derruba o build inteiro — o que no
+# Render, que constrói do zero a cada deploy, vira deploy falho. Cada tentativa
+# reaproveita o que já veio, então repetir custa pouco.
+RUN --mount=type=cache,target=/root/.m2,sharing=locked \
+    for tentativa in 1 2 3; do \
+        mvn -B -ntp package -DskipTests && exit 0; \
+        echo ">> tentativa $tentativa falhou; refazendo os downloads truncados"; \
+    done; \
+    exit 1
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Stage 3 — imagem de runtime enxuta (só o JRE + o jar)
+# Stage 3 — runtime enxuto: só o JRE + o jar
+# alpine porque o app é Java puro (sem JNI, sem AWT): nada aqui depende de
+# glibc, e a base sai de ~200MB de Debian para ~50MB com quase nenhum CVE.
 # ─────────────────────────────────────────────────────────────────────────────
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS runtime
+
+# O app grava LocalDate.now() em chamada, frequência e lançamento de notas. Sem
+# isso o container roda em UTC e tudo que for lançado depois das 21h cai no dia
+# seguinte. tzdata deixa TZ valer para o Java e para os logs.
+#
+# O gnupg e o pinentry vêm na base do Temurin só para conferir assinatura no
+# build dela, e arrastam o sqlite-libs junto — que é de onde saíam os únicos
+# CVEs HIGH da imagem. Nada disso é usado por um app Java; sai na mesma camada
+# do apk add, senão os arquivos ficariam presos na camada de baixo.
+RUN apk add --no-cache tzdata \
+ && apk del --purge gnupg gnupg-dirmngr gnupg-gpgconf gnupg-keyboxd \
+                    gnupg-utils gnupg-wks-client pinentry
+ENV TZ=America/Sao_Paulo
+
+# Usuário sem privilégio: uma falha no app não vira root dentro do container.
+RUN addgroup -S nexo && adduser -S -G nexo -h /app nexo
 WORKDIR /app
-COPY --from=backend /app/backend/target/nexo-backend-0.1.0.jar app.jar
-# O Render injeta a porta em $PORT; o app lê server.port=${PORT:8080}
+
+# O H2 de dev grava em ./data (application.yml); o diretório precisa existir e
+# pertencer ao usuário, senão o app não sobe com o filesystem em read-only.
+RUN mkdir -p /app/data && chown -R nexo:nexo /app
+
+# Curinga em vez do nome versionado: subir a versão no pom não quebra a imagem.
+# Só o fat jar casa — o repackage deixa o jar original como *.jar.original.
+COPY --from=backend --chown=nexo:nexo /build/target/*.jar app.jar
+
+USER nexo
+
+# MaxRAMPercentage: a JVM enxerga o limite do container, não a RAM da máquina —
+# sem isso ela dimensiona o heap pela RAM do host e o container leva OOM kill.
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
+
+# Informativo: o Render (e o compose) injetam a porta real em $PORT.
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# `/` devolve o index.html do Angular e é público — dá para sondar sem token.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD wget -q --spider "http://127.0.0.1:${PORT:-8080}/" || exit 1
+
+# exec: o java vira PID 1 e recebe o SIGTERM do `docker stop` direto, fechando
+# o pool de conexões em vez de morrer no timeout.
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/app.jar"]

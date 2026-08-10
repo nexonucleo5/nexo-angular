@@ -1,0 +1,40 @@
+# Sobe o monolito (Angular embutido no Spring) igual ao que roda no Render.
+#
+#   docker compose up --build      → http://localhost:8080
+#   docker compose down            → para, mantendo o banco no volume
+#   docker compose down -v         → para e apaga o banco
+name: nexo
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nexo-app:local
+    # HOST_PORT só troca a porta de fora; dentro o app fica sempre no 8080.
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    environment:
+      # Vem do .env da raiz — o mesmo arquivo que o app lê fora do Docker.
+      # Sem segredo o container não sobe, e o erro sai aqui em vez de virar
+      # um stack trace de Spring lá dentro.
+      NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:?defina NEXO_JWT_SECRET no .env (openssl rand -base64 48)}
+      PORT: 8080
+    volumes:
+      # O H2 de dev grava em /app/data; no volume os dados sobrevivem ao rebuild.
+      - nexo-data:/app/data
+    # ── Endurecimento do runtime ──────────────────────────────────────────────
+    # Filesystem só de leitura: um upload malicioso não consegue deixar nada
+    # gravado na imagem. As duas únicas coisas que precisam escrever são o banco
+    # (volume acima) e o /tmp do Tomcat (tmpfs, some quando o container morre).
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+volumes:
+  nexo-data:

@@ -1,10 +1,29 @@
-# Evita mandar lixo pesado pro contexto de build do Docker
+# Fora do contexto de build: o que é pesado, o que é gerado dentro da imagem e
+# o que não pode entrar nela de jeito nenhum.
+
+# Segredos — o .env é montado em runtime, nunca copiado para uma camada
+.env
+.env.*
+!.env.example
+
+# Dependências e artefatos de build (refeitos nos estágios do Dockerfile)
 **/node_modules
 **/target
 **/dist
 **/.angular
+**/coverage
+
+# Banco H2 local: são dados de desenvolvimento, e o volume cuida do runtime
+data
 backend/data
-.git
-.github
+
+# Metadados de repositório e de editor (nexo/ tem o próprio .git)
+**/.git
+**/.github
+**/.vscode
+**/.idea
+**/.claude
+
+# Documentação
 *.md
-nexo/*.md
+**/*.md
