@@ -19,9 +19,11 @@ import java.util.List;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final AccessTokensRevogados revogados;
 
-    public JwtAuthFilter(JwtService jwtService) {
+    public JwtAuthFilter(JwtService jwtService, AccessTokensRevogados revogados) {
         this.jwtService = jwtService;
+        this.revogados = revogados;
     }
 
     @Override
@@ -37,34 +39,37 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Só popula o SecurityContext se as claims estiverem completas e coerentes.
+     * Só autentica com o conjunto completo de claims esperado, e com um papel que existe
+     * de fato em {@link Role}. Sem essa checagem, um token assinado mas malformado passava
+     * adiante com {@code uid} nulo (quebrando toda regra que compara o dono do recurso)
+     * ou com a autoridade literal {@code ROLE_null}. Faltando qualquer claim, a requisição
+     * segue sem autenticação e o endpoint protegido responde 401.
      *
-     * A assinatura válida garante que o token saiu daqui, não que o conteúdo
-     * faça sentido: um token sem "role" produziria a authority literal
-     * "ROLE_null", e um sem "uid" daria um principal com id nulo que só
-     * quebraria lá na frente, dentro de algum controller. Sem claim válida,
-     * a requisição segue anônima e o Spring Security devolve 401.
+     * <p>O {@code jti} entra nessa exigência: sem ele o token não é revogável, e um token
+     * emitido antes desta versão simplesmente força uma renovação — o cliente toma 401,
+     * o interceptor chama /refresh e segue com um token novo.
      */
     private void autenticar(Claims claims) {
         String login = claims.getSubject();
         String role = claims.get("role", String.class);
         Long uid = claims.get("uid", Long.class);
+        String jti = claims.getId();
+        if (login == null || login.isBlank() || uid == null || jti == null || !papelConhecido(role)) return;
 
-        if (login == null || login.isBlank() || uid == null || !roleConhecida(role)) {
-            return;
-        }
+        // Assinatura boa e prazo em dia não bastam: o logout invalida a emissão na hora.
+        if (revogados.revogado(jti)) return;
 
-        var principal = new UsuarioAutenticado(uid, login, claims.get("nome", String.class), role);
+        var principal = new UsuarioAutenticado(uid, login, claims.get("nome", String.class), role, jti);
         var auth = new UsernamePasswordAuthenticationToken(
                 principal, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     /** A role precisa ser uma das do enum — não basta ser uma string qualquer. */
-    private boolean roleConhecida(String role) {
+    private static boolean papelConhecido(String role) {
         if (role == null) return false;
-        for (Role conhecida : Role.values()) {
-            if (conhecida.name().equals(role)) return true;
+        for (Role r : Role.values()) {
+            if (r.name().equals(role)) return true;
         }
         return false;
     }

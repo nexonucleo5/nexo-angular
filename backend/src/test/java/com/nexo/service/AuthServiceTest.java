@@ -1,12 +1,13 @@
 package com.nexo.service;
 
 import com.nexo.api.ApiException;
-import com.nexo.api.dto.AuthDtos.TokenResponse;
+import com.nexo.api.dto.AuthDtos.SessaoEmitida;
 import com.nexo.domain.RefreshToken;
 import com.nexo.domain.Role;
 import com.nexo.domain.Usuario;
 import com.nexo.repository.RefreshTokenRepository;
 import com.nexo.repository.UsuarioRepository;
+import com.nexo.security.AccessTokensRevogados;
 import com.nexo.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,7 @@ class AuthServiceTest {
 
     @Mock private UsuarioRepository usuarios;
     @Mock private RefreshTokenRepository refreshTokens;
+    @Mock private AccessTokensRevogados accessTokensRevogados;
     @Mock private AuditoriaService auditoria;
 
     private final PasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -50,7 +52,7 @@ class AuthServiceTest {
     @BeforeEach
     void montar() {
         authService = new AuthService(usuarios, refreshTokens, new JwtService(SEGREDO, 15),
-                encoder, auditoria, 7);
+                accessTokensRevogados, encoder, auditoria, 7);
 
         usuario = new Usuario();
         usuario.setId(1L);
@@ -72,12 +74,13 @@ class AuthServiceTest {
         usuarioExiste();
         when(refreshTokens.save(any(RefreshToken.class))).thenAnswer(i -> i.getArgument(0));
 
-        TokenResponse resposta = authService.login("ana", SENHA_CORRETA, IP);
+        SessaoEmitida sessao = authService.login("ana", SENHA_CORRETA, IP);
 
-        assertThat(resposta.token()).isNotBlank();
-        assertThat(resposta.refreshToken()).isNotBlank();
-        assertThat(resposta.usuario().nome()).isEqualTo("Ana");
-        assertThat(resposta.usuario().role()).isEqualTo("ALUNO");
+        assertThat(sessao.resposta().token()).isNotBlank();
+        // O refresh vai em claro só na resposta; o que fica gravado é o hash dele.
+        assertThat(sessao.refreshTokenPlano()).isNotBlank();
+        assertThat(sessao.resposta().usuario().nome()).isEqualTo("Ana");
+        assertThat(sessao.resposta().usuario().role()).isEqualTo("ALUNO");
     }
 
     @Test
@@ -169,24 +172,27 @@ class AuthServiceTest {
                     .isInstanceOf(ApiException.class);
         }
 
-        assertThat(authService.login("bruno", SENHA_CORRETA, IP).token()).isNotBlank();
+        assertThat(authService.login("bruno", SENHA_CORRETA, IP).resposta().token()).isNotBlank();
     }
 
     // ── Rotação do refresh token ─────────────────────────────────────────────
 
+    // O que fica gravado é o hash do token, não ele mesmo — por isso as buscas são
+    // casadas por anyString(): o hash é calculado dentro do serviço.
+
     @Test
     void refreshRevogaOTokenAnteriorEEmiteUmNovo() {
         RefreshToken antigo = new RefreshToken();
-        antigo.setToken("refresh-antigo");
+        antigo.setTokenHash("hash-do-refresh-antigo");
         antigo.setUsuario(usuario);
         antigo.setExpiraEm(Instant.now().plus(7, ChronoUnit.DAYS));
-        when(refreshTokens.findByToken("refresh-antigo")).thenReturn(Optional.of(antigo));
+        when(refreshTokens.findByTokenHash(anyString())).thenReturn(Optional.of(antigo));
         when(refreshTokens.save(any(RefreshToken.class))).thenAnswer(i -> i.getArgument(0));
 
-        TokenResponse resposta = authService.refresh("refresh-antigo");
+        SessaoEmitida sessao = authService.refresh("refresh-antigo");
 
         assertThat(antigo.isRevogado()).as("o token usado precisa ser invalidado").isTrue();
-        assertThat(resposta.refreshToken()).isNotEqualTo("refresh-antigo");
+        assertThat(sessao.refreshTokenPlano()).isNotEqualTo("refresh-antigo");
 
         ArgumentCaptor<RefreshToken> salvos = ArgumentCaptor.forClass(RefreshToken.class);
         verify(refreshTokens, org.mockito.Mockito.times(2)).save(salvos.capture());
@@ -196,27 +202,31 @@ class AuthServiceTest {
     }
 
     @Test
-    void refreshComTokenJaRevogadoEhRecusado() {
-        // É o caso do token roubado sendo reusado depois da rotação.
+    void refreshComTokenJaRevogadoDerrubaAsSessoesDoUsuario() {
+        // Token roubado sendo reusado depois da rotação. Como não dá para saber qual das
+        // duas partes é a legítima, todas as sessões caem e o usuário refaz o login —
+        // antes o replay levava só 401 e a cópia paralela seguia valendo.
         RefreshToken revogado = new RefreshToken();
-        revogado.setToken("ja-usado");
+        revogado.setTokenHash("hash-ja-usado");
         revogado.setUsuario(usuario);
         revogado.setExpiraEm(Instant.now().plus(7, ChronoUnit.DAYS));
         revogado.setRevogado(true);
-        when(refreshTokens.findByToken("ja-usado")).thenReturn(Optional.of(revogado));
+        when(refreshTokens.findByTokenHash(anyString())).thenReturn(Optional.of(revogado));
 
         assertThatThrownBy(() -> authService.refresh("ja-usado"))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("inválido ou expirado");
+                .hasMessageContaining("Sessão encerrada por segurança");
+
+        verify(refreshTokens).revogarTodosDoUsuario(usuario.getId());
     }
 
     @Test
     void refreshComTokenExpiradoEhRecusado() {
         RefreshToken expirado = new RefreshToken();
-        expirado.setToken("vencido");
+        expirado.setTokenHash("hash-vencido");
         expirado.setUsuario(usuario);
         expirado.setExpiraEm(Instant.now().minus(1, ChronoUnit.DAYS));
-        when(refreshTokens.findByToken("vencido")).thenReturn(Optional.of(expirado));
+        when(refreshTokens.findByTokenHash(anyString())).thenReturn(Optional.of(expirado));
 
         assertThatThrownBy(() -> authService.refresh("vencido"))
                 .isInstanceOf(ApiException.class);
@@ -224,7 +234,7 @@ class AuthServiceTest {
 
     @Test
     void refreshComTokenDesconhecidoEhRecusado() {
-        when(refreshTokens.findByToken(anyString())).thenReturn(Optional.empty());
+        when(refreshTokens.findByTokenHash(anyString())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.refresh("nunca-existiu"))
                 .isInstanceOf(ApiException.class);

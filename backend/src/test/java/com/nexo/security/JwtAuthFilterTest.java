@@ -2,6 +2,7 @@ package com.nexo.security;
 
 import com.nexo.domain.Role;
 import com.nexo.domain.Usuario;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
@@ -18,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -34,7 +36,8 @@ class JwtAuthFilterTest {
     private static final String SEGREDO = "segredo-de-teste-com-mais-de-32-caracteres-abcdef";
 
     private final JwtService jwtService = new JwtService(SEGREDO, 15);
-    private final JwtAuthFilter filtro = new JwtAuthFilter(jwtService);
+    private final AccessTokensRevogados revogados = new AccessTokensRevogados(15);
+    private final JwtAuthFilter filtro = new JwtAuthFilter(jwtService, revogados);
 
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
@@ -64,11 +67,19 @@ class JwtAuthFilterTest {
         request.addHeader("Authorization", "Bearer " + token);
     }
 
-    /** Monta um token assinado com a chave certa mas com as claims que eu quiser. */
+    /**
+     * Monta um token assinado com a chave certa mas com as claims que eu quiser.
+     *
+     * <p>O {@code jti} entra sempre: o filtro também exige essa claim, e sem ela todo
+     * teste daqui passaria por falta de jti em vez de pela claim que ele quer isolar.
+     */
     private static String tokenAssinado(String subject, Object uid, Object role) {
         SecretKey key = Keys.hmacShaKeyFor(SEGREDO.getBytes(StandardCharsets.UTF_8));
         Instant agora = Instant.now();
-        var builder = Jwts.builder()
+        // Tipo explícito: com `var`, o .id() vem de um supertipo genérico do JJWT e a
+        // inferência cai para Object, quebrando o encadeamento seguinte.
+        JwtBuilder builder = Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .subject(subject)
                 .issuedAt(Date.from(agora))
                 .expiration(Date.from(agora.plus(15, ChronoUnit.MINUTES)));

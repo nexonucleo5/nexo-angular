@@ -10,15 +10,26 @@ public final class AuthDtos {
 
     public record LoginRequest(@NotBlank String login, @NotBlank String senha) {}
 
-    public record RefreshRequest(@NotBlank String refreshToken) {}
-
     public record UsuarioDTO(Long id, String nome, String cargo, String foto, String role) {
         public static UsuarioDTO of(Usuario u) {
             return new UsuarioDTO(u.getId(), u.getNome(), u.getCargo(), u.getFoto(), u.getRole().name());
         }
     }
 
-    public record TokenResponse(String token, String refreshToken, UsuarioDTO usuario) {}
+    /**
+     * O que o cliente recebe no corpo. De propósito <b>sem</b> o refresh token: ele viaja
+     * em cookie HttpOnly (ver {@code RefreshTokenCookie}) justamente para ficar fora do
+     * alcance do JavaScript da página. O access token continua no corpo porque o cliente
+     * precisa montar o header {@code Authorization} — mas vive só na memória da aba e
+     * expira em 15 minutos.
+     */
+    public record TokenResponse(String token, UsuarioDTO usuario) {}
+
+    /**
+     * Resultado interno de um login ou de uma rotação: o corpo da resposta mais o refresh
+     * token em claro, que o controller converte em cookie e não deixa chegar ao JSON.
+     */
+    public record SessaoEmitida(TokenResponse resposta, String refreshTokenPlano) {}
 
     public record TrocaSenhaRequest(@NotBlank String senhaAtual,
                                     @NotBlank @Size(min = 8, message = "A nova senha deve ter ao menos 8 caracteres")

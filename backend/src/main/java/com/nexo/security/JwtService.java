@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -40,6 +41,10 @@ public class JwtService {
     public String gerarAccessToken(Usuario usuario) {
         Instant agora = Instant.now();
         return Jwts.builder()
+                // jti: identidade própria deste token, para que o logout consiga invalidar
+                // esta emissão específica sem tocar nas outras sessões do mesmo usuário
+                // (ver AccessTokensRevogados).
+                .id(UUID.randomUUID().toString())
                 .subject(usuario.getLogin())
                 .claim("uid", usuario.getId())
                 .claim("role", usuario.getRole().name())

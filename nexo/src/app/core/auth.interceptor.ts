@@ -26,7 +26,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(requisicao).pipe(
     catchError((erro: HttpErrorResponse) => {
-      const podeRenovar = erro.status === 401 && !!auth.refreshToken;
+      // O refresh token está num cookie HttpOnly — o cliente não tem como conferir se
+      // existe. O que dá para saber é se havia uma sessão: se havia, vale tentar
+      // renovar e deixar o servidor decidir pelo cookie.
+      const podeRenovar = erro.status === 401 && !!auth.usuarioLogado();
       if (!podeRenovar) {
         return throwError(() => erro);
       }

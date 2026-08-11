@@ -97,24 +97,38 @@ public class TurmasController {
         }
         LocalDate dia = request.data() != null ? request.data() : LocalDate.now();
 
-        for (PresencaRequest p : request.presencas()) {
-            Aluno aluno = alunos.findById(p.alunoId())
-                    .orElseThrow(() -> ApiException.badRequest("Aluno inexistente: " + p.alunoId()));
-            Frequencia freq = frequencias.findByAlunoIdAndTurmaIdAndData(p.alunoId(), turmaId, dia)
-                    .orElseGet(() -> {
-                        Frequencia nova = new Frequencia();
-                        nova.setAluno(aluno);
-                        nova.setTurma(turma);
-                        nova.setData(dia);
-                        return nova;
-                    });
-            freq.setPresente(p.presente());
-            frequencias.save(freq);
+        // Chamada de uma turma inteira em 3 queries fixas, no lugar de 3 por aluno
+        // (busca do aluno + busca da frequência + save) mais a releitura final.
+        Map<Long, Frequencia> porAluno = frequencias.findByTurmaIdAndData(turmaId, dia).stream()
+                .collect(Collectors.toMap(f -> f.getAluno().getId(), f -> f));
+
+        List<Long> idsPedidos = request.presencas().stream()
+                .map(PresencaRequest::alunoId).distinct().toList();
+        Map<Long, Aluno> alunosDaChamada = alunos.findAllById(idsPedidos).stream()
+                .collect(Collectors.toMap(Aluno::getId, a -> a));
+        for (Long id : idsPedidos) {
+            if (!alunosDaChamada.containsKey(id)) {
+                throw ApiException.badRequest("Aluno inexistente: " + id);
+            }
         }
 
-        List<Frequencia> doDia = frequencias.findByTurmaIdAndData(turmaId, dia);
-        long presentes = doDia.stream().filter(Frequencia::isPresente).count();
-        int total = doDia.size();
+        for (PresencaRequest p : request.presencas()) {
+            Frequencia freq = porAluno.get(p.alunoId());
+            if (freq == null) {
+                freq = new Frequencia();
+                freq.setAluno(alunosDaChamada.get(p.alunoId()));
+                freq.setTurma(turma);
+                freq.setData(dia);
+                porAluno.put(p.alunoId(), freq);
+            }
+            freq.setPresente(p.presente());
+        }
+        // saveAll agrupa os INSERT/UPDATE num único lote JDBC (hibernate.jdbc.batch_size).
+        frequencias.saveAll(porAluno.values());
+
+        // O mapa já é o estado do dia depois do save: dispensa reconsultar a tabela.
+        long presentes = porAluno.values().stream().filter(Frequencia::isPresente).count();
+        int total = porAluno.size();
         double percentual = total == 0 ? 0 : Math.round(presentes * 1000.0 / total) / 10.0;
         return new ResumoFrequencia(total, presentes, total - presentes, percentual);
     }

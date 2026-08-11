@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface NotaRepository extends JpaRepository<Nota, Long> {
 
@@ -21,6 +22,13 @@ public interface NotaRepository extends JpaRepository<Nota, Long> {
                               @Param("periodo") String periodo);
 
     List<Nota> findByAlunoId(Long alunoId);
+
+    /**
+     * A nota exata que a edição altera. Existe a constraint única
+     * (aluno_id, disciplina, periodo), então isso devolve no máximo uma linha —
+     * antes o boletim inteiro do aluno era carregado só para filtrar em memória.
+     */
+    Optional<Nota> findByAlunoIdAndDisciplinaAndPeriodo(Long alunoId, String disciplina, String periodo);
 
     /**
      * Notas cruas de TODOS os alunos numa única query, para calcular médias em lote.
