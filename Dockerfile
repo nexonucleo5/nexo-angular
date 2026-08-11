@@ -71,11 +71,18 @@ FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS runtime
 #
 # O gnupg e o pinentry vêm na base do Temurin só para conferir assinatura no
 # build dela, e arrastam o sqlite-libs junto — que é de onde saíam os únicos
-# CVEs HIGH da imagem. Nada disso é usado por um app Java; sai na mesma camada
-# do apk add, senão os arquivos ficariam presos na camada de baixo.
-RUN apk add --no-cache tzdata \
+# CVEs HIGH da imagem. O coreutils sai pelo mesmo motivo: o busybox reassume o
+# /usr/bin/env sozinho e nada num app Java precisa das versões GNU. Tudo na
+# mesma camada do apk add, senão os arquivos ficariam presos na camada de baixo.
+#
+# O apk upgrade pega os patches que sairam depois da base ser publicada — hoje
+# expat 2.8.2 e p11-kit 0.26.2, que sozinhos respondem por 14 das 20
+# vulnerabilidades que a imagem tinha.
+RUN apk upgrade --no-cache \
+ && apk add --no-cache tzdata \
  && apk del --purge gnupg gnupg-dirmngr gnupg-gpgconf gnupg-keyboxd \
-                    gnupg-utils gnupg-wks-client pinentry
+                    gnupg-utils gnupg-wks-client pinentry \
+                    coreutils coreutils-env coreutils-fmt coreutils-sha512sum
 ENV TZ=America/Sao_Paulo
 
 # Usuário sem privilégio: uma falha no app não vira root dentro do container.

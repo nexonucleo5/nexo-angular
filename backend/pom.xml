@@ -13,7 +13,7 @@
 
     <groupId>com.nexo</groupId>
     <artifactId>nexo-backend</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <name>nexo-backend</name>
     <description>Backend Java/Spring do Nexo - Gestão Escolar (arquitetura_java.md)</description>
 
@@ -24,6 +24,12 @@
              até 42.7.11 tem a CVE-2026-54291, em que a falha ao negociar TLS
              deixa a conexão seguir sem criptografia em vez de abortar. -->
         <postgresql.version>42.7.13</postgresql.version>
+        <!-- Também à frente do BOM (2.21.4), que tem três falhas de desserialização
+             — entre elas a CVE-2026-59889. O Jackson é o que converte todo JSON
+             que entra pela API, então é o caminho mais exposto do backend. -->
+        <jackson-bom.version>2.21.5</jackson-bom.version>
+        <!-- Chega via POI. O BOM fixa 3.17.0, que tem a CVE-2025-48924. -->
+        <commons-lang3.version>3.18.0</commons-lang3.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
