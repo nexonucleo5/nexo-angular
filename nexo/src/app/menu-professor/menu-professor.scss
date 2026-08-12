@@ -101,13 +101,24 @@
 
 /* Footer */
 .sidebar-footer {
-  padding: 24px 20px;
-  border-top: 1px solid var(--border-color);
-  text-align: center;
-  color: var(--text-muted);
+  padding: 8px 20px; border-top: 1px solid var(--border-color);
+  display: flex; align-items: center; justify-content: flex-start; gap: 12px;
+  p { margin: 0; font-size: 13px; color: var(--text-muted); }
+}
 
-  p {
-    margin: 0;
-    font-size: 14px;
-  }
+.sidebar-footer-logo {
+  display: inline-block;
+  width: 64px;
+  aspect-ratio: 1 / 1;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  flex-shrink: 0;
+}
+
+:host-context(html[data-theme='dark']) .sidebar-footer-logo {
+  background-image: url('/assets/imagensProjeto/logo-nexo-dark.png');
+}
+:host-context(html[data-theme='light']) .sidebar-footer-logo {
+  background-image: url('/assets/imagensProjeto/logo-nexo-light.png');
 }
