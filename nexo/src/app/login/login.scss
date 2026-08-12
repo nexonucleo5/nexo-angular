@@ -3,9 +3,10 @@
   min-height: 100vh;
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
   padding: 20px;
+  padding-right: 8vw;
   background-color: var(--bg-primary);
   overflow: hidden;
 }
@@ -14,9 +15,9 @@
 .login-marca {
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: min(760px, 92vw);
+  left: 0;
+  transform: translate(-15%, -50%);
+  width: min(1000px, 85vw);
   aspect-ratio: 1 / 1;
   background-repeat: no-repeat;
   background-position: center;
