@@ -56,6 +56,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
+        <!-- Saúde da aplicação. O HEALTHCHECK do Dockerfile batia em "/", que devolve
+             o index.html do Angular e responde 200 com o banco fora do ar — ou seja,
+             não checava nada. O /actuator/health traz o indicador do DataSource junto. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
 
         <!-- JWT -->
         <dependency>

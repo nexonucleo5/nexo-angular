@@ -56,9 +56,13 @@ spring:
           plan_cache_max_size: 256
           plan_parameter_metadata_max_size: 64
 
+  # Desligado na base de propósito: este arquivo é o que vale quando nenhum perfil
+  # é ativado, e o que vale por omissão precisa ser o seguro. Quem desenvolve liga
+  # o console pelo perfil `dev` (application-dev.yml); esquecer de ativar um perfil
+  # passa a custar uma ferramenta a menos, e não um console SQL aberto na internet.
   h2:
     console:
-      enabled: true
+      enabled: false
       path: /h2-console
 
   # Escapa não-ASCII como \uXXXX no JSON — imune a double-encoding de charset
@@ -100,6 +104,24 @@ server:
     # Devolve a thread ociosa (e o buffer dela) em vez de mantê-la presa.
     keep-alive-timeout: 30000
 
+# Só o health sai para a web, e sem detalhe: o /actuator/health é público (é o
+# HEALTHCHECK do container que o consulta, sem credencial) e um corpo detalhado
+# entregaria a quem perguntasse o endereço do banco e o estado do pool. Quem
+# precisar dos detalhes lê o log. Ampliar esta lista exige mexer também no
+# SecurityConfig, que nega /actuator/** fora do health.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      # O status agregado já considera o indicador do DataSource — banco fora do ar
+      # derruba o health para DOWN (503) mesmo sem detalhe nenhum no corpo. O que
+      # estas duas linhas escondem é só a decomposição por componente.
+      show-details: never
+      show-components: never
+
 nexo:
   jwt:
     # Sem default: o segredo vem SEMPRE do ambiente, inclusive em dev (.env local).
@@ -111,4 +133,8 @@ nexo:
     # Origem do dev-server Angular
     allowed-origins: http://localhost:4200
   seed:
-    enabled: true
+    # Mesmo motivo do console acima: o seed cria `diretor`, `professor` e `aluno`
+    # com senha conhecida (DataSeeder). Ligado na base, bastava subir a aplicação
+    # sem perfil nenhum — o que a imagem Docker fazia — para essas três contas
+    # existirem. Quem quer os dados de exemplo pede por eles: perfil `dev`.
+    enabled: false

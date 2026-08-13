@@ -1,0 +1,23 @@
+# Perfil de DESENVOLVIMENTO — ativar com SPRING_PROFILES_ACTIVE=dev
+#
+#   mvn spring-boot:run -Dspring-boot.run.profiles=dev
+#   docker compose up            (o compose.yaml já define o perfil)
+#
+# Existe para que o application.yml base possa ser seguro por omissão. Antes, o
+# que era conveniência de desenvolvimento (console SQL, contas de exemplo) valia
+# para qualquer execução que não ativasse um perfil — inclusive a imagem Docker,
+# que não definia perfil nenhum. Agora a conveniência é que precisa ser pedida.
+spring:
+  # Console SQL em http://localhost:8080/h2-console (JDBC URL: jdbc:h2:file:./data/nexo,
+  # usuário `nexo`, senha `nexo`). O SecurityConfig libera o path seguindo esta flag —
+  # com ela desligada o caminho é negado, e não apenas escondido.
+  h2:
+    console:
+      enabled: true
+
+nexo:
+  # Popula o banco com turmas, matérias, alunos e as três contas de demonstração
+  # (diretor / professor / aluno, todas com senha 123456 — ver DataSeeder).
+  # É o que faz a aplicação subir com algo na tela num clone novo.
+  seed:
+    enabled: true

@@ -103,12 +103,28 @@ USER nexo
 # sem isso ela dimensiona o heap pela RAM do host e o container leva OOM kill.
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
 
+# O perfil vive na imagem, não só no painel do Render. Sem esta linha a imagem
+# subia no perfil default — o de desenvolvimento —, e todo o endurecimento de
+# produção dependia de alguém lembrar de uma variável fora do repositório. Quem
+# esquecesse ficava com o console do H2 aberto e com as contas de demonstração
+# (senha 123456) no ar.
+#
+# Agora errar exige uma ação: o perfil prod não tem default para DB_URL nem para
+# NEXO_JWT_SECRET, então uma configuração incompleta derruba o boot com mensagem
+# clara em vez de servir um H2 em arquivo achando que está tudo bem.
+# O compose.yaml sobrescreve para `dev`, que é o que faz sentido na máquina local.
+ENV SPRING_PROFILES_ACTIVE=prod
+
 # Informativo: o Render (e o compose) injetam a porta real em $PORT.
 EXPOSE 8080
 
-# `/` devolve o index.html do Angular e é público — dá para sondar sem token.
+# /actuator/health é público e sem detalhe (application.yml), então dá para sondar
+# sem token. Antes isto batia em "/", que devolve o index.html do Angular: o
+# container continuava "saudável" com o banco inacessível, porque o Tomcat servia
+# o arquivo estático do mesmo jeito. O health agrega o indicador do DataSource e
+# responde 503 nesse caso, que é o que faz o Render tirar a instância do ar.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-    CMD wget -q --spider "http://127.0.0.1:${PORT:-8080}/" || exit 1
+    CMD wget -q --spider "http://127.0.0.1:${PORT:-8080}/actuator/health" || exit 1
 
 # exec: o java vira PID 1 e recebe o SIGTERM do `docker stop` direto, fechando
 # o pool de conexões em vez de morrer no timeout.

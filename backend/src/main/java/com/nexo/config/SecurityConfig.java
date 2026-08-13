@@ -95,6 +95,15 @@ public class SecurityConfig {
                         auth.requestMatchers("/h2-console/**").denyAll();
                     }
 
+                    // Só a saúde é pública, e ela responde apenas UP/DOWN
+                    // (management.endpoint.health.show-details=never). O resto do
+                    // actuator é negado explicitamente: sem esta linha os endpoints
+                    // dele cairiam no anyRequest().permitAll() lá embaixo, e coisas
+                    // como /actuator/env e /actuator/heapdump ficariam abertas se
+                    // alguém ampliasse a lista de exposição no yml.
+                    auth.requestMatchers("/actuator/health").permitAll()
+                            .requestMatchers("/actuator/**").denyAll();
+
                     auth.requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                             .requestMatchers("/error").permitAll()
                             .requestMatchers("/ws/**").permitAll() // handshake autenticado por ticket de uso único na query

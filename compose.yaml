@@ -1,4 +1,6 @@
-# Sobe o monolito (Angular embutido no Spring) igual ao que roda no Render.
+# Sobe o monolito (Angular embutido no Spring) — a mesma imagem que vai para o
+# Render, porém no perfil `dev`: aqui o banco é o H2 do volume, e não o Postgres
+# que o perfil de produção exige.
 #
 #   docker compose up --build      → http://localhost:8080
 #   docker compose down            → para, mantendo o banco no volume
@@ -20,6 +22,11 @@ services:
       # um stack trace de Spring lá dentro.
       NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:?defina NEXO_JWT_SECRET no .env (openssl rand -base64 48)}
       PORT: 8080
+      # A imagem vem com SPRING_PROFILES_ACTIVE=prod (ver Dockerfile), que exige
+      # Postgres. Aqui não há Postgres: o compose existe para subir o monolito
+      # inteiro numa máquina só, com o H2 do volume abaixo. Daí o `dev`, que traz
+      # junto o seed das contas de exemplo e o console SQL em /h2-console.
+      SPRING_PROFILES_ACTIVE: dev
     volumes:
       # O H2 de dev grava em /app/data; no volume os dados sobrevivem ao rebuild.
       - nexo-data:/app/data
