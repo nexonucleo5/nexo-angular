@@ -18,9 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +37,14 @@ public class RelatorioService {
 
     public record Desempenho(double taxaAprovacao, double mediaGeral, double frequenciaMedia,
                              double engajamentoMedio, long totalAlunos, List<SerieTurma> turmas) {}
+
+    /** Exportações que podem estar sendo montadas ao mesmo tempo — ver {@link #exportar}. */
+    private static final int EXPORTACOES_SIMULTANEAS = 2;
+
+    /** Quanto uma requisição espera pela vez antes de levar 429. */
+    private static final Duration ESPERA_NA_FILA = Duration.ofSeconds(5);
+
+    private final Semaphore exportacoes = new Semaphore(EXPORTACOES_SIMULTANEAS);
 
     private final AlunoRepository alunos;
     private final TurmaRepository turmas;
@@ -107,14 +118,48 @@ public class RelatorioService {
         return new Desempenho(taxaAprovacao, mediaGeral, frequenciaMedia, engajamentoMedio, total, series);
     }
 
+    /**
+     * O arquivo é montado inteiro em memória ({@link ByteArrayOutputStream}) antes de virar
+     * resposta — é o jeito mais simples, e o certo enquanto o relatório couber com folga na
+     * heap. O que não dá é deixar quantas montagens simultâneas o cliente quiser: no
+     * contêiner de 0,5 vCPU do plano free, um punhado de exportações ao mesmo tempo faz o
+     * {@code -XX:+ExitOnOutOfMemoryError} do Dockerfile cumprir o que promete e derrubar o
+     * processo — levando junto todo mundo que estava usando o sistema.
+     *
+     * <p>O semáforo põe teto nisso. A espera curta é de propósito: são poucos diretores, e
+     * dois clicarem no mesmo instante é uso legítimo, não abuso — quem chega junto espera a
+     * vez em vez de tomar erro na cara. Passou disso, 429 com {@code Retry-After}, que o
+     * cliente já sabe tratar.
+     */
     @Transactional(readOnly = true)
     public byte[] exportar(String formato, String periodo, String visao) {
-        Desempenho dados = desempenho(periodo, visao);
-        return switch (formato == null ? "" : formato.toLowerCase()) {
-            case "pdf" -> exportarPdf(dados);
-            case "xlsx" -> exportarXlsx(dados);
-            default -> throw ApiException.badRequest("Formato de exportação inválido. Use pdf ou xlsx.");
-        };
+        // Formato validado antes de ocupar uma permissão: pedido malfeito não tem por que
+        // entrar na fila nem fazer os outros esperarem.
+        boolean pdf = "pdf".equalsIgnoreCase(formato);
+        if (!pdf && !"xlsx".equalsIgnoreCase(formato)) {
+            throw ApiException.badRequest("Formato de exportação inválido. Use pdf ou xlsx.");
+        }
+
+        boolean adquiriu;
+        try {
+            adquiriu = exportacoes.tryAcquire(ESPERA_NA_FILA.toSeconds(), TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            // Desligamento gracioso em curso: devolve a marca de interrupção e desiste.
+            Thread.currentThread().interrupt();
+            throw ApiException.tooManyRequests("EXPORTACAO_OCUPADA",
+                    "A geração do relatório foi interrompida. Tente novamente.", 5);
+        }
+        if (!adquiriu) {
+            throw ApiException.tooManyRequests("EXPORTACAO_OCUPADA",
+                    "Há relatórios sendo gerados no momento. Tente novamente em instantes.", 15);
+        }
+
+        try {
+            Desempenho dados = desempenho(periodo, visao);
+            return pdf ? exportarPdf(dados) : exportarXlsx(dados);
+        } finally {
+            exportacoes.release();
+        }
     }
 
     private byte[] exportarPdf(Desempenho dados) {

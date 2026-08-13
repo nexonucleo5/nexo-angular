@@ -45,7 +45,7 @@ public class AuthController {
         if (refreshToken == null || refreshToken.isBlank()) {
             throw ApiException.unauthorized("Refresh token ausente.");
         }
-        return comCookie(authService.refresh(refreshToken), http);
+        return comCookie(authService.refresh(refreshToken, http.getRemoteAddr()), http);
     }
 
     /**

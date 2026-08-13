@@ -39,6 +39,8 @@ class AuthServiceTest {
     private static final String SEGREDO = "segredo-de-teste-com-mais-de-32-caracteres-abcdef";
     private static final String SENHA_CORRETA = "senha-correta";
     private static final String IP = "127.0.0.1";
+    /** Outra origem, para separar quem ataca de quem é dono da conta. */
+    private static final String IP_ATACANTE = "203.0.113.7";
 
     @Mock private UsuarioRepository usuarios;
     @Mock private RefreshTokenRepository refreshTokens;
@@ -175,6 +177,52 @@ class AuthServiceTest {
         assertThat(authService.login("bruno", SENHA_CORRETA, IP).resposta().token()).isNotBlank();
     }
 
+    /**
+     * O ponto do contador ser por (conta, origem) e não só por login. Antes, quem soubesse
+     * um nome adivinhável — e {@code diretor} é adivinhável — trancava a conta alheia por
+     * quinze minutos com cinco requisições. A defesa contra força bruta virava arma.
+     */
+    @Test
+    void oBloqueioNaoAlcancaAContaVindaDeOutraOrigem() {
+        usuarioExiste();
+        when(refreshTokens.save(any(RefreshToken.class))).thenAnswer(i -> i.getArgument(0));
+
+        for (int i = 0; i < 5; i++) {
+            assertThatThrownBy(() -> authService.login("ana", "senha-errada", IP_ATACANTE))
+                    .isInstanceOf(ApiException.class);
+        }
+
+        // Quem errou trava a si mesmo — inclusive com a senha certa.
+        assertThatThrownBy(() -> authService.login("ana", SENHA_CORRETA, IP_ATACANTE))
+                .hasMessageContaining("Muitas tentativas")
+                .extracting(e -> ((ApiException) e).getStatus())
+                .isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+
+        // E a dona da conta continua entrando de onde sempre entrou.
+        assertThat(authService.login("ana", SENHA_CORRETA, IP).resposta().token()).isNotBlank();
+    }
+
+    /**
+     * O /refresh é público e consulta o banco a cada chamada: sem teto, um laço prendia as
+     * dez conexões do pool sem apresentar credencial nenhuma. O limite é por origem e vale
+     * para os endpoints de autenticação como um todo.
+     */
+    @Test
+    void limitaATaxaDeRequisicoesDeUmaMesmaOrigem() {
+        for (int i = 1; i <= 120; i++) {
+            int chamada = i;
+            assertThatThrownBy(() -> authService.refresh("inexistente", IP))
+                    .as("chamada %d ainda deve ser recusada pelo token, não pela taxa", chamada)
+                    .hasMessageContaining("Refresh token inválido");
+        }
+
+        assertThatThrownBy(() -> authService.refresh("inexistente", IP))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("Muitas requisições")
+                .extracting(e -> ((ApiException) e).getStatus())
+                .isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+    }
+
     // ── Rotação do refresh token ─────────────────────────────────────────────
 
     // O que fica gravado é o hash do token, não ele mesmo — por isso as buscas são
@@ -189,7 +237,7 @@ class AuthServiceTest {
         when(refreshTokens.findByTokenHash(anyString())).thenReturn(Optional.of(antigo));
         when(refreshTokens.save(any(RefreshToken.class))).thenAnswer(i -> i.getArgument(0));
 
-        SessaoEmitida sessao = authService.refresh("refresh-antigo");
+        SessaoEmitida sessao = authService.refresh("refresh-antigo", IP);
 
         assertThat(antigo.isRevogado()).as("o token usado precisa ser invalidado").isTrue();
         assertThat(sessao.refreshTokenPlano()).isNotEqualTo("refresh-antigo");
@@ -213,7 +261,7 @@ class AuthServiceTest {
         revogado.setRevogado(true);
         when(refreshTokens.findByTokenHash(anyString())).thenReturn(Optional.of(revogado));
 
-        assertThatThrownBy(() -> authService.refresh("ja-usado"))
+        assertThatThrownBy(() -> authService.refresh("ja-usado", IP))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining("Sessão encerrada por segurança");
 
@@ -228,7 +276,7 @@ class AuthServiceTest {
         expirado.setExpiraEm(Instant.now().minus(1, ChronoUnit.DAYS));
         when(refreshTokens.findByTokenHash(anyString())).thenReturn(Optional.of(expirado));
 
-        assertThatThrownBy(() -> authService.refresh("vencido"))
+        assertThatThrownBy(() -> authService.refresh("vencido", IP))
                 .isInstanceOf(ApiException.class);
     }
 
@@ -236,7 +284,7 @@ class AuthServiceTest {
     void refreshComTokenDesconhecidoEhRecusado() {
         when(refreshTokens.findByTokenHash(anyString())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> authService.refresh("nunca-existiu"))
+        assertThatThrownBy(() -> authService.refresh("nunca-existiu", IP))
                 .isInstanceOf(ApiException.class);
     }
 }
