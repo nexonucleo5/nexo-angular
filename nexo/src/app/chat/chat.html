@@ -52,6 +52,7 @@
 
         <div class="chat-input d-flex gap-2">
           <input type="text" class="form-control chat-field" [(ngModel)]="novoTexto"
+                 maxlength="2000"
                  placeholder="Digite sua mensagem..." (keyup.enter)="enviar()">
           <button class="btn btn-enviar px-3" (click)="enviar()" [disabled]="!conectado()">
             <i class="bi bi-send-fill"></i>

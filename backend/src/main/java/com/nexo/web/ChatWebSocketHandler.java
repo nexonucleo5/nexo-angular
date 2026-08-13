@@ -2,6 +2,7 @@ package com.nexo.web;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nexo.domain.ChatMensagem;
 import com.nexo.security.WsTicketService;
 import com.nexo.service.ChatService;
 import org.springframework.stereotype.Component;
@@ -61,8 +62,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
         JsonNode node = mapper.readTree(message.getPayload());
         Long para = node.hasNonNull("para") ? node.get("para").asLong() : null;
-        String texto = node.hasNonNull("texto") ? node.get("texto").asText() : null;
+        String texto = node.hasNonNull("texto") ? node.get("texto").asText().trim() : null;
         if (para == null || texto == null || texto.isBlank()) return;
+
+        // O tamanho é conferido aqui, e não só no campo do Angular: o WebSocket aceita
+        // qualquer cliente, e o texto ia direto para uma coluna de 2000 caracteres.
+        // Acima disso o insert falhava dentro do handler, a exceção subia e a sessão
+        // era encerrada — quem estava conversando caía, na hora escolhida por quem
+        // enviou. Descartar a mensagem mantém a conversa de pé.
+        if (texto.length() > ChatMensagem.TAMANHO_MAXIMO_TEXTO) return;
 
         // O destinatário vem do cliente: confere no servidor se o par é permitido
         // (impede, por exemplo, aluno → aluno com um id forjado).

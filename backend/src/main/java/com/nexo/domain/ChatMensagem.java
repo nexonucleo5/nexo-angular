@@ -12,6 +12,15 @@ import java.time.Instant;
 })
 public class ChatMensagem {
 
+    /**
+     * Teto do texto, em caracteres — o mesmo número que define a coluna abaixo.
+     * Público porque quem recebe a mensagem (ChatWebSocketHandler) precisa recusar
+     * o excesso <b>antes</b> de chegar aqui: o texto vem do cliente pelo WebSocket,
+     * e passar do limite estourava o insert dentro do handler, o que derrubava a
+     * conexão de quem estava conversando.
+     */
+    public static final int TAMANHO_MAXIMO_TEXTO = 2000;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,7 +33,7 @@ public class ChatMensagem {
     @Column(nullable = false)
     private Long destinatarioId;
 
-    @Column(nullable = false, length = 2000)
+    @Column(nullable = false, length = TAMANHO_MAXIMO_TEXTO)
     private String texto;
 
     private Instant criadaEm;
