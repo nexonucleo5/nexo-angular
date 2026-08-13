@@ -1,0 +1,42 @@
+<div class="acesso-container">
+    <div class="acesso-marca" aria-hidden="true"></div>
+
+    @if (enviado()) {
+    <div class="acesso-form">
+        <h2 class="acesso-title">Verifique o seu e-mail</h2>
+        <p class="acesso-subtitle">
+            Se este login estiver cadastrado e tiver um e-mail de contato, o link para
+            escolher uma senha nova acabou de sair. O link vale por 30 minutos.
+        </p>
+        <p class="acesso-nota">
+            Não chegou? Confira a caixa de spam. Se você não tem e-mail de contato
+            cadastrado, fale com a secretaria da escola — ela consegue gerar um acesso novo.
+        </p>
+        <a routerLink="/login" class="btn btn-acesso w-100">Voltar para o login</a>
+    </div>
+    } @else {
+    <form class="acesso-form" [formGroup]="form" (ngSubmit)="enviar()">
+        <h2 class="acesso-title">Esqueci minha senha</h2>
+        <p class="acesso-subtitle">Informe o seu login e enviaremos um link para redefini-la.</p>
+
+        @if (mensagemErro()) {
+        <div class="alert alert-danger">{{ mensagemErro() }}</div>
+        }
+
+        <div class="mb-3">
+            <label for="login" class="form-label">Login</label>
+            <input type="text" id="login" formControlName="login" class="form-control"
+                [class.is-invalid]="form.get('login')?.invalid && form.get('login')?.touched"
+                placeholder="Digite seu login" autocomplete="username">
+            <div class="invalid-feedback">O login é obrigatório.</div>
+            <div class="form-text">É o mesmo que você usa para entrar no sistema.</div>
+        </div>
+
+        <button type="submit" class="btn btn-acesso w-100" [disabled]="enviando()">
+            {{ enviando() ? 'Enviando...' : 'Enviar link' }}
+        </button>
+
+        <a routerLink="/login" class="acesso-link">Voltar para o login</a>
+    </form>
+    }
+</div>

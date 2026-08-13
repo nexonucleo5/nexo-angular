@@ -1,0 +1,59 @@
+<div class="acesso-container">
+    <div class="acesso-marca" aria-hidden="true"></div>
+
+    @if (semToken()) {
+    <div class="acesso-form">
+        <h2 class="acesso-title">Link incompleto</h2>
+        <p class="acesso-subtitle">
+            Este endereço precisa vir do link que enviamos por e-mail. Se você copiou e
+            colou, pode ter ficado um pedaço para trás.
+        </p>
+        <button type="button" class="btn btn-acesso w-100" (click)="pedirNovoLink()">
+            Pedir um link novo
+        </button>
+    </div>
+    } @else if (concluido()) {
+    <div class="acesso-form">
+        <h2 class="acesso-title">Senha definida</h2>
+        <p class="acesso-subtitle">
+            Pronto. Já pode entrar com a sua senha nova — estamos levando você para a tela
+            de acesso.
+        </p>
+        <p class="acesso-nota">
+            Por segurança, encerramos as sessões que estavam abertas em outros aparelhos.
+        </p>
+        <button type="button" class="btn btn-acesso w-100" (click)="irParaLogin()">
+            Ir para o login
+        </button>
+    </div>
+    } @else {
+    <form class="acesso-form" [formGroup]="form" (ngSubmit)="salvar()">
+        <h2 class="acesso-title">Escolha a sua senha</h2>
+        <p class="acesso-subtitle">Ela substitui qualquer senha anterior desta conta.</p>
+
+        @if (mensagemErro()) {
+        <div class="alert alert-danger">{{ mensagemErro() }}</div>
+        }
+
+        <div class="mb-3">
+            <label for="novaSenha" class="form-label">Nova senha</label>
+            <input type="password" id="novaSenha" formControlName="novaSenha" class="form-control"
+                [class.is-invalid]="form.get('novaSenha')?.invalid && form.get('novaSenha')?.touched"
+                placeholder="Mínimo de 8 caracteres" autocomplete="new-password">
+            <div class="invalid-feedback">A senha precisa ter no mínimo 8 caracteres.</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="confirmar" class="form-label">Repita a nova senha</label>
+            <input type="password" id="confirmar" formControlName="confirmar" class="form-control"
+                [class.is-invalid]="form.get('confirmar')?.invalid && form.get('confirmar')?.touched"
+                placeholder="Digite a senha de novo" autocomplete="new-password">
+            <div class="invalid-feedback">Repita a senha para confirmar.</div>
+        </div>
+
+        <button type="submit" class="btn btn-acesso w-100" [disabled]="enviando()">
+            {{ enviando() ? 'Salvando...' : 'Salvar senha' }}
+        </button>
+    </form>
+    }
+</div>

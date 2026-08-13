@@ -8,7 +8,9 @@ import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
-const ROTAS_PUBLICAS = ['/auth/login', '/auth/refresh'];
+// A recuperação de senha é usada por quem não consegue entrar: não há token para anexar, e
+// um 401 daqui não pode disparar a tentativa de renovação lá embaixo.
+const ROTAS_PUBLICAS = ['/auth/login', '/auth/refresh', '/auth/senha/'];
 
 /**
  * Anexa o Bearer token a toda chamada da API e, em caso de 401,

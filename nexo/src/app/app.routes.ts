@@ -15,6 +15,18 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () => import('./login/login').then((m) => m.Login),
   },
+  {
+    // Passo 1 da recuperação: informa o login, recebe o link por e-mail.
+    path: 'recuperar-senha',
+    loadComponent: () => import('./recuperar-senha/recuperar-senha').then((m) => m.RecuperarSenha),
+  },
+  {
+    // Passo 2: destino do link do e-mail (?token=...). É também para onde aponta o
+    // convite de primeiro acesso de quem acabou de ser cadastrado — o caminho está
+    // fixado em RecuperacaoSenhaService.link(), no backend, e os dois precisam bater.
+    path: 'redefinir-senha',
+    loadComponent: () => import('./redefinir-senha/redefinir-senha').then((m) => m.RedefinirSenha),
+  },
 
   // ── Compartilhadas (todos os roles) ─────────────────────────────────────────
   {

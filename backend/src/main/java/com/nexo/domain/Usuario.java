@@ -24,17 +24,25 @@ public class Usuario {
     private String cargo;
 
     /**
-     * Endereço que recebe de fato mensagem do sistema — recuperação de senha, credencial
-     * de primeiro acesso, avisos.
+     * Endereço que recebe as mensagens <b>da conta</b>: convite de primeiro acesso e
+     * redefinição de senha.
      *
      * <p>Não confundir com o {@code login}, que para aluno e professor é o "e-mail
      * institucional" gerado pelo {@code CredenciaisService} num domínio de fachada
      * ({@code nexo.escola.com}): aquilo é identificador de acesso, não caixa de correio —
      * mandar mensagem para lá não chega a lugar nenhum.
      *
-     * <p>Para aluno menor de idade, o endereço aqui é o do responsável. É por isso que o
-     * campo mora no {@code Usuario} e não no {@code Aluno}: quem recebe a mensagem nem
-     * sempre é a pessoa que estuda.
+     * <p><b>De quem é este endereço.</b> De quem entra no sistema. Aluno de ensino médio
+     * tem o próprio e-mail e é ele quem esquece a própria senha — obrigá-lo a pedir o link
+     * ao responsável e esperar o repasse é atrito sem ganho de segurança, e ainda faz a
+     * credencial dele passar pela caixa de outra pessoa. O endereço do responsável entra
+     * aqui só quando o aluno é novo demais para ter um.
+     *
+     * <p><b>O que este campo não é.</b> Não é o canal para a escola falar <em>sobre</em> o
+     * aluno com a família — nota, falta, alerta de evasão. Essa é outra necessidade, com
+     * outro destinatário e outra base legal, e pede um campo próprio no {@code Aluno} no dia
+     * em que existir o que enviar. Misturar as duas coisas num campo só faria a comunicação
+     * escolar decidir para onde vai a redefinição de senha, ou o contrário.
      *
      * <p>Nulo é situação normal e prevista — cadastro antigo não tem, e o sistema precisa
      * seguir funcionando sem. O que depende de e-mail simplesmente não acontece.

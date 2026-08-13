@@ -73,6 +73,20 @@
         </select>
         <div class="invalid-feedback">Selecione o ano do ensino básico.</div>
       </div>
+
+      <div class="col-12 mb-3">
+        <label class="form-label" for="aluno-email">E-mail de contato (opcional):</label>
+        <input type="email" id="aluno-email" formControlName="emailContato" class="form-control"
+               [class.is-invalid]="fa['emailContato'].invalid && fa['emailContato'].touched"
+               placeholder="email@exemplo.com">
+        <div class="invalid-feedback">Informe um e-mail válido ou deixe o campo em branco.</div>
+        <div class="form-text">
+          O e-mail do próprio aluno, se ele já tiver — é ele quem vai precisar recuperar a
+          senha. Só use o do responsável quando o aluno ainda não tem um endereço próprio.
+          Para lá vai o convite para ele criar a senha; deixando em branco, a senha
+          provisória aparece aqui na tela para você repassar.
+        </div>
+      </div>
     </div>
 
     <button type="submit" class="btn btn-cadastro w-100 mt-2" [disabled]="enviando()">
@@ -126,6 +140,18 @@
       </div>
       <div *ngIf="fp['materiaIds'].invalid && fp['materiaIds'].touched" class="erro-materias">
         Selecione ao menos uma matéria.
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="prof-email">E-mail de contato (opcional):</label>
+      <input type="email" id="prof-email" formControlName="emailContato" class="form-control"
+             [class.is-invalid]="fp['emailContato'].invalid && fp['emailContato'].touched"
+             placeholder="email@exemplo.com">
+      <div class="invalid-feedback">Informe um e-mail válido ou deixe o campo em branco.</div>
+      <div class="form-text">
+        E-mail pessoal do docente, para onde vai o convite de criação de senha. Não é o
+        e-mail institucional — esse o sistema gera sozinho e serve só como login.
       </div>
     </div>
 

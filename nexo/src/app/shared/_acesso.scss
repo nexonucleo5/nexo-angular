@@ -1,45 +1,50 @@
-.login-container {
+// Estilo das telas de acesso que ficam fora da aplicação logada (recuperar senha,
+// redefinir senha). Compartilhado porque são a mesma tela em passos diferentes — e
+// porque elas precisam parecer a continuação do login, não outro site.
+//
+// O login tem o seu próprio arquivo: ele já existia e tem a marca de fundo posicionada
+// para o card à direita. Aqui o card é centralizado, que é o que cabe num passo curto.
+
+.acesso-container {
   position: relative;
   min-height: 100vh;
   width: 100%;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   padding: 20px;
-  padding-right: 8vw;
   background-color: var(--bg-primary);
   overflow: hidden;
 }
 
-/* Logo de fundo — ocupa boa parte da tela e passa por baixo do card. */
-.login-marca {
+.acesso-marca {
   position: absolute;
   top: 50%;
-  left: 0;
-  transform: translate(-15%, -50%);
-  width: min(1000px, 85vw);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(800px, 80vw);
   aspect-ratio: 1 / 1;
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  opacity: 0.3;
+  opacity: 0.18;
   pointer-events: none;
   z-index: 0;
 }
 
-:host-context(html[data-theme='dark']) .login-marca {
+:host-context(html[data-theme='dark']) .acesso-marca {
   background-image: url('/assets/imagensProjeto/logo-nexo-dark.png');
 }
-:host-context(html[data-theme='light']) .login-marca {
+:host-context(html[data-theme='light']) .acesso-marca {
   background-image: url('/assets/imagensProjeto/logo-nexo-light.png');
-  opacity: 0.22; /* no claro a logo tem mais contraste e pesa mais */
+  opacity: 0.14;
 }
 
-.login-form {
+.acesso-form {
   position: relative;
-  z-index: 1;   /* o card fica por cima da logo */
+  z-index: 1;
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   background-color: var(--bg-card);
   padding: 40px;
   border-radius: 16px;
@@ -47,19 +52,25 @@
   box-shadow: 0 8px 25px var(--shadow-color);
 }
 
-.login-title {
-  font-size: 28px;
+.acesso-title {
+  font-size: 26px;
   font-weight: 700;
   color: var(--text-main);
   text-align: center;
   margin-bottom: 8px;
 }
 
-.login-subtitle {
+.acesso-subtitle {
   font-size: 14px;
   color: var(--text-muted);
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
+}
+
+.acesso-nota {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
 }
 
 .form-label {
@@ -94,27 +105,25 @@
   margin-top: 6px;
 }
 
-.form-check-input {
-  background-color: var(--bg-input);
-  border: 1px solid var(--border-color);
-
-  &:focus    { box-shadow: none; border-color: #9b2fff; }
-  &:checked  { background-color: #9b2fff; border-color: #9b2fff; }
-}
-
-.form-check-label { font-size: 13px; color: var(--text-muted); }
-
-.btn-login {
-  width: 100%; height: 46px;
-  font-size: 15px; font-weight: 600; border-radius: 10px;
+.btn-acesso {
+  width: 100%;
+  height: 46px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
   background: linear-gradient(135deg, #9b2fff, #06d25e);
-  border: none; color: white;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: opacity 0.2s;
+
   &:hover { opacity: 0.9; color: white; }
   &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
-.login-link {
+.acesso-link {
   display: block;
   text-align: center;
   margin-top: 18px;
