@@ -36,4 +36,19 @@ public final class AuthDtos {
                                     String novaSenha) {}
 
     public record AtualizarPerfilRequest(String nome, String foto) {}
+
+    /**
+     * Só o login. De propósito não pede o e-mail junto: conferir os dois permitiria
+     * descobrir qual endereço está cadastrado para uma conta, testando um de cada vez.
+     */
+    public record EsqueciSenhaRequest(@NotBlank String login) {}
+
+    /**
+     * O mesmo mínimo de 8 caracteres da troca autenticada — a senha que sai daqui vale
+     * tanto quanto a outra, e não faria sentido a porta de recuperação aceitar uma mais
+     * fraca do que a porta da frente.
+     */
+    public record RedefinirSenhaRequest(@NotBlank String token,
+                                        @NotBlank @Size(min = 8, message = "A nova senha deve ter ao menos 8 caracteres")
+                                        String novaSenha) {}
 }

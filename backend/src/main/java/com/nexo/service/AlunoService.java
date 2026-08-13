@@ -32,7 +32,13 @@ public class AlunoService {
         this.auditoria = auditoria;
     }
 
-    public record CadastroAluno(String nome, String dataNascimento, String sexo, Long turmaId) {}
+    /**
+     * {@code emailContato}: endereço do responsável, para onde vai o convite de primeiro
+     * acesso. Opcional — sem ele o cadastro funciona igual e a senha provisória continua
+     * saindo na resposta, para o diretor repassar.
+     */
+    public record CadastroAluno(String nome, String dataNascimento, String sexo, Long turmaId,
+                                String emailContato) {}
 
     public record AlunoCriado(Long id, String nome, String emailInstitucional, String senhaProvisoria,
                               Long matriculaId) {}
@@ -78,7 +84,8 @@ public class AlunoService {
 
         var acesso = credenciais.gerar(aluno.getNome());
         aluno.setEmailInstitucional(acesso.login());
-        aluno.setUsuario(credenciais.criarUsuario(aluno.getNome(), turma.getNome(), Role.ALUNO, acesso));
+        aluno.setUsuario(credenciais.criarUsuario(aluno.getNome(), turma.getNome(), Role.ALUNO, acesso,
+                dados.emailContato()));
         alunos.save(aluno);
 
         Matricula matricula = new Matricula();

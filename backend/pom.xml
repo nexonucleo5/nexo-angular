@@ -63,6 +63,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <!-- Envio de e-mail por SMTP. De propósito não é o SDK de um provedor: Brevo,
+             Resend, SES e Mailgun falam SMTP, então trocar de fornecedor vira mudança
+             de variável de ambiente em vez de reescrita de código. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
 
         <!-- JWT -->
         <dependency>

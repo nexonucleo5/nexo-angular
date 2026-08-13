@@ -104,7 +104,12 @@ public class SecurityConfig {
                     auth.requestMatchers("/actuator/health").permitAll()
                             .requestMatchers("/actuator/**").denyAll();
 
-                    auth.requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                    // A recuperação de senha é necessariamente pública: quem a usa é
+                    // justamente quem não consegue autenticar. Os dois endpoints têm teto
+                    // de pedidos por origem e o /esqueci responde igual exista ou não a
+                    // conta — ver RecuperacaoSenhaService.
+                    auth.requestMatchers("/api/auth/login", "/api/auth/refresh",
+                                    "/api/auth/senha/esqueci", "/api/auth/senha/redefinir").permitAll()
                             .requestMatchers("/error").permitAll()
                             .requestMatchers("/ws/**").permitAll() // handshake autenticado por ticket de uso único na query
                             // <img src> não envia header Authorization; o id da foto é um UUID

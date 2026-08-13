@@ -39,5 +39,11 @@ nexo:
     refresh-token-days: ${JWT_REFRESH_DAYS:7}
   cors:
     allowed-origins: ${CORS_ORIGINS:https://nexo-gestao-escolar.com.br}
+  email:
+    # Endereço de um domínio verificado no provedor — senão a mensagem vai para spam ou é
+    # recusada. Sem ele a recuperação de senha continua respondendo 204, mas nada sai:
+    # o link fica só no log, onde ninguém vai buscá-lo.
+    remetente: ${EMAIL_REMETENTE:nao-responda@nexo-gestao-escolar.com.br}
+    url-base: ${EMAIL_URL_BASE:https://nexo-gestao-escolar.com.br}
   seed:
     enabled: ${SEED_ENABLED:false}      # não semear dados de exemplo em produção

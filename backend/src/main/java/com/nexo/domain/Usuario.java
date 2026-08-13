@@ -23,6 +23,24 @@ public class Usuario {
 
     private String cargo;
 
+    /**
+     * Endereço que recebe de fato mensagem do sistema — recuperação de senha, credencial
+     * de primeiro acesso, avisos.
+     *
+     * <p>Não confundir com o {@code login}, que para aluno e professor é o "e-mail
+     * institucional" gerado pelo {@code CredenciaisService} num domínio de fachada
+     * ({@code nexo.escola.com}): aquilo é identificador de acesso, não caixa de correio —
+     * mandar mensagem para lá não chega a lugar nenhum.
+     *
+     * <p>Para aluno menor de idade, o endereço aqui é o do responsável. É por isso que o
+     * campo mora no {@code Usuario} e não no {@code Aluno}: quem recebe a mensagem nem
+     * sempre é a pessoa que estuda.
+     *
+     * <p>Nulo é situação normal e prevista — cadastro antigo não tem, e o sistema precisa
+     * seguir funcionando sem. O que depende de e-mail simplesmente não acontece.
+     */
+    private String emailContato;
+
     private String foto;
 
     @Enumerated(EnumType.STRING)
@@ -43,6 +61,8 @@ public class Usuario {
     public void setNome(String nome) { this.nome = nome; }
     public String getCargo() { return cargo; }
     public void setCargo(String cargo) { this.cargo = cargo; }
+    public String getEmailContato() { return emailContato; }
+    public void setEmailContato(String emailContato) { this.emailContato = emailContato; }
     public String getFoto() { return foto; }
     public void setFoto(String foto) { this.foto = foto; }
     public Role getRole() { return role; }

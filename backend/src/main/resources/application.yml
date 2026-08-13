@@ -77,6 +77,41 @@ spring:
       max-file-size: 2MB
       max-request-size: 3MB
 
+  # Pool que executa o envio de e-mail fora da thread da requisição (EnviadorDeEmail).
+  # Pequeno de propósito: SMTP é espera de rede, não trabalho de CPU, e este contêiner tem
+  # meio núcleo. A fila é limitada — sem teto ela cresceria até o heap acabar, e o descarte
+  # com aviso no log é preferível a um OutOfMemory silencioso.
+  task:
+    execution:
+      pool:
+        core-size: 1
+        max-size: 3
+        queue-capacity: 200
+      thread-name-prefix: nexo-async-
+
+  # O JavaMailSender só existe se `spring.mail.host` estiver definida; sem ela o
+  # EnviadorDeEmail cai no modo de registro em log. É por isso que host, porta, usuário e
+  # senha NÃO aparecem aqui com default vazio: `${MAIL_HOST:}` criaria a propriedade com
+  # valor em branco, e a condição que decide o bean olha se ela existe — não se tem
+  # conteúdo. O provedor entra por variável de ambiente, que o Spring liga sozinho:
+  #
+  #   SPRING_MAIL_HOST=smtp-relay.brevo.com   SPRING_MAIL_PORT=587
+  #   SPRING_MAIL_USERNAME=...                SPRING_MAIL_PASSWORD=...
+  #
+  # Brevo, Resend, SES e Mailgun falam SMTP: trocar de fornecedor é trocar estas quatro.
+  mail:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          # Sem estes dois um provedor lento prende a thread do pool de envio
+          # indefinidamente; a fila entope atrás e nenhum e-mail sai mais.
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
 server:
   # Render (e outros PaaS) injetam a porta em $PORT; local cai no 8080
   port: ${PORT:8080}
@@ -132,6 +167,13 @@ nexo:
   cors:
     # Origem do dev-server Angular
     allowed-origins: http://localhost:4200
+  email:
+    # Remetente das mensagens. Vazio = sem provedor: o envio vira registro no log, que é
+    # como se lê o link de recuperação em desenvolvimento (procure por "E-mail não enviado").
+    # Em produção precisa ser um endereço de domínio verificado no provedor.
+    remetente: ${EMAIL_REMETENTE:}
+    # Onde o link do e-mail aponta — a origem em que o Angular está servido.
+    url-base: ${EMAIL_URL_BASE:http://localhost:4200}
   seed:
     # Mesmo motivo do console acima: o seed cria `diretor`, `professor` e `aluno`
     # com senha conhecida (DataSeeder). Ligado na base, bastava subir a aplicação

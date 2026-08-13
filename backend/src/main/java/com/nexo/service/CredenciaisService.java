@@ -26,13 +26,16 @@ public class CredenciaisService {
     private final AlunoRepository alunos;
     private final ProfessorRepository professores;
     private final PasswordEncoder passwordEncoder;
+    private final RecuperacaoSenhaService recuperacao;
 
     public CredenciaisService(UsuarioRepository usuarios, AlunoRepository alunos,
-                              ProfessorRepository professores, PasswordEncoder passwordEncoder) {
+                              ProfessorRepository professores, PasswordEncoder passwordEncoder,
+                              RecuperacaoSenhaService recuperacao) {
         this.usuarios = usuarios;
         this.alunos = alunos;
         this.professores = professores;
         this.passwordEncoder = passwordEncoder;
+        this.recuperacao = recuperacao;
     }
 
     /** Credenciais recém-geradas; a senha só existe em claro aqui e na resposta do cadastro. */
@@ -42,15 +45,30 @@ public class CredenciaisService {
         return new Acesso(gerarEmailInstitucional(nomeCompleto), gerarSenhaProvisoria());
     }
 
-    /** Cria e persiste o Usuario de login com as credenciais geradas. */
-    public Usuario criarUsuario(String nome, String cargo, Role role, Acesso acesso) {
+    /**
+     * Cria e persiste o Usuario de login com as credenciais geradas.
+     *
+     * <p>Havendo endereço de contato, dispara o convite de primeiro acesso — um link para a
+     * pessoa escolher a própria senha. A senha provisória continua indo na resposta do
+     * cadastro para o diretor: é o caminho de quem não informou endereço, e o de sempre
+     * quando a mensagem não chega.
+     *
+     * @param emailContato endereço que recebe de fato a mensagem; para aluno menor de idade,
+     *                     o do responsável. Nulo é normal e só significa que não há convite.
+     */
+    public Usuario criarUsuario(String nome, String cargo, Role role, Acesso acesso, String emailContato) {
         Usuario usuario = new Usuario();
         usuario.setLogin(acesso.login());
         usuario.setSenhaHash(passwordEncoder.encode(acesso.senhaProvisoria()));
         usuario.setNome(nome);
         usuario.setCargo(cargo);
         usuario.setRole(role);
-        return usuarios.save(usuario);
+        usuario.setEmailContato(emailContato == null || emailContato.isBlank()
+                ? null : emailContato.trim().toLowerCase());
+
+        Usuario salvo = usuarios.save(usuario);
+        recuperacao.enviarPrimeiroAcesso(salvo);
+        return salvo;
     }
 
     /** primeiro-nome.sobrenome@dominio, com sufixo numérico em caso de colisão. */

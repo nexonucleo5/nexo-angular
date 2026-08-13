@@ -36,7 +36,9 @@ public class ProfessorService {
         this.auditoria = auditoria;
     }
 
-    public record CadastroProfessor(String nome, String dataNascimento, String sexo, List<Long> materiaIds) {}
+    /** {@code emailContato}: ver {@link AlunoService.CadastroAluno} — mesma regra, opcional. */
+    public record CadastroProfessor(String nome, String dataNascimento, String sexo, List<Long> materiaIds,
+                                    String emailContato) {}
 
     public record ProfessorCriado(Long id, String nome, String disciplinas, String emailInstitucional,
                                   String senhaProvisoria) {}
@@ -88,7 +90,8 @@ public class ProfessorService {
 
         var acesso = credenciais.gerar(professor.getNome());
         professor.setEmail(acesso.login());
-        professor.setUsuario(credenciais.criarUsuario(professor.getNome(), cargo(professor), Role.PROFESSOR, acesso));
+        professor.setUsuario(credenciais.criarUsuario(professor.getNome(), cargo(professor), Role.PROFESSOR,
+                acesso, dados.emailContato()));
         professores.save(professor);
 
         auditoria.registrar(operador, EventoAuditoria.Tipo.ALTERACAO,
