@@ -19,8 +19,11 @@ function erro401() {
 
 function tokens(token: string): TokenResponse {
   return {
+    // Sem refreshToken: ele saiu do corpo da resposta quando passou a viajar em cookie
+    // HttpOnly, e o TokenResponse deixou de ter o campo. O dublê aqui ficou para trás e
+    // o teste parou de compilar — o que passou despercebido porque a falha é de
+    // compilação do bundle de teste, e não uma expectativa quebrada.
     token,
-    refreshToken: 'refresh-novo',
     usuario: { id: 1, nome: 'Ana', cargo: 'Aluno', foto: '', role: 'ALUNO' },
   };
 }
@@ -28,7 +31,7 @@ function tokens(token: string): TokenResponse {
 describe('authInterceptor', () => {
   let auth: {
     token: string | null;
-    refreshToken: string | null;
+    usuarioLogado: ReturnType<typeof vi.fn>;
     refresh: ReturnType<typeof vi.fn>;
     logout: ReturnType<typeof vi.fn>;
   };
@@ -37,7 +40,11 @@ describe('authInterceptor', () => {
   beforeEach(() => {
     auth = {
       token: 'token-velho',
-      refreshToken: 'refresh-valido',
+      // O interceptor decide se vale tentar renovar olhando se havia sessão: o refresh
+      // token está em cookie HttpOnly e o cliente não consegue conferir se existe. O
+      // dublê ainda expunha um `refreshToken` legível, que é justamente o que deixou de
+      // existir — daí os testes de renovação quebrarem com "não é uma função".
+      usuarioLogado: vi.fn(() => ({ id: 1, nome: 'Ana', role: 'ALUNO' })),
       refresh: vi.fn(() => of(tokens('token-novo'))),
       logout: vi.fn(),
     };
@@ -148,8 +155,11 @@ describe('authInterceptor', () => {
     expect(erro).toBeInstanceOf(HttpErrorResponse);
   });
 
-  it('sem refresh token guardado, nem tenta renovar', async () => {
-    auth.refreshToken = null;
+  // O gatilho deixou de ser "tem refresh token guardado?" — ele está em cookie HttpOnly e
+  // o cliente não o enxerga. Passou a ser "havia sessão?": sem usuário, não há o que
+  // renovar, e insistir só geraria uma chamada a /refresh fadada ao 401.
+  it('sem sessão, nem tenta renovar', async () => {
+    auth.usuarioLogado = vi.fn(() => null);
     const next: HttpHandlerFn = () => throwError(() => erro401());
 
     const { erro } = await executar(get(), next);
