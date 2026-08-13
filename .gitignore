@@ -48,6 +48,13 @@ Thumbs.db
 .env.local
 !.env.example
 
+# Banco H2 de desenvolvimento. Estava versionado, e com isso os hashes bcrypt das
+# contas locais iam para o repositório — hoje só os do seed, mas bastava alguém
+# criar um usuário de verdade e dar `git add .`. É um arquivo binário que muda a
+# cada execução, então também colidia em todo merge sem diff possível.
+# O DataSeeder reconstrói o banco sozinho no perfil dev.
+/data/
+
 # Ignora todos os arquivos Markdown (documentação) em todo o repositório
 *.md
 
