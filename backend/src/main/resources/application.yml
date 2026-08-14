@@ -99,6 +99,13 @@ spring:
   #   SPRING_MAIL_USERNAME=...                SPRING_MAIL_PASSWORD=...
   #
   # Brevo, Resend, SES e Mailgun falam SMTP: trocar de fornecedor é trocar estas quatro.
+  #
+  # No .env local, porém, os nomes vão com ponto (spring.mail.host=...): aquele arquivo é
+  # lido como .properties e a chave vale ao pé da letra — a tradução de SPRING_MAIL_HOST
+  # para spring.mail.host é feita pelo Spring apenas em variável do sistema operacional.
+  #
+  # spring.mail.password é a chave SMTP gerada no painel do provedor, nunca a senha da
+  # conta dele: ela só serve para enviar e-mail e pode ser revogada isoladamente.
   mail:
     properties:
       mail:
