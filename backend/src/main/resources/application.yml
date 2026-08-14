@@ -95,10 +95,12 @@ spring:
   # valor em branco, e a condição que decide o bean olha se ela existe — não se tem
   # conteúdo. O provedor entra por variável de ambiente, que o Spring liga sozinho:
   #
-  #   SPRING_MAIL_HOST=smtp-relay.brevo.com   SPRING_MAIL_PORT=587
-  #   SPRING_MAIL_USERNAME=...                SPRING_MAIL_PASSWORD=...
+  #   SPRING_MAIL_HOST=smtp.fornecedor-escolhido.com   SPRING_MAIL_PORT=587
+  #   SPRING_MAIL_USERNAME=...                         SPRING_MAIL_PASSWORD=...
   #
-  # Brevo, Resend, SES e Mailgun falam SMTP: trocar de fornecedor é trocar estas quatro.
+  # O fornecedor ainda não foi decidido, e o código não depende de qual seja: os serviços
+  # de e-mail transacional falam SMTP, então mudar de ideia depois é trocar estas quatro
+  # variáveis. Nada aqui precisa ser escrito antes dessa escolha.
   #
   # No .env local, porém, os nomes vão com ponto (spring.mail.host=...): aquele arquivo é
   # lido como .properties e a chave vale ao pé da letra — a tradução de SPRING_MAIL_HOST
