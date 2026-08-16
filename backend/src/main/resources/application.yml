@@ -11,11 +11,25 @@ spring:
       - optional:file:./.env[.properties]
       - optional:file:../.env[.properties]
 
+  lifecycle:
+    # Teto para o desligamento gracioso abaixo: passou disso, encerra à força.
+    timeout-per-shutdown-phase: 20s
+
   datasource:
     url: jdbc:h2:file:./data/nexo;MODE=PostgreSQL;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: nexo
     password: nexo
+    # Pool dimensionado para container pequeno (Render free/hobby tem 0.5 vCPU):
+    # conexão ociosa custa memória no banco e na JVM, e mais conexões que núcleos
+    # só aumenta troca de contexto. 10 conexões saturam bem 2-4 vCPUs.
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 300000        # devolve conexão ociosa em 5 min
+      max-lifetime: 900000        # recicla antes do timeout típico de proxy/PaaS
+      connection-timeout: 10000
+      leak-detection-threshold: 20000
 
   jpa:
     hibernate:
@@ -24,6 +38,23 @@ spring:
     properties:
       hibernate:
         format_sql: false
+        jdbc:
+          # Agrupa INSERT/UPDATE numa só ida ao banco (ex.: salvar a chamada de
+          # uma turma inteira vira 1 roundtrip em vez de 30).
+          batch_size: 30
+          # Menos roundtrips ao paginar resultados grandes (relatórios/agregados).
+          fetch_size: 100
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
+        # Carrega associações lazy em lote: N acessos viram ceil(N/25) queries.
+        # Rede de segurança para qualquer N+1 que escape das queries explícitas.
+        default_batch_fetch_size: 25
+        query:
+          # O default (2048 planos + 128 metadados) é um dos maiores consumidores
+          # de heap ocioso do Hibernate. Esta API tem poucas dezenas de queries.
+          plan_cache_max_size: 256
+          plan_parameter_metadata_max_size: 64
 
   h2:
     console:
@@ -45,10 +76,29 @@ spring:
 server:
   # Render (e outros PaaS) injetam a porta em $PORT; local cai no 8080
   port: ${PORT:8080}
+  # No deploy, para de aceitar conexão nova e deixa as requisições em voo
+  # terminarem. Sem isto o SIGTERM corta no meio: quem estava salvando a chamada
+  # da turma ou trocando a senha recebe erro de conexão.
+  shutdown: graceful
+  # Atrás do proxy do Render a conexão real é HTTP; sem isso, request.isSecure()
+  # sempre dá false e o header HSTS nunca é emitido em produção.
+  forward-headers-strategy: framework
   compression:
     enabled: true
     mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript,text/javascript,image/svg+xml
     min-response-size: 1024
+  tomcat:
+    threads:
+      # Cada thread do Tomcat reserva ~1 MB de stack. O default (200) dimensiona
+      # para uma máquina bem maior do que a que roda esta API; 50 já é folgado
+      # para o volume de uma escola e economiza heap/stack no container.
+      max: 50
+      min-spare: 5
+    max-connections: 2000
+    accept-count: 100
+    connection-timeout: 20000
+    # Devolve a thread ociosa (e o buffer dela) em vez de mantê-la presa.
+    keep-alive-timeout: 30000
 
 nexo:
   jwt:

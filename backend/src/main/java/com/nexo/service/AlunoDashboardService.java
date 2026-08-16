@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -60,9 +59,9 @@ public class AlunoDashboardService {
         Aluno aluno = alunos.findByUsuarioId(usuarioId)
                 .orElseThrow(() -> ApiException.notFound("Aluno não encontrado para o usuário logado."));
 
-        List<Aluno> ranking = alunos.findAll().stream()
-                .sorted(Comparator.comparingInt(Aluno::getXpTotal).reversed())
-                .toList();
+        // Projeção ordenada pelo banco: traz 4 colunas por aluno em vez da entidade
+        // inteira gerenciada, e dispensa o sort em memória.
+        List<AlunoRepository.RankingXp> ranking = alunos.rankingPorXp();
 
         int posicao = 1;
         for (int i = 0; i < ranking.size(); i++) {
@@ -72,9 +71,10 @@ public class AlunoDashboardService {
             }
         }
 
-        List<RankingItemDTO> topRanking = new ArrayList<>();
-        for (int i = 0; i < Math.min(5, ranking.size()); i++) {
-            Aluno a = ranking.get(i);
+        int topN = Math.min(5, ranking.size());
+        List<RankingItemDTO> topRanking = new ArrayList<>(topN + 1);
+        for (int i = 0; i < topN; i++) {
+            AlunoRepository.RankingXp a = ranking.get(i);
             topRanking.add(new RankingItemDTO(i + 1, a.getNome(), a.getXpTotal(), a.getFoto(),
                     a.getId().equals(aluno.getId())));
         }

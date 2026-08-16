@@ -24,4 +24,25 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     /** Alunos de várias turmas de uma vez — evita uma query por turma dentro de laços. */
     @Query("select a from Aluno a left join fetch a.turma t where t.id in :turmaIds order by a.nome")
     List<Aluno> findByTurmaIdInComTurma(Collection<Long> turmaIds);
+
+    /**
+     * Só as quatro colunas que o ranking de gamificação exibe, já ordenadas pelo banco.
+     * O dashboard mostra 5 posições, mas precisa varrer a escola inteira para achar a
+     * colocação do aluno logado — com {@code findAll()} isso trazia toda a tabela como
+     * entidade gerenciada (cada uma com o snapshot de dirty-checking do Hibernate junto).
+     * O desempate por id reproduz a ordem estável do sort que existia em Java.
+     */
+    interface RankingXp {
+        Long getId();
+        String getNome();
+        int getXpTotal();
+        String getFoto();
+    }
+
+    @Query("""
+           select a.id as id, a.nome as nome, a.xpTotal as xpTotal, a.foto as foto
+           from Aluno a
+           order by a.xpTotal desc, a.id asc
+           """)
+    List<RankingXp> rankingPorXp();
 }

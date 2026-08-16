@@ -13,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -27,8 +26,6 @@ public class GestaoDiretorController {
     private final RelatorioService relatorioService;
     private final EventoAuditoriaRepository eventos;
     private final ProfessorRepository professores;
-    private final ConteudoAulaRepository conteudos;
-
     public GestaoDiretorController(EvasaoService evasaoService, RelatorioService relatorioService,
                                    EventoAuditoriaRepository eventos, ProfessorRepository professores,
                                    ConteudoAulaRepository conteudos) {
@@ -36,7 +33,6 @@ public class GestaoDiretorController {
         this.relatorioService = relatorioService;
         this.eventos = eventos;
         this.professores = professores;
-        this.conteudos = conteudos;
     }
 
     // ── Gestão de Evasão ─────────────────────────────────────────────────────
