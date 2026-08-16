@@ -45,6 +45,10 @@ export class MatriculasService {
     return this.http.patch<MatriculaDTO>(`${this.api}/${id}/status`, { status });
   }
 
+  transferirTurma(id: number, turmaId: number): Observable<MatriculaDTO> {
+    return this.http.patch<MatriculaDTO>(`${this.api}/${id}/turma`, { turmaId });
+  }
+
   /** PDF da declaração de matrícula — blob porque a rota exige o Bearer do interceptor. */
   declaracao(id: number): Observable<Blob> {
     return this.http.get(`${this.api}/${id}/declaracao`, { responseType: 'blob' });

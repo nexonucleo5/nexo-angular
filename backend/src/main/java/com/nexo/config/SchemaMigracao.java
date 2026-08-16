@@ -38,6 +38,10 @@ public class SchemaMigracao {
         return args -> {
             migrarDisciplinaParaMaterias(jdbc, materias);
             COLUNAS_REMOVIDAS.forEach(jdbc::execute);
+            // O ddl-auto=update cria turmas.capacidade sem valor: linhas antigas
+            // ficam NULL. O getter cobre a leitura, mas o banco fica consistente aqui.
+            jdbc.execute("update turmas set capacidade = " + com.nexo.domain.Turma.CAPACIDADE_PADRAO
+                    + " where capacidade is null");
         };
     }
 

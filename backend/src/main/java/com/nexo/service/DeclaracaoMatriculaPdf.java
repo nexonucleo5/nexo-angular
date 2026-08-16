@@ -25,7 +25,8 @@ public class DeclaracaoMatriculaPdf {
     private static final DateTimeFormatter DATA_EXTENSO =
             DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy", Locale.of("pt", "BR"));
 
-    public byte[] gerar(Matricula matricula) {
+    /** {@code validadeDias} vem da configuração da secretaria (seção Documentos). */
+    public byte[] gerar(Matricula matricula, int validadeDias) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Document doc = new Document();
             PdfWriter.getInstance(doc, out);
@@ -58,7 +59,8 @@ public class DeclaracaoMatriculaPdf {
             doc.add(new Paragraph(" "));
             doc.add(new Paragraph(" "));
             Paragraph data = new Paragraph(
-                    "Emitida em " + LocalDate.now().format(DATA_EXTENSO) + ".",
+                    "Emitida em " + LocalDate.now().format(DATA_EXTENSO)
+                            + ". Válida por " + validadeDias + " dias a contar da emissão.",
                     FontFactory.getFont(FontFactory.HELVETICA, 12));
             data.setAlignment(Element.ALIGN_RIGHT);
             doc.add(data);

@@ -7,9 +7,9 @@
     <app-dashboard-diretor></app-dashboard-diretor>
 </div>
 } @else if (authService.usuarioLogado()?.role === 'secretaria') {
-<div class="page-container-pushed">
-    <app-secretaria-dashboard></app-secretaria-dashboard>
-</div>
+<!-- Sem .page-container-pushed: o painel já traz o próprio recuo (page-content
+     p-4) e o wrapper duplicaria o padding que o layout global aplica. -->
+<app-secretaria-dashboard></app-secretaria-dashboard>
 } @else if (authService.usuarioLogado()?.role === 'professor') {
 <div class="page-container-pushed">
     <app-dashboard-professor></app-dashboard-professor>

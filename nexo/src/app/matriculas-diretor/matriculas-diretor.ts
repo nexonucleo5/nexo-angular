@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { MatriculasService } from '../api/matriculas.service';
-import { MatriculaDTO, StatusDocumentacao, StatusMatricula } from '../core/api.models';
+import { TurmasService } from '../api/turmas.service';
+import { MatriculaDTO, StatusDocumentacao, StatusMatricula, TurmaDTO } from '../core/api.models';
 import { exportarCsv } from '../core/csv.util';
 
 interface MatriculaView {
@@ -41,6 +42,10 @@ const DOC_PERCENT: Record<StatusDocumentacao, number> = {
 })
 export class MatriculasDiretor {
   private readonly api = inject(MatriculasService);
+  private readonly turmasApi = inject(TurmasService);
+
+  /** Turmas para o seletor de transferência — carregadas uma vez, junto da lista. */
+  readonly turmas = signal<TurmaDTO[]>([]);
 
   readonly buscaTermo = signal('');
   readonly statusSelecionado = signal('Todos os Status');
@@ -75,6 +80,10 @@ export class MatriculasDiretor {
 
   constructor() {
     this.carregar();
+    this.turmasApi.listar().subscribe({
+      next: (turmas) => this.turmas.set(turmas),
+      error: () => this.turmas.set([]), // sem turmas o seletor de transferência só não aparece
+    });
   }
 
   carregar(): void {
@@ -145,6 +154,12 @@ export class MatriculasDiretor {
 
   mudarDocumentacao(m: MatriculaView, documentacao: StatusDocumentacao): void {
     this.executar(this.api.atualizarDocumentos(m.id, documentacao));
+  }
+
+  transferirTurma(m: MatriculaView, turmaId: string): void {
+    const id = Number(turmaId);
+    if (!id) return;
+    this.executar(this.api.transferirTurma(m.id, id));
   }
 
   /** Aplica a resposta do servidor na lista e no modal — sem recarregar a página toda. */

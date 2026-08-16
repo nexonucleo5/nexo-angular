@@ -72,6 +72,72 @@ class SecretariaMatriculasTest extends TesteApiBase {
     }
 
     @Test
+    @DisplayName("fila de pendências e ocupação de turmas alimentam o painel da secretaria")
+    void filaEOcupacao() throws Exception {
+        String secretaria = bearer("secretaria");
+
+        JsonNode fila = json.readTree(mvc.perform(get("/api/secretaria/pendencias")
+                        .header(HttpHeaders.AUTHORIZATION, secretaria))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
+        assertThat(fila.size()).as("o seed tem matrículas pendentes/documentação incompleta").isGreaterThan(0);
+        JsonNode primeira = fila.get(0);
+        assertThat(primeira.get("aguardaEfetivacao").asBoolean()
+                || primeira.get("aguardaDocumentacao").asBoolean())
+                .as("toda pendência aponta o que falta").isTrue();
+
+        JsonNode ocupacao = json.readTree(mvc.perform(get("/api/secretaria/turmas/ocupacao")
+                        .header(HttpHeaders.AUTHORIZATION, secretaria))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
+        assertThat(ocupacao.size()).isGreaterThan(0);
+        for (JsonNode t : ocupacao) {
+            assertThat(t.get("capacidade").asInt()).isGreaterThan(0);
+            assertThat(t.get("percentual").asInt()).isGreaterThanOrEqualTo(0);
+        }
+    }
+
+    @Test
+    @DisplayName("secretaria transfere aluno de turma; matrícula e cadastro andam juntos")
+    void transferenciaDeTurma() throws Exception {
+        String secretaria = bearer("secretaria");
+        long id = idPorStatus(secretaria, "ATIVA");
+
+        JsonNode matricula = json.readTree(mvc.perform(get("/api/matriculas/" + id)
+                        .header(HttpHeaders.AUTHORIZATION, secretaria))
+                .andReturn().getResponse().getContentAsString());
+        String turmaAtual = matricula.get("turma").asText();
+
+        JsonNode turmas = json.readTree(mvc.perform(get("/api/turmas")
+                        .header(HttpHeaders.AUTHORIZATION, secretaria))
+                .andReturn().getResponse().getContentAsString());
+        long destino = -1;
+        String nomeDestino = null;
+        for (JsonNode t : turmas) {
+            if (!t.get("nome").asText().equals(turmaAtual)) {
+                destino = t.get("id").asLong();
+                nomeDestino = t.get("nome").asText();
+                break;
+            }
+        }
+        assertThat(destino).as("o seed precisa de mais de uma turma").isGreaterThan(0);
+
+        mvc.perform(patch("/api/matriculas/" + id + "/turma")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"turmaId\":" + destino + "}")
+                        .header(HttpHeaders.AUTHORIZATION, secretaria))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.turma").value(nomeDestino));
+
+        // Sem turma de destino é requisição malfeita, não transferência.
+        mvc.perform(patch("/api/matriculas/" + id + "/turma")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}")
+                        .header(HttpHeaders.AUTHORIZATION, secretaria))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @DisplayName("declaração sai em PDF para matrícula ativa e é negada fora disso")
     void declaracaoDeMatricula() throws Exception {
         String secretaria = bearer("secretaria");

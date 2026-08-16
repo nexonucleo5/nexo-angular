@@ -143,9 +143,7 @@ public class ConfiguracaoService {
                 m.put("aparencia", secao("temaEscuro", true, "animacoesInterface", true));
                 m.put("privacidade", secao("perfilVisivelAlunos", true, "exibirContatoResponsaveis", false));
             }
-            // A secretaria compartilha as seções administrativas do diretor — o
-            // frontend dela reutiliza o mesmo modelo (DiretorSettings).
-            case DIRETOR, SECRETARIA -> {
+            case DIRETOR -> {
                 m.put("notificacoes", secao("novosCadastrosPendentes", true, "relatoriosPendentes", true,
                         "alertasSistema", true, "notificacoesEmail", true));
                 Map<String, Object> institucional = new LinkedHashMap<>();
@@ -158,6 +156,17 @@ public class ConfiguracaoService {
                         "sincronizarCalendarioInstitucional", true));
                 m.put("aparencia", secao("temaEscuro", true, "animacoesInterface", true));
                 m.put("privacidade", secao("exibirDadosInstituicaoPublicamente", false));
+            }
+            // Seções do dia a dia da secretaria — não as de gestão do diretor:
+            // o trabalho aqui é matrícula, documento e atendimento.
+            case SECRETARIA -> {
+                m.put("notificacoes", secao("novasMatriculas", true, "documentacaoPendente", true,
+                        "transferenciasTurma", true, "notificacoesEmail", true));
+                Map<String, Object> documentos = new LinkedHashMap<>();
+                documentos.put("validadeDeclaracaoDias", 30);
+                documentos.put("avisarFilaAcimaDe", 10);
+                m.put("documentos", documentos);
+                m.put("aparencia", secao("temaEscuro", true, "animacoesInterface", true));
             }
         }
         return m;

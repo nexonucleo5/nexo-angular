@@ -118,6 +118,29 @@ export interface DashboardSecretariaDTO {
   documentacaoPendente: number;
 }
 
+/** GET /api/secretaria/pendencias — fila de trabalho, mais antiga primeiro */
+export interface PendenciaDTO {
+  matriculaId: number;
+  alunoId: number;
+  aluno: string;
+  turma: string | null;
+  status: StatusMatricula;
+  documentacao: StatusDocumentacao;
+  dataMatricula: string;
+  aguardaEfetivacao: boolean;
+  aguardaDocumentacao: boolean;
+}
+
+/** GET /api/secretaria/turmas/ocupacao */
+export interface OcupacaoTurmaDTO {
+  turmaId: number;
+  turma: string;
+  turno: string | null;
+  alunos: number;
+  capacidade: number;
+  percentual: number;
+}
+
 // ── Diário de classe ─────────────────────────────────────────────────────────
 
 export interface PresencaAluno {

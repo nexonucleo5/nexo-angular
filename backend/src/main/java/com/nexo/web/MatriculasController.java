@@ -22,14 +22,24 @@ import java.time.LocalDate;
 public class MatriculasController {
 
     private final MatriculaRepository matriculas;
+    private final com.nexo.repository.TurmaRepository turmas;
+    private final com.nexo.repository.AlunoRepository alunos;
     private final AuditoriaService auditoria;
     private final DeclaracaoMatriculaPdf declaracaoPdf;
+    private final com.nexo.service.ConfiguracaoService configuracoes;
 
-    public MatriculasController(MatriculaRepository matriculas, AuditoriaService auditoria,
-                                DeclaracaoMatriculaPdf declaracaoPdf) {
+    public MatriculasController(MatriculaRepository matriculas,
+                                com.nexo.repository.TurmaRepository turmas,
+                                com.nexo.repository.AlunoRepository alunos,
+                                AuditoriaService auditoria,
+                                DeclaracaoMatriculaPdf declaracaoPdf,
+                                com.nexo.service.ConfiguracaoService configuracoes) {
         this.matriculas = matriculas;
+        this.turmas = turmas;
+        this.alunos = alunos;
         this.auditoria = auditoria;
         this.declaracaoPdf = declaracaoPdf;
+        this.configuracoes = configuracoes;
     }
 
     public record MatriculaDTO(Long id, Long alunoId, String aluno, String turma,
@@ -123,6 +133,50 @@ public class MatriculasController {
         return MatriculaDTO.of(matricula);
     }
 
+    // ── Transferência de turma ───────────────────────────────────────────────
+
+    public record TransferirTurmaRequest(Long turmaId) {}
+
+    /**
+     * Move o aluno de turma — a matrícula e o cadastro do aluno andam juntos,
+     * senão o diário de classe e a matrícula apontariam para turmas diferentes.
+     */
+    @PatchMapping("/{id}/turma")
+    public MatriculaDTO transferirTurma(@PathVariable Long id,
+                                        @RequestBody TransferirTurmaRequest request,
+                                        @AuthenticationPrincipal UsuarioAutenticado operador) {
+        if (request.turmaId() == null) {
+            throw ApiException.badRequest("Informe a turma de destino.");
+        }
+        Matricula matricula = matriculas.findById(id)
+                .orElseThrow(() -> ApiException.notFound("Matrícula não encontrada."));
+        if (matricula.getStatus() == Matricula.Status.CANCELADA) {
+            throw ApiException.validation("Matrícula cancelada não pode ser transferida.",
+                    java.util.Map.of("status", "Reative por rematrícula antes de transferir."));
+        }
+        var destino = turmas.findById(request.turmaId())
+                .orElseThrow(() -> ApiException.notFound("Turma de destino não encontrada."));
+        var origem = matricula.getTurma();
+        if (origem != null && origem.getId().equals(destino.getId())) {
+            return MatriculaDTO.of(matricula); // já está lá — repetir não é erro
+        }
+        long ocupadas = alunos.countByTurmaId(destino.getId());
+        if (ocupadas >= destino.getCapacidade()) {
+            throw ApiException.validation("A turma de destino está lotada.",
+                    java.util.Map.of("turmaId", destino.getNome() + " já tem " + ocupadas
+                            + " alunos para " + destino.getCapacidade() + " vagas."));
+        }
+        matricula.setTurma(destino);
+        var aluno = matricula.getAluno();
+        aluno.setTurma(destino);
+        matriculas.save(matricula);
+        auditoria.registrar(operador.nome(), EventoAuditoria.Tipo.ALTERACAO,
+                "Aluno transferido de turma",
+                aluno.getNome() + ": " + (origem != null ? origem.getNome() : "sem turma")
+                        + " → " + destino.getNome(), null);
+        return MatriculaDTO.of(matricula);
+    }
+
     // ── Declaração de matrícula (documento oficial da secretaria) ────────────
 
     /**
@@ -139,7 +193,7 @@ public class MatriculasController {
             throw ApiException.validation("Declaração disponível apenas para matrícula ativa.",
                     java.util.Map.of("status", "A matrícula está " + matricula.getStatus() + "."));
         }
-        byte[] pdf = declaracaoPdf.gerar(matricula);
+        byte[] pdf = declaracaoPdf.gerar(matricula, validadeDeclaracaoDias(operador));
         auditoria.registrar(operador.nome(), EventoAuditoria.Tipo.ACESSO,
                 "Declaração de matrícula emitida",
                 "Matrícula #" + id + " — " + matricula.getAluno().getNome(), null);
@@ -148,5 +202,21 @@ public class MatriculasController {
                         "attachment; filename=\"declaracao-matricula-" + id + ".pdf\"")
                 .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
                 .body(pdf);
+    }
+
+    /**
+     * Validade configurada na seção Documentos do operador (secretaria). Diretor
+     * não tem a seção — cai no padrão de 30 dias, o mesmo default do backend.
+     */
+    private int validadeDeclaracaoDias(UsuarioAutenticado operador) {
+        try {
+            Object valor = configuracoes.obter(operador.id())
+                    .getOrDefault("documentos", java.util.Map.of())
+                    .get("validadeDeclaracaoDias");
+            if (valor instanceof Number n && n.intValue() > 0) return n.intValue();
+        } catch (Exception ignorada) {
+            // configuração ilegível não pode impedir a emissão do documento
+        }
+        return 30;
     }
 }

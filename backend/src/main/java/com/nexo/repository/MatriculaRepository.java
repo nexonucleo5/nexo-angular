@@ -27,4 +27,19 @@ public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
     long countByDocumentacao(Matricula.Documentacao documentacao);
 
     long countByDocumentacaoNot(Matricula.Documentacao documentacao);
+
+    /**
+     * Fila de trabalho da secretaria: tudo que espera uma ação humana — efetivar
+     * a matrícula pendente ou cobrar documentação. A mais antiga primeiro, que é
+     * a ordem em que a fila deve ser drenada. Cancelada fica fora: não há mais o
+     * que fazer nela.
+     */
+    @Query("""
+           select m from Matricula m
+           where m.status <> com.nexo.domain.Matricula.Status.CANCELADA
+             and (m.status = com.nexo.domain.Matricula.Status.PENDENTE
+                  or m.documentacao <> com.nexo.domain.Matricula.Documentacao.COMPLETA)
+           order by m.dataMatricula, m.id
+           """)
+    java.util.List<Matricula> pendencias(Pageable pageable);
 }

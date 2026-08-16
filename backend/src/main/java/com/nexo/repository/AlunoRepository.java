@@ -25,6 +25,12 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     @Query("select a from Aluno a left join fetch a.turma t where t.id in :turmaIds order by a.nome")
     List<Aluno> findByTurmaIdInComTurma(Collection<Long> turmaIds);
 
+    long countByTurmaId(Long turmaId);
+
+    /** Ocupação de todas as turmas numa ida só: (turmaId, total de alunos). */
+    @Query("select a.turma.id, count(a) from Aluno a where a.turma is not null group by a.turma.id")
+    List<Object[]> totalPorTurma();
+
     /**
      * Só as quatro colunas que o ranking de gamificação exibe, já ordenadas pelo banco.
      * O dashboard mostra 5 posições, mas precisa varrer a escola inteira para achar a
