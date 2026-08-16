@@ -26,7 +26,7 @@ public class DesafioService {
 
     public record DesafioDTO(Long id, String titulo, String materia, String nivel, int xp,
                              int tempoMin, String status, int progresso,
-                             Integer acertos, Integer totalPerguntas) {}
+                             Integer acertos, Integer totalPerguntas, int tentativas) {}
 
     public record StatsDTO(int concluidos, int total, int taxaSucesso, int sequenciaDias) {}
 
@@ -39,7 +39,13 @@ public class DesafioService {
 
     public record FinalizarQuizRequest(List<RespostaItem> respostas) {}
 
-    public record QuizResultadoDTO(int acertos, int totalPerguntas, int xpGanho, String status) {}
+    /**
+     * Resultado de uma tentativa. Só é aprovado quem acerta 100% — e só nesse caso
+     * o placar vem preenchido. Tentativa reprovada devolve {@code acertos = null}
+     * de propósito: o aluno não descobre quantas (nem quais) errou, apenas refaz.
+     */
+    public record QuizResultadoDTO(boolean aprovado, Integer acertos, int totalPerguntas,
+                                   int xpGanho, String status, int tentativas) {}
 
     private final DesafioRepository desafios;
     private final DesafioAlunoRepository progresso;
@@ -107,9 +113,9 @@ public class DesafioService {
 
     /**
      * Perguntas do quiz do desafio. Abrir o quiz de um desafio ABERTO já o marca
-     * como PROGRESSO (mesmo efeito do antigo botão "Iniciar"). A alternativa
-     * correta só é revelada se o aluno já concluiu — evita entregar o gabarito
-     * durante a tentativa.
+     * como PROGRESSO (mesmo efeito do antigo botão "Iniciar"). A alternativa correta
+     * só é revelada a quem já gabaritou o desafio; como tentativa reprovada nunca
+     * marca CONCLUIDO, o aluno que errou continua sem acesso ao gabarito.
      */
     @Transactional
     public List<QuizPerguntaDTO> listarPerguntas(Long usuarioId, Long desafioId) {
@@ -129,7 +135,14 @@ public class DesafioService {
                 .toList();
     }
 
-    /** Corrige as respostas, credita XP na primeira conclusão e persiste o placar no progresso do aluno. */
+    /**
+     * Corrige as respostas de uma tentativa.
+     *
+     * <p>Regra: o desafio só é concluído (e o XP só é creditado) quando o aluno acerta
+     * <b>todas</b> as perguntas. Errou uma que seja, nada é persistido além do contador
+     * de tentativas — o status continua PROGRESSO, o que mantém o gabarito escondido em
+     * {@link #listarPerguntas} e permite refazer o quiz do zero.
+     */
     @Transactional
     public QuizResultadoDTO finalizarQuiz(Long usuarioId, Long desafioId, FinalizarQuizRequest request) {
         Aluno aluno = aluno(usuarioId);
@@ -151,22 +164,31 @@ public class DesafioService {
             Integer escolhida = escolhas.get(p.getId());
             if (escolhida != null && escolhida == p.getRespostaCorreta()) acertos++;
         }
+        boolean aprovado = acertos == lista.size();
 
         DesafioAluno da = progressoOuNovo(aluno, d, desafioId);
         boolean jaConcluido = "CONCLUIDO".equals(da.getStatus());
-        da.setStatus("CONCLUIDO");
-        da.setProgresso(100);
-        da.setAcertos(acertos);
-        da.setTotalPerguntas(lista.size());
-        progresso.save(da);
+        da.setTentativas(da.getTentativas() + 1);
 
         int xpGanho = 0;
-        if (!jaConcluido) {
-            xpGanho = d.getXp();
-            creditarXp(aluno, xpGanho);
+        if (aprovado) {
+            da.setStatus("CONCLUIDO");
+            da.setProgresso(100);
+            da.setAcertos(acertos);
+            da.setTotalPerguntas(lista.size());
+            if (!jaConcluido) {
+                xpGanho = d.getXp();
+                creditarXp(aluno, xpGanho);
+            }
+        } else if (!jaConcluido) {
+            // Reprovado: segue em PROGRESSO, sem XP e sem placar gravado.
+            da.setStatus("PROGRESSO");
+            da.setProgresso(Math.max(da.getProgresso(), 50));
         }
+        progresso.save(da);
 
-        return new QuizResultadoDTO(acertos, lista.size(), xpGanho, da.getStatus());
+        return new QuizResultadoDTO(aprovado, aprovado ? acertos : null, lista.size(),
+                xpGanho, da.getStatus(), da.getTentativas());
     }
 
     private Map<Long, DesafioAluno> progressoDoAluno(Long alunoId) {
@@ -193,8 +215,9 @@ public class DesafioService {
         int prog = da != null ? da.getProgresso() : 0;
         Integer acertos = da != null ? da.getAcertos() : null;
         Integer total = da != null ? da.getTotalPerguntas() : null;
+        int tentativas = da != null ? da.getTentativas() : 0;
         return new DesafioDTO(d.getId(), d.getTitulo(), d.getMateria(), d.getNivel(), d.getXp(),
-                d.getTempoMin(), status, prog, acertos, total);
+                d.getTempoMin(), status, prog, acertos, total, tentativas);
     }
 
     private Aluno aluno(Long usuarioId) {

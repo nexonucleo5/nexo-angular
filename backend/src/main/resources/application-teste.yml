@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:35205/nexo
+    username: postgres
+    password: teste
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  h2:
+    console:
+      enabled: false
+
+nexo:
+  jwt:
+    secret: nexo-gestao-escolar-chave-de-desenvolvimento-nao-usar-em-producao-0123456789
+    access-token-minutes: 15
+    refresh-token-days: 7
+  cors:
+    allowed-origins: http://localhost:4200
+  seed:
+    enabled: true

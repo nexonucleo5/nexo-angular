@@ -30,7 +30,13 @@
   &.dificil { background: rgba(255, 61, 0, 0.1);  color: #ff3d00; }
 }
 
-.resultado-banner { border-color: #06d25e; }
+/* Gabaritou */
+.banner-sucesso { border-color: #06d25e; }
+.icone-sucesso { color: #06d25e; }
+
+/* Errou — âmbar, não vermelho: é um convite a refazer, não um veredito */
+.banner-retentar { border-color: #ffc107; }
+.icone-retentar { color: #ffc107; }
 
 /* Alternativas — mesmo padrão de "chip" selecionável do cadastro de professor */
 .alternativas {
@@ -61,16 +67,12 @@
     background: rgba(155, 47, 255, 0.08);
   }
 
+  /* Só aparece em modo revisão, e modo revisão só existe para quem gabaritou —
+     por isso não há mais estado "incorreta": nada é marcado em vermelho. */
   &.correta {
     border-color: #06d25e;
     background: rgba(6, 210, 94, 0.08);
     color: #06d25e;
-  }
-
-  &.incorreta {
-    border-color: #ff3d00;
-    background: rgba(255, 61, 0, 0.08);
-    color: #ff3d00;
   }
 }
 
@@ -93,4 +95,8 @@
   transition: opacity 0.2s;
   &:hover:not(:disabled) { opacity: 0.9; color: white; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.enunciado {
+  white-space: pre-line;
 }

@@ -20,13 +20,32 @@
         </div>
       </header>
 
-      <!-- Banner de resultado -->
-      <div *ngIf="placar() as p" class="main-card p-4 mb-4 resultado-banner">
+      <!-- Gabaritou: parabéns + XP + gabarito liberado abaixo -->
+      <div *ngIf="placar() as p" class="main-card p-4 mb-4 banner-sucesso">
         <div class="d-flex align-items-center gap-3 flex-wrap justify-content-between">
           <div>
-            <h2 class="fw-bold mb-1 text-main">Você acertou {{ p.acertos }} de {{ p.total }}</h2>
+            <h2 class="fw-bold mb-1 text-main">
+              <i class="bi bi-trophy-fill me-2 icone-sucesso"></i>Parabéns, você acertou tudo!
+            </h2>
+            <p class="text-soft mb-0">{{ p.acertos }} de {{ p.total }} corretas.</p>
             <p class="text-soft mb-0" *ngIf="p.xpGanho > 0">+{{ p.xpGanho }} XP creditado no seu perfil</p>
             <p class="text-soft mb-0" *ngIf="p.xpGanho === 0">Desafio já concluído anteriormente</p>
+          </div>
+          <button class="btn btn-outline-main" (click)="voltar()">Voltar aos Desafios</button>
+        </div>
+      </div>
+
+      <!-- Errou: só o aviso. Sem placar, sem marcar o que errou, sem gabarito. -->
+      <div *ngIf="tentativaReprovada() && !modoRevisao()" class="main-card p-4 mb-4 banner-retentar">
+        <div class="d-flex align-items-center gap-3 flex-wrap justify-content-between">
+          <div>
+            <h2 class="fw-bold mb-1 text-main">
+              <i class="bi bi-arrow-counterclockwise me-2 icone-retentar"></i>Ainda não foi dessa vez
+            </h2>
+            <p class="text-soft mb-0">
+              É preciso acertar todas as perguntas para concluir o desafio. Revise o conteúdo e responda de novo — nenhum XP foi creditado.
+            </p>
+            <p class="text-soft small mb-0 mt-1">{{ textoTentativas() }} até agora</p>
           </div>
           <button class="btn btn-outline-main" (click)="voltar()">Voltar aos Desafios</button>
         </div>
@@ -36,7 +55,7 @@
 
       <!-- Perguntas -->
       <div class="main-card p-4 mb-3" *ngFor="let pergunta of perguntas(); let i = index">
-        <h3 class="h6 fw-bold text-main mb-3">{{ i + 1 }}. {{ pergunta.enunciado }}</h3>
+        <h3 class="h6 fw-bold text-main mb-3 enunciado">{{ i + 1 }}. {{ pergunta.enunciado }}</h3>
         <div class="alternativas">
           <button type="button" class="alternativa" *ngFor="let alt of pergunta.alternativas; let ai = index"
                   [class]="classeAlternativa(pergunta, ai)"
@@ -44,7 +63,6 @@
                   (click)="escolher(pergunta.id, ai)">
             <i class="bi" [ngClass]="{
                  'bi-check-circle-fill': classeAlternativa(pergunta, ai) === 'selecionada' || classeAlternativa(pergunta, ai) === 'correta',
-                 'bi-x-circle-fill': classeAlternativa(pergunta, ai) === 'incorreta',
                  'bi-circle': classeAlternativa(pergunta, ai) === ''
                }"></i>
             {{ alt }}
@@ -55,7 +73,7 @@
       <!-- Envio -->
       <div *ngIf="!modoRevisao() && perguntas().length > 0" class="d-flex justify-content-end mt-3">
         <button class="btn btn-gradient" [disabled]="!todasRespondidas() || enviando()" (click)="enviar()">
-          {{ enviando() ? 'Enviando...' : 'Enviar respostas' }}
+          {{ enviando() ? 'Enviando...' : (tentativaReprovada() ? 'Tentar novamente' : 'Enviar respostas') }}
         </button>
       </div>
 

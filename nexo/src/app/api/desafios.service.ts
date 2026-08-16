@@ -12,8 +12,11 @@ export interface DesafioDTO {
   tempoMin: number;
   status: 'ABERTO' | 'PROGRESSO' | 'CONCLUIDO';
   progresso: number;
+  /** Só vem preenchido quando o aluno gabaritou o desafio. */
   acertos: number | null;
   totalPerguntas: number | null;
+  /** Quantas vezes o aluno já enviou o quiz (tentativas reprovadas incluídas). */
+  tentativas: number;
 }
 
 export interface DesafiosStats {
@@ -32,7 +35,7 @@ export interface QuizPerguntaDTO {
   id: number;
   enunciado: string;
   alternativas: string[];
-  /** Só vem preenchido quando o desafio já foi concluído (modo revisão). */
+  /** Só vem preenchido para quem já gabaritou o desafio (modo revisão). */
   respostaCorreta: number | null;
 }
 
@@ -42,10 +45,14 @@ export interface RespostaItem {
 }
 
 export interface QuizResultadoDTO {
-  acertos: number;
+  /** Acertou 100% das perguntas — única forma de concluir o desafio e ganhar XP. */
+  aprovado: boolean;
+  /** null em tentativa reprovada: o aluno não vê quantas errou, só refaz. */
+  acertos: number | null;
   totalPerguntas: number;
   xpGanho: number;
   status: string;
+  tentativas: number;
 }
 
 /** Desafios do aluno logado (catálogo + progresso + quiz). */
