@@ -9,7 +9,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
 import { authInterceptor } from './auth.interceptor';
-import { AuthService, TokenResponse } from '../services/auth.service';
+import { AuthService, TokenResponse, Usuario } from '../services/auth.service';
 
 const API = 'http://localhost:8080/api';
 
@@ -17,18 +17,21 @@ function erro401() {
   return new HttpErrorResponse({ status: 401, url: `${API}/alunos` });
 }
 
+// O refresh token não aparece aqui de propósito: ele vive num cookie HttpOnly
+// que o cliente não lê — o corpo da resposta traz só o access token e o usuário.
 function tokens(token: string): TokenResponse {
   return {
     token,
-    refreshToken: 'refresh-novo',
     usuario: { id: 1, nome: 'Ana', cargo: 'Aluno', foto: '', role: 'ALUNO' },
   };
 }
 
+const USUARIO: Usuario = { id: 1, nome: 'Ana', cargo: 'Aluno', foto: '', role: 'aluno' };
+
 describe('authInterceptor', () => {
   let auth: {
     token: string | null;
-    refreshToken: string | null;
+    usuarioLogado: ReturnType<typeof vi.fn>;
     refresh: ReturnType<typeof vi.fn>;
     logout: ReturnType<typeof vi.fn>;
   };
@@ -37,7 +40,7 @@ describe('authInterceptor', () => {
   beforeEach(() => {
     auth = {
       token: 'token-velho',
-      refreshToken: 'refresh-valido',
+      usuarioLogado: vi.fn(() => USUARIO),
       refresh: vi.fn(() => of(tokens('token-novo'))),
       logout: vi.fn(),
     };
@@ -148,8 +151,8 @@ describe('authInterceptor', () => {
     expect(erro).toBeInstanceOf(HttpErrorResponse);
   });
 
-  it('sem refresh token guardado, nem tenta renovar', async () => {
-    auth.refreshToken = null;
+  it('sem sessão ativa, nem tenta renovar', async () => {
+    auth.usuarioLogado = vi.fn(() => null);
     const next: HttpHandlerFn = () => throwError(() => erro401());
 
     const { erro } = await executar(get(), next);
