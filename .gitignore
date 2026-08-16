@@ -48,6 +48,11 @@ Thumbs.db
 .env.local
 !.env.example
 
+# Banco H2 de desenvolvimento — dados locais (usuários, senhas, notas) não
+# entram no repositório; o Docker monta volume e o app recria o schema sozinho
+/data/
+backend/data/
+
 # Ignora todos os arquivos Markdown (documentação) em todo o repositório
 *.md
 
