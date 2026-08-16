@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Observable } from 'rxjs';
 import { MatriculasService } from '../api/matriculas.service';
 import { MatriculaDTO, StatusDocumentacao, StatusMatricula } from '../core/api.models';
 import { exportarCsv } from '../core/csv.util';
@@ -112,10 +113,76 @@ export class MatriculasDiretor {
 
   verDetalhes(m: MatriculaView): void {
     this.detalhe.set(m);
+    this.acaoErro.set(null);
   }
 
   fecharDetalhes(): void {
     this.detalhe.set(null);
+  }
+
+  // ── Ações da secretaria/diretoria sobre a matrícula ────────────────────────
+
+  readonly acaoEmCurso = signal(false);
+  readonly acaoErro = signal<string | null>(null);
+
+  /** Transições que o backend aceita a partir de cada status (espelho do controller). */
+  private static readonly PROXIMOS_STATUS: Record<StatusMatricula, StatusMatricula[]> = {
+    PENDENTE: ['ATIVA', 'CANCELADA'],
+    ATIVA: ['TRANCADA', 'CANCELADA'],
+    TRANCADA: ['ATIVA', 'CANCELADA'],
+    CANCELADA: [],
+  };
+
+  proximosStatus(m: MatriculaView): StatusMatricula[] {
+    return MatriculasDiretor.PROXIMOS_STATUS[m.status];
+  }
+
+  readonly docOpcoes: StatusDocumentacao[] = ['COMPLETA', 'PENDENTE', 'INCOMPLETA'];
+
+  mudarStatus(m: MatriculaView, status: StatusMatricula): void {
+    this.executar(this.api.atualizarStatus(m.id, status));
+  }
+
+  mudarDocumentacao(m: MatriculaView, documentacao: StatusDocumentacao): void {
+    this.executar(this.api.atualizarDocumentos(m.id, documentacao));
+  }
+
+  /** Aplica a resposta do servidor na lista e no modal — sem recarregar a página toda. */
+  private executar(chamada: Observable<MatriculaDTO>): void {
+    this.acaoEmCurso.set(true);
+    this.acaoErro.set(null);
+    chamada.subscribe({
+      next: (dto) => {
+        const atualizada = this.paraView(dto);
+        this.matriculas.update((lista) => lista.map((x) => (x.id === dto.id ? atualizada : x)));
+        this.detalhe.set(atualizada);
+        this.acaoEmCurso.set(false);
+      },
+      error: (erro) => {
+        this.acaoErro.set(erro?.error?.message ?? 'Não foi possível concluir a ação.');
+        this.acaoEmCurso.set(false);
+      },
+    });
+  }
+
+  emitirDeclaracao(m: MatriculaView): void {
+    this.acaoEmCurso.set(true);
+    this.acaoErro.set(null);
+    this.api.declaracao(m.id).subscribe({
+      next: (pdf) => {
+        const url = URL.createObjectURL(pdf);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `declaracao-matricula-${m.id}.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+        this.acaoEmCurso.set(false);
+      },
+      error: () => {
+        this.acaoErro.set('A declaração só pode ser emitida para matrícula ativa.');
+        this.acaoEmCurso.set(false);
+      },
+    });
   }
 
   private iniciais(nome: string): string {

@@ -68,6 +68,34 @@ class AutorizacaoTest extends TesteApiBase {
     }
 
     @Test
+    @DisplayName("secretaria gere matrículas e vê o próprio painel, mas não escala para o resto")
+    void escopoDaSecretaria() throws Exception {
+        String secretaria = bearer("secretaria");
+
+        // O trabalho da secretaria: matrículas e o painel dela.
+        mvc.perform(get("/api/matriculas").header(HttpHeaders.AUTHORIZATION, secretaria))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/secretaria/dashboard").header(HttpHeaders.AUTHORIZATION, secretaria))
+                .andExpect(status().isOk());
+
+        // Gestão pedagógica e auditoria continuam sendo do diretor.
+        for (String rota : new String[]{
+                "/api/evasao/risco", "/api/relatorios/desempenho", "/api/auditoria/eventos",
+                "/api/monitoramento/professores", "/api/avaliacoes"}) {
+            mvc.perform(get(rota).header(HttpHeaders.AUTHORIZATION, secretaria))
+                    .andExpect(status().isForbidden());
+        }
+
+        // E os demais perfis não alcançam o painel da secretaria (diretor supervisiona).
+        mvc.perform(get("/api/secretaria/dashboard").header(HttpHeaders.AUTHORIZATION, bearer("aluno")))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/api/secretaria/dashboard").header(HttpHeaders.AUTHORIZATION, bearer("professor")))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/api/secretaria/dashboard").header(HttpHeaders.AUTHORIZATION, bearer("diretor")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @DisplayName("professor só enxerga avaliações das turmas que leciona")
     void escopoDeAvaliacoesPorTurma() throws Exception {
         String diretor = bearer("diretor");

@@ -74,10 +74,11 @@ public class DataSeeder {
 
             String senhaPadrao = encoder.encode("123456");
 
-            // ── Usuários dos 3 perfis (mesmos personas do AuthService antigo) ──
+            // ── Usuários dos perfis (mesmos personas do AuthService antigo) ──
             Usuario diretor = usuario("diretor", senhaPadrao, "Diretor Silva", "Administração Escolar", Role.DIRETOR);
             Usuario professorUsr = usuario("professor", senhaPadrao, "Prof. Roberto Alves", "Professor de História", Role.PROFESSOR);
             Usuario alunoUsr = usuario("aluno", senhaPadrao, "Gabriel Mendes", "2º Ano - Ensino Médio", Role.ALUNO);
+            usuario("secretaria", senhaPadrao, "Helena Ramos", "Secretaria Escolar", Role.SECRETARIA);
 
             Professor professor = new Professor();
             professor.setUsuario(professorUsr);

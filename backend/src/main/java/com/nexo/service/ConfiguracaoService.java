@@ -143,7 +143,9 @@ public class ConfiguracaoService {
                 m.put("aparencia", secao("temaEscuro", true, "animacoesInterface", true));
                 m.put("privacidade", secao("perfilVisivelAlunos", true, "exibirContatoResponsaveis", false));
             }
-            case DIRETOR -> {
+            // A secretaria compartilha as seções administrativas do diretor — o
+            // frontend dela reutiliza o mesmo modelo (DiretorSettings).
+            case DIRETOR, SECRETARIA -> {
                 m.put("notificacoes", secao("novosCadastrosPendentes", true, "relatoriosPendentes", true,
                         "alertasSistema", true, "notificacoesEmail", true));
                 Map<String, Object> institucional = new LinkedHashMap<>();

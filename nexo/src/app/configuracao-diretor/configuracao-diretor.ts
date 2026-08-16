@@ -9,6 +9,7 @@ import {
 } from './configuracao-diretor.model';
 import { AparenciaConfig } from '../configuracoes/settings-store';
 import { AuthService } from '../services/auth.service';
+import { ConfiguracaoSecretariaService } from '../configuracao-secretaria/configuracao-secretaria.service';
 
 @Component({
   selector: 'app-configuracao-diretor',
@@ -16,9 +17,17 @@ import { AuthService } from '../services/auth.service';
   styleUrl: './configuracao-diretor.scss',
 })
 export class ConfiguracaoDiretor {
-  private readonly configService = inject(ConfiguracaoDiretorService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+
+  /**
+   * A tela é compartilhada por diretor e secretaria (mesmas seções); o que muda
+   * é o store — cada service só sincroniza com a API para a própria role.
+   */
+  private readonly configService =
+    this.authService.usuarioLogado()?.role === 'secretaria'
+      ? inject(ConfiguracaoSecretariaService)
+      : inject(ConfiguracaoDiretorService);
 
   readonly settings = this.configService.settings;
 

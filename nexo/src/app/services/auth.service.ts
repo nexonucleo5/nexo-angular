@@ -5,7 +5,7 @@ import { environment } from '../../environments/environment';
 import { resolverFoto } from '../core/avatar';
 
 /** Role no cliente em minúsculo (compatível com os templates/guards existentes). */
-export type RoleCliente = 'aluno' | 'professor' | 'diretor';
+export type RoleCliente = 'aluno' | 'professor' | 'diretor' | 'secretaria';
 
 export interface Usuario {
   id: number;
@@ -20,7 +20,7 @@ interface UsuarioApi {
   nome: string;
   cargo: string;
   foto: string;
-  role: 'ALUNO' | 'PROFESSOR' | 'DIRETOR';
+  role: 'ALUNO' | 'PROFESSOR' | 'DIRETOR' | 'SECRETARIA';
 }
 
 /** O refresh token não está aqui de propósito: ele vem em cookie HttpOnly. */

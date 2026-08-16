@@ -1,5 +1,5 @@
 <div class="w-100">
-  @if (authService.usuarioLogado()?.role === 'diretor') {
+  @if (authService.usuarioLogado()?.role === 'diretor' || authService.usuarioLogado()?.role === 'secretaria') {
   <app-matriculas-diretor></app-matriculas-diretor>
   } @else {
   <app-materias></app-materias>

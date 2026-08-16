@@ -94,4 +94,8 @@
   color: white; border: none; border-radius: 10px;
   font-weight: 600; cursor: pointer; transition: opacity 0.2s;
   &:hover { opacity: 0.9; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
+
+/* Separa os dados da matrícula das ações da secretaria no modal */
+.detalhe-separador { border-color: var(--border-color); opacity: 1; margin: 16px 0 14px; }

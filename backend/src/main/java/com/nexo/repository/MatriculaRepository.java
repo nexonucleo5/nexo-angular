@@ -23,4 +23,8 @@ public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
                            Pageable pageable);
 
     long countByStatus(Matricula.Status status);
+
+    long countByDocumentacao(Matricula.Documentacao documentacao);
+
+    long countByDocumentacaoNot(Matricula.Documentacao documentacao);
 }

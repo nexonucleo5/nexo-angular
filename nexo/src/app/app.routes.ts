@@ -74,10 +74,19 @@ export const routes: Routes = [
   // já compartilhado; pode sair quando não houver mais acesso pelo path antigo.
   { path: 'meus_niveis_notas', redirectTo: '/meus-niveis-notas', pathMatch: 'full' },
 
+  // ── Secretaria ───────────────────────────────────────────────────────────────
+  {
+    path: 'secretaria-dashboard',
+    canActivate: [authGuard, roleGuard('secretaria', 'diretor')],
+    loadComponent: () => import('./secretaria-dashboard/secretaria-dashboard').then((m) => m.SecretariaDashboard),
+  },
+
   // ── Diretor ──────────────────────────────────────────────────────────────────
   {
+    // A secretaria cadastra aluno (função administrativa); o backend espelha em
+    // POST /api/alunos com hasAnyRole('DIRETOR','SECRETARIA').
     path: 'cadastro',
-    canActivate: [authGuard, roleGuard('diretor')],
+    canActivate: [authGuard, roleGuard('diretor', 'secretaria')],
     loadComponent: () => import('./cadastro/cadastro').then((m) => m.Cadastro),
   },
   {

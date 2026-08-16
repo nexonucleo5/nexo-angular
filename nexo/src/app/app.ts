@@ -6,11 +6,13 @@ import { Menu } from './menu/menu';
 import { MenuUsuario } from './menu-usuario/menu-usuario';
 import { MenuDiretor } from './menu-diretor/menu-diretor';
 import { MenuProfessor } from './menu-professor/menu-professor';
+import { MenuSecretaria } from './menu-secretaria/menu-secretaria';
 import { AuthService, RoleCliente } from './services/auth.service';
 import { aplicarTema, temaSalvoEscuro } from './configuracoes/settings-store';
 import { ConfiguracaoAlunoService } from './configuracao-aluno/configuracao-aluno.service';
 import { ConfiguracaoProfessorService } from './configuracao-professor/configuracao-professor.service';
 import { ConfiguracaoDiretorService } from './configuracao-diretor/configuracao-diretor.service';
+import { ConfiguracaoSecretariaService } from './configuracao-secretaria/configuracao-secretaria.service';
 
 /** Contrato mínimo comum aos três services de configuração por perfil. */
 interface PerfilSettings {
@@ -28,6 +30,7 @@ interface PerfilSettings {
     MenuUsuario,
     MenuDiretor,
     MenuProfessor,
+    MenuSecretaria,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -138,6 +141,8 @@ export class App {
         return this.injector.get(ConfiguracaoProfessorService);
       case 'diretor':
         return this.injector.get(ConfiguracaoDiretorService);
+      case 'secretaria':
+        return this.injector.get(ConfiguracaoSecretariaService);
       default:
         return this.injector.get(ConfiguracaoAlunoService);
     }

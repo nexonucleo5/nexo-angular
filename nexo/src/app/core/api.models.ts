@@ -108,6 +108,16 @@ export interface MatriculaDTO {
   dataMatricula: string;
 }
 
+/** GET /api/secretaria/dashboard */
+export interface DashboardSecretariaDTO {
+  totalAlunos: number;
+  totalTurmas: number;
+  matriculasAtivas: number;
+  matriculasPendentes: number;
+  matriculasTrancadas: number;
+  documentacaoPendente: number;
+}
+
 // ── Diário de classe ─────────────────────────────────────────────────────────
 
 export interface PresencaAluno {

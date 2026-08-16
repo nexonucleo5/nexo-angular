@@ -40,4 +40,13 @@ export class MatriculasService {
   atualizarDocumentos(id: number, documentacao: StatusDocumentacao): Observable<MatriculaDTO> {
     return this.http.patch<MatriculaDTO>(`${this.api}/${id}/documentos`, { documentacao });
   }
+
+  atualizarStatus(id: number, status: StatusMatricula): Observable<MatriculaDTO> {
+    return this.http.patch<MatriculaDTO>(`${this.api}/${id}/status`, { status });
+  }
+
+  /** PDF da declaração de matrícula — blob porque a rota exige o Bearer do interceptor. */
+  declaracao(id: number): Observable<Blob> {
+    return this.http.get(`${this.api}/${id}/declaracao`, { responseType: 'blob' });
+  }
 }

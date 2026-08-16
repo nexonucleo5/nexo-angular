@@ -7,6 +7,8 @@
         <app-menu></app-menu>
       } @else if (usuario.role === 'professor') {
         <app-menu-professor></app-menu-professor>
+      } @else if (usuario.role === 'secretaria') {
+        <app-menu-secretaria></app-menu-secretaria>
       } @else {
         <app-menu-diretor></app-menu-diretor>
       }
@@ -36,6 +38,7 @@
                 <h2 class="h4 fw-bold mb-0" style="color: var(--text-main);">
                     @if (usuario.role === 'aluno') { Portal do Aluno }
                     @else if (usuario.role === 'professor') { Portal do Professor }
+                    @else if (usuario.role === 'secretaria') { Portal da Secretaria }
                     @else { Portal do Diretor }
                 </h2>
 

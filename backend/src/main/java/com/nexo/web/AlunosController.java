@@ -86,7 +86,7 @@ public class AlunosController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('DIRETOR')")
+    @PreAuthorize("hasAnyRole('DIRETOR','SECRETARIA')")
     public ResponseEntity<AlunoService.AlunoCriado> cadastrar(
             @RequestBody AlunoService.CadastroAluno request,
             @AuthenticationPrincipal UsuarioAutenticado operador) {

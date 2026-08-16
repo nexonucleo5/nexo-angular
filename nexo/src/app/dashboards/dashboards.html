@@ -6,6 +6,10 @@
 <div class="page-container-pushed">
     <app-dashboard-diretor></app-dashboard-diretor>
 </div>
+} @else if (authService.usuarioLogado()?.role === 'secretaria') {
+<div class="page-container-pushed">
+    <app-secretaria-dashboard></app-secretaria-dashboard>
+</div>
 } @else if (authService.usuarioLogado()?.role === 'professor') {
 <div class="page-container-pushed">
     <app-dashboard-professor></app-dashboard-professor>
