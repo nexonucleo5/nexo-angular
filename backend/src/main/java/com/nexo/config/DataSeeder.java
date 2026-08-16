@@ -70,7 +70,14 @@ public class DataSeeder {
 
         @Transactional
         void executar() {
-            if (usuarios.count() > 0) return;
+            if (usuarios.count() > 0) {
+                // Banco já povoado: o seed de exemplo não se repete, mas um perfil
+                // criado depois dele precisa existir aqui também — senão a conta da
+                // secretaria só apareceria em instalação nova, e quem já tinha banco
+                // (o dev de ontem, o Render) não conseguiria entrar com ela.
+                garantirSecretaria();
+                return;
+            }
 
             String senhaPadrao = encoder.encode("123456");
 
@@ -312,6 +319,17 @@ public class DataSeeder {
                     "Diretor, poderia liberar a sala 204 para a aula de reforço?", agora.minus(3, ChronoUnit.HOURS)));
             chatMensagens.save(new ChatMensagem(diretor.getId(), diretor.getNome(), professorUsr.getId(),
                     "Claro, professor. Sala reservada para quinta às 16h.", agora.minus(2, ChronoUnit.HOURS)));
+        }
+
+        /**
+         * Cria a conta da secretaria em banco que já foi semeado antes deste perfil
+         * existir. Idempotente: com a conta lá, não faz nada — nem toca na senha de
+         * quem já trocou a dela.
+         */
+        private void garantirSecretaria() {
+            if (usuarios.existsByLoginIgnoreCase("secretaria")) return;
+            usuario("secretaria", encoder.encode("123456"), "Helena Ramos",
+                    "Secretaria Escolar", Role.SECRETARIA);
         }
 
         private Usuario usuario(String login, String hash, String nome, String cargo, Role role) {

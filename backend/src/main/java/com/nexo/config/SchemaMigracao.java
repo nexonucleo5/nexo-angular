@@ -38,11 +38,65 @@ public class SchemaMigracao {
         return args -> {
             migrarDisciplinaParaMaterias(jdbc, materias);
             COLUNAS_REMOVIDAS.forEach(jdbc::execute);
+            liberarPapeisNovos(jdbc);
             // O ddl-auto=update cria turmas.capacidade sem valor: linhas antigas
             // ficam NULL. O getter cobre a leitura, mas o banco fica consistente aqui.
             jdbc.execute("update turmas set capacidade = " + com.nexo.domain.Turma.CAPACIDADE_PADRAO
                     + " where capacidade is null");
         };
+    }
+
+    /**
+     * Libera papéis criados depois da tabela usuarios em usuarios.role.
+     *
+     * <p>O Hibernate congela a lista de papéis quando <b>cria</b> a tabela, e
+     * ddl-auto=update mexe em coluna mas nunca desfaz isso. Num banco criado antes de
+     * {@link com.nexo.domain.Role#SECRETARIA} gravar o papel novo estoura ("Value not
+     * permitted for column") e derruba a aplicação no arranque, porque quem grava é o
+     * seeder. O congelamento tem forma diferente em cada banco:
+     *
+     * <ul>
+     *   <li><b>H2</b> (desenvolvimento): a coluna é do tipo ENUM nativo, com os valores
+     *       no próprio tipo — vira {@code varchar};</li>
+     *   <li><b>Postgres</b> (deploy): a coluna é varchar com um CHECK listando os
+     *       valores — o check sai.</li>
+     * </ul>
+     *
+     * <p>Cada passo é detectado no catálogo e não faz nada onde não se aplica, então os
+     * dois convivem no mesmo método. Depois disto quem valida o papel é o enum no Java
+     * ({@code @Enumerated(EnumType.STRING)} e a checagem do JwtAuthFilter), e um papel
+     * futuro não precisa de migração nenhuma.
+     */
+    private void liberarPapeisNovos(JdbcTemplate jdbc) {
+        if (roleEhEnumNativo(jdbc)) {
+            jdbc.execute("alter table usuarios alter column role set data type varchar(30)");
+        }
+
+        List<Map<String, Object>> checks = jdbc.queryForList("""
+                select tc.constraint_name as nome, cc.check_clause as clausula
+                from information_schema.table_constraints tc
+                join information_schema.check_constraints cc
+                  on cc.constraint_name = tc.constraint_name
+                 and cc.constraint_schema = tc.constraint_schema
+                where lower(tc.table_name) = 'usuarios' and tc.constraint_type = 'CHECK'
+                """);
+
+        for (Map<String, Object> check : checks) {
+            String clausula = String.valueOf(check.get("clausula")).toUpperCase();
+            // Só o check dos papéis: o que já conhece SECRETARIA está em dia, e os
+            // NOT NULL que o Postgres também expõe como CHECK não podem ser removidos.
+            if (!clausula.contains("PROFESSOR") || clausula.contains("SECRETARIA")) continue;
+            jdbc.execute("alter table usuarios drop constraint if exists \"" + check.get("nome") + "\"");
+        }
+    }
+
+    private boolean roleEhEnumNativo(JdbcTemplate jdbc) {
+        Integer total = jdbc.queryForObject("""
+                select count(*) from information_schema.columns
+                where lower(table_name) = 'usuarios' and lower(column_name) = 'role'
+                  and upper(data_type) = 'ENUM'
+                """, Integer.class);
+        return total != null && total > 0;
     }
 
     /**
