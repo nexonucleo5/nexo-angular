@@ -75,6 +75,76 @@
       </div>
     </div>
 
+    <!-- ── Endereço (opcional) ─────────────────────────── -->
+    <div class="secao-endereco" formGroupName="endereco">
+      <h3 class="secao-titulo">
+        <i class="bi bi-geo-alt"></i>
+        Endereço
+        <span class="secao-opcional">opcional</span>
+      </h3>
+
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label" for="aluno-cep">CEP:</label>
+          <div class="cep-campo">
+            <input type="text" id="aluno-cep" formControlName="cep" class="form-control"
+                   inputmode="numeric" maxlength="9" placeholder="00000-000"
+                   (blur)="buscarCep()" (keydown.enter)="$event.preventDefault(); buscarCep()">
+            @if (buscandoCep()) {
+              <span class="cep-status" role="status">
+                <i class="bi bi-arrow-repeat girando"></i> buscando…
+              </span>
+            } @else if (cepPreenchido()) {
+              <span class="cep-status ok">
+                <i class="bi bi-check-circle-fill"></i> endereço encontrado
+              </span>
+            }
+          </div>
+          @if (cepErro(); as msg) {
+            <small class="cep-erro">{{ msg }}</small>
+          } @else {
+            <small class="cep-dica">Preenche o endereço automaticamente</small>
+          }
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label" for="aluno-logradouro">Rua / Logradouro:</label>
+          <input type="text" id="aluno-logradouro" formControlName="logradouro" class="form-control"
+                 placeholder="Preenchido pelo CEP">
+        </div>
+
+        <div class="col-md-2 mb-3">
+          <label class="form-label" for="aluno-numero">Número:</label>
+          <input type="text" id="aluno-numero" formControlName="numero" class="form-control"
+                 inputmode="numeric" placeholder="123">
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label class="form-label" for="aluno-complemento">Complemento:</label>
+          <input type="text" id="aluno-complemento" formControlName="complemento" class="form-control"
+                 placeholder="Apto, bloco…">
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label class="form-label" for="aluno-bairro">Bairro:</label>
+          <input type="text" id="aluno-bairro" formControlName="bairro" class="form-control"
+                 placeholder="Preenchido pelo CEP">
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="aluno-cidade">Cidade:</label>
+          <input type="text" id="aluno-cidade" formControlName="cidade" class="form-control"
+                 placeholder="Preenchido pelo CEP">
+        </div>
+
+        <div class="col-md-1 mb-3">
+          <label class="form-label" for="aluno-uf">UF:</label>
+          <input type="text" id="aluno-uf" formControlName="uf" class="form-control"
+                 maxlength="2" placeholder="SP">
+        </div>
+      </div>
+    </div>
+
     <button type="submit" class="btn btn-cadastro w-100 mt-2" [disabled]="enviando()">
       <i class="bi bi-check-circle me-2"></i>{{ enviando() ? 'Enviando...' : 'Cadastrar aluno' }}
     </button>

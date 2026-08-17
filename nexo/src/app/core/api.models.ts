@@ -56,6 +56,39 @@ export interface CadastroAlunoRequest {
   sexo: string;
   /** Ano do ensino básico em que o aluno entra (turma existente). */
   turmaId: number | null;
+  /** Opcional: a escola matricula antes de ter a documentação completa. */
+  endereco?: EnderecoRequest | null;
+}
+
+// ── Endereço ─────────────────────────────────────────────────────────────────
+
+/** Corpo do endereço no cadastro e em PUT /api/alunos/{id}/endereco. */
+export interface EnderecoRequest {
+  cep: string | null;
+  logradouro: string | null;
+  numero: string | null;
+  complemento: string | null;
+  bairro: string | null;
+  cidade: string | null;
+  uf: string | null;
+}
+
+/** Endereço como a API devolve — `resumo` é a linha pronta para exibição. */
+export interface EnderecoDTO extends EnderecoRequest {
+  resumo: string | null;
+}
+
+/**
+ * GET /api/cep/{cep}. A busca é feita pelo backend (BrasilAPI com ViaCEP de
+ * reserva): a CSP declara connect-src 'self', então o navegador não fala com
+ * host externo — e nem precisa.
+ */
+export interface EnderecoCepDTO {
+  cep: string;
+  logradouro: string | null;
+  bairro: string | null;
+  cidade: string | null;
+  uf: string | null;
 }
 
 // ── Matérias / Professores ───────────────────────────────────────────────────

@@ -59,22 +59,52 @@ public class AlunosController {
 
     public record AlunoDTO(Long id, String nome, String emailInstitucional, String sexo,
                            LocalDate dataNascimento, Long turmaId, String turma,
-                           int engajamento, String foto) {
+                           int engajamento, String foto, EnderecoDTO endereco) {
         static AlunoDTO of(Aluno a) {
             return new AlunoDTO(a.getId(), a.getNome(), a.getEmailInstitucional(), a.getSexo(),
                     a.getDataNascimento(),
                     a.getTurma() != null ? a.getTurma().getId() : null,
                     a.getTurma() != null ? a.getTurma().getNome() : null,
-                    a.getEngajamento(), a.getFoto());
+                    a.getEngajamento(), a.getFoto(), EnderecoDTO.of(a.getEndereco()));
         }
+    }
+
+    public record EnderecoDTO(String cep, String logradouro, String numero, String complemento,
+                              String bairro, String cidade, String uf, String resumo) {
+        /** Aluno sem endereço devolve null, não um objeto de campos vazios. */
+        static EnderecoDTO of(com.nexo.domain.Endereco e) {
+            if (e == null || e.estaVazio()) return null;
+            return new EnderecoDTO(e.getCep(), e.getLogradouro(), e.getNumero(), e.getComplemento(),
+                    e.getBairro(), e.getCidade(), e.getUf(), e.resumo());
+        }
+    }
+
+    /**
+     * O endereço é parte do cadastro, então segue os papéis do cadastro (a secretaria
+     * é quem mantém isso em dia) — e não o escopo por turma das notas e observações.
+     */
+    @PutMapping("/{alunoId}/endereco")
+    @PreAuthorize("hasAnyRole('DIRETOR','SECRETARIA')")
+    public EnderecoDTO atualizarEndereco(@PathVariable Long alunoId,
+                                         @RequestBody AlunoService.EnderecoRequest request,
+                                         @AuthenticationPrincipal UsuarioAutenticado operador) {
+        // PUT e não PATCH: o corpo é o endereço inteiro, e campo ausente significa
+        // "apagar" — é assim que a secretaria limpa um complemento que saiu.
+        return EnderecoDTO.of(alunoService.atualizarEndereco(alunoId, request, operador.nome()));
     }
 
     /**
      * Recurso endereçável do aluno. Sem ele o POST não tinha para onde apontar o
      * Location, e o aluno só existia dentro de listagens e agregações.
      */
+    /**
+     * A SECRETARIA entra aqui porque é ela quem cadastra o aluno e mantém o endereço:
+     * sem isto ela criava o registro e não conseguia reler o que acabou de gravar.
+     * É o cadastro que ela enxerga — nota, observação e os painéis pedagógicos
+     * seguem fora do alcance dela.
+     */
     @GetMapping("/{alunoId}")
-    @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
+    @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR','SECRETARIA')")
     public AlunoDTO detalhar(@PathVariable Long alunoId,
                              @AuthenticationPrincipal UsuarioAutenticado operador) {
         Aluno aluno = alunos.findById(alunoId)

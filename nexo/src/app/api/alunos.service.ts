@@ -5,6 +5,9 @@ import { environment } from '../../environments/environment';
 import {
   AlunoCriado,
   CadastroAlunoRequest,
+  EnderecoCepDTO,
+  EnderecoDTO,
+  EnderecoRequest,
   NotaDTO,
   ObservacaoDTO,
 } from '../core/api.models';
@@ -32,5 +35,20 @@ export class AlunosService {
 
   criarObservacao(alunoId: number, texto: string): Observable<ObservacaoDTO> {
     return this.http.post<ObservacaoDTO>(`${this.api}/${alunoId}/observacoes`, { texto });
+  }
+
+  /** PUT e não PATCH: o corpo é o endereço inteiro, campo ausente apaga o valor. */
+  salvarEndereco(alunoId: number, endereco: EnderecoRequest): Observable<EnderecoDTO> {
+    return this.http.put<EnderecoDTO>(`${this.api}/${alunoId}/endereco`, endereco);
+  }
+
+  /**
+   * Busca o endereço de um CEP. Quem fala com o provedor externo é o backend —
+   * ver EnderecoCepDTO. `cep` pode vir formatado; o servidor normaliza.
+   */
+  buscarCep(cep: string): Observable<EnderecoCepDTO> {
+    return this.http.get<EnderecoCepDTO>(
+      `${environment.apiUrl}/cep/${cep.replace(/\D/g, '')}`,
+    );
   }
 }

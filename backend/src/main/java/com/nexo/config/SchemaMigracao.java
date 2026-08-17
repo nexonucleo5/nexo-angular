@@ -28,6 +28,12 @@ public class SchemaMigracao {
             "alter table if exists alunos drop column if exists email_responsavel",
             "alter table if exists alunos drop column if exists cpf_responsavel",
             "alter table if exists alunos drop column if exists telefone_responsavel",
+            // Estas duas são as colunas de TEXTO LIVRE do cadastro antigo, e continuam
+            // saindo: em banco velho vinham NOT NULL e quebrariam todo cadastro novo.
+            // O endereço atual não conflita com elas de propósito — as colunas do
+            // Endereco levam o prefixo endereco_ (endereco_logradouro,
+            // endereco_complemento, ...) justamente para não cair nesses nomes e ser
+            // apagado aqui a cada arranque. Ver com.nexo.domain.Endereco.
             "alter table if exists alunos drop column if exists endereco",
             "alter table if exists alunos drop column if exists complemento",
             "alter table if exists professores drop column if exists disciplina");

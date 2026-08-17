@@ -133,3 +133,50 @@
 .form-select.is-invalid { border-color: #dc3545; }
 
 .alert { display: block; }
+
+/* ── Endereço (seção opcional do cadastro de aluno) ───────────────────────── */
+.secao-endereco {
+  border-top: 1px solid var(--border-color);
+  margin-top: 8px;
+  padding-top: 20px;
+}
+
+.secao-titulo {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 16px; font-weight: 700; color: var(--text-main);
+  margin-bottom: 16px;
+  i { color: #9b2fff; }
+}
+
+/* "opcional" precisa ser lido como etiqueta, não como parte do título. */
+.secao-opcional {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
+.cep-campo { position: relative; }
+
+/* Fica sobre a borda direita do campo: a mensagem não pode empurrar o layout,
+   senão a linha toda salta quando a busca começa. */
+.cep-status {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--text-muted);
+  pointer-events: none;
+  &.ok { color: #06d25e; }
+}
+
+.girando { animation: cep-girando 0.9s linear infinite; }
+
+@keyframes cep-girando {
+  to { transform: rotate(360deg); }
+}
+
+.cep-dica, .cep-erro { display: block; margin-top: 4px; font-size: 12px; }
+.cep-dica { color: var(--text-muted); }
+.cep-erro { color: #ef4444; font-weight: 600; }

@@ -32,7 +32,15 @@ public class AlunoService {
         this.auditoria = auditoria;
     }
 
-    public record CadastroAluno(String nome, String dataNascimento, String sexo, Long turmaId) {}
+    /**
+     * {@code endereco} é opcional — a escola matricula antes de ter a documentação
+     * toda, e é justamente essa pendência que a secretaria acompanha na fila.
+     */
+    public record CadastroAluno(String nome, String dataNascimento, String sexo, Long turmaId,
+                                EnderecoRequest endereco) {}
+
+    public record EnderecoRequest(String cep, String logradouro, String numero, String complemento,
+                                  String bairro, String cidade, String uf) {}
 
     public record AlunoCriado(Long id, String nome, String emailInstitucional, String senhaProvisoria,
                               Long matriculaId) {}
@@ -75,6 +83,7 @@ public class AlunoService {
         aluno.setDataNascimento(nascimento);
         aluno.setSexo(dados.sexo());
         aluno.setTurma(turma);
+        aplicarEndereco(aluno, dados.endereco());
 
         var acesso = credenciais.gerar(aluno.getNome());
         aluno.setEmailInstitucional(acesso.login());
@@ -93,5 +102,53 @@ public class AlunoService {
 
         return new AlunoCriado(aluno.getId(), aluno.getNome(), acesso.login(), acesso.senhaProvisoria(),
                 matricula.getId());
+    }
+
+    /**
+     * Copia o endereço informado para o aluno. Requisição sem endereço, ou com todos
+     * os campos em branco, deixa o aluno sem endereço em vez de gravar linhas vazias.
+     * O CEP é normalizado (só dígitos, 8 posições) para a busca por CEP mais tarde
+     * casar com o que está gravado; UF sobe para maiúsculo pelo mesmo motivo.
+     */
+    @Transactional
+    public void aplicarEndereco(Aluno aluno, EnderecoRequest dados) {
+        if (dados == null) return;
+
+        Endereco endereco = aluno.getEndereco();
+        endereco.setCep(dados.cep() == null || dados.cep().isBlank()
+                ? null : ConsultaCep.normalizar(dados.cep()));
+        endereco.setLogradouro(limpar(dados.logradouro()));
+        endereco.setNumero(limpar(dados.numero()));
+        endereco.setComplemento(limpar(dados.complemento()));
+        endereco.setBairro(limpar(dados.bairro()));
+        endereco.setCidade(limpar(dados.cidade()));
+
+        String uf = limpar(dados.uf());
+        if (uf != null) {
+            uf = uf.toUpperCase();
+            if (uf.length() != 2) {
+                throw ApiException.validation("Endereço inválido.",
+                        Map.of("uf", "A UF tem duas letras (ex.: SP)."));
+            }
+        }
+        endereco.setUf(uf);
+    }
+
+    private static String limpar(String valor) {
+        if (valor == null) return null;
+        String s = valor.trim();
+        return s.isEmpty() ? null : s;
+    }
+
+    /** Atualiza só o endereço de um aluno que já existe. */
+    @Transactional
+    public Endereco atualizarEndereco(Long alunoId, EnderecoRequest dados, String operador) {
+        Aluno aluno = alunos.findById(alunoId)
+                .orElseThrow(() -> ApiException.notFound("Aluno não encontrado."));
+        aplicarEndereco(aluno, dados);
+        alunos.save(aluno);
+        auditoria.registrar(operador, EventoAuditoria.Tipo.ALTERACAO,
+                "Endereço de aluno atualizado", "Aluno: " + aluno.getNome(), null);
+        return aluno.getEndereco();
     }
 }

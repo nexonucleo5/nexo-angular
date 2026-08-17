@@ -29,6 +29,10 @@ public class Aluno {
     @ManyToOne(fetch = FetchType.LAZY)
     private Turma turma;
 
+    /** Endereço residencial (opcional) — preenchido pela secretaria a partir do CEP. */
+    @Embedded
+    private Endereco endereco = new Endereco();
+
     /** Índice de engajamento (0-100), atualizado a partir de acessos/entregas. */
     private int engajamento;
 
@@ -58,6 +62,9 @@ public class Aluno {
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
+    /** Nunca nulo: o embeddable é criado com o aluno, então quem chama não precisa checar. */
+    public Endereco getEndereco() { return endereco != null ? endereco : (endereco = new Endereco()); }
+    public void setEndereco(Endereco endereco) { this.endereco = endereco; }
     public String getSexo() { return sexo; }
     public void setSexo(String sexo) { this.sexo = sexo; }
     public LocalDate getDataNascimento() { return dataNascimento; }
