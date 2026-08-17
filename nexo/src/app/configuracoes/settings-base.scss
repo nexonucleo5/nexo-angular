@@ -7,11 +7,22 @@
    e faziam as configurações começarem 34px à direita de todas as outras telas —
    era isso que deixava a tela com cara de desalinhada. */
 
+/* A tela de configurações é uma coluna estreita (800px) dentro de uma área de
+   conteúdo bem mais larga. Encostada à esquerda, ela deixava um vão enorme à
+   direita e destoava das demais telas, que ocupam a largura toda. Centralizar a
+   coluna resolve — e o cabeçalho tem que ir junto, senão o título fica sozinho
+   na borda esquerda enquanto os cards estão no meio. */
+.settings-header,
+.settings-wrapper {
+  max-width: 800px;
+  margin-inline: auto;
+  width: 100%;
+}
+
 .settings-wrapper {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  max-width: 800px;
 }
 
 .settings-card {

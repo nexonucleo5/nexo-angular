@@ -553,12 +553,24 @@ input.form-control,
    quem ligava o modo foco dentro da própria tela de configurações perdia toda a
    navegação de uma vez — sem nenhum jeito de voltar e desligar. */
 body.modo-foco-ativo {
+  /* Some o HOST, não só o <aside> de dentro. Quem é `position: fixed`, tem os
+     300px de largura, o z-index 1000 e o fundo pintado é o próprio elemento
+     app-menu* (ver "Sidebar global") — esconder apenas .sidebar deixava o host
+     no lugar como um painel cego, tampando os primeiros 300px de cada linha de
+     texto da tela. */
+  app-menu,
+  app-menu-diretor,
+  app-menu-professor,
+  app-menu-secretaria,
   .sidebar { display: none; }
 
   /* Os 3 riscos sem barra para abrir seriam um botão morto no header; a
      navegação do modo foco é o menu do usuário. */
   .btn-hamburguer { display: none; }
 
+  /* O !important cobre a regra de .app-layout.menu-aberto, que é mais
+     específica e continuaria empurrando o conteúdo para a direita atrás de uma
+     barra que não está mais lá. */
   .main-content {
     margin-left: 0 !important;
     width: 100% !important;
