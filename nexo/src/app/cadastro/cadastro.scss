@@ -180,3 +180,16 @@
 .cep-dica, .cep-erro { display: block; margin-top: 4px; font-size: 12px; }
 .cep-dica { color: var(--text-muted); }
 .cep-erro { color: #ef4444; font-weight: 600; }
+
+/* Botão de copiar as credenciais recém-geradas */
+.btn-copiar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: border-color 0.2s;
+  &:hover { border-color: #9b2fff; color: var(--text-main); }
+  .bi-check-lg { color: #06d25e; }
+}

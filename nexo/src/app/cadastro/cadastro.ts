@@ -220,4 +220,21 @@ export class Cadastro {
     this.mensagemErro.set('');
     this.acesso.set(null);
   }
+
+  // ── Copiar credenciais ──────────────────────────────────────────────
+  // A senha provisória aparece uma única vez; sem isto a secretária anotava no
+  // papel (e errava um caractere) para repassar ao aluno.
+
+  readonly copiado = signal(false);
+  private timerCopiado: ReturnType<typeof setTimeout> | null = null;
+
+  copiarAcesso(): void {
+    const a = this.acesso();
+    if (!a) return;
+    navigator.clipboard.writeText(`Login: ${a.login}\nSenha provisória: ${a.senha}`).then(() => {
+      this.copiado.set(true);
+      if (this.timerCopiado) clearTimeout(this.timerCopiado);
+      this.timerCopiado = setTimeout(() => this.copiado.set(false), 2500);
+    });
+  }
 }

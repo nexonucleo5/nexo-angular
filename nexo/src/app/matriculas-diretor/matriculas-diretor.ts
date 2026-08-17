@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { MatriculasService } from '../api/matriculas.service';
 import { TurmasService } from '../api/turmas.service';
@@ -43,6 +44,7 @@ const DOC_PERCENT: Record<StatusDocumentacao, number> = {
 export class MatriculasDiretor {
   private readonly api = inject(MatriculasService);
   private readonly turmasApi = inject(TurmasService);
+  private readonly route = inject(ActivatedRoute);
 
   /** Turmas para o seletor de transferência — carregadas uma vez, junto da lista. */
   readonly turmas = signal<TurmaDTO[]>([]);
@@ -50,6 +52,21 @@ export class MatriculasDiretor {
   readonly buscaTermo = signal('');
   readonly statusSelecionado = signal('Todos os Status');
   readonly statusOpcoes = ['Todos os Status', 'Ativa', 'Pendente', 'Trancada', 'Cancelada'];
+
+  readonly turmaSelecionada = signal('Todas as Turmas');
+  /** Opções vindas das próprias linhas: cobre "Sem turma" e só lista o que existe. */
+  readonly turmaOpcoes = computed(() => {
+    const nomes = new Set(this.matriculas().map((m) => m.turma));
+    return ['Todas as Turmas', ...[...nomes].sort()];
+  });
+
+  /**
+   * Contexto vindo do painel da secretaria (?matricula=ID abre o modal direto,
+   * ?turma=ID chega filtrado). Sem isso o clique em "Resolver" na fila jogava a
+   * pessoa na lista completa — e ela tinha que reencontrar o aluno na mão.
+   */
+  private pendenteAbrirId: number | null = null;
+  private pendenteTurmaId: number | null = null;
 
   readonly carregando = signal(true);
   readonly erro = signal(false);
@@ -59,13 +76,15 @@ export class MatriculasDiretor {
   readonly matriculasFiltradas = computed(() => {
     const termo = this.buscaTermo().toLowerCase();
     const status = this.statusSelecionado();
+    const turma = this.turmaSelecionada();
     return this.matriculas().filter((m) => {
       const buscaOk =
         !termo ||
         m.nome.toLowerCase().includes(termo) ||
         m.matricula.includes(termo);
       const statusOk = status === 'Todos os Status' || STATUS_LABEL[m.status] === status;
-      return buscaOk && statusOk;
+      const turmaOk = turma === 'Todas as Turmas' || m.turma === turma;
+      return buscaOk && statusOk && turmaOk;
     });
   });
 
@@ -79,9 +98,21 @@ export class MatriculasDiretor {
   });
 
   constructor() {
+    const params = this.route.snapshot.queryParamMap;
+    this.pendenteAbrirId = Number(params.get('matricula')) || null;
+    this.pendenteTurmaId = Number(params.get('turma')) || null;
+
     this.carregar();
     this.turmasApi.listar().subscribe({
-      next: (turmas) => this.turmas.set(turmas),
+      next: (turmas) => {
+        this.turmas.set(turmas);
+        // ?turma= chega como id (é o que a ocupação conhece); o filtro é por nome.
+        if (this.pendenteTurmaId != null) {
+          const nome = turmas.find((t) => t.id === this.pendenteTurmaId)?.nome;
+          if (nome) this.turmaSelecionada.set(nome);
+          this.pendenteTurmaId = null;
+        }
+      },
       error: () => this.turmas.set([]), // sem turmas o seletor de transferência só não aparece
     });
   }
@@ -93,6 +124,11 @@ export class MatriculasDiretor {
       next: (page) => {
         this.matriculas.set(page.content.map((m) => this.paraView(m)));
         this.carregando.set(false);
+        if (this.pendenteAbrirId != null) {
+          const alvo = this.matriculas().find((m) => m.id === this.pendenteAbrirId);
+          this.pendenteAbrirId = null;
+          if (alvo) this.verDetalhes(alvo);
+        }
       },
       error: () => {
         this.erro.set(true);
@@ -123,6 +159,7 @@ export class MatriculasDiretor {
   verDetalhes(m: MatriculaView): void {
     this.detalhe.set(m);
     this.acaoErro.set(null);
+    this.acaoSucesso.set(null);
   }
 
   fecharDetalhes(): void {
@@ -133,6 +170,8 @@ export class MatriculasDiretor {
 
   readonly acaoEmCurso = signal(false);
   readonly acaoErro = signal<string | null>(null);
+  /** Confirmação visível: sem ela, só o erro falava — salvar em silêncio parece travado. */
+  readonly acaoSucesso = signal<string | null>(null);
 
   /** Transições que o backend aceita a partir de cada status (espelho do controller). */
   private static readonly PROXIMOS_STATUS: Record<StatusMatricula, StatusMatricula[]> = {
@@ -166,12 +205,14 @@ export class MatriculasDiretor {
   private executar(chamada: Observable<MatriculaDTO>): void {
     this.acaoEmCurso.set(true);
     this.acaoErro.set(null);
+    this.acaoSucesso.set(null);
     chamada.subscribe({
       next: (dto) => {
         const atualizada = this.paraView(dto);
         this.matriculas.update((lista) => lista.map((x) => (x.id === dto.id ? atualizada : x)));
         this.detalhe.set(atualizada);
         this.acaoEmCurso.set(false);
+        this.acaoSucesso.set('Alterações salvas.');
       },
       error: (erro) => {
         this.acaoErro.set(erro?.error?.message ?? 'Não foi possível concluir a ação.');
@@ -183,6 +224,7 @@ export class MatriculasDiretor {
   emitirDeclaracao(m: MatriculaView): void {
     this.acaoEmCurso.set(true);
     this.acaoErro.set(null);
+    this.acaoSucesso.set(null);
     this.api.declaracao(m.id).subscribe({
       next: (pdf) => {
         const url = URL.createObjectURL(pdf);
@@ -192,6 +234,7 @@ export class MatriculasDiretor {
         link.click();
         URL.revokeObjectURL(url);
         this.acaoEmCurso.set(false);
+        this.acaoSucesso.set('Declaração baixada — confira a pasta de downloads.');
       },
       error: () => {
         this.acaoErro.set('A declaração só pode ser emitida para matrícula ativa.');

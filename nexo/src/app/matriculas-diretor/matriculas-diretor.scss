@@ -15,5 +15,8 @@
 }
 
 .doc-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; }
+
+/* Confirmação de ação no modal — o verde do sistema, não o do Bootstrap. */
+.acao-sucesso { color: #06d25e; font-weight: 600; }
 .badge-sub-green { background: rgba(6,210,94,0.1);  color: #06d25e; }
 .badge-sub-red   { background: rgba(239,68,68,0.1); color: #ef4444; }

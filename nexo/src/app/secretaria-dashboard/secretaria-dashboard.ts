@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { MatriculasService } from '../api/matriculas.service';
 import { SecretariaService } from '../api/secretaria.service';
 import { ConfiguracaoSecretariaService } from '../configuracao-secretaria/configuracao-secretaria.service';
 import {
@@ -24,6 +25,7 @@ import {
 })
 export class SecretariaDashboard {
   private readonly secretaria = inject(SecretariaService);
+  private readonly matriculasApi = inject(MatriculasService);
   private readonly config = inject(ConfiguracaoSecretariaService);
 
   readonly carregando = signal(true);
@@ -65,9 +67,45 @@ export class SecretariaDashboard {
     });
   }
 
+  // ── Efetivação direto da fila ──────────────────────────────────────────────
+  // A transição PENDENTE → ATIVA não pede mais nada além da decisão — obrigar a
+  // abrir a lista, achar o aluno e abrir o modal era caminho comprido para um
+  // clique. O que pede contexto (documentação, cancelamento) continua no modal,
+  // via "Abrir".
+
+  readonly efetivandoId = signal<number | null>(null);
+  readonly filaErro = signal<string | null>(null);
+
+  efetivar(p: PendenciaDTO): void {
+    this.efetivandoId.set(p.matriculaId);
+    this.filaErro.set(null);
+    this.matriculasApi.atualizarStatus(p.matriculaId, 'ATIVA').subscribe({
+      next: () => {
+        this.efetivandoId.set(null);
+        // Recarrega o painel inteiro: a efetivação mexe nos contadores e pode
+        // tirar (ou não) o item da fila — o servidor é quem sabe.
+        this.carregar();
+      },
+      error: (erro) => {
+        this.efetivandoId.set(null);
+        this.filaErro.set(erro?.error?.message ?? 'Não foi possível efetivar a matrícula.');
+      },
+    });
+  }
+
   formatarData(iso: string): string {
     if (!iso) return '';
     return new Date(iso + (iso.length === 10 ? 'T00:00:00' : '')).toLocaleDateString('pt-BR');
+  }
+
+  /** Fila se drena pela idade: "há N dias" diz a urgência sem exigir conta de cabeça. */
+  diasNaFila(iso: string): string {
+    if (!iso) return '';
+    const inicio = new Date(iso + (iso.length === 10 ? 'T00:00:00' : '')).getTime();
+    const dias = Math.max(0, Math.floor((Date.now() - inicio) / 86_400_000));
+    if (dias === 0) return 'hoje';
+    if (dias === 1) return 'há 1 dia';
+    return `há ${dias} dias`;
   }
 
   iniciais(nome: string): string {

@@ -18,16 +18,24 @@
   <div *ngIf="mensagemSucesso()" class="alert alert-success">{{ mensagemSucesso() }}</div>
   <div *ngIf="mensagemErro()" class="alert alert-danger">{{ mensagemErro() }}</div>
 
-  <div *ngIf="acesso() as a" class="alert alert-info d-flex align-items-center gap-3 mb-4">
+  <div *ngIf="acesso() as a" class="alert alert-info d-flex align-items-center gap-3 mb-4 flex-wrap">
     <i class="bi bi-key-fill fs-4"></i>
-    <div>
+    <div class="flex-grow-1">
       <strong>Acesso gerado com sucesso!</strong><br>
       <small>
         Login: <strong>{{ a.login }}</strong>
         &nbsp;|&nbsp;
         Senha provisória: <strong>{{ a.senha }}</strong>
+        <span class="d-block">A senha aparece só esta vez — copie e repasse agora.</span>
       </small>
     </div>
+    <button type="button" class="btn btn-sm btn-copiar" (click)="copiarAcesso()">
+      @if (copiado()) {
+        <i class="bi bi-check-lg"></i> Copiado!
+      } @else {
+        <i class="bi bi-clipboard"></i> Copiar acesso
+      }
+    </button>
   </div>
 
   <!-- ── Aluno ────────────────────────────────────────── -->
