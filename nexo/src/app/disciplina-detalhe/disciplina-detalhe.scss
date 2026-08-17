@@ -1,8 +1,6 @@
 /* disciplina-detalhe.scss — usa apenas variáveis do styles.scss */
 
-.page-content { background-color: var(--bg-primary); min-height: 100vh; }
-
-.page-title { font-size: 40px; }
+/* A caixa da página e o .page-title são padronizados no styles.scss §3. */
 
 .back-link {
   color: var(--text-muted);

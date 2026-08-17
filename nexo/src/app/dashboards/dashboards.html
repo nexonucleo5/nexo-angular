@@ -2,21 +2,19 @@
      despacha para o painel do perfil. Sem o ramo do professor ele caía no
      layout do aluno, que pede o painel de gamificação a uma API que não existe
      para ele — daí o "Olá, !" sem nome e o erro de carregamento. -->
+<!-- Nenhum ramo embrulha o painel: o recuo da página é do layout (app.html), e o
+     .page-container-pushed que ficava aqui somava um segundo recuo — o painel do
+     diretor abria 64px da borda e o da secretaria 32px. O ramo do aluno tinha
+     ainda um segundo .main-content dentro do de verdade, herdando margem lateral
+     e 100vh de altura de um container que já tinha os dois. -->
 @if (authService.usuarioLogado()?.role === 'diretor') {
-<div class="page-container-pushed">
-    <app-dashboard-diretor></app-dashboard-diretor>
-</div>
+<app-dashboard-diretor></app-dashboard-diretor>
 } @else if (authService.usuarioLogado()?.role === 'secretaria') {
-<!-- Sem .page-container-pushed: o painel já traz o próprio recuo (page-content
-     p-4) e o wrapper duplicaria o padding que o layout global aplica. -->
 <app-secretaria-dashboard></app-secretaria-dashboard>
 } @else if (authService.usuarioLogado()?.role === 'professor') {
-<div class="page-container-pushed">
-    <app-dashboard-professor></app-dashboard-professor>
-</div>
+<app-dashboard-professor></app-dashboard-professor>
 } @else {
-<main class="main-content page-container-pushed flex-grow-1">
-    <section class="page-content p-4">
+    <section class="page-content">
 
         <section class="dashboard-welcome-card mb-4">
             <div class="row align-items-center g-4">
@@ -186,5 +184,4 @@
         }
 
     </section>
-</main>
 }

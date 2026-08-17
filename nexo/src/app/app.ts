@@ -81,6 +81,14 @@ export class App {
     effect(() => {
       const role = this.authService.usuarioLogado()?.role ?? null;
       this.settingsAtivo.set(role ? untracked(() => this.servicoPara(role)) : null);
+
+      // O modo foco é uma configuração do aluno, mas a classe mora no <body> e
+      // sobrevive à troca de sessão. Sem limpar aqui, um aluno com o modo ligado
+      // deixava o próximo perfil sem barra lateral — e sem a tela de estudos do
+      // aluno para desligar, ninguém conseguia mais trazê-la de volta.
+      if (role !== 'aluno') {
+        document.body.classList.remove('modo-foco-ativo');
+      }
     });
 
     // Entrou ou saiu, a barra volta ao padrão da largura atual.

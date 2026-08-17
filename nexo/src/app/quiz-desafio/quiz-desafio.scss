@@ -1,10 +1,6 @@
 /* quiz-desafio.scss — usa apenas variáveis do styles.scss */
 
-.page-container {
-  padding: 2rem;
-  background-color: var(--bg-primary);
-  min-height: 100vh;
-}
+/* A caixa da página (recuo, fundo, altura) é padronizada no styles.scss §3. */
 
 .back-link {
   color: var(--text-muted);

@@ -1,10 +1,6 @@
 /* materias.scss — usa apenas variáveis do styles.scss */
 
-.page-content { background-color: var(--bg-primary); min-height: 100vh; }
-
-/* Sem !important: no celular o styles.scss reduz .page-title, e um !important
-   aqui venceria essa regra e devolveria os 44px numa tela de 384px. */
-.page-title { color: var(--text-main); font-size: 44px; }
+/* A caixa da página e o .page-title são padronizados no styles.scss §3. */
 
 .filters-box {
   background: var(--bg-card);

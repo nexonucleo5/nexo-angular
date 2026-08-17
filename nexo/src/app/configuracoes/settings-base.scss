@@ -2,17 +2,10 @@
    configuração (Task 4): .settings-card, .custom-switch, .btn-gradient etc.
    Usa apenas variáveis do styles.scss. */
 
-.page-content {
-  padding: 34px;
-  background-color: var(--bg-primary);
-  min-height: 100vh;
-}
-
-.settings-header {
-  margin-bottom: 32px;
-  .settings-page-title    { font-size: 36px; font-weight: 800; color: var(--text-main); margin: 0 0 8px; }
-  .settings-page-subtitle { font-size: 15px; color: var(--text-muted); margin: 0; }
-}
+/* A caixa da página e o cabeçalho (.settings-page-title, .settings-page-subtitle)
+   são padronizados no styles.scss §3. Os 34px daqui somavam com o recuo do layout
+   e faziam as configurações começarem 34px à direita de todas as outras telas —
+   era isso que deixava a tela com cara de desalinhada. */
 
 .settings-wrapper {
   display: flex;

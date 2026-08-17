@@ -1,7 +1,7 @@
 /* Estilos comuns às três telas de perfil (cards, KPIs, listas, cores) */
 @use './perfil-base';
 
-.page-content { padding: 34px; width: 100%; box-sizing: border-box; }
+/* A caixa da página (recuo, fundo, altura) é padronizada no styles.scss §3. */
 
 /* Card principal */
 .profile-main-card {
@@ -70,7 +70,7 @@
   .profile-tags { justify-content: center; }
 }
 @media (max-width: 768px) {
-  .page-content { padding: 20px; }
+  /* O recuo do celular vem do --gutter-pagina (styles.scss §1). */
   .profile-page-name { font-size: 28px !important; }
 }
 

@@ -1,5 +1,6 @@
-.main-content { background-color: var(--bg-primary); }
-.page-content  { background-color: var(--bg-primary); padding: 32px; width: 100%; }
+/* A caixa da página é padronizada no styles.scss §3. O .main-content daqui era um
+   segundo .main-content dentro do de verdade (ver o template do aluno): pintava o
+   fundo por cima da marca d'água e herdava margem e altura do layout. */
 
 /* Welcome card */
 .dashboard-welcome-card {

@@ -12,9 +12,23 @@ export interface AparenciaConfig {
     animacoesInterface: boolean;
 }
 
-/** Aplica o tema no documento e guarda em cache compartilhado (lido antes do login). */
+/**
+ * Aplica o tema no documento e guarda em cache compartilhado (lido antes do login).
+ *
+ * <p>A classe `trocando-tema` corta as transições durante a virada (ver styles.scss):
+ * cada caixa tem a sua própria duração de transição de cor, então sem isso o tema
+ * entrava em ondas — header, depois cards, depois bordas. Com as transições cortadas
+ * tudo repinta no mesmo frame, e elas voltam no frame seguinte para o hover continuar
+ * suave. Os dois rAF encadeados são de propósito: um só ainda cai dentro do frame em
+ * que o estilo é recalculado, e a onda voltava.
+ */
 export function aplicarTema(escuro: boolean): void {
-    document.documentElement.setAttribute('data-theme', escuro ? 'dark' : 'light');
+    const raiz = document.documentElement;
+    raiz.classList.add('trocando-tema');
+    raiz.setAttribute('data-theme', escuro ? 'dark' : 'light');
+    requestAnimationFrame(() =>
+        requestAnimationFrame(() => raiz.classList.remove('trocando-tema'))
+    );
     try {
         localStorage.setItem(TEMA_KEY, escuro ? 'dark' : 'light');
     } catch {

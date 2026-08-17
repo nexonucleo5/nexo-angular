@@ -1,7 +1,6 @@
 /* gestao-evasao.scss — usa apenas variáveis do styles.scss */
 
-.page-content { background-color: var(--bg-primary); min-height: 100vh; padding: 32px; }
-.page-title { font-size: 44px; font-weight: 800; color: var(--text-main); }
+/* A caixa da página e o .page-title são padronizados no styles.scss §3. */
 
 .stat-card {
   background: var(--bg-card); border: 1px solid var(--border-color);
