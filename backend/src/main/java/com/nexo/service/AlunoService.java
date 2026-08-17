@@ -17,6 +17,10 @@ import java.util.Map;
 @Service
 public class AlunoService {
 
+    /** A escola atende do 6º ano ao 3º do médio; a faixa acomoda distorção idade-série. */
+    private static final int IDADE_MINIMA_ALUNO = 4;
+    private static final int IDADE_MAXIMA_ALUNO = 100;
+
     private final AlunoRepository alunos;
     private final MatriculaRepository matriculas;
     private final TurmaRepository turmas;
@@ -52,19 +56,10 @@ public class AlunoService {
         if (dados.nome() == null || dados.nome().trim().length() < 3) {
             erros.put("nome", "Informe o nome completo.");
         }
-        LocalDate nascimento = null;
-        if (dados.dataNascimento() == null || dados.dataNascimento().isBlank()) {
-            erros.put("dataNascimento", "Informe a data de nascimento.");
-        } else {
-            try {
-                nascimento = LocalDate.parse(dados.dataNascimento());
-                if (nascimento.isAfter(LocalDate.now())) {
-                    erros.put("dataNascimento", "A data de nascimento não pode ser futura.");
-                }
-            } catch (java.time.format.DateTimeParseException e) {
-                erros.put("dataNascimento", "Data de nascimento inválida.");
-            }
-        }
+        // Faixa larga de propósito (cabe repetência e EJA); o que ela barra é o
+        // impossível — recém-nascido matriculado no 6º ano e ano digitado errado.
+        LocalDate nascimento = DataNascimento.validar(dados.dataNascimento(),
+                IDADE_MINIMA_ALUNO, IDADE_MAXIMA_ALUNO, erros);
         if (dados.sexo() == null || dados.sexo().isBlank()) {
             erros.put("sexo", "Selecione o sexo.");
         }

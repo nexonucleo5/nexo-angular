@@ -38,6 +38,8 @@ public class Turma {
     public void setAnoLetivo(int anoLetivo) { this.anoLetivo = anoLetivo; }
     public String getTurno() { return turno; }
     public void setTurno(String turno) { this.turno = turno; }
+    /** Etapa de ensino, derivada do nome ("9º Ano B" → fundamental, "1º Ano EM A" → médio). */
+    public SegmentoEnsino getSegmento() { return SegmentoEnsino.daTurma(nome); }
     public int getCapacidade() { return capacidade != null ? capacidade : CAPACIDADE_PADRAO; }
     public void setCapacidade(Integer capacidade) { this.capacidade = capacidade; }
     public Professor getProfessor() { return professor; }

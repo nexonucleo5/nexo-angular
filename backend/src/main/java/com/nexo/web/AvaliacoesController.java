@@ -32,13 +32,16 @@ public class AvaliacoesController {
     private final QuestaoRepository questoes;
     private final TurmaRepository turmas;
     private final ProfessorRepository professores;
+    private final com.nexo.service.EscopoDocente escopoDocente;
 
     public AvaliacoesController(AvaliacaoRepository avaliacoes, QuestaoRepository questoes, TurmaRepository turmas,
-                                ProfessorRepository professores) {
+                                ProfessorRepository professores,
+                                com.nexo.service.EscopoDocente escopoDocente) {
         this.avaliacoes = avaliacoes;
         this.questoes = questoes;
         this.turmas = turmas;
         this.professores = professores;
+        this.escopoDocente = escopoDocente;
     }
 
     /** PROFESSOR só cria avaliação para a turma que leciona; DIRETOR tem acesso irrestrito. */
@@ -115,6 +118,8 @@ public class AvaliacoesController {
         if (request.titulo() == null || request.titulo().isBlank()) {
             throw ApiException.validation("Dados inválidos.", Map.of("titulo", "Informe o título da avaliação."));
         }
+        // Mesma regra das notas: a turma pode ser dele, a matéria não.
+        escopoDocente.exigirMateria(request.disciplina(), operador);
         Avaliacao avaliacao = new Avaliacao();
         avaliacao.setTitulo(request.titulo().trim());
         avaliacao.setDisciplina(request.disciplina());

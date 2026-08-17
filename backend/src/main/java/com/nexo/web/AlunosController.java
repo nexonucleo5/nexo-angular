@@ -35,15 +35,18 @@ public class AlunosController {
     private final NotaRepository notas;
     private final ObservacaoPedagogicaRepository observacoes;
     private final ProfessorRepository professores;
+    private final com.nexo.service.EscopoDocente escopoDocente;
 
     public AlunosController(AlunoService alunoService, AlunoRepository alunos,
                             NotaRepository notas, ObservacaoPedagogicaRepository observacoes,
-                            ProfessorRepository professores) {
+                            ProfessorRepository professores,
+                            com.nexo.service.EscopoDocente escopoDocente) {
         this.alunoService = alunoService;
         this.alunos = alunos;
         this.notas = notas;
         this.observacoes = observacoes;
         this.professores = professores;
+        this.escopoDocente = escopoDocente;
     }
 
     /** PROFESSOR só age sobre alunos da turma que leciona; DIRETOR tem acesso irrestrito. */
@@ -155,7 +158,15 @@ public class AlunosController {
                 .orElseThrow(() -> ApiException.notFound("Aluno não encontrado."));
         exigirLeciona(aluno.getTurma(), operador);
 
-        String disciplina = request.disciplina() != null ? request.disciplina() : "Geral";
+        // Turma certa não basta: sem esta checagem o professor de História lançava
+        // nota de Matemática — a matéria vinha como texto livre e ninguém conferia.
+        // O "Geral" que existia como padrão também sumiu: era uma gaveta fora de
+        // qualquer matéria, e nota precisa dizer de que disciplina ela é.
+        escopoDocente.exigirMateria(request.disciplina(), operador);
+
+        String disciplina = request.disciplina() != null && !request.disciplina().isBlank()
+                ? request.disciplina().trim()
+                : "Geral";
         String periodo = request.periodo() != null ? request.periodo() : "2026-1";
 
         Nota nota = notas.findByAlunoIdAndDisciplinaAndPeriodo(alunoId, disciplina, periodo)
