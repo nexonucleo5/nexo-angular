@@ -10,6 +10,7 @@ import { MenuSecretaria } from './menu-secretaria/menu-secretaria';
 import { AuthService, RoleCliente } from './services/auth.service';
 import { aplicarTema, temaSalvoEscuro } from './configuracoes/settings-store';
 import { ConfiguracaoAlunoService } from './configuracao-aluno/configuracao-aluno.service';
+// (mantido junto dos demais services de perfil abaixo)
 import { ConfiguracaoProfessorService } from './configuracao-professor/configuracao-professor.service';
 import { ConfiguracaoDiretorService } from './configuracao-diretor/configuracao-diretor.service';
 import { ConfiguracaoSecretariaService } from './configuracao-secretaria/configuracao-secretaria.service';
@@ -48,6 +49,20 @@ export class App {
   private readonly settingsAtivo = signal<PerfilSettings | null>(null);
 
   readonly temaEscuro = computed(() => this.settingsAtivo()?.isDarkMode() ?? this.temaLocal());
+
+  /**
+   * Modo foco ligado (só o aluno tem a configuração). O header precisa saber para
+   * oferecer a saída: sem um botão explícito, desligar exigia lembrar que a chave
+   * mora em Configurações → Estudos, com a barra lateral já escondida.
+   */
+  readonly modoFoco = computed(() => {
+    if (this.authService.usuarioLogado()?.role !== 'aluno') return false;
+    return this.injector.get(ConfiguracaoAlunoService).settings().estudos.modoFoco;
+  });
+
+  sairDoModoFoco(): void {
+    this.injector.get(ConfiguracaoAlunoService).updateSection('estudos', { modoFoco: false });
+  }
 
   /**
    * Sidebar aberta. O botão dos 3 riscos existe em qualquer largura, mas a barra

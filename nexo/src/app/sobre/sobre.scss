@@ -1,0 +1,63 @@
+/* sobre.scss — .icon-box, .badge-compliance e .gradient-btn são globais (styles.scss §6) */
+
+.sobre-destaque {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.versao-tag {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 4px 12px;
+  white-space: nowrap;
+}
+
+.recurso-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+}
+
+.recurso-icone { font-size: 22px; color: #9b2fff; flex-shrink: 0; }
+
+.perfil-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  transition: border-color 0.2s;
+
+  /* O perfil de quem está lendo ganha destaque: a pergunta que traz alguém aqui
+     costuma ser "o que EU posso fazer". */
+  &.perfil-atual { border-color: #9b2fff; box-shadow: 0 0 0 1px rgba(155, 47, 255, 0.25); }
+}
+
+.lista-permissoes {
+  list-style: none; margin: 0; padding: 0;
+  li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: var(--text-soft);
+    &:last-child { margin-bottom: 0; }
+    &::before {
+      content: '\F26E'; /* bi-check2 */
+      font-family: 'bootstrap-icons';
+      position: absolute; left: 0; top: 0;
+      color: #06d25e;
+      font-size: 13px;
+    }
+  }
+}
+
+.sobre-rodape {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+}

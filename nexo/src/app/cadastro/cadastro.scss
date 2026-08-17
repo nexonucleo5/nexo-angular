@@ -193,3 +193,20 @@
   &:hover { border-color: #9b2fff; color: var(--text-main); }
   .bi-check-lg { color: #06d25e; }
 }
+
+/* Contador de matérias do professor (teto de 3, igual ao servidor) */
+.contador-materias {
+  font-size: 11px; font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 2px 10px;
+  &.no-limite { color: #ff9800; border-color: rgba(255, 152, 0, 0.4); }
+}
+
+.materia-chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  &:hover { border-color: var(--border-color); }
+}

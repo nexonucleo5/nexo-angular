@@ -45,6 +45,16 @@
                 <button (click)="alternarTema()" class="btn-theme ms-2">
                     <i class="bi" [ngClass]="temaEscuro() ? 'bi-sun-fill' : 'bi-moon-fill'"></i>
                 </button>
+
+                <!-- Saída do modo foco. Sem ela, desligar exigia lembrar que a chave
+                     está em Configurações → Estudos — com a barra lateral escondida,
+                     que é justamente o que o modo foco faz. -->
+                @if (modoFoco()) {
+                    <button type="button" class="btn-sair-foco ms-2" (click)="sairDoModoFoco()">
+                        <i class="bi bi-eye"></i>
+                        <span class="rotulo-sair-foco">Sair do modo foco</span>
+                    </button>
+                }
             </div>
 
             <app-menu-usuario

@@ -38,6 +38,17 @@ export const routes: Routes = [
     loadComponent: () => import('./dashboards/dashboards').then((m) => m.Dashboards),
   },
   {
+    // Referência de perfis e permissões — a mesma matriz que o backend aplica.
+    path: 'sobre',
+    canActivate: [authGuard],
+    loadComponent: () => import('./sobre/sobre').then((m) => m.Sobre),
+  },
+  {
+    path: 'suporte',
+    canActivate: [authGuard],
+    loadComponent: () => import('./suporte/suporte').then((m) => m.Suporte),
+  },
+  {
     // Chat em tempo real entre papéis diferentes (aluno ↔ professor ↔ diretor)
     path: 'mensagens',
     canActivate: [authGuard, roleGuard('diretor', 'professor', 'aluno')],

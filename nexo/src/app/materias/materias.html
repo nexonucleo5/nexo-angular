@@ -8,42 +8,65 @@
         </p>
     </div>
 
+    <!-- O seletor de "nível" saiu: a lista já chega recortada pela etapa do aluno
+         (o servidor decide). No lugar dele, o filtro que o aluno de fato usa —
+         onde ele parou —, com a contagem em cada aba para não clicar no vazio. -->
     <section class="filters-box p-4 rounded-4 shadow-sm mb-4">
         <div class="row g-3 align-items-center">
-            <div class="col-lg-8">
+            <div class="col-lg-6">
                 <div class="search-box custom-input d-flex align-items-center px-3 py-2 rounded-pill">
                     <i class="bi bi-search me-2"></i>
-                    <input 
+                    <input
                         type="text"
-                        [(ngModel)]="buscaDeTermos"
+                        [ngModel]="buscaDeTermos()" (ngModelChange)="buscaDeTermos.set($event)"
                         class="form-control border-0 bg-transparent shadow-none"
                         placeholder="Buscar matéria..."
+                        aria-label="Buscar matéria"
                     >
+                    @if (buscaDeTermos()) {
+                        <button type="button" class="btn-limpar-busca" (click)="limparBusca()" aria-label="Limpar busca">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    }
                 </div>
             </div>
 
-            <div class="col-lg-4">
-                <div class="custom-dropdown w-100 position-relative">
-                    <div 
-                        class="custom-input rounded-pill px-3 py-2 d-flex justify-content-between align-items-center"
-                        (click)="toggleDropdown()"
-                    >
-                        {{ selecionarNivel }}
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="dropdown-menu-custom w-100" *ngIf="dropdownAberto">
-                        <div class="dropdown-item" (click)="selecionar('Todos os Níveis')">Todos os Níveis</div>
-                        <div class="dropdown-item" (click)="selecionar('Fundamental')">Fundamental</div>
-                        <div class="dropdown-item" (click)="selecionar('Médio')">Médio</div>
-                    </div>
+            <div class="col-lg-6">
+                <div class="filtro-abas d-flex flex-wrap gap-2">
+                    @for (opcao of opcoesFiltro; track opcao.valor) {
+                        <button type="button" class="filtro-aba"
+                                [class.ativa]="filtro() === opcao.valor"
+                                (click)="selecionarFiltro(opcao.valor)">
+                            {{ opcao.rotulo }}
+                            <span class="filtro-contagem">{{ contagem()[opcao.valor] }}</span>
+                        </button>
+                    }
                 </div>
             </div>
         </div>
     </section>
 
+    @if (carregando()) {
+        <p class="text-soft">Carregando suas matérias…</p>
+    } @else if (erro()) {
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <p class="text-soft mb-0">Não foi possível carregar suas matérias.</p>
+            <button class="btn-limpar-filtros" (click)="carregar()">Tentar novamente</button>
+        </div>
+    } @else {
+
     <section class="subjects-section mb-5">
+        @if (filtradas().length === 0) {
+            <div class="sem-resultado card-theme p-4 rounded-4 text-center">
+                <i class="bi bi-search fs-3 text-soft"></i>
+                <p class="text-soft mt-2 mb-3">Nenhuma matéria encontrada com esses filtros.</p>
+                <button class="btn-limpar-filtros" (click)="limparBusca(); selecionarFiltro('todas')">
+                    Limpar filtros
+                </button>
+            </div>
+        }
         <div class="row g-4">
-            <div class="col-md-6 col-xl-4" *ngFor="let subject of filtroDeBusca">
+            <div class="col-md-6 col-xl-4" *ngFor="let subject of filtradas()">
                 <div class="subject-card card-theme p-4 rounded-5 shadow-sm h-100 d-flex flex-column">
                     <div class="subject-header d-flex justify-content-between align-items-start gap-2 mb-4">
                         <div class="d-flex gap-3 subject-identity">
@@ -54,7 +77,7 @@
                             </div>
                             <div>
                                 <h2 class="subject-title" style="color: var(--text-main); font-size: 1.25rem;">{{subject.title}}</h2>
-                                <p class="text-soft">{{subject.level}}</p>
+                                <p class="text-soft">{{ subject.progress === 0 ? 'Não iniciada' : subject.progress === 100 ? 'Concluída' : 'Em andamento' }}</p>
                             </div>
                         </div>
                         <span class="badge rounded-pill bg-light fw-bold p-2 text-dark">
@@ -81,7 +104,7 @@
     <section class="stats-section mt-5">
         <h2 class="fw-bold mb-4" style="color: var(--text-main);">Estatísticas Gerais</h2>
         <div class="row g-4 text-center">
-            <div class="col-md-6 col-xl-3" *ngFor="let stat of stats">
+            <div class="col-md-6 col-xl-3" *ngFor="let stat of stats()">
                 <div class="stat-box card-theme p-4 rounded-4 shadow-sm">
                     <h3 class="stat-number" style="color: var(--text-main);">{{stat.value}}</h3>
                     <p class="text-soft">{{stat.label}}</p>
@@ -89,4 +112,6 @@
             </div>
         </div>
     </section>
+
+    }
 </section>

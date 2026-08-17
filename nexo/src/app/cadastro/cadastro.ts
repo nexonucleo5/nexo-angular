@@ -37,6 +37,27 @@ export class Cadastro {
   readonly turmas = signal<TurmaDTO[]>([]);
   readonly materias = signal<MateriaDTO[]>([]);
 
+  /**
+   * Limites do seletor de data — espelho das regras do servidor (AlunoService e
+   * ProfessorService). O navegador barrando já no calendário evita a viagem de
+   * ida e volta só para descobrir que 2205 não era 2005; quem decide continua
+   * sendo o backend.
+   */
+  readonly limitesAluno = Cadastro.faixaDeDatas(4, 100);
+  readonly limitesProfessor = Cadastro.faixaDeDatas(18, 100);
+
+  /** Teto de matérias por docente, igual ao do ProfessorService. */
+  readonly maximoMaterias = 3;
+
+  private static faixaDeDatas(idadeMinima: number, idadeMaxima: number): { min: string; max: string } {
+    const hoje = new Date();
+    const iso = (d: Date) => d.toISOString().slice(0, 10);
+    return {
+      min: iso(new Date(hoje.getFullYear() - idadeMaxima, hoje.getMonth(), hoje.getDate())),
+      max: iso(new Date(hoje.getFullYear() - idadeMinima, hoje.getMonth(), hoje.getDate())),
+    };
+  }
+
   readonly enviando = signal(false);
   readonly acesso = signal<AcessoGerado | null>(null);
   readonly mensagemSucesso = signal('');
@@ -153,8 +174,14 @@ export class Cadastro {
     return this.materiaIdsSelecionadas.includes(id);
   }
 
+  /** Já no limite e não marcada: o clique não teria efeito, então some do alcance. */
+  materiaBloqueada(id: number): boolean {
+    return !this.materiaSelecionada(id) && this.materiaIdsSelecionadas.length >= this.maximoMaterias;
+  }
+
   alternarMateria(id: number): void {
     const atuais = this.materiaIdsSelecionadas;
+    if (this.materiaBloqueada(id)) return;
     const novas = atuais.includes(id) ? atuais.filter((m) => m !== id) : [...atuais, id];
     // `required` num array considera [] preenchido; o setErrors garante a validação.
     this.fp['materiaIds'].setValue(novas);

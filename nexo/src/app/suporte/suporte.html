@@ -1,0 +1,82 @@
+<section class="page-content">
+
+  <div class="page-heading mb-4">
+    <h1 class="page-title fw-bold">Suporte</h1>
+    <p class="text-soft m-0">Dúvidas frequentes e canais de atendimento</p>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- ── Dúvidas frequentes ───────────────────────────────── -->
+    <div class="col-12 col-xl-7">
+      <h2 class="h6 fw-bold text-main mb-3">
+        Dúvidas frequentes
+        <span class="text-soft fw-normal small">— para o seu perfil</span>
+      </h2>
+
+      <div class="d-flex flex-column gap-2">
+        @for (d of duvidas(); track d.pergunta; let i = $index) {
+          <div class="faq-item" [class.aberta]="abertaIndice() === i">
+            <button type="button" class="faq-pergunta" (click)="alternar(i)"
+                    [attr.aria-expanded]="abertaIndice() === i">
+              <span>{{ d.pergunta }}</span>
+              <i class="bi" [ngClass]="abertaIndice() === i ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+            </button>
+            @if (abertaIndice() === i) {
+              <p class="faq-resposta">{{ d.resposta }}</p>
+            }
+          </div>
+        } @empty {
+          <p class="text-soft">Nenhuma dúvida cadastrada para o seu perfil.</p>
+        }
+      </div>
+
+      <p class="text-soft small mt-3 mb-0">
+        Não achou o que precisava? Veja também
+        <a routerLink="/sobre" class="link-sobre">o que cada perfil pode fazer</a>.
+      </p>
+    </div>
+
+    <!-- ── Canais + dados técnicos ──────────────────────────── -->
+    <div class="col-12 col-xl-5">
+      <h2 class="h6 fw-bold text-main mb-3">Falar com alguém</h2>
+
+      <div class="d-flex flex-column gap-2 mb-4">
+        @for (c of canais; track c.titulo) {
+          <div class="canal-card d-flex align-items-start gap-3 p-3">
+            <i class="bi {{ c.icone }} canal-icone"></i>
+            <div>
+              <h3 class="h6 fw-bold text-main mb-1">{{ c.titulo }}</h3>
+              <p class="canal-detalhe mb-1">{{ c.detalhe }}</p>
+              <small class="text-soft">{{ c.texto }}</small>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Reunido aqui porque é sempre o que o suporte pede na primeira resposta. -->
+      <div class="info-tecnica p-3">
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+          <h3 class="h6 fw-bold text-main m-0">Dados para o chamado</h3>
+          <button type="button" class="btn-copiar-info" (click)="copiarInfo()">
+            @if (copiado()) {
+              <i class="bi bi-check-lg"></i> Copiado
+            } @else {
+              <i class="bi bi-clipboard"></i> Copiar
+            }
+          </button>
+        </div>
+        @for (i of infoTecnica(); track i.rotulo) {
+          <div class="detalhe-row">
+            <span class="rot">{{ i.rotulo }}</span>
+            <span class="val">{{ i.valor }}</span>
+          </div>
+        }
+        <small class="text-soft d-block mt-2">
+          Envie estes dados junto da sua mensagem — eles encurtam o atendimento.
+        </small>
+      </div>
+    </div>
+  </div>
+
+</section>

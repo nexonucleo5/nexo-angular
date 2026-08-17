@@ -20,3 +20,27 @@
 .acao-sucesso { color: #06d25e; font-weight: 600; }
 .badge-sub-green { background: rgba(6,210,94,0.1);  color: #06d25e; }
 .badge-sub-red   { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+/* ── Ações do modal, agrupadas por natureza ───────────────────────────────── */
+.grupo-acao {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+  &:last-child { border-bottom: none; padding-bottom: 0; }
+
+  > small { font-size: 12px; }
+}
+
+.grupo-titulo {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  i { color: #9b2fff; font-size: 13px; }
+}
+
+/* Cancelar é irreversível (não há volta de CANCELADA): a cor avisa antes do clique. */
+.acao-perigo {
+  color: #ef4444;
+  &:hover { border-color: #ef4444; }
+}

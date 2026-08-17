@@ -55,7 +55,10 @@
 
       <div class="col-md-6 mb-3">
         <label class="form-label" for="aluno-nascimento">Data de nascimento:</label>
+        <!-- min/max espelham a regra do servidor: o calendário já não oferece data
+             futura nem idade impossível. -->
         <input type="date" id="aluno-nascimento" formControlName="dataNascimento" class="form-control"
+               [min]="limitesAluno.min" [max]="limitesAluno.max"
                [class.is-invalid]="fa['dataNascimento'].invalid && fa['dataNascimento'].touched">
         <div class="invalid-feedback">Data de nascimento obrigatória.</div>
       </div>
@@ -176,8 +179,9 @@
       <div class="col-md-6 mb-3">
         <label class="form-label" for="prof-nascimento">Data de nascimento:</label>
         <input type="date" id="prof-nascimento" formControlName="dataNascimento" class="form-control"
+               [min]="limitesProfessor.min" [max]="limitesProfessor.max"
                [class.is-invalid]="fp['dataNascimento'].invalid && fp['dataNascimento'].touched">
-        <div class="invalid-feedback">Data de nascimento obrigatória.</div>
+        <div class="invalid-feedback">Data de nascimento obrigatória (professor maior de idade).</div>
       </div>
 
       <div class="col-md-6 mb-3">
@@ -194,10 +198,20 @@
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Matérias que leciona:</label>
+      <label class="form-label d-flex align-items-center gap-2 flex-wrap">
+        Matérias que leciona:
+        <span class="contador-materias"
+              [class.no-limite]="materiaIdsSelecionadas.length >= maximoMaterias">
+          {{ materiaIdsSelecionadas.length }} de {{ maximoMaterias }}
+        </span>
+      </label>
       <div class="materias-grid" [class.invalido]="fp['materiaIds'].invalid && fp['materiaIds'].touched">
+        <!-- Passado o teto, o que não está marcado fica fora de alcance: um clique
+             sem efeito seria lido como bug. -->
         <button type="button" *ngFor="let m of materias()" class="materia-chip"
-                [class.selecionada]="materiaSelecionada(m.id)" (click)="alternarMateria(m.id)">
+                [class.selecionada]="materiaSelecionada(m.id)"
+                [disabled]="materiaBloqueada(m.id)"
+                (click)="alternarMateria(m.id)">
           <i class="bi" [ngClass]="materiaSelecionada(m.id) ? 'bi-check-circle-fill' : 'bi-circle'"></i>
           {{ m.nome }}
         </button>
