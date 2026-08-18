@@ -50,15 +50,31 @@ export class App {
 
   readonly temaEscuro = computed(() => this.settingsAtivo()?.isDarkMode() ?? this.temaLocal());
 
+  /** Rota atual — o modo foco depende dela (ver {@link emAtividade}). */
+  private readonly rotaAtual = signal('');
+
   /**
-   * Modo foco ligado (só o aluno tem a configuração). O header precisa saber para
-   * oferecer a saída: sem um botão explícito, desligar exigia lembrar que a chave
-   * mora em Configurações → Estudos, com a barra lateral já escondida.
+   * Telas que são "atividade": ler o conteúdo de uma disciplina e responder um
+   * quiz. É só nelas que o modo foco esconde o menu.
+   *
+   * <p>A lista de matérias e a de desafios ficam de fora de propósito: elas são o
+   * caminho ATÉ a atividade. Escondendo o menu nelas, o aluno com modo foco
+   * ligado não tinha como chegar às matérias — precisava desligar o modo foco
+   * para estudar, que é o contrário do que a configuração promete.
    */
-  readonly modoFoco = computed(() => {
+  private readonly emAtividade = computed(() => {
+    const url = this.rotaAtual().split('?')[0];
+    return /^\/disciplina\/[^/]+/.test(url) || /^\/desafios\/[^/]+\/quiz/.test(url);
+  });
+
+  /** A configuração está ligada (só o aluno a tem). */
+  private readonly modoFocoConfigurado = computed(() => {
     if (this.authService.usuarioLogado()?.role !== 'aluno') return false;
     return this.injector.get(ConfiguracaoAlunoService).settings().estudos.modoFoco;
   });
+
+  /** Modo foco valendo agora — é o que o header usa para oferecer a saída. */
+  readonly modoFoco = computed(() => this.modoFocoConfigurado() && this.emAtividade());
 
   sairDoModoFoco(): void {
     this.injector.get(ConfiguracaoAlunoService).updateSection('estudos', { modoFoco: false });
@@ -101,9 +117,8 @@ export class App {
       // sobrevive à troca de sessão. Sem limpar aqui, um aluno com o modo ligado
       // deixava o próximo perfil sem barra lateral — e sem a tela de estudos do
       // aluno para desligar, ninguém conseguia mais trazê-la de volta.
-      if (role !== 'aluno') {
-        document.body.classList.remove('modo-foco-ativo');
-      }
+      // A classe do modo foco é reavaliada pelo effect abaixo; sair da sessão de
+      // aluno derruba modoFocoConfigurado() e ela cai junto.
     });
 
     // Entrou ou saiu, a barra volta ao padrão da largura atual.
@@ -115,11 +130,20 @@ export class App {
     // No celular a barra cobre a tela, então tocar num link precisa fechá-la —
     // senão a tela recém-aberta fica atrás dela. Onde ela empurra, fica aberta
     // de propósito: não cobre nada e serve para ir direto à próxima tela.
+    this.rotaAtual.set(this.router.url);
     this.router.events
       .pipe(filter((evento) => evento instanceof NavigationEnd))
-      .subscribe(() => {
+      .subscribe((evento) => {
+        this.rotaAtual.set((evento as NavigationEnd).urlAfterRedirects);
         if (App.cobreATela()) this.menuAberto.set(false);
       });
+
+    // Modo foco: liga só quando a configuração está ativa E a tela é uma
+    // atividade. Fica aqui, e não no service de configurações, porque depende da
+    // rota — e o service não conhece o router.
+    effect(() => {
+      document.body.classList.toggle('modo-foco-ativo', this.modoFoco());
+    });
 
     // Trava o scroll do fundo enquanto a barra cobre a tela: sem isso o dedo que
     // quer rolar a lista de links rola a página atrás dela. A classe só tem

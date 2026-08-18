@@ -14,16 +14,20 @@
       </div>
       <div class="flex-grow-1">
         <h1 class="page-title fw-bold mb-1" style="color: var(--text-main);">{{ d.title }}</h1>
-        <p class="text-soft fs-5 mb-2">{{ d.level }}</p>
-        <div class="d-flex align-items-center gap-3">
-          <div class="progress flex-grow-1" style="height: 10px; max-width: 320px;">
-            <div [class]="'progress-bar ' + d.colorClass" [style.width.%]="d.progress"></div>
+        <!-- Progresso real: conteúdos que este aluno marcou como concluídos. -->
+        @if (totalConteudos() > 0) {
+          <div class="d-flex align-items-center gap-3 mt-2">
+            <div class="progress flex-grow-1" style="height: 10px; max-width: 320px;">
+              <div [class]="'progress-bar ' + d.colorClass" [style.width.%]="percentual()"></div>
+            </div>
+            <span class="text-soft fw-bold">{{ percentual() }}%</span>
           </div>
-          <span class="text-soft fw-bold">{{ d.progress }}%</span>
-        </div>
-        <small class="text-soft d-block mt-2">
-          {{ d.completedLessons }}/{{ d.totalLessons }} aulas concluídas
-        </small>
+          <small class="text-soft d-block mt-2">
+            {{ totalConcluidos() }}/{{ totalConteudos() }} conteúdos concluídos
+          </small>
+        } @else {
+          <p class="text-soft mb-0">Conteúdo ainda não publicado para esta matéria.</p>
+        }
       </div>
     </div>
 
@@ -88,11 +92,11 @@
 
         <div class="row g-4">
           <div class="col-md-6 col-xl-4" *ngFor="let c of conteudos(); let i = index">
-            <button type="button" class="topic-card card-theme p-4 rounded-4 h-100 d-flex flex-column align-items-start gap-2 w-100 text-start border-0"
-                    (click)="selecionarTopico(c)">
+            <div class="topic-card card-theme p-4 rounded-4 h-100 d-flex flex-column align-items-start gap-2"
+                 [class.concluido]="estaConcluido(c)">
               <div class="d-flex align-items-center gap-3 w-100">
                 <div [class]="'topic-number d-flex align-items-center justify-content-center rounded-3 ' + d.colorClass">
-                  {{ i + 1 }}
+                  @if (estaConcluido(c)) { <i class="bi bi-check-lg"></i> } @else { {{ i + 1 }} }
                 </div>
                 <div class="flex-grow-1 topic-heading">
                   <h3 class="topic-title mb-1" style="color: var(--text-main);">{{ c.titulo }}</h3>
@@ -100,14 +104,26 @@
                     <span class="leitura-tempo"><i class="bi bi-clock"></i> {{ c.minutos }} min</span>
                   }
                 </div>
+                <!-- Marcar fica separado de abrir: um clique só teria de adivinhar
+                     qual das duas coisas o aluno queria. -->
+                <button type="button" class="btn-concluir"
+                        [class.marcado]="estaConcluido(c)"
+                        [disabled]="salvandoId() === c.id"
+                        (click)="alternarConcluido(c)"
+                        [attr.aria-pressed]="estaConcluido(c)"
+                        [attr.aria-label]="(estaConcluido(c) ? 'Desmarcar' : 'Marcar como concluído') + ': ' + c.titulo">
+                  <i class="bi" [ngClass]="estaConcluido(c) ? 'bi-check-circle-fill' : 'bi-circle'"></i>
+                </button>
               </div>
 
               <!-- O resumo é o que faz o card valer o clique: o aluno já sabe o
                    que vai encontrar antes de abrir. -->
               <p class="topic-resumo text-soft mb-0">{{ c.resumo }}</p>
 
-              <span class="topic-cta mt-auto">Ler agora <i class="bi bi-arrow-right"></i></span>
-            </button>
+              <button type="button" class="topic-cta mt-auto" (click)="selecionarTopico(c)">
+                {{ estaConcluido(c) ? 'Reler' : 'Ler agora' }} <i class="bi bi-arrow-right"></i>
+              </button>
+            </div>
           </div>
         </div>
 

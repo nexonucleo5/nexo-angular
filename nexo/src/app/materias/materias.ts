@@ -2,7 +2,8 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { MateriasService } from '../api/materias.service';
+import { AlunoDashboardService } from '../api/aluno-dashboard.service';
+import { MateriaProgressoDTO } from '../core/api.models';
 import { Subject, SUBJECTS } from './materias.data';
 
 /** Filtros que a tela oferece — por progresso, que é o que o aluno usa para decidir. */
@@ -16,7 +17,7 @@ type FiltroProgresso = 'todas' | 'em-andamento' | 'nao-iniciadas' | 'concluidas'
   styleUrls: ['./materias.scss'],
 })
 export class Materias {
-  private readonly api = inject(MateriasService);
+  private readonly api = inject(AlunoDashboardService);
 
   readonly buscaDeTermos = signal('');
   readonly filtro = signal<FiltroProgresso>('todas');
@@ -25,15 +26,15 @@ export class Materias {
   readonly erro = signal(false);
 
   /**
-   * As matérias que o aluno cursa vêm do servidor já recortadas pela etapa dele
-   * (GET /api/materias) — o do médio não recebe Ciências, o do fundamental não
-   * recebe Física. O filtro de "nível" que existia aqui era só visual: mostrava
-   * o catálogo inteiro e deixava escolher a etapa de outro aluno.
+   * As matérias que o aluno cursa vêm do servidor (GET /api/aluno/materias) já
+   * recortadas pela etapa dele — o do médio não recebe Ciências, o do fundamental
+   * não recebe Física — e com o progresso real: conteúdos que ele concluiu ÷
+   * total da matéria. Antes o percentual era número fixo no client, igual para
+   * todo aluno e imune ao que ele fizesse.
    *
-   * <p>Ícone, cor e lista de tópicos continuam vindo de materias.data.ts: são
-   * apresentação, não dado acadêmico. Progresso segue de lá também, até existir
-   * acompanhamento de aula de verdade no backend — matéria que o servidor manda
-   * e a tela não conhece aparece com a aparência padrão em vez de sumir.
+   * <p>Ícone, cor e tópicos continuam vindo de materias.data.ts: são apresentação,
+   * não dado acadêmico. Matéria que o servidor manda e a tela não conhece aparece
+   * com a aparência padrão em vez de sumir.
    */
   readonly materias = signal<Subject[]>([]);
 
@@ -91,9 +92,9 @@ export class Materias {
   carregar(): void {
     this.carregando.set(true);
     this.erro.set(false);
-    this.api.listar().subscribe({
+    this.api.materias().subscribe({
       next: (doServidor) => {
-        this.materias.set(doServidor.map((m) => this.comApresentacao(m.id, m.nome)));
+        this.materias.set(doServidor.map((m) => this.comApresentacao(m)));
         this.carregando.set(false);
       },
       error: () => {
@@ -103,20 +104,24 @@ export class Materias {
     });
   }
 
-  /** Casa a matéria do servidor com a apresentação local; sem par, usa o padrão. */
-  private comApresentacao(id: number, nome: string): Subject {
-    const local = SUBJECTS.find((s) => s.title.toLowerCase() === nome.toLowerCase());
-    if (local) return { ...local, title: nome };
+  /**
+   * Junta o dado do servidor (nome, progresso) com a apresentação local (ícone,
+   * cor, tópicos). Sem par local, usa a aparência padrão — some da tela seria
+   * pior do que aparecer sem ícone bonito.
+   */
+  private comApresentacao(m: MateriaProgressoDTO): Subject {
+    const local = SUBJECTS.find((s) => s.title.toLowerCase() === m.nome.toLowerCase());
     return {
-      id: String(id),
-      title: nome,
+      id: String(m.id), // rota /disciplina/:id passa a usar o id real da matéria
+      title: m.nome,
       level: '',
-      progress: 0,
-      completedLessons: 0,
-      totalLessons: 0,
-      iconClass: 'bi-journal-text',
-      colorClass: 'subj-blue',
-      topics: [],
+      progress: m.percentual,
+      completedLessons: m.conteudosConcluidos,
+      totalLessons: m.totalConteudos,
+      iconClass: local?.iconClass ?? 'bi-journal-text',
+      iconText: local?.iconText,
+      colorClass: local?.colorClass ?? 'subj-blue',
+      topics: local?.topics ?? [],
     };
   }
 

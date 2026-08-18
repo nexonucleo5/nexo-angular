@@ -10,7 +10,9 @@ import org.springframework.test.context.TestPropertySource;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -202,5 +204,67 @@ class RegrasAcademicasTest extends TesteApiBase {
                                 + "\"sexo\":\"F\",\"materiaIds\":[" + m1 + "]}")
                         .header(HttpHeaders.AUTHORIZATION, diretor))
                 .andExpect(status().isCreated());
+    }
+
+    // ── Progresso por matéria ────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("progresso da matéria sai dos conteúdos concluídos e marcar é idempotente")
+    void progressoPorMateria() throws Exception {
+        String aluno = bearer("aluno");
+
+        JsonNode materias = json("/api/aluno/materias", aluno);
+        assertThat(materias.size()).isGreaterThan(0);
+
+        // Uma matéria com conteúdo publicado — é onde o progresso faz sentido.
+        JsonNode alvo = null;
+        for (JsonNode m : materias) {
+            if (m.get("totalConteudos").asInt() > 0) { alvo = m; break; }
+        }
+        assertThat(alvo).as("o seed precisa de matéria com conteúdo").isNotNull();
+        long materiaId = alvo.get("id").asLong();
+        assertThat(alvo.get("percentual").asInt()).isZero();
+
+        JsonNode conteudos = json("/api/materias/" + materiaId + "/conteudos", aluno);
+        long conteudoId = conteudos.get(0).get("id").asLong();
+
+        // Marcar duas vezes conta uma só — senão o percentual passaria de 100%.
+        for (int i = 0; i < 2; i++) {
+            mvc.perform(put("/api/aluno/conteudos/" + conteudoId + "/concluido")
+                            .header(HttpHeaders.AUTHORIZATION, aluno))
+                    .andExpect(status().isNoContent());
+        }
+
+        assertThat(json("/api/aluno/materias/" + materiaId + "/concluidos", aluno).size()).isEqualTo(1);
+
+        int percentual = 0;
+        for (JsonNode m : json("/api/aluno/materias", aluno)) {
+            if (m.get("id").asLong() == materiaId) {
+                assertThat(m.get("conteudosConcluidos").asInt()).isEqualTo(1);
+                percentual = m.get("percentual").asInt();
+            }
+        }
+        assertThat(percentual).isGreaterThan(0);
+
+        // Desmarcar volta ao zero, e repetir também não é erro.
+        for (int i = 0; i < 2; i++) {
+            mvc.perform(delete("/api/aluno/conteudos/" + conteudoId + "/concluido")
+                            .header(HttpHeaders.AUTHORIZATION, aluno))
+                    .andExpect(status().isNoContent());
+        }
+        assertThat(json("/api/aluno/materias/" + materiaId + "/concluidos", aluno).size()).isZero();
+    }
+
+    @Test
+    @DisplayName("aluno não conclui conteúdo de matéria fora da etapa dele")
+    void progressoRespeitaAEtapa() throws Exception {
+        String aluno = bearer("aluno");
+        long ciencias = -1;
+        for (JsonNode m : json("/api/materias", bearer("diretor"))) {
+            if ("Ciências".equals(m.get("nome").asText())) ciencias = m.get("id").asLong();
+        }
+        mvc.perform(get("/api/aluno/materias/" + ciencias + "/concluidos")
+                        .header(HttpHeaders.AUTHORIZATION, aluno))
+                .andExpect(status().isForbidden());
     }
 }

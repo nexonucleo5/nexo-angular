@@ -51,13 +51,16 @@ public class DesafioService {
     private final DesafioAlunoRepository progresso;
     private final AlunoRepository alunos;
     private final QuizPerguntaRepository perguntas;
+    private final com.nexo.repository.MateriaRepository materias;
 
     public DesafioService(DesafioRepository desafios, DesafioAlunoRepository progresso, AlunoRepository alunos,
-                          QuizPerguntaRepository perguntas) {
+                          QuizPerguntaRepository perguntas,
+                          com.nexo.repository.MateriaRepository materias) {
         this.desafios = desafios;
         this.progresso = progresso;
         this.alunos = alunos;
         this.perguntas = perguntas;
+        this.materias = materias;
     }
 
     @Transactional(readOnly = true)
@@ -65,7 +68,23 @@ public class DesafioService {
         Aluno aluno = aluno(usuarioId);
         Map<Long, DesafioAluno> porDesafio = progressoDoAluno(aluno.getId());
 
+        // Mesma regra das matérias: desafio de Química não é do aluno do
+        // fundamental, e Ciências não é de quem está no médio. O nome da matéria
+        // no desafio é texto livre, então o catálogo é quem decide a etapa; nome
+        // fora do catálogo (desafio geral, como "Revisão") vale para todos.
+        var etapa = aluno.getTurma() == null
+                ? com.nexo.domain.SegmentoEnsino.FUNDAMENTAL
+                : aluno.getTurma().getSegmento();
+        Map<String, com.nexo.domain.SegmentoEnsino> segmentoPorMateria = new HashMap<>();
+        materias.findAll().forEach(m ->
+                segmentoPorMateria.put(m.getNome().toLowerCase(), m.getSegmento()));
+
         List<DesafioDTO> lista = desafios.findAll().stream()
+                .filter(d -> {
+                    var segmento = d.getMateria() == null ? null
+                            : segmentoPorMateria.get(d.getMateria().toLowerCase());
+                    return segmento == null || segmento.atende(etapa);
+                })
                 .map(d -> paraDTO(d, porDesafio.get(d.getId())))
                 .toList();
 

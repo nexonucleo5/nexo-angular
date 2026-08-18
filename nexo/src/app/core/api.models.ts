@@ -141,6 +141,20 @@ export interface MatriculaDTO {
   dataMatricula: string;
 }
 
+/**
+ * GET /api/aluno/materias — as matérias que o aluno cursa, com o progresso real
+ * dele. Diferente de MateriaDTO (catálogo da escola): aqui o recorte é a etapa
+ * do aluno e os números vêm dos conteúdos que ele concluiu.
+ */
+export interface MateriaProgressoDTO {
+  id: number;
+  nome: string;
+  segmento: 'FUNDAMENTAL' | 'MEDIO' | 'AMBOS';
+  totalConteudos: number;
+  conteudosConcluidos: number;
+  percentual: number;
+}
+
 /** GET /api/secretaria/dashboard */
 export interface DashboardSecretariaDTO {
   totalAlunos: number;

@@ -89,7 +89,11 @@
                             <div [class]="'progress-bar ' + subject.colorClass" [style.width.%]="subject.progress"></div>
                         </div>
                         <small class="text-soft">
-                            {{subject.completedLessons}}/{{subject.totalLessons}} aulas concluídas
+                            @if (subject.totalLessons > 0) {
+                                {{subject.completedLessons}}/{{subject.totalLessons}} conteúdos concluídos
+                            } @else {
+                                Conteúdo ainda não publicado
+                            }
                         </small>
                     </div>
                     <a [routerLink]="['/disciplina', subject.id]"
