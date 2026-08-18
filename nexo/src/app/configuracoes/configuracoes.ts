@@ -3,15 +3,15 @@ import { AuthService } from '../services/auth.service';
 import { ConfiguracaoAluno } from '../configuracao-aluno/configuracao-aluno';
 import { ConfiguracaoProfessor } from '../configuracao-professor/configuracao-professor';
 import { ConfiguracaoDiretor } from '../configuracao-diretor/configuracao-diretor';
-import { ConfiguracaoSecretaria } from '../configuracao-secretaria/configuracao-secretaria';
+import { ConfiguracaoAdmin } from '../configuracao-admin/configuracao-admin';
 
 /**
  * Wrapper da rota /configuracoes: renderiza a tela de configuração do perfil
- * logado (Task 4) — mesmo padrão do matriculas-wrapper.
+ * logado (Task 4) — mesmo padrão do inscricoes-wrapper.
  */
 @Component({
   selector: 'app-configuracoes',
-  imports: [ConfiguracaoAluno, ConfiguracaoProfessor, ConfiguracaoDiretor, ConfiguracaoSecretaria],
+  imports: [ConfiguracaoAluno, ConfiguracaoProfessor, ConfiguracaoDiretor, ConfiguracaoAdmin],
   templateUrl: './configuracoes.html',
 })
 export class Configuracoes {

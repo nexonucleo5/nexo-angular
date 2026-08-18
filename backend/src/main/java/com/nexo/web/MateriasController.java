@@ -69,7 +69,7 @@ public class MateriasController {
     /**
      * Catálogo de matérias.
      *
-     * <p>Para quem administra (diretor, secretaria, professor) é o catálogo inteiro
+     * <p>Para quem administra (diretor, administrador, professor) é o catálogo inteiro
      * — é o que alimenta a seleção do cadastro de professor. Para o ALUNO a lista
      * já vem recortada pela etapa dele: o aluno do médio não cursa Ciências e o do
      * fundamental não cursa Física, então não faz sentido nem exibi-las. O recorte
@@ -94,7 +94,9 @@ public class MateriasController {
      * conteúdo cadastrado devolvem lista vazia — o client trata esse caso.
      *
      * <p>A checagem de etapa se repete aqui de propósito: esconder a matéria da
-     * listagem não impede ninguém de pedir /api/materias/7/conteudos na mão.
+     * listagem não impede ninguém de pedir /api/materias/7/conteudos na mão. Pelo
+     * mesmo motivo o despublicado é filtrado aqui, e não na tela: conteúdo tirado
+     * do ar pelo administrador não pode voltar por uma requisição feita na mão.
      */
     @GetMapping("/{id}/conteudos")
     public List<ConteudoMateriaDTO> conteudos(@PathVariable Long id,
@@ -105,6 +107,6 @@ public class MateriasController {
         if ("ALUNO".equals(operador.role()) && !materia.getSegmento().atende(segmentoDoAluno(operador))) {
             throw ApiException.forbidden("Esta matéria não faz parte da sua etapa de ensino.");
         }
-        return conteudos.findByMateriaIdOrderByOrdemAsc(id).stream().map(ConteudoMateriaDTO::of).toList();
+        return conteudos.publicadosDaMateria(id).stream().map(ConteudoMateriaDTO::of).toList();
     }
 }

@@ -4,19 +4,29 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   AlunoCriado,
+  AlunoResumoDTO,
   CadastroAlunoRequest,
-  EnderecoCepDTO,
-  EnderecoDTO,
-  EnderecoRequest,
   NotaDTO,
   ObservacaoDTO,
-  ProntuarioDTO,
 } from '../core/api.models';
 
+/**
+ * O que sobrou aqui é o que um sistema de aprendizado precisa do aluno. Endereço,
+ * prontuário, histórico escolar em PDF e consulta de CEP saíram: eram a ficha
+ * pessoal dele, e ela pertence ao sistema de aula da escola.
+ */
 @Injectable({ providedIn: 'root' })
 export class AlunosService {
   private http = inject(HttpClient);
   private api = `${environment.apiUrl}/alunos`;
+
+  /**
+   * Os alunos que o operador alcança. O recorte é do servidor: o professor recebe
+   * os das turmas que leciona, diretor e administrador recebem todos.
+   */
+  listar(): Observable<AlunoResumoDTO[]> {
+    return this.http.get<AlunoResumoDTO[]>(this.api);
+  }
 
   /** Cadastro de aluno — e-mail institucional e senha provisória são gerados no backend. */
   cadastrar(dados: CadastroAlunoRequest): Observable<AlunoCriado> {
@@ -36,29 +46,5 @@ export class AlunosService {
 
   criarObservacao(alunoId: number, texto: string): Observable<ObservacaoDTO> {
     return this.http.post<ObservacaoDTO>(`${this.api}/${alunoId}/observacoes`, { texto });
-  }
-
-  /** PUT e não PATCH: o corpo é o endereço inteiro, campo ausente apaga o valor. */
-  salvarEndereco(alunoId: number, endereco: EnderecoRequest): Observable<EnderecoDTO> {
-    return this.http.put<EnderecoDTO>(`${this.api}/${alunoId}/endereco`, endereco);
-  }
-
-  /** Ficha completa do aluno — o que a secretaria abre quando o responsável liga. */
-  prontuario(alunoId: number): Observable<ProntuarioDTO> {
-    return this.http.get<ProntuarioDTO>(`${this.api}/${alunoId}/prontuario`);
-  }
-
-  historicoEscolar(alunoId: number): Observable<Blob> {
-    return this.http.get(`${this.api}/${alunoId}/historico`, { responseType: 'blob' });
-  }
-
-  /**
-   * Busca o endereço de um CEP. Quem fala com o provedor externo é o backend —
-   * ver EnderecoCepDTO. `cep` pode vir formatado; o servidor normaliza.
-   */
-  buscarCep(cep: string): Observable<EnderecoCepDTO> {
-    return this.http.get<EnderecoCepDTO>(
-      `${environment.apiUrl}/cep/${cep.replace(/\D/g, '')}`,
-    );
   }
 }

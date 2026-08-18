@@ -152,26 +152,43 @@ class RegrasAcademicasTest extends TesteApiBase {
     }
 
     @Test
-    @DisplayName("cadastro recusa data futura e idade impossível, e aceita a plausível")
-    void idadeNoCadastro() throws Exception {
+    @DisplayName("cadastro de aluno pede só nome e turma, e ignora dado pessoal enviado")
+    void cadastroDeAlunoNaoGuardaDadoPessoal() throws Exception {
         String diretor = bearer("diretor");
         long turmaId = primeiraTurma(diretor);
-        String futuro = LocalDate.now().plusYears(1).toString();
-        String ontem = LocalDate.now().minusDays(1).toString();
 
-        for (String data : new String[]{futuro, ontem, "1850-01-01"}) {
-            mvc.perform(post("/api/alunos").contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"nome\":\"Aluno Data Ruim\",\"dataNascimento\":\"" + data + "\","
-                                    + "\"sexo\":\"M\",\"turmaId\":" + turmaId + "}")
-                            .header(HttpHeaders.AUTHORIZATION, diretor))
-                    .andExpect(status().isBadRequest());
+        // Nome e turma bastam: nascimento, sexo e endereço saíram do cadastro.
+        String location = mvc.perform(post("/api/alunos").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nome\":\"Aluno Sem Ficha\",\"turmaId\":" + turmaId + "}")
+                        .header(HttpHeaders.AUTHORIZATION, diretor))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getHeader(HttpHeaders.LOCATION);
+
+        // Um cliente antigo (ou um atacante) mandando os campos removidos não os
+        // planta de volta: o Jackson os descarta e a resposta não os traz.
+        JsonNode criado = json.readTree(mvc.perform(post("/api/alunos").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nome\":\"Aluno Com Ficha\",\"turmaId\":" + turmaId + ","
+                                + "\"dataNascimento\":\"2012-08-09\",\"sexo\":\"M\","
+                                + "\"endereco\":{\"cep\":\"01310100\",\"cidade\":\"São Paulo\"}}")
+                        .header(HttpHeaders.AUTHORIZATION, diretor))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString());
+        assertThat(criado.has("dataNascimento")).isFalse();
+        assertThat(criado.has("sexo")).isFalse();
+        assertThat(criado.has("endereco")).isFalse();
+
+        // E o aluno relido também não devolve nada disso.
+        JsonNode lido = json(location.substring(location.indexOf("/api/")), diretor);
+        assertThat(lido.get("nome").asText()).isEqualTo("Aluno Sem Ficha");
+        for (String campo : new String[]{"dataNascimento", "sexo", "endereco", "cpf"}) {
+            assertThat(lido.has(campo)).as("o aluno não pode expor " + campo).isFalse();
         }
 
+        // Sem turma o cadastro não passa: é dela que sai o conteúdo do aluno.
         mvc.perform(post("/api/alunos").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"nome\":\"Aluno Data Boa\",\"dataNascimento\":\"2012-08-09\","
-                                + "\"sexo\":\"M\",\"turmaId\":" + turmaId + "}")
+                        .content("{\"nome\":\"Aluno Sem Turma\"}")
                         .header(HttpHeaders.AUTHORIZATION, diretor))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -295,5 +312,38 @@ class RegrasAcademicasTest extends TesteApiBase {
         JsonNode materias = json("/api/professor/materias", professor);
         assertThat(materias.size()).isEqualTo(1);
         assertThat(materias.get(0).asText()).isEqualTo("História");
+    }
+
+    @Test
+    @DisplayName("a lista de alunos chega recortada pelas turmas do professor")
+    void listaDeAlunosDoProfessor() throws Exception {
+        String professor = bearer("professor");
+        String diretor = bearer("diretor");
+
+        // O professor conseguir a lista é o ponto: antes a tela de comunicação
+        // pedia /api/matriculas, que é do diretor, e ele tomava 403 em silêncio.
+        JsonNode meus = json("/api/alunos", professor);
+        JsonNode todos = json("/api/alunos", diretor);
+
+        assertThat(meus.size()).isGreaterThan(0);
+        assertThat(meus.size())
+                .as("professor não pode ver a escola inteira")
+                .isLessThan(todos.size());
+
+        // Só alunos das turmas que ele leciona, e nenhuma outra.
+        java.util.Set<String> turmasDele = new java.util.HashSet<>();
+        for (JsonNode t : json("/api/turmas", professor)) {
+            turmasDele.add(t.get("nome").asText());
+        }
+        for (JsonNode a : meus) {
+            assertThat(turmasDele).contains(a.get("turma").asText());
+        }
+
+        // A coleção não entrega o login de toda a turma de uma vez.
+        assertThat(meus.get(0).has("emailInstitucional")).isFalse();
+
+        // Aluno não alcança a lista de jeito nenhum.
+        mvc.perform(get("/api/alunos").header(HttpHeaders.AUTHORIZATION, bearer("aluno")))
+                .andExpect(status().isForbidden());
     }
 }

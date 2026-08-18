@@ -9,8 +9,8 @@ import org.springframework.test.context.TestPropertySource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Trava a correção do achado da revisão de segurança: o seed criava a conta da
- * secretaria com a senha padrão em QUALQUER banco já povoado, incluindo o de
+ * Trava a correção do achado da revisão de segurança: o seed criava a conta
+ * administrativa com a senha padrão em QUALQUER banco já povoado, incluindo o de
  * produção — porque nem o Dockerfile nem o compose.yaml ativam o perfil prod, e
  * fora dele nexo.seed.enabled continua true.
  *
@@ -30,7 +30,7 @@ class SeedNaoVazaParaProducaoTest extends TesteApiBase {
     @Test
     @DisplayName("no banco de desenvolvimento (H2) as contas de exemplo existem")
     void contasDeExemploNoH2() {
-        assertThat(usuarios.existsByLoginIgnoreCase("secretaria")).isTrue();
+        assertThat(usuarios.existsByLoginIgnoreCase("admin")).isTrue();
         assertThat(usuarios.existsByLoginIgnoreCase("diretor")).isTrue();
     }
 

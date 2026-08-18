@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * Química. Turma certa, matéria alheia — e o registro ficava no boletim do aluno.
  *
  * <p>DIRETOR passa livre: ele responde pela escola inteira e é quem corrige
- * lançamento errado. SECRETARIA não chega aqui — nota e avaliação estão fora do
+ * lançamento errado. ADMIN não chega aqui — nota e avaliação estão fora do
  * alcance dela por autorização de rota.
  */
 @Service

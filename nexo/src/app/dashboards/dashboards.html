@@ -4,13 +4,13 @@
      para ele — daí o "Olá, !" sem nome e o erro de carregamento. -->
 <!-- Nenhum ramo embrulha o painel: o recuo da página é do layout (app.html), e o
      .page-container-pushed que ficava aqui somava um segundo recuo — o painel do
-     diretor abria 64px da borda e o da secretaria 32px. O ramo do aluno tinha
+     diretor abria 64px da borda e o do administrador 32px. O ramo do aluno tinha
      ainda um segundo .main-content dentro do de verdade, herdando margem lateral
      e 100vh de altura de um container que já tinha os dois. -->
 @if (authService.usuarioLogado()?.role === 'diretor') {
 <app-dashboard-diretor></app-dashboard-diretor>
-} @else if (authService.usuarioLogado()?.role === 'secretaria') {
-<app-secretaria-dashboard></app-secretaria-dashboard>
+} @else if (authService.usuarioLogado()?.role === 'admin') {
+<app-admin-dashboard></app-admin-dashboard>
 } @else if (authService.usuarioLogado()?.role === 'professor') {
 <app-dashboard-professor></app-dashboard-professor>
 } @else {

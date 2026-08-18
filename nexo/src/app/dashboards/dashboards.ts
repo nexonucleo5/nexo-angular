@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardDiretor } from '../diretor-dashboard/diretor-dashboard';
 import { DashboardProfessor } from '../dashboard-professor/dashboard-professor';
-import { SecretariaDashboard } from '../secretaria-dashboard/secretaria-dashboard';
+import { AdminDashboard } from '../admin-dashboard/admin-dashboard';
 import { AuthService } from '../services/auth.service';
 import { AlunoDashboardService } from '../api/aluno-dashboard.service';
 import { AlunoDashboardDTO } from '../core/api.models';
@@ -13,7 +13,7 @@ const COR_PROGRESSO = ['blue-fill', 'green-fill', 'purple-fill', 'orange-fill'];
 @Component({
   selector: 'app-dashboards',
   standalone: true,
-  imports: [CommonModule, DashboardDiretor, DashboardProfessor, SecretariaDashboard],
+  imports: [CommonModule, DashboardDiretor, DashboardProfessor, AdminDashboard],
   templateUrl: './dashboards.html',
   styleUrl: './dashboards.scss',
 })

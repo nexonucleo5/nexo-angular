@@ -80,6 +80,8 @@ public class DesafioService {
                 segmentoPorMateria.put(m.getNome().toLowerCase(), m.getSegmento()));
 
         List<DesafioDTO> lista = desafios.findAll().stream()
+                // Despublicado sai do catálogo do aluno; quem já concluiu mantém o XP.
+                .filter(Desafio::isPublicado)
                 .filter(d -> {
                     var segmento = d.getMateria() == null ? null
                             : segmentoPorMateria.get(d.getMateria().toLowerCase());
@@ -244,8 +246,14 @@ public class DesafioService {
                 .orElseThrow(() -> ApiException.notFound("Aluno não encontrado para o usuário logado."));
     }
 
+    /**
+     * O desafio despublicado responde 404, e não 403: sumir da listagem não basta
+     * se abrir /api/aluno/desafios/{id} na mão ainda o entrega. Para quem pede, um
+     * desafio fora do ar e um que nunca existiu são a mesma coisa.
+     */
     private Desafio desafio(Long desafioId) {
         return desafios.findById(desafioId)
+                .filter(Desafio::isPublicado)
                 .orElseThrow(() -> ApiException.notFound("Desafio não encontrado."));
     }
 }

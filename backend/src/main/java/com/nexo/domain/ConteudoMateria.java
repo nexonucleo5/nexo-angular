@@ -47,6 +47,18 @@ public class ConteudoMateria {
     /** Ordem de exibição dentro da matéria. */
     private int ordem;
 
+    /**
+     * Conteúdo despublicado some da tela do aluno mas continua no banco, com o
+     * progresso de quem já leu intacto. É a alternativa a apagar para corrigir:
+     * o administrador tira de circulação, ajusta e devolve.
+     *
+     * <p>Boolean (e não boolean) porque ddl-auto=update cria a coluna sem valor:
+     * linha gravada antes dela existir fica nula, e o getter a trata como publicada
+     * — que é o estado em que ela já estava.
+     */
+    @Column(name = "publicado")
+    private Boolean publicado = Boolean.TRUE;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Materia getMateria() { return materia; }
@@ -63,4 +75,7 @@ public class ConteudoMateria {
     public void setMinutos(Integer minutos) { this.minutos = minutos; }
     public int getOrdem() { return ordem; }
     public void setOrdem(int ordem) { this.ordem = ordem; }
+    /** Nunca nulo: conteúdo gravado antes da coluna existir já estava no ar. */
+    public boolean isPublicado() { return publicado == null || publicado; }
+    public void setPublicado(boolean publicado) { this.publicado = publicado; }
 }

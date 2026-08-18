@@ -54,14 +54,14 @@ export class Sobre {
       ],
     },
     {
-      perfil: 'Secretaria',
-      icone: 'bi-folder2-open',
+      perfil: 'Administrador',
+      icone: 'bi-shield-lock',
       cor: 'orange',
       faz: [
-        'Cadastra alunos e mantém endereço e documentação',
-        'Efetiva, tranca, cancela e transfere matrículas',
-        'Emite declaração de matrícula em PDF',
-        'Acompanha a fila de pendências e as vagas por turma',
+        'Cria contas de acesso e as ativa ou desativa',
+        'Redefine senha provisória de quem perdeu a dela',
+        'Publica, despublica e reordena conteúdos e desafios',
+        'Inscreve alunos nas turmas e os transfere entre elas',
       ],
     },
     {
@@ -71,7 +71,7 @@ export class Sobre {
       faz: [
         'Enxerga a escola inteira, sem restrição de turma ou matéria',
         'Acompanha evasão, desempenho e monitoramento docente',
-        'Cadastra professores e supervisiona a secretaria',
+        'Cadastra professores e supervisiona a administração do sistema',
         'Consulta a auditoria de tudo que foi alterado',
       ],
     },

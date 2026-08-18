@@ -1,0 +1,82 @@
+/* catalogo.scss — o visual das telas administrativas (stat-card, badges, botões)
+   é global: styles.scss §6. Aqui ficam só os estilos desta página. */
+
+.aba-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-soft);
+  border-radius: 12px; padding: 8px 18px;
+  font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: border-color 0.2s, color 0.2s;
+  &:hover { border-color: #9b2fff; }
+  &.ativa {
+    border-color: #9b2fff;
+    color: var(--text-main);
+    background: var(--bg-card);
+  }
+}
+
+/* Lista de matérias — a navegação lateral desta tela. */
+.lista-materias {
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.materia-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 12px 14px;
+  text-align: left; width: 100%; cursor: pointer;
+  transition: border-color 0.2s;
+  &:hover { border-color: #9b2fff; }
+  &.selecionada { border-color: #9b2fff; background: var(--hover-overlay); }
+}
+
+.conteudo-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  transition: border-color 0.2s;
+  &:hover { border-color: #9b2fff; }
+
+  /* Fora do ar fica apagado: a lista mistura publicado e não, e a diferença
+     precisa saltar numa varredura rápida. */
+  &.fora-do-ar {
+    opacity: 0.65;
+    border-color: rgba(239, 68, 68, 0.35);
+  }
+}
+
+/* As duas setas ocupam a altura da linha, empilhadas. */
+.setas-ordem { gap: 2px; }
+
+.seta {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 8px;
+  width: 28px; height: 22px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: border-color 0.2s;
+  &:hover:not(:disabled) { border-color: #9b2fff; }
+  &:disabled { opacity: 0.35; cursor: not-allowed; }
+}
+
+.posicao {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--bg-input); color: var(--text-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+}
+
+.girando { display: inline-block; animation: catalogo-girando 0.9s linear infinite; }
+@keyframes catalogo-girando { to { transform: rotate(360deg); } }
+
+/* No celular a linha empilha: o texto ocupa a largura toda e o botão cresce. */
+@media (max-width: 767.98px) {
+  .conteudo-row {
+    > .flex-grow-1 { flex: 1 1 100%; }
+    > button:not(.seta) { flex: 1 1 100%; }
+  }
+}

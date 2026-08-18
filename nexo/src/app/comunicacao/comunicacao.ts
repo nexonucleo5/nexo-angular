@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Chat } from '../chat/chat';
 import { ComunicacaoService } from '../api/comunicacao.service';
-import { MatriculasService } from '../api/matriculas.service';
 import { TurmasService } from '../api/turmas.service';
 import { AlunosService } from '../api/alunos.service';
 import { AvisoDTO, ConversaDTO, DuvidaDTO, NotaDTO, TurmaDTO } from '../core/api.models';
@@ -45,7 +44,6 @@ interface DuvidaView {
 interface AlunoLista {
   alunoId: number;
   nome: string;
-  matricula: string;
   turma: string;
 }
 
@@ -70,7 +68,6 @@ interface ObservacaoView {
 })
 export class Comunicacao implements OnInit {
   private readonly comunicacao = inject(ComunicacaoService);
-  private readonly matriculasApi = inject(MatriculasService);
   private readonly turmasApi = inject(TurmasService);
   private readonly alunosApi = inject(AlunosService);
 
@@ -92,6 +89,12 @@ export class Comunicacao implements OnInit {
   readonly avisos = signal<AvisoView[]>([]);
   readonly duvidas = signal<DuvidaView[]>([]);
   readonly alunos = signal<AlunoLista[]>([]);
+  /**
+   * A carga da lista falhou. Existe porque a versão anterior engolia o erro: a
+   * chamada não tinha ramo de falha, então uma resposta 403 deixava a aba de
+   * alunos vazia e indistinguível de uma turma sem aluno nenhum.
+   */
+  readonly erroAlunos = signal(false);
   private readonly turmas = signal<TurmaDTO[]>([]);
 
   mensagemSelecionada: MensagemView | null = null;
@@ -129,19 +132,22 @@ export class Comunicacao implements OnInit {
       next: (duvidas) => this.duvidas.set(duvidas.map((d) => this.duvidaView(d))),
     });
     this.turmasApi.listar().subscribe({ next: (t) => this.turmas.set(t) });
-    this.matriculasApi.listar({ size: 100 }).subscribe({
-      next: (page) => {
+    // GET /api/alunos já chega recortado pelas turmas que este professor leciona —
+    // antes esta lista vinha de /api/matriculas, que é do diretor, e o professor
+    // tomava 403 sem nada na tela dizendo por que a lista estava vazia.
+    this.alunosApi.listar().subscribe({
+      next: (lista) => {
         this.alunos.set(
-          page.content.map((m) => ({
-            alunoId: m.alunoId,
-            nome: m.aluno,
-            matricula: `2024${String(m.id).padStart(3, '0')}`,
-            turma: m.turma ?? 'Sem turma',
+          lista.map((a) => ({
+            alunoId: a.id,
+            nome: a.nome,
+            turma: a.turma ?? 'Sem turma',
           })),
         );
         const turmas = this.turmasDisponiveis();
         if (turmas.length) this.turmaSelecionada = turmas[0];
       },
+      error: () => this.erroAlunos.set(true),
     });
   }
 
@@ -244,7 +250,7 @@ export class Comunicacao implements OnInit {
     return this.alunos().filter(
       (a) =>
         a.turma === this.turmaSelecionada &&
-        (a.nome.toLowerCase().includes(termo) || a.matricula.includes(termo)),
+        a.nome.toLowerCase().includes(termo),
     );
   }
 

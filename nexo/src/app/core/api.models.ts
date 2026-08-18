@@ -33,7 +33,7 @@ export interface KpiStat {
   tom?: 'positivo' | 'negativo' | 'neutro';
 }
 
-// ── Turmas / Alunos / Matrículas ─────────────────────────────────────────────
+// ── Turmas / Alunos / Inscrições ─────────────────────────────────────────────
 
 export interface TurmaDTO {
   id: number;
@@ -42,53 +42,37 @@ export interface TurmaDTO {
   turno: string;
 }
 
+/**
+ * GET /api/alunos — o aluno na listagem, já recortado por quem pergunta: o
+ * professor recebe os das turmas que leciona, diretor e administrador recebem
+ * todos. Mais enxuto que o item: o e-mail institucional é o login do aluno e não
+ * sai numa coleção.
+ */
+export interface AlunoResumoDTO {
+  id: number;
+  nome: string;
+  turmaId: number | null;
+  turma: string | null;
+  foto: string | null;
+}
+
 export interface AlunoCriado {
   id: number;
   nome: string;
   emailInstitucional: string;
   senhaProvisoria: string;
-  matriculaId: number;
-}
-
-export interface CadastroAlunoRequest {
-  nome: string;
-  dataNascimento: string;
-  sexo: string;
-  /** Ano do ensino básico em que o aluno entra (turma existente). */
-  turmaId: number | null;
-  /** Opcional: a escola matricula antes de ter a documentação completa. */
-  endereco?: EnderecoRequest | null;
-}
-
-// ── Endereço ─────────────────────────────────────────────────────────────────
-
-/** Corpo do endereço no cadastro e em PUT /api/alunos/{id}/endereco. */
-export interface EnderecoRequest {
-  cep: string | null;
-  logradouro: string | null;
-  numero: string | null;
-  complemento: string | null;
-  bairro: string | null;
-  cidade: string | null;
-  uf: string | null;
-}
-
-/** Endereço como a API devolve — `resumo` é a linha pronta para exibição. */
-export interface EnderecoDTO extends EnderecoRequest {
-  resumo: string | null;
+  inscricaoId: number;
 }
 
 /**
- * GET /api/cep/{cep}. A busca é feita pelo backend (BrasilAPI com ViaCEP de
- * reserva): a CSP declara connect-src 'self', então o navegador não fala com
- * host externo — e nem precisa.
+ * O cadastro pede duas coisas, e é assim de propósito: nascimento, sexo e
+ * endereço saíram porque este sistema não guarda dado pessoal de aluno — a ficha
+ * dele vive no sistema de aula da escola.
  */
-export interface EnderecoCepDTO {
-  cep: string;
-  logradouro: string | null;
-  bairro: string | null;
-  cidade: string | null;
-  uf: string | null;
+export interface CadastroAlunoRequest {
+  nome: string;
+  /** Turma cujo conteúdo o aluno vai estudar. */
+  turmaId: number | null;
 }
 
 // ── Matérias / Professores ───────────────────────────────────────────────────
@@ -128,17 +112,19 @@ export interface ProfessorCriado {
   senhaProvisoria: string;
 }
 
-export type StatusMatricula = 'ATIVA' | 'PENDENTE' | 'TRANCADA' | 'CANCELADA';
-export type StatusDocumentacao = 'COMPLETA' | 'PENDENTE' | 'INCOMPLETA';
-
-export interface MatriculaDTO {
+/**
+ * GET /api/inscricoes — o vínculo aluno↔turma, e só. Status de trancamento,
+ * situação de documentação e ano letivo saíram com a matrícula.
+ */
+export interface InscricaoDTO {
   id: number;
   alunoId: number;
   aluno: string;
+  turmaId: number | null;
   turma: string | null;
-  status: StatusMatricula;
-  documentacao: StatusDocumentacao;
-  dataMatricula: string;
+  /** Desligada, o aluno não vê o conteúdo da turma — mas o progresso dele fica. */
+  ativo: boolean;
+  criadaEm: string;
 }
 
 /**
@@ -155,117 +141,75 @@ export interface MateriaProgressoDTO {
   percentual: number;
 }
 
-// ── Rematrícula ──────────────────────────────────────────────────────────────
+// ── Painel do administrador ──────────────────────────────────────────────────
 
-/** POST /api/matriculas/{id}/rematricula — o vínculo criado para o ano seguinte. */
-export interface RematriculaDTO {
-  matriculaId: number;
-  origemId: number;
-  alunoId: number;
-  aluno: string;
-  turmaAnterior: string;
-  turmaNova: string;
-  anoLetivo: number;
-}
+export type PapelConta = 'ALUNO' | 'PROFESSOR' | 'DIRETOR' | 'ADMIN';
 
-/** Uma matrícula que o lote não renovou, com o motivo em texto legível. */
-export interface IgnoradaDTO {
-  matriculaId: number;
-  aluno: string;
-  motivo: string;
-}
-
-/**
- * POST /api/matriculas/rematricula — relatório do lote. Não é tudo-ou-nada: um
- * concluinte no meio da turma não impede a renovação dos outros.
- */
-export interface ResultadoLoteDTO {
-  renovadas: number;
-  ignoradas: number;
-  novas: RematriculaDTO[];
-  semRenovar: IgnoradaDTO[];
-}
-
-// ── Documentação e prontuário (secretaria) ───────────────────────────────────
-
-/** Um documento do checklist da matrícula. */
-export interface ItemChecklistDTO {
-  tipo: string;
-  rotulo: string;
-  obrigatorio: boolean;
-  entregue: boolean;
-  entregueEm: string | null;
-  recebidoPor: string | null;
-  observacao: string | null;
-}
-
-/**
- * GET /api/matriculas/{id}/documentos/checklist. `situacao` é derivada da lista —
- * ninguém escolhe mais o estado da documentação na mão.
- */
-export interface ChecklistDTO {
-  matriculaId: number;
-  aluno: string;
-  situacao: StatusDocumentacao;
-  entregues: number;
-  totalObrigatorios: number;
-  obrigatoriosEntregues: number;
-  /** O que ainda falta — é o roteiro da ligação para o responsável. */
-  faltantes: string[];
-  itens: ItemChecklistDTO[];
-}
-
-/** GET /api/alunos/{id}/prontuario — a ficha completa numa leitura só. */
-export interface ProntuarioDTO {
-  identificacao: {
-    id: number;
-    nome: string;
-    emailInstitucional: string | null;
-    sexo: string | null;
-    dataNascimento: string | null;
-    idade: number | null;
-    turma: string | null;
-    etapa: 'FUNDAMENTAL' | 'MEDIO' | null;
-  };
-  endereco: { cep: string | null; resumo: string | null } | null;
-  matricula: { id: number; status: StatusMatricula; documentacao: StatusDocumentacao; dataMatricula: string } | null;
-  documentos: ChecklistDTO | null;
-  desempenho: Array<{ disciplina: string | null; periodo: string | null; media: number | null }>;
-  mediaGeral: number | null;
-  observacoesPedagogicas: number;
-}
-
-/** GET /api/secretaria/dashboard */
-export interface DashboardSecretariaDTO {
-  totalAlunos: number;
-  totalTurmas: number;
-  matriculasAtivas: number;
-  matriculasPendentes: number;
-  matriculasTrancadas: number;
-  documentacaoPendente: number;
-}
-
-/** GET /api/secretaria/pendencias — fila de trabalho, mais antiga primeiro */
-export interface PendenciaDTO {
-  matriculaId: number;
-  alunoId: number;
-  aluno: string;
-  turma: string | null;
-  status: StatusMatricula;
-  documentacao: StatusDocumentacao;
-  dataMatricula: string;
-  aguardaEfetivacao: boolean;
-  aguardaDocumentacao: boolean;
-}
-
-/** GET /api/secretaria/turmas/ocupacao */
-export interface OcupacaoTurmaDTO {
-  turmaId: number;
-  turma: string;
-  turno: string | null;
+/** GET /api/admin/dashboard — acesso de um lado, catálogo do outro. */
+export interface DashboardAdminDTO {
+  contas: number;
+  contasInativas: number;
   alunos: number;
-  capacidade: number;
-  percentual: number;
+  professores: number;
+  diretores: number;
+  admins: number;
+  turmas: number;
+  materias: number;
+  conteudos: number;
+  conteudosDespublicados: number;
+  desafios: number;
+  desafiosDespublicados: number;
+}
+
+/**
+ * GET /api/admin/contas. Nome e login estão aqui porque sem eles não dá para
+ * saber de quem é a conta que se vai desativar — e a lista para aí: não há dado
+ * pessoal a expor porque o sistema não guarda nenhum.
+ */
+export interface ContaDTO {
+  id: number;
+  login: string;
+  nome: string;
+  cargo: string | null;
+  papel: PapelConta;
+  ativo: boolean;
+  criadoEm: string;
+}
+
+/** A senha em claro existe só nesta resposta. */
+export interface SenhaRedefinidaDTO {
+  login: string;
+  senhaProvisoria: string;
+}
+
+/** GET /api/admin/catalogo — quanto de cada matéria está no ar. */
+export interface MateriaCatalogoDTO {
+  id: number;
+  nome: string;
+  segmento: 'FUNDAMENTAL' | 'MEDIO' | 'AMBOS';
+  conteudos: number;
+  conteudosPublicados: number;
+}
+
+export interface ConteudoAdminDTO {
+  id: number;
+  materiaId: number | null;
+  materia: string | null;
+  titulo: string;
+  resumo: string | null;
+  minutos: number;
+  ordem: number;
+  publicado: boolean;
+}
+
+export interface DesafioAdminDTO {
+  id: number;
+  titulo: string;
+  materia: string | null;
+  nivel: string | null;
+  xp: number;
+  tempoMin: number;
+  publicado: boolean;
 }
 
 // ── Diário de classe ─────────────────────────────────────────────────────────

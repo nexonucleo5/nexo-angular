@@ -62,7 +62,7 @@ export const routes: Routes = [
   {
     path: 'materias',
     canActivate: [authGuard, roleGuard('aluno')],
-    loadComponent: () => import('./matriculas-wrapper/matriculas-wrapper').then((m) => m.MatriculasWrapper),
+    loadComponent: () => import('./inscricoes-wrapper/inscricoes-wrapper').then((m) => m.InscricoesWrapper),
   },
   {
     path: 'disciplina/:id',
@@ -88,19 +88,34 @@ export const routes: Routes = [
   // já compartilhado; pode sair quando não houver mais acesso pelo path antigo.
   { path: 'meus_niveis_notas', redirectTo: '/meus-niveis-notas', pathMatch: 'full' },
 
-  // ── Secretaria ───────────────────────────────────────────────────────────────
+  // ── Administrador ────────────────────────────────────────────────────────────
+  // Contas e catálogo. O diretor entra junto, como já entrava no painel da
+  // secretaria que estas telas substituíram.
   {
-    path: 'secretaria-dashboard',
-    canActivate: [authGuard, roleGuard('secretaria', 'diretor')],
-    loadComponent: () => import('./secretaria-dashboard/secretaria-dashboard').then((m) => m.SecretariaDashboard),
+    path: 'admin-dashboard',
+    canActivate: [authGuard, roleGuard('admin', 'diretor')],
+    loadComponent: () => import('./admin-dashboard/admin-dashboard').then((m) => m.AdminDashboard),
   },
+  {
+    path: 'contas',
+    canActivate: [authGuard, roleGuard('admin', 'diretor')],
+    loadComponent: () => import('./contas/contas').then((m) => m.Contas),
+  },
+  {
+    path: 'catalogo',
+    canActivate: [authGuard, roleGuard('admin', 'diretor')],
+    loadComponent: () => import('./catalogo/catalogo').then((m) => m.Catalogo),
+  },
+  // Path antigo do painel da secretaria: mantido para não quebrar link já
+  // compartilhado ou favorito de quem usava a tela.
+  { path: 'secretaria-dashboard', redirectTo: '/admin-dashboard', pathMatch: 'full' },
 
   // ── Diretor ──────────────────────────────────────────────────────────────────
   {
-    // A secretaria cadastra aluno (função administrativa); o backend espelha em
-    // POST /api/alunos com hasAnyRole('DIRETOR','SECRETARIA').
+    // O administrador cria as contas de acesso; o backend espelha em
+    // POST /api/alunos com hasAnyRole('DIRETOR','ADMIN').
     path: 'cadastro',
-    canActivate: [authGuard, roleGuard('diretor', 'secretaria')],
+    canActivate: [authGuard, roleGuard('diretor', 'admin')],
     loadComponent: () => import('./cadastro/cadastro').then((m) => m.Cadastro),
   },
   {
@@ -109,11 +124,13 @@ export const routes: Routes = [
     loadComponent: () => import('./diretor-dashboard/diretor-dashboard').then((m) => m.DashboardDiretor),
   },
   {
-    // wrapper redireciona por role (aluno vê matérias, diretor vê matrículas)
-    path: 'matriculas',
+    // wrapper redireciona por role (aluno vê matérias, gestão vê inscrições)
+    path: 'inscricoes',
     canActivate: [authGuard],
-    loadComponent: () => import('./matriculas-wrapper/matriculas-wrapper').then((m) => m.MatriculasWrapper),
+    loadComponent: () => import('./inscricoes-wrapper/inscricoes-wrapper').then((m) => m.InscricoesWrapper),
   },
+  // Path antigo, pelo mesmo motivo do /secretaria-dashboard acima.
+  { path: 'matriculas', redirectTo: '/inscricoes', pathMatch: 'full' },
   {
     path: 'evasao',
     canActivate: [authGuard, roleGuard('diretor')],

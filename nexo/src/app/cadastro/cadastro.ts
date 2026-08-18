@@ -16,8 +16,14 @@ interface AcessoGerado {
 }
 
 /**
- * Cadastros do diretor: aluno e professor em abas da mesma tela. As credenciais
- * são sempre geradas no backend — o client apenas exibe o que voltou.
+ * Cadastros: aluno e professor em abas da mesma tela. As credenciais são sempre
+ * geradas no backend — o client apenas exibe o que voltou.
+ *
+ * <p>O formulário do aluno pede nome e turma, e nada mais. Nascimento, sexo e
+ * endereço saíram junto com a busca de CEP: este sistema cuida de aprendizado e
+ * retenção de conteúdo, e a ficha pessoal do aluno vive no sistema de aula da
+ * escola. O do professor mantém os campos porque a validação de idade mínima
+ * para lecionar continua sendo regra do servidor.
  */
 @Component({
   selector: 'app-cadastro',
@@ -38,12 +44,10 @@ export class Cadastro {
   readonly materias = signal<MateriaDTO[]>([]);
 
   /**
-   * Limites do seletor de data — espelho das regras do servidor (AlunoService e
-   * ProfessorService). O navegador barrando já no calendário evita a viagem de
-   * ida e volta só para descobrir que 2205 não era 2005; quem decide continua
-   * sendo o backend.
+   * Limites do seletor de data — espelho da regra do servidor (ProfessorService).
+   * O navegador barrando já no calendário evita a viagem de ida e volta só para
+   * descobrir que 2205 não era 2005; quem decide continua sendo o backend.
    */
-  readonly limitesAluno = Cadastro.faixaDeDatas(4, 100);
   readonly limitesProfessor = Cadastro.faixaDeDatas(18, 100);
 
   /** Teto de matérias por docente, igual ao do ProfessorService. */
@@ -69,20 +73,7 @@ export class Cadastro {
   constructor() {
     this.alunoForm = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(3)]],
-      dataNascimento: ['', Validators.required],
-      sexo: ['', Validators.required],
       turmaId: [null, Validators.required],
-      // Endereço é opcional (a escola matricula antes de ter a documentação toda),
-      // então nenhum campo daqui tem Validators.required — o que impediria o envio.
-      endereco: this.fb.group({
-        cep: [''],
-        logradouro: [''],
-        numero: [''],
-        complemento: [''],
-        bairro: [''],
-        cidade: [''],
-        uf: [''],
-      }),
     });
 
     this.professorForm = this.fb.group({
@@ -104,60 +95,6 @@ export class Cadastro {
 
   get fa() {
     return this.alunoForm.controls;
-  }
-
-  get enderecoForm(): FormGroup {
-    return this.alunoForm.get('endereco') as FormGroup;
-  }
-
-  // ── CEP ─────────────────────────────────────────────────────────────
-
-  readonly buscandoCep = signal(false);
-  readonly cepErro = signal('');
-  readonly cepPreenchido = signal(false);
-
-  /**
-   * Busca o CEP e preenche logradouro/bairro/cidade/UF. Chamado quando o campo
-   * perde o foco e ao pressionar Enter — não a cada tecla: seriam 8 requisições
-   * para um CEP digitado, e as 7 primeiras a serviço público por CEP incompleto.
-   *
-   * <p>Falha não trava o cadastro: os campos continuam editáveis à mão, que é o
-   * motivo de o endereço inteiro ser opcional.
-   */
-  buscarCep(): void {
-    const cep = (this.enderecoForm.value.cep ?? '').replace(/\D/g, '');
-    this.cepErro.set('');
-
-    if (!cep) return;
-    if (cep.length !== 8) {
-      this.cepErro.set('O CEP tem 8 dígitos.');
-      return;
-    }
-
-    this.buscandoCep.set(true);
-    this.alunosService.buscarCep(cep).subscribe({
-      next: (e) => {
-        this.buscandoCep.set(false);
-        this.cepPreenchido.set(true);
-        // patchValue e não setValue: número e complemento são de quem digita, e
-        // um setValue no grupo apagaria o que já foi preenchido neles.
-        this.enderecoForm.patchValue({
-          logradouro: e.logradouro ?? '',
-          bairro: e.bairro ?? '',
-          cidade: e.cidade ?? '',
-          uf: e.uf ?? '',
-        });
-      },
-      error: (erro: ApiErro) => {
-        this.buscandoCep.set(false);
-        this.cepPreenchido.set(false);
-        this.cepErro.set(
-          erro.status === 404
-            ? 'CEP não encontrado. Confira o número ou preencha à mão.'
-            : erro.message || 'Não foi possível consultar o CEP agora.',
-        );
-      },
-    });
   }
 
   get fp() {
@@ -200,12 +137,7 @@ export class Cadastro {
         this.enviando.set(false);
         this.acesso.set({ login: criado.emailInstitucional, senha: criado.senhaProvisoria });
         this.mensagemSucesso.set(`Aluno ${criado.nome} cadastrado com sucesso.`);
-        this.alunoForm.reset({
-          nome: '', dataNascimento: '', sexo: '', turmaId: null,
-          endereco: { cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '' },
-        });
-        this.cepPreenchido.set(false);
-        this.cepErro.set('');
+        this.alunoForm.reset({ nome: '', turmaId: null });
       },
       error: (erro: ApiErro) => this.falhar(erro),
     });
@@ -249,7 +181,7 @@ export class Cadastro {
   }
 
   // ── Copiar credenciais ──────────────────────────────────────────────
-  // A senha provisória aparece uma única vez; sem isto a secretária anotava no
+  // A senha provisória aparece uma única vez; sem isto quem cadastra anotava no
   // papel (e errava um caractere) para repassar ao aluno.
 
   readonly copiado = signal(false);

@@ -111,7 +111,7 @@ html, body {
 app-menu,
 app-menu-diretor,
 app-menu-professor,
-app-menu-secretaria,
+app-menu-admin,
 .sidebar {
   width: var(--largura-sidebar) !important;
   height: 100vh;
@@ -139,7 +139,7 @@ app-menu-secretaria,
 app-menu,
 app-menu-diretor,
 app-menu-professor,
-app-menu-secretaria {
+app-menu-admin {
   transform: translateX(-100%);
   visibility: hidden;
   transition: transform 0.28s ease, visibility 0.28s ease,
@@ -150,7 +150,7 @@ app-menu-secretaria {
 .app-layout.menu-aberto app-menu,
 .app-layout.menu-aberto app-menu-diretor,
 .app-layout.menu-aberto app-menu-professor,
-.app-layout.menu-aberto app-menu-secretaria {
+.app-layout.menu-aberto app-menu-admin {
   transform: translateX(0);
   visibility: visible;
 }
@@ -364,7 +364,7 @@ html[data-theme='light'] .main-content::before {
   app-menu,
   app-menu-diretor,
   app-menu-professor,
-  app-menu-secretaria,
+  app-menu-admin,
   .sidebar {
     width: 100% !important;
     border-right: none;
@@ -561,7 +561,7 @@ body.modo-foco-ativo {
   app-menu,
   app-menu-diretor,
   app-menu-professor,
-  app-menu-secretaria,
+  app-menu-admin,
   .sidebar { display: none; }
 
   /* Os 3 riscos sem barra para abrir seriam um botão morto no header; a
@@ -651,7 +651,7 @@ html.alto-contraste {
    logo grande da tela de login (login.scss). */
 
 /* ==========================================================================
-   6. TELAS ADMINISTRATIVAS (matrículas, secretaria)
+   6. TELAS ADMINISTRATIVAS (contas, catálogo, inscrições)
    ==========================================================================
    Padrões compartilhados que antes viviam copiados por página. Global (e não
    partial por componente) pelo mesmo motivo do modal de detalhes acima: uma

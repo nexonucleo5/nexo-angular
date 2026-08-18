@@ -16,9 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * <p>A tabela usuarios nasce com a lista de papéis congelada pelo Hibernate — ENUM
  * nativo no H2, CHECK no Postgres — e ddl-auto=update nunca desfaz isso. Num banco
- * criado antes de {@link Role#SECRETARIA}, gravar o papel novo estourava "Value not
+ * criado antes de {@link Role#ADMIN}, gravar o papel novo estourava "Value not
  * permitted for column" e derrubava a aplicação no arranque, já que quem grava é o
- * seeder. Quem descongela é o SchemaMigracao.
+ * seeder. Quem descongela é o SchemaMigracao — que também é quem converte as contas
+ * do antigo papel SECRETARIA.
  */
 @TestPropertySource(properties = {
         "spring.datasource.url=jdbc:h2:mem:teste-papel-novo;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
@@ -45,23 +46,31 @@ class PapelNovoEmBancoExistenteTest extends TesteApiBase {
                 .doesNotContainIgnoringCase("enum");
 
         Usuario nova = new Usuario();
-        nova.setLogin("secretaria-2");
+        nova.setLogin("admin-2");
         nova.setSenhaHash("irrelevante-para-este-teste");
-        nova.setNome("Segunda Secretária");
-        nova.setCargo("Secretaria Escolar");
-        nova.setRole(Role.SECRETARIA);
+        nova.setNome("Segundo Administrador");
+        nova.setCargo("Administração do sistema");
+        nova.setRole(Role.ADMIN);
 
         assertThat(usuarios.save(nova).getId()).isNotNull();
     }
 
     @Test
-    @DisplayName("o seed cria a conta da secretaria e ela entra com a senha padrão")
-    void contaDaSecretariaExiste() throws Exception {
-        assertThat(usuarios.existsByLoginIgnoreCase("secretaria")).isTrue();
+    @DisplayName("o seed cria a conta do administrador e ela entra com a senha padrão")
+    void contaDoAdministradorExiste() throws Exception {
+        assertThat(usuarios.existsByLoginIgnoreCase("admin")).isTrue();
 
         // O mesmo caminho das outras contas: login + senha padrão devolvem sessão.
-        var sessao = autenticar("secretaria", SENHA_PADRAO);
+        var sessao = autenticar("admin", SENHA_PADRAO);
         assertThat(sessao.get("token").asText()).isNotBlank();
-        assertThat(sessao.get("usuario").get("role").asText()).isEqualTo("SECRETARIA");
+        assertThat(sessao.get("usuario").get("role").asText()).isEqualTo("ADMIN");
+    }
+
+    @Test
+    @DisplayName("o papel SECRETARIA não existe mais em lugar nenhum do enum")
+    void papelAntigoSumiu() {
+        assertThat(java.util.Arrays.stream(Role.values()).map(Enum::name))
+                .doesNotContain("SECRETARIA")
+                .contains("ADMIN");
     }
 }

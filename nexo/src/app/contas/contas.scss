@@ -1,0 +1,32 @@
+/* contas.scss — o visual das telas administrativas (stat-card, badges, botões)
+   é global: styles.scss §6. Aqui ficam só os estilos desta página. */
+
+/* Conta desligada fica visivelmente apagada: a lista mistura ativas e inativas,
+   e sem isso as duas se parecem demais para uma varredura rápida. */
+.conta-inativa {
+  opacity: 0.65;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+/* Cartão da senha provisória — aparece uma vez e some. */
+.senha-card {
+  background: var(--bg-card);
+  border: 1px solid #06d25e;
+  border-radius: 18px;
+}
+
+.acoes-conta { align-items: center; }
+
+.girando { display: inline-block; animation: conta-girando 0.9s linear infinite; }
+@keyframes conta-girando { to { transform: rotate(360deg); } }
+
+/* No celular a linha empilha e os botões crescem para dedo. */
+@media (max-width: 767.98px) {
+  .student-row-card {
+    > .flex-grow-1 { flex: 1 1 calc(100% - 60px); }
+    > .acoes-conta {
+      flex: 1 1 100%;
+      > * { flex: 1 1 0; text-align: center; }
+    }
+  }
+}

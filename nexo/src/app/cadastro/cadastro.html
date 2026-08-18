@@ -54,107 +54,24 @@
       </div>
 
       <div class="col-md-6 mb-3">
-        <label class="form-label" for="aluno-nascimento">Data de nascimento:</label>
-        <!-- min/max espelham a regra do servidor: o calendário já não oferece data
-             futura nem idade impossível. -->
-        <input type="date" id="aluno-nascimento" formControlName="dataNascimento" class="form-control"
-               [min]="limitesAluno.min" [max]="limitesAluno.max"
-               [class.is-invalid]="fa['dataNascimento'].invalid && fa['dataNascimento'].touched">
-        <div class="invalid-feedback">Data de nascimento obrigatória.</div>
-      </div>
-
-      <div class="col-md-6 mb-3">
-        <label class="form-label" for="aluno-sexo">Sexo:</label>
-        <select id="aluno-sexo" formControlName="sexo" class="form-select"
-                [class.is-invalid]="fa['sexo'].invalid && fa['sexo'].touched">
-          <option value="" disabled>Selecione</option>
-          <option value="M">Masculino</option>
-          <option value="F">Feminino</option>
-          <option value="N">Não informar</option>
-        </select>
-        <div class="invalid-feedback">Selecione o sexo.</div>
-      </div>
-
-      <div class="col-md-6 mb-3">
-        <label class="form-label" for="aluno-turma">Ano do ensino básico:</label>
+        <label class="form-label" for="aluno-turma">Turma:</label>
         <select id="aluno-turma" formControlName="turmaId" class="form-select"
                 [class.is-invalid]="fa['turmaId'].invalid && fa['turmaId'].touched">
-          <option [ngValue]="null" disabled>Selecione o ano</option>
+          <option [ngValue]="null" disabled>Selecione a turma</option>
           <option *ngFor="let t of turmas()" [ngValue]="t.id">{{ t.nome }}</option>
         </select>
-        <div class="invalid-feedback">Selecione o ano do ensino básico.</div>
+        <div class="invalid-feedback">Selecione a turma.</div>
+        <small class="form-text">É dela que sai o conteúdo que o aluno vai estudar.</small>
       </div>
     </div>
 
-    <!-- ── Endereço (opcional) ─────────────────────────── -->
-    <div class="secao-endereco" formGroupName="endereco">
-      <h3 class="secao-titulo">
-        <i class="bi bi-geo-alt"></i>
-        Endereço
-        <span class="secao-opcional">opcional</span>
-      </h3>
-
-      <div class="row">
-        <div class="col-md-4 mb-3">
-          <label class="form-label" for="aluno-cep">CEP:</label>
-          <div class="cep-campo">
-            <input type="text" id="aluno-cep" formControlName="cep" class="form-control"
-                   inputmode="numeric" maxlength="9" placeholder="00000-000"
-                   (blur)="buscarCep()" (keydown.enter)="$event.preventDefault(); buscarCep()">
-            @if (buscandoCep()) {
-              <span class="cep-status" role="status">
-                <i class="bi bi-arrow-repeat girando"></i> buscando…
-              </span>
-            } @else if (cepPreenchido()) {
-              <span class="cep-status ok">
-                <i class="bi bi-check-circle-fill"></i> endereço encontrado
-              </span>
-            }
-          </div>
-          @if (cepErro(); as msg) {
-            <small class="cep-erro">{{ msg }}</small>
-          } @else {
-            <small class="cep-dica">Preenche o endereço automaticamente</small>
-          }
-        </div>
-
-        <div class="col-md-6 mb-3">
-          <label class="form-label" for="aluno-logradouro">Rua / Logradouro:</label>
-          <input type="text" id="aluno-logradouro" formControlName="logradouro" class="form-control"
-                 placeholder="Preenchido pelo CEP">
-        </div>
-
-        <div class="col-md-2 mb-3">
-          <label class="form-label" for="aluno-numero">Número:</label>
-          <input type="text" id="aluno-numero" formControlName="numero" class="form-control"
-                 inputmode="numeric" placeholder="123">
-        </div>
-
-        <div class="col-md-4 mb-3">
-          <label class="form-label" for="aluno-complemento">Complemento:</label>
-          <input type="text" id="aluno-complemento" formControlName="complemento" class="form-control"
-                 placeholder="Apto, bloco…">
-        </div>
-
-        <div class="col-md-4 mb-3">
-          <label class="form-label" for="aluno-bairro">Bairro:</label>
-          <input type="text" id="aluno-bairro" formControlName="bairro" class="form-control"
-                 placeholder="Preenchido pelo CEP">
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <label class="form-label" for="aluno-cidade">Cidade:</label>
-          <input type="text" id="aluno-cidade" formControlName="cidade" class="form-control"
-                 placeholder="Preenchido pelo CEP">
-        </div>
-
-        <div class="col-md-1 mb-3">
-          <label class="form-label" for="aluno-uf">UF:</label>
-          <input type="text" id="aluno-uf" formControlName="uf" class="form-control"
-                 maxlength="2" placeholder="SP">
-        </div>
-      </div>
-    </div>
+    <!-- Nascimento, sexo e endereço saíram daqui: este sistema cuida de
+         aprendizado e retenção, e a ficha pessoal do aluno pertence ao sistema
+         de aula da escola. Menos dado guardado é menos coisa a vazar. -->
+    <p class="nota-privacidade">
+      <i class="bi bi-shield-check"></i>
+      Só pedimos nome e turma. Dados pessoais do aluno ficam no sistema de aula da escola.
+    </p>
 
     <button type="submit" class="btn btn-cadastro w-100 mt-2" [disabled]="enviando()">
       <i class="bi bi-check-circle me-2"></i>{{ enviando() ? 'Enviando...' : 'Cadastrar aluno' }}

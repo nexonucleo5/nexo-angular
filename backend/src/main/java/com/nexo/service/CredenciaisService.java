@@ -53,6 +53,17 @@ public class CredenciaisService {
         return usuarios.save(usuario);
     }
 
+    /**
+     * Sorteia uma senha provisória nova para uma conta que já existe e devolve o
+     * valor em claro, que só existe aqui e na resposta ao administrador. Quem chama
+     * é quem grava o usuário — e é quem precisa derrubar as sessões abertas.
+     */
+    public String redefinirSenhaProvisoria(Usuario usuario) {
+        String senha = gerarSenhaProvisoria();
+        usuario.setSenhaHash(passwordEncoder.encode(senha));
+        return senha;
+    }
+
     /** primeiro-nome.sobrenome@dominio, com sufixo numérico em caso de colisão. */
     private String gerarEmailInstitucional(String nomeCompleto) {
         String[] partes = normalizar(nomeCompleto).split("\\s+");

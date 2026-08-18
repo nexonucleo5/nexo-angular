@@ -33,8 +33,9 @@ export class Suporte {
     {
       pergunta: 'Esqueci minha senha. Como recupero?',
       resposta:
-        'A senha é redefinida pela secretaria ou pela direção, que geram uma senha ' +
-        'provisória nova. Ao entrar com ela, troque em Configurações → Conta → Alterar senha.',
+        'A senha é redefinida pela administração ou pela direção, em Contas → Nova senha, ' +
+        'que gera uma senha provisória. Ao entrar com ela, troque em Configurações → Conta → ' +
+        'Alterar senha.',
     },
     {
       pergunta: 'Por que não vejo algumas matérias?',
@@ -59,25 +60,33 @@ export class Suporte {
       perfis: ['professor'],
     },
     {
-      pergunta: 'O CEP não preencheu o endereço. E agora?',
+      pergunta: 'Onde cadastro endereço, documentos ou histórico do aluno?',
       resposta:
-        'A busca depende de um serviço externo. Se ele estiver fora do ar, os campos continuam ' +
-        'editáveis: preencha o endereço à mão que o cadastro segue normalmente.',
-      perfis: ['secretaria', 'diretor'],
+        'Aqui não. Este sistema cuida de aprendizado e retenção de conteúdo, e guarda do aluno ' +
+        'apenas nome, turma e progresso. Ficha cadastral, documentos, matrícula e rematrícula ' +
+        'ficam no sistema de aula da escola.',
+      perfis: ['admin', 'diretor', 'professor'],
     },
     {
-      pergunta: 'A declaração de matrícula não é emitida.',
+      pergunta: 'Despubliquei um conteúdo por engano. Perdi o progresso dos alunos?',
       resposta:
-        'A declaração atesta vínculo vigente, então só sai para matrícula ativa. Se a matrícula ' +
-        'estiver pendente, efetive-a antes; se estiver trancada, reative.',
-      perfis: ['secretaria', 'diretor'],
+        'Não. Despublicar só tira o conteúdo da tela do aluno; quem já concluiu continua com o ' +
+        'registro. Basta publicar de novo em Catálogo que tudo volta como estava.',
+      perfis: ['admin', 'diretor'],
     },
     {
-      pergunta: 'Cadastrei uma data de nascimento e o sistema recusou.',
+      pergunta: 'Desativei uma conta. A pessoa sai na hora?',
       resposta:
-        'O cadastro recusa data futura e idade fora do plausível — aluno abaixo de 4 anos e ' +
-        'professor abaixo de 18. Quase sempre é o ano digitado com um dígito trocado.',
-      perfis: ['secretaria', 'diretor'],
+        'As sessões abertas são encerradas e o login para de funcionar. O acesso que já estava ' +
+        'em uso pode sobreviver por até 15 minutos, que é a validade do token em curso.',
+      perfis: ['admin', 'diretor'],
+    },
+    {
+      pergunta: 'Cadastrei uma data de nascimento de professor e o sistema recusou.',
+      resposta:
+        'O cadastro de professor recusa data futura e idade abaixo de 18 anos. Quase sempre é o ' +
+        'ano digitado com um dígito trocado.',
+      perfis: ['admin', 'diretor'],
     },
     {
       pergunta: 'Onde vejo o que já foi alterado no sistema?',
@@ -97,9 +106,9 @@ export class Suporte {
   readonly canais = [
     {
       icone: 'bi-envelope',
-      titulo: 'Secretaria',
-      detalhe: 'secretaria@nexo.escola.com',
-      texto: 'Matrícula, documentos e dados cadastrais',
+      titulo: 'Administração',
+      detalhe: 'admin@nexo.escola.com',
+      texto: 'Contas de acesso e catálogo de conteúdo',
     },
     {
       icone: 'bi-headset',

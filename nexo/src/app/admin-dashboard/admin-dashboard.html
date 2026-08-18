@@ -1,0 +1,207 @@
+<!-- Raiz padrão das telas administrativas — o recuo externo é do layout global. -->
+<section class="page-content">
+
+  <!-- ── Cabeçalho ────────────────────────────────────────── -->
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+      <h1 class="page-title fw-bold">Administração</h1>
+      <p class="text-soft m-0">Contas de acesso e catálogo de conteúdo</p>
+    </div>
+    <a routerLink="/cadastro" class="gradient-btn px-4 py-2 d-inline-flex align-items-center gap-2 text-decoration-none">
+      <i class="bi bi-person-plus"></i> Nova conta
+    </a>
+  </div>
+
+  @if (carregando()) {
+    <p class="text-soft">Carregando o painel…</p>
+  } @else if (erro()) {
+    <div class="d-flex align-items-center gap-3">
+      <p class="text-soft mb-0">Não foi possível carregar o painel.</p>
+      <button class="btn btn-dark-custom" (click)="carregar()">Tentar novamente</button>
+    </div>
+  } @else if (dados(); as d) {
+
+  <!-- ── KPI Cards ─────────────────────────────────────────── -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="stat-card">
+        <div>
+          <p class="text-soft small mb-1 fw-semibold">Contas de acesso</p>
+          <h2 class="fw-bold m-0 text-main">{{ d.contas }}</h2>
+          <small class="text-soft">{{ d.contasInativas }} inativa(s)</small>
+        </div>
+        <div class="icon-box blue-gradient">
+          <i class="bi bi-shield-lock-fill fs-4"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="stat-card">
+        <div>
+          <p class="text-soft small mb-1 fw-semibold">Alunos</p>
+          <h2 class="fw-bold m-0 text-main">{{ d.alunos }}</h2>
+          <small class="text-soft">{{ d.professores }} professor(es) • {{ d.turmas }} turma(s)</small>
+        </div>
+        <div class="icon-box green">
+          <i class="bi bi-people-fill fs-4"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="stat-card">
+        <div>
+          <p class="text-soft small mb-1 fw-semibold">Conteúdos</p>
+          <h2 class="fw-bold m-0 text-main">{{ d.conteudos }}</h2>
+          <small class="text-soft">em {{ d.materias }} matéria(s)</small>
+        </div>
+        <div class="icon-box purple-gradient">
+          <i class="bi bi-journal-text fs-4"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="stat-card">
+        <div>
+          <p class="text-soft small mb-1 fw-semibold">Fora do ar</p>
+          <h2 class="fw-bold m-0 text-main">{{ d.conteudosDespublicados + d.desafiosDespublicados }}</h2>
+          <small class="text-soft">{{ d.desafios }} desafio(s) no catálogo</small>
+        </div>
+        <div class="icon-box orange">
+          <i class="bi bi-eye-slash-fill fs-4"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- ── Cobertura do catálogo ────────────────────────────── -->
+    <div class="col-12 col-xl-7">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <h5 class="text-main fw-bold m-0">Cobertura por matéria</h5>
+        @if (materiasFracas().length > 0) {
+          <span class="badge-compliance status-warn">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            {{ materiasFracas().length }} com pouco conteúdo
+          </span>
+        }
+      </div>
+
+      <!-- Matéria sem conteúdo é aluno sem o que estudar: é o que o painel
+           precisa mostrar primeiro num sistema de retenção. -->
+      @if (materiasFracas().length > 0) {
+        <div class="d-flex flex-column gap-2 mb-3">
+          @for (m of materiasFracas(); track m.id) {
+            <a class="materia-row p-3 d-flex align-items-center gap-3 flex-wrap text-decoration-none"
+               routerLink="/catalogo" [queryParams]="{ materia: m.id }">
+              <div class="icon-box purple-gradient">
+                <i class="bi bi-journal-x"></i>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="text-main fw-bold mb-1">{{ m.nome }}</h6>
+                <small class="text-soft">
+                  {{ m.conteudosPublicados }} de {{ m.conteudos }} conteúdo(s) no ar
+                </small>
+              </div>
+              <span class="badge-compliance"
+                    [ngClass]="m.conteudosPublicados === 0 ? 'status-danger' : 'status-warn'">
+                <i class="bi bi-plus-circle"></i>
+                {{ m.conteudosPublicados === 0 ? 'Sem conteúdo' : 'Pouco conteúdo' }}
+              </span>
+            </a>
+          }
+        </div>
+      } @else {
+        <p class="text-soft">Todas as matérias têm conteúdo publicado. 🎉</p>
+      }
+
+      <div class="ocupacao-card">
+        @for (m of catalogo(); track m.id) {
+          <a class="ocupacao-linha" routerLink="/catalogo" [queryParams]="{ materia: m.id }"
+             [attr.aria-label]="'Abrir o catálogo de ' + m.nome">
+            <div class="d-flex justify-content-between small">
+              <span class="text-main fw-semibold">{{ m.nome }}</span>
+              <span class="text-soft">{{ m.conteudosPublicados }}/{{ m.conteudos }}</span>
+            </div>
+            <div class="ocupacao-barra">
+              <span [class.vazia]="m.conteudosPublicados === 0"
+                    [style.width.%]="percentualPublicado(m)"></span>
+            </div>
+          </a>
+        } @empty {
+          <p class="text-soft m-0">Nenhuma matéria cadastrada.</p>
+        }
+      </div>
+    </div>
+
+    <!-- ── Acesso ───────────────────────────────────────────── -->
+    <div class="col-12 col-xl-5">
+      <h5 class="text-main fw-bold mb-3">Acesso</h5>
+
+      <div class="ocupacao-card mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-main fw-semibold">Contas por perfil</span>
+        </div>
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex justify-content-between small">
+            <span class="text-soft">Alunos</span><span class="text-main fw-semibold">{{ d.alunos }}</span>
+          </div>
+          <div class="d-flex justify-content-between small">
+            <span class="text-soft">Professores</span><span class="text-main fw-semibold">{{ d.professores }}</span>
+          </div>
+          <div class="d-flex justify-content-between small">
+            <span class="text-soft">Diretores</span><span class="text-main fw-semibold">{{ d.diretores }}</span>
+          </div>
+          <div class="d-flex justify-content-between small">
+            <span class="text-soft">Administradores</span><span class="text-main fw-semibold">{{ d.admins }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex flex-column gap-2">
+        <a routerLink="/contas" class="quick-card p-3 d-flex align-items-center gap-3 text-decoration-none">
+          <div class="icon-box blue-gradient"><i class="bi bi-shield-lock"></i></div>
+          <div>
+            <h6 class="text-main fw-bold mb-1">Gerir contas</h6>
+            <small class="text-soft">Ativar, desativar e redefinir senha provisória</small>
+          </div>
+        </a>
+
+        @if (d.contasInativas > 0) {
+          <a routerLink="/contas" [queryParams]="{ inativas: true }"
+             class="quick-card p-3 d-flex align-items-center gap-3 text-decoration-none">
+            <div class="icon-box orange"><i class="bi bi-person-slash"></i></div>
+            <div>
+              <h6 class="text-main fw-bold mb-1">{{ d.contasInativas }} conta(s) inativa(s)</h6>
+              <small class="text-soft">Sem acesso ao sistema até serem reativadas</small>
+            </div>
+          </a>
+        }
+
+        <a routerLink="/catalogo" class="quick-card p-3 d-flex align-items-center gap-3 text-decoration-none">
+          <div class="icon-box purple-gradient"><i class="bi bi-collection"></i></div>
+          <div>
+            <h6 class="text-main fw-bold mb-1">Catálogo de conteúdo</h6>
+            <small class="text-soft">
+              @if (temConteudoForaDoAr()) {
+                {{ d.conteudosDespublicados }} conteúdo(s) e {{ d.desafiosDespublicados }} desafio(s) fora do ar
+              } @else {
+                Publicar, despublicar e reordenar
+              }
+            </small>
+          </div>
+        </a>
+
+        <a routerLink="/inscricoes" class="quick-card p-3 d-flex align-items-center gap-3 text-decoration-none">
+          <div class="icon-box green"><i class="bi bi-people"></i></div>
+          <div>
+            <h6 class="text-main fw-bold mb-1">Inscrições nas turmas</h6>
+            <small class="text-soft">De qual turma cada aluno vê o conteúdo</small>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  }
+</section>

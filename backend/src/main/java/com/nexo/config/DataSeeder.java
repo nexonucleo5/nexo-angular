@@ -32,7 +32,7 @@ public class DataSeeder {
     @org.springframework.core.annotation.Order(2) // depois do CatalogoMaterias
     CommandLineRunner seed(UsuarioRepository usuarios, TurmaRepository turmas, AlunoRepository alunos,
                            ProfessorRepository professores, MateriaRepository materias,
-                           MatriculaRepository matriculas,
+                           InscricaoRepository inscricoes,
                            FrequenciaRepository frequencias, NotaRepository notas,
                            AvaliacaoRepository avaliacoes, QuestaoRepository questoes,
                            ConversaRepository conversas, MensagemRepository mensagens,
@@ -47,7 +47,7 @@ public class DataSeeder {
                            ChatMensagemRepository chatMensagens,
                            PasswordEncoder encoder,
                            @Value("${spring.datasource.url:}") String jdbcUrl) {
-        return args -> new Seeder(usuarios, turmas, alunos, professores, materias, matriculas, frequencias, notas,
+        return args -> new Seeder(usuarios, turmas, alunos, professores, materias, inscricoes, frequencias, notas,
                 avaliacoes, questoes, conversas, mensagens, avisos, duvidas, observacoes, eventos,
                 atividadesAluno, aulasAgendadas, atividadesProfessor, desafios, desafiosAluno,
                 chatMensagens, encoder, jdbcUrl).executar();
@@ -55,7 +55,7 @@ public class DataSeeder {
 
     record Seeder(UsuarioRepository usuarios, TurmaRepository turmas, AlunoRepository alunos,
                   ProfessorRepository professores, MateriaRepository materias,
-                  MatriculaRepository matriculas,
+                  InscricaoRepository inscricoes,
                   FrequenciaRepository frequencias, NotaRepository notas,
                   AvaliacaoRepository avaliacoes, QuestaoRepository questoes,
                   ConversaRepository conversas, MensagemRepository mensagens,
@@ -75,14 +75,14 @@ public class DataSeeder {
         void executar() {
             if (usuarios.count() > 0) {
                 // Banco já povoado: o seed de exemplo não se repete, mas um perfil
-                // criado depois dele precisa existir aqui também — senão a conta da
-                // secretaria só apareceria em instalação nova e quem já tinha banco
+                // criado depois dele precisa existir aqui também — senão a conta do
+                // administrador só apareceria em instalação nova e quem já tinha banco
                 // de desenvolvimento não conseguiria entrar com ela.
                 //
                 // SÓ no banco de desenvolvimento (ver bancoDeDesenvolvimento): esta
                 // conta nasce com a senha padrão do seed, e criá-la num banco de
                 // verdade seria plantar credencial conhecida num sistema em uso.
-                if (bancoDeDesenvolvimento()) garantirSecretaria();
+                if (bancoDeDesenvolvimento()) garantirAdmin();
                 return;
             }
 
@@ -92,7 +92,7 @@ public class DataSeeder {
             Usuario diretor = usuario("diretor", senhaPadrao, "Diretor Silva", "Administração Escolar", Role.DIRETOR);
             Usuario professorUsr = usuario("professor", senhaPadrao, "Prof. Roberto Alves", "Professor de História", Role.PROFESSOR);
             Usuario alunoUsr = usuario("aluno", senhaPadrao, "Gabriel Mendes", "2º Ano - Ensino Médio", Role.ALUNO);
-            usuario("secretaria", senhaPadrao, "Helena Ramos", "Secretaria Escolar", Role.SECRETARIA);
+            usuario("admin", senhaPadrao, "Helena Ramos", "Administração do sistema", Role.ADMIN);
 
             Professor professor = new Professor();
             professor.setUsuario(professorUsr);
@@ -140,27 +140,29 @@ public class DataSeeder {
             turmas.save(t2em);
             turmas.save(t1em);
 
-            // ── Alunos (nome, sexo, turma, engajamento) ──
+            // ── Alunos (nome, turma, engajamento) ──
+            // Sexo e data de nascimento saíram do cadastro: são dado pessoal que este
+            // sistema não guarda mais (ver Aluno), e nem o seed deve inventá-los.
             String[][] dadosAlunos = {
-                    {"Gabriel Mendes", "M", "2em", "88"},
-                    {"Ana Beatriz Souza", "F", "9a", "92"},
-                    {"Carlos Eduardo Lima", "M", "9a", "45"},
-                    {"Mariana Ferreira", "F", "9a", "78"},
-                    {"João Pedro Santos", "M", "9b", "25"},
-                    {"Larissa Oliveira", "F", "9b", "83"},
-                    {"Rafael Costa", "M", "9b", "52"},
-                    {"Beatriz Almeida", "F", "1em", "95"},
-                    {"Lucas Martins", "M", "1em", "38"},
-                    {"Julia Rodrigues", "F", "1em", "72"},
-                    {"Pedro Henrique Silva", "M", "2em", "60"},
-                    {"Camila Barbosa", "F", "2em", "90"},
+                    {"Gabriel Mendes", "2em", "88"},
+                    {"Ana Beatriz Souza", "9a", "92"},
+                    {"Carlos Eduardo Lima", "9a", "45"},
+                    {"Mariana Ferreira", "9a", "78"},
+                    {"João Pedro Santos", "9b", "25"},
+                    {"Larissa Oliveira", "9b", "83"},
+                    {"Rafael Costa", "9b", "52"},
+                    {"Beatriz Almeida", "1em", "95"},
+                    {"Lucas Martins", "1em", "38"},
+                    {"Julia Rodrigues", "1em", "72"},
+                    {"Pedro Henrique Silva", "2em", "60"},
+                    {"Camila Barbosa", "2em", "90"},
             };
 
             Random random = new Random(42);
             LocalDate hoje = LocalDate.now();
 
             for (String[] d : dadosAlunos) {
-                Turma turma = switch (d[2]) {
+                Turma turma = switch (d[1]) {
                     case "9a" -> t9a;
                     case "9b" -> t9b;
                     case "1em" -> t1em;
@@ -168,12 +170,8 @@ public class DataSeeder {
                 };
                 Aluno aluno = new Aluno();
                 aluno.setNome(d[0]);
-                aluno.setSexo(d[1]);
                 aluno.setTurma(turma);
-                aluno.setEngajamento(Integer.parseInt(d[3]));
-                // Idade típica da turma: 15 anos no 9º ano, 16/17 no ensino médio.
-                aluno.setDataNascimento(hoje.minusYears(d[2].startsWith("9") ? 15 : 17)
-                        .withDayOfYear(1 + random.nextInt(365)));
+                aluno.setEngajamento(Integer.parseInt(d[2]));
                 String primeiro = d[0].split(" ")[0].toLowerCase();
                 String ultimo = d[0].substring(d[0].lastIndexOf(' ') + 1).toLowerCase();
                 aluno.setEmailInstitucional(primeiro + "." + ultimo + "@nexo.escola.com");
@@ -196,17 +194,15 @@ public class DataSeeder {
                 if (d[0].equals("Gabriel Mendes")) aluno.setUsuario(alunoUsr);
                 alunos.save(aluno);
 
-                // Matrícula
-                Matricula matricula = new Matricula();
-                matricula.setAluno(aluno);
-                matricula.setTurma(turma);
-                int sorte = random.nextInt(10);
-                matricula.setStatus(sorte < 7 ? Matricula.Status.ATIVA
-                        : sorte < 9 ? Matricula.Status.PENDENTE : Matricula.Status.TRANCADA);
-                matricula.setDocumentacao(sorte < 6 ? Matricula.Documentacao.COMPLETA
-                        : sorte < 9 ? Matricula.Documentacao.PENDENTE : Matricula.Documentacao.INCOMPLETA);
-                matricula.setDataMatricula(hoje.minusMonths(5).plusDays(random.nextInt(30)));
-                matriculas.save(matricula);
+                // Inscrição na turma de estudo. Uma em dez nasce inativa, só para
+                // que a tela de inscrições tenha os dois estados no banco de exemplo.
+                Inscricao inscricao = new Inscricao();
+                inscricao.setAluno(aluno);
+                inscricao.setTurma(turma);
+                inscricao.setAtivo(random.nextInt(10) > 0);
+                inscricao.setCriadaEm(hoje.minusMonths(5).plusDays(random.nextInt(30))
+                        .atStartOfDay(ZoneOffset.UTC).toInstant());
+                inscricoes.save(inscricao);
 
                 // Notas — alunos com engajamento baixo tiram notas menores
                 double base = 3.5 + (aluno.getEngajamento() / 100.0) * 6.0;
@@ -335,7 +331,7 @@ public class DataSeeder {
          * {@code true} no application.yml e só o perfil {@code prod} o desliga — mas
          * nem o Dockerfile nem o compose.yaml ativam esse perfil, então um container
          * sobe com o seed LIGADO. Sem esta checagem, subir a aplicação contra um
-         * Postgres de verdade criaria ali a conta da secretaria com a senha padrão do
+         * Postgres de verdade criaria ali a conta do administrador com a senha padrão do
          * seed, numa base em uso. Dado de exemplo pertence ao banco de exemplo.
          */
         private boolean bancoDeDesenvolvimento() {
@@ -343,14 +339,19 @@ public class DataSeeder {
         }
 
         /**
-         * Cria a conta da secretaria em banco que já foi semeado antes deste perfil
-         * existir. Idempotente: com a conta lá, não faz nada — nem toca na senha de
-         * quem já trocou a dela.
+         * Cria a conta do administrador em banco que já foi semeado antes deste
+         * perfil existir. Idempotente: com a conta lá, não faz nada — nem toca na
+         * senha de quem já trocou a dela.
+         *
+         * <p>O login "secretaria" também conta como presente: em banco antigo a
+         * SchemaMigracao já converteu aquela conta para ADMIN, e criar uma segunda
+         * daria duas contas administrativas onde deveria haver uma.
          */
-        private void garantirSecretaria() {
-            if (usuarios.existsByLoginIgnoreCase("secretaria")) return;
-            usuario("secretaria", encoder.encode("123456"), "Helena Ramos",
-                    "Secretaria Escolar", Role.SECRETARIA);
+        private void garantirAdmin() {
+            if (usuarios.existsByLoginIgnoreCase("admin")
+                    || usuarios.existsByLoginIgnoreCase("secretaria")) return;
+            usuario("admin", encoder.encode("123456"), "Helena Ramos",
+                    "Administração do sistema", Role.ADMIN);
         }
 
         private Usuario usuario(String login, String hash, String nome, String cargo, Role role) {
