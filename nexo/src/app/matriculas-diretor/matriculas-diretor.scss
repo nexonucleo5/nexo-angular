@@ -44,3 +44,69 @@
   color: #ef4444;
   &:hover { border-color: #ef4444; }
 }
+
+/* ── Abas do modal de detalhe ─────────────────────────────────────────────── */
+.abas-detalhe {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 14px;
+}
+
+.aba-detalhe {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none; border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  padding: 8px 12px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+
+  &:hover { color: var(--text-main); }
+  &.ativa { color: #9b2fff; border-bottom-color: #9b2fff; }
+}
+
+/* ── Checklist de documentos ──────────────────────────────────────────────── */
+.doc-resumo {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px;
+
+  .progress { height: 8px; background: var(--bg-card); border-radius: 6px; overflow: hidden; }
+  .progress-bar { background: linear-gradient(90deg, #9b2fff, #06d25e); }
+}
+
+/* O que falta é a informação mais acionável da tela: cor de aviso, não de erro. */
+.doc-faltantes {
+  font-size: 13px;
+  color: #ff9800;
+  strong { color: var(--text-main); }
+}
+
+.doc-item {
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: background 0.15s;
+  &:hover { background: var(--hover-overlay); }
+  &.entregue .doc-rotulo { color: var(--text-main); }
+}
+
+.btn-doc {
+  background: none; border: none; padding: 2px;
+  font-size: 18px; line-height: 1;
+  color: var(--text-muted); cursor: pointer;
+  transition: color 0.2s;
+  &:hover { color: #06d25e; }
+  &.marcado { color: #06d25e; }
+  &:disabled { opacity: 0.5; cursor: wait; }
+}
+
+.doc-rotulo { color: var(--text-soft); font-size: 14px; font-weight: 600; }
+
+.doc-obrigatorio {
+  margin-left: 6px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #ff9800;
+}

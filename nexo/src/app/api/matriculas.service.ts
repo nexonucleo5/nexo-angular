@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
+  ChecklistDTO,
   MatriculaDTO,
   PageEnvelope,
   StatusDocumentacao,
@@ -52,5 +53,22 @@ export class MatriculasService {
   /** PDF da declaração de matrícula — blob porque a rota exige o Bearer do interceptor. */
   declaracao(id: number): Observable<Blob> {
     return this.http.get(`${this.api}/${id}/declaracao`, { responseType: 'blob' });
+  }
+
+  // ── Checklist de documentos ────────────────────────────────────────────────
+
+  checklist(id: number): Observable<ChecklistDTO> {
+    return this.http.get<ChecklistDTO>(`${this.api}/${id}/documentos/checklist`);
+  }
+
+  /** Registrar entrega é estado do documento: PUT, e reenviar não duplica. */
+  registrarDocumento(id: number, tipo: string, observacao?: string): Observable<ChecklistDTO> {
+    return this.http.put<ChecklistDTO>(`${this.api}/${id}/documentos/${tipo}`, {
+      observacao: observacao ?? null,
+    });
+  }
+
+  removerDocumento(id: number, tipo: string): Observable<ChecklistDTO> {
+    return this.http.delete<ChecklistDTO>(`${this.api}/${id}/documentos/${tipo}`);
   }
 }

@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, provideRouter, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { authGuard, roleGuard } from './guards';
+import { authGuard, roleGuard, visitanteGuard } from './guards';
 import { AuthService, RoleCliente, Usuario } from '../services/auth.service';
 
 /** Os guards ignoram os dois argumentos; passar stubs vazios basta. */
@@ -25,7 +25,7 @@ describe('guards de rota', () => {
     });
   });
 
-  function rodar(guard: ReturnType<typeof roleGuard> | typeof authGuard) {
+  function rodar(guard: ReturnType<typeof roleGuard> | typeof authGuard | typeof visitanteGuard) {
     return TestBed.runInInjectionContext(() => guard(ROTA, ESTADO));
   }
 
@@ -76,6 +76,22 @@ describe('guards de rota', () => {
       sessao.set(usuarioCom('diretor'));
 
       expect(destinoDe(rodar(roleGuard()))).toBe('/dashboards');
+    });
+  });
+
+
+  describe('visitanteGuard', () => {
+    it('libera a tela de login para quem não tem sessão', () => {
+      expect(rodar(visitanteGuard)).toBe(true);
+    });
+
+    it('desvia para o painel quem já está logado', () => {
+      // Trava o bug em que /login era desenhado dentro do sistema: a raiz
+      // redireciona para /login, então recarregar em "/" com sessão ativa levava
+      // ao formulário de login com barra lateral e nome do usuário na tela.
+      sessao.set(usuarioCom('aluno'));
+
+      expect(destinoDe(rodar(visitanteGuard))).toBe('/dashboards');
     });
   });
 

@@ -36,11 +36,20 @@ public class AlunosController {
     private final ObservacaoPedagogicaRepository observacoes;
     private final ProfessorRepository professores;
     private final com.nexo.service.EscopoDocente escopoDocente;
+    private final com.nexo.service.ProntuarioService prontuarioService;
+    private final com.nexo.service.HistoricoEscolarPdf historicoPdf;
+    private final com.nexo.service.AuditoriaService auditoria;
 
     public AlunosController(AlunoService alunoService, AlunoRepository alunos,
                             NotaRepository notas, ObservacaoPedagogicaRepository observacoes,
                             ProfessorRepository professores,
-                            com.nexo.service.EscopoDocente escopoDocente) {
+                            com.nexo.service.EscopoDocente escopoDocente,
+                            com.nexo.service.ProntuarioService prontuarioService,
+                            com.nexo.service.HistoricoEscolarPdf historicoPdf,
+                            com.nexo.service.AuditoriaService auditoria) {
+        this.prontuarioService = prontuarioService;
+        this.historicoPdf = historicoPdf;
+        this.auditoria = auditoria;
         this.alunoService = alunoService;
         this.alunos = alunos;
         this.notas = notas;
@@ -80,6 +89,36 @@ public class AlunosController {
             return new EnderecoDTO(e.getCep(), e.getLogradouro(), e.getNumero(), e.getComplemento(),
                     e.getBairro(), e.getCidade(), e.getUf(), e.resumo());
         }
+    }
+
+    /**
+     * Ficha completa do aluno numa leitura só: identificação, endereço, matrícula,
+     * checklist de documentos e resumo de desempenho. É o que a secretária abre
+     * quando o responsável liga — antes eram quatro telas e a soma feita de cabeça.
+     */
+    @GetMapping("/{alunoId}/prontuario")
+    @PreAuthorize("hasAnyRole('DIRETOR','SECRETARIA')")
+    public com.nexo.service.ProntuarioService.ProntuarioDTO prontuario(@PathVariable Long alunoId) {
+        return prontuarioService.montar(alunoId);
+    }
+
+    /** Histórico escolar em PDF, montado do prontuário — sem redigitação. */
+    @GetMapping("/{alunoId}/historico")
+    @PreAuthorize("hasAnyRole('DIRETOR','SECRETARIA')")
+    public ResponseEntity<byte[]> historicoEscolar(@PathVariable Long alunoId,
+                                                   @AuthenticationPrincipal UsuarioAutenticado operador) {
+        var prontuario = prontuarioService.montar(alunoId);
+        byte[] pdf = historicoPdf.gerar(prontuario);
+
+        com.nexo.domain.EventoAuditoria.Tipo acesso = com.nexo.domain.EventoAuditoria.Tipo.ACESSO;
+        auditoria.registrar(operador.nome(), acesso, "Histórico escolar emitido",
+                prontuario.identificacao().nome(), null);
+
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"historico-escolar-" + alunoId + ".pdf\"")
+                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 
     /**

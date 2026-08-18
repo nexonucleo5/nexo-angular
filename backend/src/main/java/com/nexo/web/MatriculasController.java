@@ -27,13 +27,16 @@ public class MatriculasController {
     private final AuditoriaService auditoria;
     private final DeclaracaoMatriculaPdf declaracaoPdf;
     private final com.nexo.service.ConfiguracaoService configuracoes;
+    private final com.nexo.service.DocumentacaoService documentacao;
 
     public MatriculasController(MatriculaRepository matriculas,
                                 com.nexo.repository.TurmaRepository turmas,
                                 com.nexo.repository.AlunoRepository alunos,
                                 AuditoriaService auditoria,
                                 DeclaracaoMatriculaPdf declaracaoPdf,
-                                com.nexo.service.ConfiguracaoService configuracoes) {
+                                com.nexo.service.ConfiguracaoService configuracoes,
+                                com.nexo.service.DocumentacaoService documentacao) {
+        this.documentacao = documentacao;
         this.matriculas = matriculas;
         this.turmas = turmas;
         this.alunos = alunos;
@@ -131,6 +134,36 @@ public class MatriculasController {
                 "Status de matrícula atualizado",
                 "Matrícula #" + id + ": " + atual + " → " + request.status(), null);
         return MatriculaDTO.of(matricula);
+    }
+
+    // ── Checklist de documentos ──────────────────────────────────────────────
+
+    /**
+     * O que foi entregue e o que falta. Substitui na prática o PATCH /documentos:
+     * lá o estado era escolhido na mão, aqui ele é consequência da lista — e a
+     * secretária sabe o que pedir ao ligar para o responsável.
+     */
+    @GetMapping("/{id}/documentos/checklist")
+    public com.nexo.service.DocumentacaoService.ChecklistDTO checklist(@PathVariable Long id) {
+        return documentacao.checklist(id);
+    }
+
+    /** PUT: registrar a entrega é estado do documento, e reenviar não duplica. */
+    @PutMapping("/{id}/documentos/{tipo}")
+    public com.nexo.service.DocumentacaoService.ChecklistDTO registrarDocumento(
+            @PathVariable Long id,
+            @PathVariable com.nexo.domain.TipoDocumento tipo,
+            @RequestBody(required = false) com.nexo.service.DocumentacaoService.RegistrarDocumentoRequest request,
+            @AuthenticationPrincipal UsuarioAutenticado operador) {
+        return documentacao.registrar(id, tipo, request == null ? null : request.observacao(), operador.nome());
+    }
+
+    @DeleteMapping("/{id}/documentos/{tipo}")
+    public com.nexo.service.DocumentacaoService.ChecklistDTO removerDocumento(
+            @PathVariable Long id,
+            @PathVariable com.nexo.domain.TipoDocumento tipo,
+            @AuthenticationPrincipal UsuarioAutenticado operador) {
+        return documentacao.remover(id, tipo, operador.nome());
     }
 
     // ── Transferência de turma ───────────────────────────────────────────────

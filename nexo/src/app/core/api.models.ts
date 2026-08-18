@@ -155,6 +155,55 @@ export interface MateriaProgressoDTO {
   percentual: number;
 }
 
+// ── Documentação e prontuário (secretaria) ───────────────────────────────────
+
+/** Um documento do checklist da matrícula. */
+export interface ItemChecklistDTO {
+  tipo: string;
+  rotulo: string;
+  obrigatorio: boolean;
+  entregue: boolean;
+  entregueEm: string | null;
+  recebidoPor: string | null;
+  observacao: string | null;
+}
+
+/**
+ * GET /api/matriculas/{id}/documentos/checklist. `situacao` é derivada da lista —
+ * ninguém escolhe mais o estado da documentação na mão.
+ */
+export interface ChecklistDTO {
+  matriculaId: number;
+  aluno: string;
+  situacao: StatusDocumentacao;
+  entregues: number;
+  totalObrigatorios: number;
+  obrigatoriosEntregues: number;
+  /** O que ainda falta — é o roteiro da ligação para o responsável. */
+  faltantes: string[];
+  itens: ItemChecklistDTO[];
+}
+
+/** GET /api/alunos/{id}/prontuario — a ficha completa numa leitura só. */
+export interface ProntuarioDTO {
+  identificacao: {
+    id: number;
+    nome: string;
+    emailInstitucional: string | null;
+    sexo: string | null;
+    dataNascimento: string | null;
+    idade: number | null;
+    turma: string | null;
+    etapa: 'FUNDAMENTAL' | 'MEDIO' | null;
+  };
+  endereco: { cep: string | null; resumo: string | null } | null;
+  matricula: { id: number; status: StatusMatricula; documentacao: StatusDocumentacao; dataMatricula: string } | null;
+  documentos: ChecklistDTO | null;
+  desempenho: Array<{ disciplina: string | null; periodo: string | null; media: number | null }>;
+  mediaGeral: number | null;
+  observacoesPedagogicas: number;
+}
+
 /** GET /api/secretaria/dashboard */
 export interface DashboardSecretariaDTO {
   totalAlunos: number;

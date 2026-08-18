@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, roleGuard } from './core/guards';
+import { authGuard, roleGuard, visitanteGuard } from './core/guards';
 
 /**
  * Rotas com lazy loading (loadComponent) por perfil + guards usando a role
@@ -12,7 +12,10 @@ export const routes: Routes = [
 
   // ── Públicas ────────────────────────────────────────────────────────────────
   {
+    // visitanteGuard: com sessão ativa, /login manda para o painel em vez de
+    // desenhar o formulário dentro do sistema (ver o comentário do guard).
     path: 'login',
+    canActivate: [visitanteGuard],
     loadComponent: () => import('./login/login').then((m) => m.Login),
   },
 

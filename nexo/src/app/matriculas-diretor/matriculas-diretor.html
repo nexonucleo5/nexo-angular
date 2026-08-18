@@ -192,14 +192,25 @@
           <button class="detalhe-close" (click)="fecharDetalhes()" aria-label="Fechar">&times;</button>
         </div>
 
-        <div class="detalhe-row"><span class="rot">Matrícula</span><span class="val">{{ m.matricula }}</span></div>
-        <div class="detalhe-row"><span class="rot">Turma</span><span class="val">{{ m.turma }}</span></div>
-        <div class="detalhe-row"><span class="rot">Data da matrícula</span><span class="val">{{ m.dataMatricula }}</span></div>
-
-        <!-- ── Ações da secretaria ───────────────────────────
-             Agrupadas por natureza e rotuladas: antes eram três controles soltos
-             em sequência, e não dava para saber o que mexia em quê. -->
-        <hr class="detalhe-separador">
+        <!-- Abas: o atendimento tem momentos distintos — mexer na matrícula,
+             conferir papel entregue e olhar a ficha inteira. -->
+        <div class="abas-detalhe" role="tablist">
+          <button type="button" class="aba-detalhe" [class.ativa]="aba() === 'matricula'"
+                  role="tab" [attr.aria-selected]="aba() === 'matricula'"
+                  (click)="abrirAba('matricula')">
+            <i class="bi bi-clipboard-check"></i> Matrícula
+          </button>
+          <button type="button" class="aba-detalhe" [class.ativa]="aba() === 'documentos'"
+                  role="tab" [attr.aria-selected]="aba() === 'documentos'"
+                  (click)="abrirAba('documentos')">
+            <i class="bi bi-folder2-open"></i> Documentos
+          </button>
+          <button type="button" class="aba-detalhe" [class.ativa]="aba() === 'prontuario'"
+                  role="tab" [attr.aria-selected]="aba() === 'prontuario'"
+                  (click)="abrirAba('prontuario')">
+            <i class="bi bi-person-vcard"></i> Prontuário
+          </button>
+        </div>
 
         @if (acaoErro(); as msg) {
           <p class="text-danger small mb-2"><i class="bi bi-exclamation-circle"></i> {{ msg }}</p>
@@ -207,6 +218,15 @@
         @if (acaoSucesso(); as msg) {
           <p class="acao-sucesso small mb-2"><i class="bi bi-check-circle-fill"></i> {{ msg }}</p>
         }
+
+        <!-- ══ Aba: Matrícula ═════════════════════════════════ -->
+        @if (aba() === 'matricula') {
+
+        <div class="detalhe-row"><span class="rot">Matrícula</span><span class="val">{{ m.matricula }}</span></div>
+        <div class="detalhe-row"><span class="rot">Turma</span><span class="val">{{ m.turma }}</span></div>
+        <div class="detalhe-row"><span class="rot">Data da matrícula</span><span class="val">{{ m.dataMatricula }}</span></div>
+
+        <hr class="detalhe-separador">
 
         <div class="grupo-acao">
           <span class="grupo-titulo"><i class="bi bi-clipboard-check"></i> Situação da matrícula</span>
@@ -233,15 +253,14 @@
 
         <div class="grupo-acao">
           <span class="grupo-titulo"><i class="bi bi-folder2-open"></i> Documentação</span>
-          <select id="doc-select" class="form-select filter-select form-select-sm"
-                  aria-label="Situação da documentação"
-                  [ngModel]="m.documentacao"
-                  (ngModelChange)="mudarDocumentacao(m, $event)"
-                  [disabled]="acaoEmCurso()">
-            <option *ngFor="let d of docOpcoes" [value]="d">
-              {{ d === 'COMPLETA' ? 'Completa' : d === 'PENDENTE' ? 'Pendente' : 'Incompleta' }}
-            </option>
-          </select>
+          <p class="text-soft small m-0">
+            Situação atual: <strong class="text-main">{{ m.documentacao }}</strong> —
+            calculada a partir dos documentos entregues.
+          </p>
+          <button type="button" class="btn btn-dark-custom btn-sm align-self-start"
+                  (click)="abrirAba('documentos')">
+            <i class="bi bi-list-check"></i> Conferir documentos
+          </button>
         </div>
 
         @if (turmas().length > 0 && m.status !== 'CANCELADA') {
@@ -264,18 +283,130 @@
         }
 
         <div class="grupo-acao">
-          <span class="grupo-titulo"><i class="bi bi-file-earmark-text"></i> Documentos</span>
+          <span class="grupo-titulo"><i class="bi bi-file-earmark-text"></i> Emitir documentos</span>
           <button class="gradient-btn px-4 py-2 w-100"
                   [disabled]="acaoEmCurso() || m.status !== 'ATIVA'"
                   (click)="emitirDeclaracao(m)">
             <i class="bi bi-file-earmark-arrow-down"></i>
-            Emitir declaração de matrícula (PDF)
+            Declaração de matrícula (PDF)
           </button>
           @if (m.status !== 'ATIVA') {
             <!-- Botão desabilitado sem explicação vira "está quebrado". -->
             <small class="text-soft">A declaração atesta vínculo vigente: só sai com a matrícula ativa.</small>
           }
+          <button class="btn btn-dark-custom w-100" [disabled]="acaoEmCurso()"
+                  (click)="emitirHistorico(m)">
+            <i class="bi bi-file-earmark-text"></i>
+            Histórico escolar (PDF)
+          </button>
         </div>
+
+        }
+
+        <!-- ══ Aba: Documentos ════════════════════════════════ -->
+        @if (aba() === 'documentos') {
+          @if (carregandoChecklist()) {
+            <p class="text-soft">Carregando checklist…</p>
+          } @else if (checklist(); as c) {
+
+            <div class="doc-resumo mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-soft small">Obrigatórios entregues</span>
+                <span class="text-main fw-bold">{{ c.obrigatoriosEntregues }}/{{ c.totalObrigatorios }}</span>
+              </div>
+              <div class="progress">
+                <div class="progress-bar"
+                     [style.width.%]="(c.obrigatoriosEntregues / c.totalObrigatorios) * 100"></div>
+              </div>
+              @if (c.faltantes.length > 0) {
+                <!-- É o roteiro da ligação para o responsável: o que pedir. -->
+                <p class="doc-faltantes mt-2 mb-0">
+                  <i class="bi bi-telephone"></i>
+                  Falta pedir: <strong>{{ c.faltantes.join(', ') }}</strong>
+                </p>
+              } @else {
+                <p class="acao-sucesso small mt-2 mb-0">
+                  <i class="bi bi-check-circle-fill"></i> Documentação completa.
+                </p>
+              }
+            </div>
+
+            <div class="d-flex flex-column gap-1">
+              @for (item of c.itens; track item.tipo) {
+                <div class="doc-item d-flex align-items-center gap-2 p-2"
+                     [class.entregue]="item.entregue">
+                  <button type="button" class="btn-doc"
+                          [class.marcado]="item.entregue"
+                          [disabled]="documentoEmCurso() === item.tipo"
+                          (click)="alternarDocumento(item)"
+                          [attr.aria-pressed]="item.entregue"
+                          [attr.aria-label]="(item.entregue ? 'Remover' : 'Registrar') + ' ' + item.rotulo">
+                    <i class="bi" [ngClass]="item.entregue ? 'bi-check-square-fill' : 'bi-square'"></i>
+                  </button>
+                  <div class="flex-grow-1">
+                    <span class="doc-rotulo">{{ item.rotulo }}</span>
+                    @if (item.obrigatorio) {
+                      <span class="doc-obrigatorio">obrigatório</span>
+                    }
+                    @if (item.entregue && item.recebidoPor) {
+                      <small class="text-soft d-block">Recebido por {{ item.recebidoPor }}</small>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+
+        <!-- ══ Aba: Prontuário ════════════════════════════════ -->
+        @if (aba() === 'prontuario') {
+          @if (carregandoProntuario()) {
+            <p class="text-soft">Carregando prontuário…</p>
+          } @else if (prontuario(); as p) {
+
+            <span class="grupo-titulo mb-2"><i class="bi bi-person"></i> Identificação</span>
+            <div class="detalhe-row"><span class="rot">Nome</span><span class="val">{{ p.identificacao.nome }}</span></div>
+            @if (p.identificacao.idade != null) {
+              <div class="detalhe-row"><span class="rot">Idade</span><span class="val">{{ p.identificacao.idade }} anos</span></div>
+            }
+            <div class="detalhe-row"><span class="rot">Turma</span><span class="val">{{ p.identificacao.turma ?? '—' }}</span></div>
+            <div class="detalhe-row">
+              <span class="rot">Etapa</span>
+              <span class="val">{{ p.identificacao.etapa === 'MEDIO' ? 'Ensino Médio' : p.identificacao.etapa === 'FUNDAMENTAL' ? 'Ensino Fundamental' : '—' }}</span>
+            </div>
+            <div class="detalhe-row"><span class="rot">E-mail</span><span class="val">{{ p.identificacao.emailInstitucional ?? '—' }}</span></div>
+            <div class="detalhe-row">
+              <span class="rot">Endereço</span>
+              <span class="val">{{ p.endereco?.resumo ?? 'Não informado' }}</span>
+            </div>
+
+            <hr class="detalhe-separador">
+            <span class="grupo-titulo mb-2"><i class="bi bi-graph-up"></i> Desempenho</span>
+            @if (p.desempenho.length === 0) {
+              <p class="text-soft small m-0">Nenhuma nota lançada até agora.</p>
+            } @else {
+              @for (d of p.desempenho; track d.disciplina) {
+                <div class="detalhe-row">
+                  <span class="rot">{{ d.disciplina }}</span>
+                  <span class="val">{{ d.media != null ? (d.media | number:'1.1-1') : '—' }}</span>
+                </div>
+              }
+              @if (p.mediaGeral != null) {
+                <div class="detalhe-row">
+                  <span class="rot fw-bold">Média geral</span>
+                  <span class="val">{{ p.mediaGeral | number:'1.1-1' }}</span>
+                </div>
+              }
+            }
+
+            @if (p.observacoesPedagogicas > 0) {
+              <p class="text-soft small mt-2 mb-0">
+                <i class="bi bi-journal-text"></i>
+                {{ p.observacoesPedagogicas }} observação(ões) pedagógica(s) registrada(s) pelos professores.
+              </p>
+            }
+          }
+        }
       </div>
     </div>
   }

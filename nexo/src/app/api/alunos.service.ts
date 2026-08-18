@@ -10,6 +10,7 @@ import {
   EnderecoRequest,
   NotaDTO,
   ObservacaoDTO,
+  ProntuarioDTO,
 } from '../core/api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -40,6 +41,15 @@ export class AlunosService {
   /** PUT e não PATCH: o corpo é o endereço inteiro, campo ausente apaga o valor. */
   salvarEndereco(alunoId: number, endereco: EnderecoRequest): Observable<EnderecoDTO> {
     return this.http.put<EnderecoDTO>(`${this.api}/${alunoId}/endereco`, endereco);
+  }
+
+  /** Ficha completa do aluno — o que a secretaria abre quando o responsável liga. */
+  prontuario(alunoId: number): Observable<ProntuarioDTO> {
+    return this.http.get<ProntuarioDTO>(`${this.api}/${alunoId}/prontuario`);
+  }
+
+  historicoEscolar(alunoId: number): Observable<Blob> {
+    return this.http.get(`${this.api}/${alunoId}/historico`, { responseType: 'blob' });
   }
 
   /**

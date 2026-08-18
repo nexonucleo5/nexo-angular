@@ -3,13 +3,22 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
+import { AlunosService } from '../api/alunos.service';
 import { MatriculasService } from '../api/matriculas.service';
 import { TurmasService } from '../api/turmas.service';
-import { MatriculaDTO, StatusDocumentacao, StatusMatricula, TurmaDTO } from '../core/api.models';
+import {
+  ChecklistDTO,
+  MatriculaDTO,
+  ProntuarioDTO,
+  StatusDocumentacao,
+  StatusMatricula,
+  TurmaDTO,
+} from '../core/api.models';
 import { exportarCsv } from '../core/csv.util';
 
 interface MatriculaView {
   id: number;
+  alunoId: number;
   nome: string;
   iniciais: string;
   turma: string;
@@ -20,6 +29,9 @@ interface MatriculaView {
   docPercent: number;
   temAlerta: boolean;
 }
+
+/** Abas do modal: o atendimento tem dois momentos distintos. */
+type AbaDetalhe = 'matricula' | 'documentos' | 'prontuario';
 
 const STATUS_LABEL: Record<StatusMatricula, string> = {
   ATIVA: 'Ativa',
@@ -43,6 +55,7 @@ const DOC_PERCENT: Record<StatusDocumentacao, number> = {
 })
 export class MatriculasDiretor {
   private readonly api = inject(MatriculasService);
+  private readonly alunosApi = inject(AlunosService);
   private readonly turmasApi = inject(TurmasService);
   private readonly route = inject(ActivatedRoute);
 
@@ -140,6 +153,7 @@ export class MatriculasDiretor {
   private paraView(m: MatriculaDTO): MatriculaView {
     return {
       id: m.id,
+      alunoId: m.alunoId,
       nome: m.aluno,
       iniciais: this.iniciais(m.aluno),
       turma: m.turma ?? 'Sem turma',
@@ -160,10 +174,135 @@ export class MatriculasDiretor {
     this.detalhe.set(m);
     this.acaoErro.set(null);
     this.acaoSucesso.set(null);
+    this.aba.set('matricula');
+    this.checklist.set(null);
+    this.prontuario.set(null);
   }
 
   fecharDetalhes(): void {
     this.detalhe.set(null);
+  }
+
+  // ── Abas do modal ─────────────────────────────────────────────────────────
+
+  readonly aba = signal<AbaDetalhe>('matricula');
+
+  /** Cada aba carrega o que precisa só quando é aberta — e uma vez só. */
+  abrirAba(aba: AbaDetalhe): void {
+    this.aba.set(aba);
+    const m = this.detalhe();
+    if (!m) return;
+    if (aba === 'documentos' && !this.checklist()) this.carregarChecklist(m.id);
+    if (aba === 'prontuario' && !this.prontuario()) this.carregarProntuario(m.alunoId);
+  }
+
+  // ── Checklist de documentos ───────────────────────────────────────────────
+
+  readonly checklist = signal<ChecklistDTO | null>(null);
+  readonly carregandoChecklist = signal(false);
+  readonly documentoEmCurso = signal<string | null>(null);
+
+  private carregarChecklist(matriculaId: number): void {
+    this.carregandoChecklist.set(true);
+    this.api.checklist(matriculaId).subscribe({
+      next: (c) => {
+        this.checklist.set(c);
+        this.carregandoChecklist.set(false);
+      },
+      error: () => {
+        this.carregandoChecklist.set(false);
+        this.acaoErro.set('Não foi possível carregar o checklist de documentos.');
+      },
+    });
+  }
+
+  /**
+   * Marca ou desmarca a entrega. A resposta traz o checklist inteiro já com a
+   * situação recalculada, então a linha da lista é atualizada junto — sem isso o
+   * cartão continuaria mostrando a documentação antiga até recarregar a página.
+   */
+  alternarDocumento(item: { tipo: string; entregue: boolean }): void {
+    const m = this.detalhe();
+    if (!m) return;
+
+    this.documentoEmCurso.set(item.tipo);
+    this.acaoErro.set(null);
+    const chamada = item.entregue
+      ? this.api.removerDocumento(m.id, item.tipo)
+      : this.api.registrarDocumento(m.id, item.tipo);
+
+    chamada.subscribe({
+      next: (c) => {
+        this.checklist.set(c);
+        this.documentoEmCurso.set(null);
+        this.acaoSucesso.set(item.entregue ? 'Documento removido.' : 'Documento registrado.');
+        this.atualizarDocumentacaoNaLista(m.id, c.situacao);
+      },
+      error: () => {
+        this.documentoEmCurso.set(null);
+        this.acaoErro.set('Não foi possível atualizar o documento.');
+      },
+    });
+  }
+
+  private atualizarDocumentacaoNaLista(matriculaId: number, situacao: StatusDocumentacao): void {
+    const aplicar = (x: MatriculaView): MatriculaView =>
+      x.id !== matriculaId
+        ? x
+        : {
+            ...x,
+            documentacao: situacao,
+            docPercent: DOC_PERCENT[situacao],
+            temAlerta: situacao === 'INCOMPLETA' || x.status === 'PENDENTE',
+          };
+    this.matriculas.update((lista) => lista.map(aplicar));
+    const atual = this.detalhe();
+    if (atual) this.detalhe.set(aplicar(atual));
+  }
+
+  // ── Prontuário ────────────────────────────────────────────────────────────
+
+  readonly prontuario = signal<ProntuarioDTO | null>(null);
+  readonly carregandoProntuario = signal(false);
+
+  private carregarProntuario(alunoId: number): void {
+    this.carregandoProntuario.set(true);
+    this.alunosApi.prontuario(alunoId).subscribe({
+      next: (p) => {
+        this.prontuario.set(p);
+        this.carregandoProntuario.set(false);
+      },
+      error: () => {
+        this.carregandoProntuario.set(false);
+        this.acaoErro.set('Não foi possível carregar o prontuário.');
+      },
+    });
+  }
+
+  emitirHistorico(m: MatriculaView): void {
+    this.acaoEmCurso.set(true);
+    this.acaoErro.set(null);
+    this.acaoSucesso.set(null);
+    this.alunosApi.historicoEscolar(m.alunoId).subscribe({
+      next: (pdf) => {
+        this.baixar(pdf, `historico-escolar-${m.alunoId}.pdf`);
+        this.acaoEmCurso.set(false);
+        this.acaoSucesso.set('Histórico escolar baixado.');
+      },
+      error: () => {
+        this.acaoEmCurso.set(false);
+        this.acaoErro.set('Não foi possível emitir o histórico escolar.');
+      },
+    });
+  }
+
+  private baixar(blob: Blob, nome: string): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nome;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   // ── Ações da secretaria/diretoria sobre a matrícula ────────────────────────
