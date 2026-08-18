@@ -9,10 +9,12 @@ import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AuditoriaService;
 import com.nexo.service.DeclaracaoMatriculaPdf;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.time.LocalDate;
 
 @RestController
@@ -28,6 +30,7 @@ public class MatriculasController {
     private final DeclaracaoMatriculaPdf declaracaoPdf;
     private final com.nexo.service.ConfiguracaoService configuracoes;
     private final com.nexo.service.DocumentacaoService documentacao;
+    private final com.nexo.service.RematriculaService rematricula;
 
     public MatriculasController(MatriculaRepository matriculas,
                                 com.nexo.repository.TurmaRepository turmas,
@@ -35,8 +38,10 @@ public class MatriculasController {
                                 AuditoriaService auditoria,
                                 DeclaracaoMatriculaPdf declaracaoPdf,
                                 com.nexo.service.ConfiguracaoService configuracoes,
-                                com.nexo.service.DocumentacaoService documentacao) {
+                                com.nexo.service.DocumentacaoService documentacao,
+                                com.nexo.service.RematriculaService rematricula) {
         this.documentacao = documentacao;
+        this.rematricula = rematricula;
         this.matriculas = matriculas;
         this.turmas = turmas;
         this.alunos = alunos;
@@ -134,6 +139,38 @@ public class MatriculasController {
                 "Status de matrícula atualizado",
                 "Matrícula #" + id + ": " + atual + " → " + request.status(), null);
         return MatriculaDTO.of(matricula);
+    }
+
+    // ── Rematrícula ──────────────────────────────────────────────────────────
+
+    /**
+     * Renova o vínculo para o ano letivo seguinte, promovendo o aluno de série.
+     * POST porque cria um recurso novo (a matrícula do ano que vem) — não é uma
+     * edição da matrícula atual, que continua existindo como histórico.
+     */
+    @PostMapping("/{id}/rematricula")
+    public ResponseEntity<com.nexo.service.RematriculaService.RematriculaDTO> rematricular(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UsuarioAutenticado operador) {
+        var criada = rematricula.renovar(id, operador.nome());
+        return ResponseEntity.created(URI.create("/api/matriculas/" + criada.matriculaId())).body(criada);
+    }
+
+    public record RematriculaLoteRequest(Long turmaId) {}
+
+    /**
+     * Renova a turma inteira. Devolve 200 (e não 201) porque o resultado é um
+     * relatório do lote, não um recurso: parte renova, parte não, e o corpo diz
+     * quem ficou de fora e por quê.
+     */
+    @PostMapping("/rematricula")
+    public com.nexo.service.RematriculaService.ResultadoLoteDTO rematricularTurma(
+            @RequestBody RematriculaLoteRequest request,
+            @AuthenticationPrincipal UsuarioAutenticado operador) {
+        if (request == null || request.turmaId() == null) {
+            throw ApiException.badRequest("Informe a turma a renovar.");
+        }
+        return rematricula.renovarTurma(request.turmaId(), operador.nome());
     }
 
     // ── Checklist de documentos ──────────────────────────────────────────────

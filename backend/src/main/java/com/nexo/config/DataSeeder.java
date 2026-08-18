@@ -3,6 +3,7 @@ package com.nexo.config;
 import com.nexo.domain.*;
 import com.nexo.repository.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,11 +45,12 @@ public class DataSeeder {
                            DesafioRepository desafios,
                            DesafioAlunoRepository desafiosAluno,
                            ChatMensagemRepository chatMensagens,
-                           PasswordEncoder encoder) {
+                           PasswordEncoder encoder,
+                           @Value("${spring.datasource.url:}") String jdbcUrl) {
         return args -> new Seeder(usuarios, turmas, alunos, professores, materias, matriculas, frequencias, notas,
                 avaliacoes, questoes, conversas, mensagens, avisos, duvidas, observacoes, eventos,
                 atividadesAluno, aulasAgendadas, atividadesProfessor, desafios, desafiosAluno,
-                chatMensagens, encoder).executar();
+                chatMensagens, encoder, jdbcUrl).executar();
     }
 
     record Seeder(UsuarioRepository usuarios, TurmaRepository turmas, AlunoRepository alunos,
@@ -66,16 +68,21 @@ public class DataSeeder {
                   DesafioRepository desafios,
                   DesafioAlunoRepository desafiosAluno,
                   ChatMensagemRepository chatMensagens,
-                  PasswordEncoder encoder) {
+                  PasswordEncoder encoder,
+                  String jdbcUrl) {
 
         @Transactional
         void executar() {
             if (usuarios.count() > 0) {
                 // Banco já povoado: o seed de exemplo não se repete, mas um perfil
                 // criado depois dele precisa existir aqui também — senão a conta da
-                // secretaria só apareceria em instalação nova, e quem já tinha banco
-                // (o dev de ontem, o Render) não conseguiria entrar com ela.
-                garantirSecretaria();
+                // secretaria só apareceria em instalação nova e quem já tinha banco
+                // de desenvolvimento não conseguiria entrar com ela.
+                //
+                // SÓ no banco de desenvolvimento (ver bancoDeDesenvolvimento): esta
+                // conta nasce com a senha padrão do seed, e criá-la num banco de
+                // verdade seria plantar credencial conhecida num sistema em uso.
+                if (bancoDeDesenvolvimento()) garantirSecretaria();
                 return;
             }
 
@@ -319,6 +326,20 @@ public class DataSeeder {
                     "Diretor, poderia liberar a sala 204 para a aula de reforço?", agora.minus(3, ChronoUnit.HOURS)));
             chatMensagens.save(new ChatMensagem(diretor.getId(), diretor.getNome(), professorUsr.getId(),
                     "Claro, professor. Sala reservada para quinta às 16h.", agora.minus(2, ChronoUnit.HOURS)));
+        }
+
+        /**
+         * O seed só escreve em banco H2, que é o de desenvolvimento (application.yml).
+         *
+         * <p>Trava de segurança, e não conveniência: {@code nexo.seed.enabled} é
+         * {@code true} no application.yml e só o perfil {@code prod} o desliga — mas
+         * nem o Dockerfile nem o compose.yaml ativam esse perfil, então um container
+         * sobe com o seed LIGADO. Sem esta checagem, subir a aplicação contra um
+         * Postgres de verdade criaria ali a conta da secretaria com a senha padrão do
+         * seed, numa base em uso. Dado de exemplo pertence ao banco de exemplo.
+         */
+        private boolean bancoDeDesenvolvimento() {
+            return jdbcUrl != null && jdbcUrl.toLowerCase(java.util.Locale.ROOT).startsWith("jdbc:h2:");
         }
 
         /**

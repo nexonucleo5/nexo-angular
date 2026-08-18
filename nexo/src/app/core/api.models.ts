@@ -155,6 +155,37 @@ export interface MateriaProgressoDTO {
   percentual: number;
 }
 
+// ── Rematrícula ──────────────────────────────────────────────────────────────
+
+/** POST /api/matriculas/{id}/rematricula — o vínculo criado para o ano seguinte. */
+export interface RematriculaDTO {
+  matriculaId: number;
+  origemId: number;
+  alunoId: number;
+  aluno: string;
+  turmaAnterior: string;
+  turmaNova: string;
+  anoLetivo: number;
+}
+
+/** Uma matrícula que o lote não renovou, com o motivo em texto legível. */
+export interface IgnoradaDTO {
+  matriculaId: number;
+  aluno: string;
+  motivo: string;
+}
+
+/**
+ * POST /api/matriculas/rematricula — relatório do lote. Não é tudo-ou-nada: um
+ * concluinte no meio da turma não impede a renovação dos outros.
+ */
+export interface ResultadoLoteDTO {
+  renovadas: number;
+  ignoradas: number;
+  novas: RematriculaDTO[];
+  semRenovar: IgnoradaDTO[];
+}
+
 // ── Documentação e prontuário (secretaria) ───────────────────────────────────
 
 /** Um documento do checklist da matrícula. */

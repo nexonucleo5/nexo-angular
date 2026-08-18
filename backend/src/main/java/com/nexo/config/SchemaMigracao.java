@@ -49,6 +49,10 @@ public class SchemaMigracao {
             // ficam NULL. O getter cobre a leitura, mas o banco fica consistente aqui.
             jdbc.execute("update turmas set capacidade = " + com.nexo.domain.Turma.CAPACIDADE_PADRAO
                     + " where capacidade is null");
+            // Mesma história em matriculas.ano_letivo: a coluna nasce vazia e o ano
+            // que vale para a linha antiga é o da própria data de matrícula.
+            jdbc.execute("update matriculas set ano_letivo = extract(year from data_matricula) "
+                    + "where ano_letivo is null and data_matricula is not null");
         };
     }
 

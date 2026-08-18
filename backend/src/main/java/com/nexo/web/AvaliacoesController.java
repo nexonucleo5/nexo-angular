@@ -180,10 +180,15 @@ public class AvaliacoesController {
                                      Questao.Tipo tipo, Questao.Dificuldade dificuldade) {}
 
     @PostMapping("/api/questoes")
-    public ResponseEntity<QuestaoDTO> criarQuestao(@RequestBody NovaQuestaoRequest request) {
+    public ResponseEntity<QuestaoDTO> criarQuestao(@RequestBody NovaQuestaoRequest request,
+                                                   @AuthenticationPrincipal UsuarioAutenticado operador) {
         if (request.enunciado() == null || request.enunciado().isBlank()) {
             throw ApiException.validation("Dados inválidos.", Map.of("enunciado", "Informe o enunciado."));
         }
+        // O banco de questões alimenta as avaliações, então segue a mesma regra
+        // delas: o professor só cria questão da matéria que leciona. Sem isto,
+        // bastava criar a questão de Química aqui para contornar o escopo.
+        escopoDocente.exigirMateria(request.disciplina(), operador);
         Questao questao = new Questao();
         questao.setEnunciado(request.enunciado().trim());
         questao.setDisciplina(request.disciplina());
@@ -194,9 +199,14 @@ public class AvaliacoesController {
     }
 
     @PutMapping("/api/questoes/{id}")
-    public QuestaoDTO atualizarQuestao(@PathVariable Long id, @RequestBody NovaQuestaoRequest request) {
+    public QuestaoDTO atualizarQuestao(@PathVariable Long id, @RequestBody NovaQuestaoRequest request,
+                                       @AuthenticationPrincipal UsuarioAutenticado operador) {
         Questao q = questoes.findById(id)
                 .orElseThrow(() -> ApiException.notFound("Questão não encontrada."));
+        // Editar questão alheia para a própria matéria — ou a própria para uma
+        // matéria alheia — tem que passar pelas duas pontas.
+        escopoDocente.exigirMateria(q.getDisciplina(), operador);
+        if (request.disciplina() != null) escopoDocente.exigirMateria(request.disciplina(), operador);
         if (request.enunciado() != null && !request.enunciado().isBlank()) q.setEnunciado(request.enunciado().trim());
         if (request.disciplina() != null) q.setDisciplina(request.disciplina());
         if (request.tipo() != null) q.setTipo(request.tipo());
@@ -206,10 +216,11 @@ public class AvaliacoesController {
 
     @DeleteMapping("/api/questoes/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void excluirQuestao(@PathVariable Long id) {
-        if (!questoes.existsById(id)) {
-            throw ApiException.notFound("Questão não encontrada.");
-        }
-        questoes.deleteById(id);
+    public void excluirQuestao(@PathVariable Long id,
+                               @AuthenticationPrincipal UsuarioAutenticado operador) {
+        Questao q = questoes.findById(id)
+                .orElseThrow(() -> ApiException.notFound("Questão não encontrada."));
+        escopoDocente.exigirMateria(q.getDisciplina(), operador);
+        questoes.delete(q);
     }
 }

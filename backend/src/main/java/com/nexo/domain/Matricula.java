@@ -32,6 +32,22 @@ public class Matricula {
 
     private LocalDate dataMatricula = LocalDate.now();
 
+    /**
+     * Ano letivo a que este vínculo se refere. É o que separa a matrícula de 2026
+     * da rematrícula de 2027 do mesmo aluno — sem ele, renovar criaria uma segunda
+     * matrícula indistinguível da primeira.
+     *
+     * <p>Integer para o banco antigo: linha gravada antes da coluna existir fica
+     * nula e o getter cai no ano da própria data de matrícula (ver SchemaMigracao,
+     * que também preenche as linhas de uma vez).
+     */
+    @Column(name = "ano_letivo")
+    private Integer anoLetivo;
+
+    /** A matrícula que deu origem a esta, quando veio de rematrícula. */
+    @Column(name = "origem_matricula_id")
+    private Long origemMatriculaId;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Aluno getAluno() { return aluno; }
@@ -44,4 +60,12 @@ public class Matricula {
     public void setDocumentacao(Documentacao documentacao) { this.documentacao = documentacao; }
     public LocalDate getDataMatricula() { return dataMatricula; }
     public void setDataMatricula(LocalDate dataMatricula) { this.dataMatricula = dataMatricula; }
+    /** Nunca nulo: sem a coluna preenchida, vale o ano da data de matrícula. */
+    public int getAnoLetivo() {
+        if (anoLetivo != null) return anoLetivo;
+        return dataMatricula != null ? dataMatricula.getYear() : LocalDate.now().getYear();
+    }
+    public void setAnoLetivo(Integer anoLetivo) { this.anoLetivo = anoLetivo; }
+    public Long getOrigemMatriculaId() { return origemMatriculaId; }
+    public void setOrigemMatriculaId(Long origemMatriculaId) { this.origemMatriculaId = origemMatriculaId; }
 }

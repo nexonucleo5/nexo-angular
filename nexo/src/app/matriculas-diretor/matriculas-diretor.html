@@ -89,6 +89,46 @@
     </div>
   </div>
 
+  <!-- Rematrícula em lote: só aparece com uma turma filtrada, porque é sobre ela
+       que a ação age — renovar "todas as turmas" de uma vez seria irreversível
+       demais para um clique. -->
+  @if (turmaFiltradaId(); as turmaId) {
+    <div class="lote-barra d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 p-3">
+      <div>
+        <strong class="text-main">Rematrícula de {{ turmaSelecionada() }}</strong>
+        <small class="text-soft d-block">
+          Renova para o ano seguinte quem está ativo, promovendo de série. Concluintes
+          e pendentes ficam de fora, com o motivo.
+        </small>
+      </div>
+      <button class="gradient-btn px-4 py-2" [disabled]="acaoEmCurso()"
+              (click)="rematricularTurma(turmaId)">
+        <i class="bi bi-arrow-repeat"></i> Renovar turma
+      </button>
+    </div>
+  }
+
+  @if (resultadoLote(); as r) {
+    <div class="lote-resultado p-3 mb-4">
+      <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+        <strong class="text-main">
+          {{ r.renovadas }} matrícula(s) renovada(s), {{ r.ignoradas }} fora
+        </strong>
+        <button class="detalhe-close" (click)="fecharResultadoLote()" aria-label="Fechar">&times;</button>
+      </div>
+      @if (r.semRenovar.length > 0) {
+        <div class="d-flex flex-column gap-1">
+          @for (i of r.semRenovar; track i.matriculaId) {
+            <small class="text-soft">
+              <i class="bi bi-dash-circle"></i>
+              <strong class="text-main">{{ i.aluno }}</strong> — {{ i.motivo }}
+            </small>
+          }
+        </div>
+      }
+    </div>
+  }
+
   <!-- ── Lista de matrículas ───────────────────────────────── -->
   <div class="row mb-3">
     <div class="col-12">
@@ -281,6 +321,22 @@
             <small class="text-soft">Move a matrícula e o cadastro do aluno juntos.</small>
           </div>
         }
+
+        <div class="grupo-acao">
+          <span class="grupo-titulo"><i class="bi bi-arrow-repeat"></i> Rematrícula</span>
+          <button class="btn btn-dark-custom btn-sm align-self-start"
+                  [disabled]="acaoEmCurso() || m.status !== 'ATIVA'"
+                  (click)="rematricular(m)">
+            <i class="bi bi-arrow-up-right-circle"></i> Renovar para o ano seguinte
+          </button>
+          <small class="text-soft">
+            @if (m.status !== 'ATIVA') {
+              Só matrícula ativa é renovada — efetive esta antes.
+            } @else {
+              Promove de série e abre um vínculo pendente; documentos permanentes acompanham.
+            }
+          </small>
+        </div>
 
         <div class="grupo-acao">
           <span class="grupo-titulo"><i class="bi bi-file-earmark-text"></i> Emitir documentos</span>

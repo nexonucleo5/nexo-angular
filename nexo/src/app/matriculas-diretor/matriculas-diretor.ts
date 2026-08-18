@@ -10,6 +10,7 @@ import {
   ChecklistDTO,
   MatriculaDTO,
   ProntuarioDTO,
+  ResultadoLoteDTO,
   StatusDocumentacao,
   StatusMatricula,
   TurmaDTO,
@@ -278,6 +279,68 @@ export class MatriculasDiretor {
       },
     });
   }
+
+  // ── Rematrícula ───────────────────────────────────────────────────────────
+
+  readonly resultadoLote = signal<ResultadoLoteDTO | null>(null);
+
+  /** Renova o vínculo deste aluno e recarrega a lista, que ganhou uma linha. */
+  rematricular(m: MatriculaView): void {
+    this.acaoEmCurso.set(true);
+    this.acaoErro.set(null);
+    this.acaoSucesso.set(null);
+    this.api.rematricular(m.id).subscribe({
+      next: (nova) => {
+        this.acaoEmCurso.set(false);
+        this.acaoSucesso.set(
+          `Rematriculado para ${nova.anoLetivo}: ${nova.turmaAnterior} → ${nova.turmaNova}.`,
+        );
+        this.carregar();
+      },
+      error: (erro) => {
+        this.acaoEmCurso.set(false);
+        this.acaoErro.set(
+          erro?.error?.fields?.matricula ??
+            erro?.error?.fields?.turma ??
+            erro?.error?.message ??
+            'Não foi possível rematricular.',
+        );
+      },
+    });
+  }
+
+  /**
+   * Renova a turma inteira. O resultado fica na tela com quem ficou de fora e o
+   * motivo — "12 de 30 renovadas" sem os motivos obrigaria a conferir 18 na mão.
+   */
+  rematricularTurma(turmaId: number): void {
+    this.acaoEmCurso.set(true);
+    this.acaoErro.set(null);
+    this.acaoSucesso.set(null);
+    this.resultadoLote.set(null);
+    this.api.rematricularTurma(turmaId).subscribe({
+      next: (resultado) => {
+        this.acaoEmCurso.set(false);
+        this.resultadoLote.set(resultado);
+        this.carregar();
+      },
+      error: (erro) => {
+        this.acaoEmCurso.set(false);
+        this.acaoErro.set(erro?.error?.message ?? 'Não foi possível renovar a turma.');
+      },
+    });
+  }
+
+  fecharResultadoLote(): void {
+    this.resultadoLote.set(null);
+  }
+
+  /** Id da turma atualmente filtrada — o lote age sobre ela. */
+  readonly turmaFiltradaId = computed(() => {
+    const nome = this.turmaSelecionada();
+    if (nome === 'Todas as Turmas') return null;
+    return this.turmas().find((t) => t.nome === nome)?.id ?? null;
+  });
 
   emitirHistorico(m: MatriculaView): void {
     this.acaoEmCurso.set(true);

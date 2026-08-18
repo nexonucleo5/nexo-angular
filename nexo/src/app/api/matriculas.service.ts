@@ -6,6 +6,8 @@ import {
   ChecklistDTO,
   MatriculaDTO,
   PageEnvelope,
+  RematriculaDTO,
+  ResultadoLoteDTO,
   StatusDocumentacao,
   StatusMatricula,
 } from '../core/api.models';
@@ -53,6 +55,18 @@ export class MatriculasService {
   /** PDF da declaração de matrícula — blob porque a rota exige o Bearer do interceptor. */
   declaracao(id: number): Observable<Blob> {
     return this.http.get(`${this.api}/${id}/declaracao`, { responseType: 'blob' });
+  }
+
+  // ── Rematrícula ────────────────────────────────────────────────────────────
+
+  /** Renova um vínculo para o ano seguinte, promovendo o aluno de série. */
+  rematricular(id: number): Observable<RematriculaDTO> {
+    return this.http.post<RematriculaDTO>(`${this.api}/${id}/rematricula`, {});
+  }
+
+  /** Renova a turma inteira; a resposta diz quem ficou de fora e por quê. */
+  rematricularTurma(turmaId: number): Observable<ResultadoLoteDTO> {
+    return this.http.post<ResultadoLoteDTO>(`${this.api}/rematricula`, { turmaId });
   }
 
   // ── Checklist de documentos ────────────────────────────────────────────────
