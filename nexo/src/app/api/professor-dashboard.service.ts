@@ -13,4 +13,14 @@ export class ProfessorDashboardService {
   dashboard(): Observable<ProfessorDashboardDTO> {
     return this.http.get<ProfessorDashboardDTO>(`${this.api}/dashboard`);
   }
+
+  /**
+   * As matérias que o docente leciona. As telas montavam esse seletor com uma
+   * lista fixa no código, o que deixava um professor de Química sem poder lançar
+   * nada e oferecia matéria alheia — recusada no salvamento.
+   */
+  materias(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.api}/materias`);
+  }
+
 }

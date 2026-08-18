@@ -68,6 +68,18 @@ public class EscopoDocente {
                 .collect(Collectors.toCollection(java.util.LinkedHashSet::new));
     }
 
+    /** Matérias de um docente já carregado — evita reconsultar por usuarioId. */
+    public Set<String> nomesDePorProfessor(Professor professor) {
+        return professor.getMaterias().stream()
+                .map(Materia::getNome)
+                .collect(Collectors.toCollection(java.util.LinkedHashSet::new));
+    }
+
+    /** Mesma normalização usada aqui, para quem precisa comparar nome de matéria. */
+    public static String normalizarPublico(String texto) {
+        return texto == null ? "" : normalizar(texto);
+    }
+
     private Set<String> materiasDe(UsuarioAutenticado operador) {
         return nomesDe(operador).stream().map(EscopoDocente::normalizar).collect(Collectors.toSet());
     }

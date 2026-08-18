@@ -10,6 +10,9 @@ import java.util.Optional;
 
 public interface FrequenciaRepository extends JpaRepository<Frequencia, Long> {
     List<Frequencia> findByTurmaIdAndData(Long turmaId, LocalDate data);
+
+    /** Todas as chamadas da turma — base do percentual de presença por aluno. */
+    List<Frequencia> findByTurmaId(Long turmaId);
     Optional<Frequencia> findByAlunoIdAndTurmaIdAndData(Long alunoId, Long turmaId, LocalDate data);
     long countByAlunoIdAndPresenteFalse(Long alunoId);
     long countByAlunoId(Long alunoId);

@@ -267,4 +267,33 @@ class RegrasAcademicasTest extends TesteApiBase {
                         .header(HttpHeaders.AUTHORIZATION, aluno))
                 .andExpect(status().isForbidden());
     }
+
+    // ── Escopo das telas do professor ────────────────────────────────────────
+
+    @Test
+    @DisplayName("professor vê só as turmas que leciona e só as matérias dele")
+    void telasDoProfessorVemRecortadas() throws Exception {
+        String professor = bearer("professor"); // leciona História, em 3 turmas
+        String diretor = bearer("diretor");
+
+        JsonNode todas = json("/api/turmas", diretor);
+        JsonNode minhas = json("/api/turmas", professor);
+
+        assertThat(minhas.size())
+                .as("o seletor do diário e o de notas listavam a escola inteira")
+                .isLessThan(todas.size());
+        assertThat(minhas.size()).isGreaterThan(0);
+
+        // Toda turma listada tem que ser acionável: antes, escolher a turma de um
+        // colega só rendia 403 no primeiro clique seguinte.
+        for (JsonNode t : minhas) {
+            mvc.perform(get("/api/turmas/" + t.get("id").asLong() + "/frequencia")
+                            .header(HttpHeaders.AUTHORIZATION, professor))
+                    .andExpect(status().isOk());
+        }
+
+        JsonNode materias = json("/api/professor/materias", professor);
+        assertThat(materias.size()).isEqualTo(1);
+        assertThat(materias.get(0).asText()).isEqualTo("História");
+    }
 }

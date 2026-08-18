@@ -32,7 +32,7 @@
       <div class="col-12 col-sm-6 col-lg-3">
         <label class="form-label text-soft small fw-medium mb-2">Disciplina</label>
         <select class="form-select custom-select" [(ngModel)]="disciplinaSelecionada" (ngModelChange)="carregarNotas()">
-          <option *ngFor="let d of disciplinas" [value]="d">{{ d }}</option>
+          <option *ngFor="let d of disciplinas()" [value]="d">{{ d }}</option>
         </select>
       </div>
       <div class="col-12 col-sm-6 col-lg-3">

@@ -6,6 +6,7 @@ import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { forkJoin } from 'rxjs';
 import { TurmasService } from '../api/turmas.service';
 import { AlunosService } from '../api/alunos.service';
+import { ProfessorDashboardService } from '../api/professor-dashboard.service';
 import { NotaDTO, TurmaDTO } from '../core/api.models';
 import { AVATAR_PADRAO } from '../core/avatar';
 
@@ -40,14 +41,22 @@ interface BarraDistribuicao {
 export class NotasEngajamento implements OnInit {
   private readonly turmasApi = inject(TurmasService);
   private readonly alunosApi = inject(AlunosService);
+  private readonly professorApi = inject(ProfessorDashboardService);
 
   readonly turmas = signal<TurmaDTO[]>([]);
   turmaSelecionadaId: number | null = null;
-  disciplinaSelecionada = 'História';
+  /** Preenchida com a primeira matéria do docente assim que o servidor responde. */
+  disciplinaSelecionada = '';
   periodoSelecionado = 'Este Bimestre';
   statusSelecionado = 'Todos';
 
-  disciplinas = ['História', 'Matemática', 'Português'];
+  /**
+   * Só as matérias que o docente leciona. Era uma lista fixa no código
+   * (História/Matemática/Português): um professor de Química não conseguia lançar
+   * nota nenhuma, e escolher matéria alheia rendia 403 só na hora de salvar — com
+   * a tabela já preenchida.
+   */
+  readonly disciplinas = signal<string[]>([]);
   periodos = ['Este Bimestre', 'Último Bimestre', 'Ano Letivo'];
   statusOpcoes = ['Todos', 'Aprovados', 'Em Risco'];
 
@@ -56,6 +65,18 @@ export class NotasEngajamento implements OnInit {
   readonly alunos = signal<AlunoNotaView[]>([]);
 
   ngOnInit(): void {
+    // A lista de turmas já chega recortada pelo servidor ("minhas turmas").
+    this.professorApi.materias().subscribe({
+      next: (materias) => {
+        this.disciplinas.set(materias);
+        if (!this.disciplinaSelecionada && materias.length) {
+          this.disciplinaSelecionada = materias[0];
+          this.carregarNotas();
+        }
+      },
+      error: () => this.disciplinas.set([]),
+    });
+
     this.turmasApi.listar().subscribe({
       next: (turmas) => {
         this.turmas.set(turmas);
@@ -69,7 +90,8 @@ export class NotasEngajamento implements OnInit {
 
   carregarNotas(): void {
     const turmaId = this.turmaSelecionadaId;
-    if (turmaId == null) return;
+    // Sem matéria escolhida não há o que carregar: a nota pertence a uma disciplina.
+    if (turmaId == null || !this.disciplinaSelecionada) return;
     this.turmasApi.notas(turmaId, this.disciplinaSelecionada).subscribe({
       next: (notas) => this.alunos.set(notas.map((n) => this.paraView(n))),
       error: () => this.alunos.set([]),
