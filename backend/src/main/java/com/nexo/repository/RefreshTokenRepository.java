@@ -33,4 +33,18 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     @Modifying
     @Query("update RefreshToken t set t.revogado = true where t.usuario.id = :usuarioId and t.revogado = false")
     int revogarTodosDoUsuario(@Param("usuarioId") Long usuarioId);
+
+    /**
+     * Encerra as demais sessões do usuário, preservando a que apresentou
+     * {@code hashPreservado}. Usado na troca de senha: as outras sessões caem, mas quem
+     * acabou de trocar continua onde estava.
+     *
+     * <p>Para revogar <b>todas</b>, passe uma string vazia — nenhum SHA-256 é vazio, então
+     * a condição não poupa nada. Evita um {@code is null} na consulta.
+     */
+    @Modifying
+    @Query("update RefreshToken t set t.revogado = true "
+         + "where t.usuario.id = :usuarioId and t.revogado = false and t.tokenHash <> :hashPreservado")
+    int revogarOutrasSessoes(@Param("usuarioId") Long usuarioId,
+                             @Param("hashPreservado") String hashPreservado);
 }

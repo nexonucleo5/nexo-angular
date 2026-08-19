@@ -11,8 +11,11 @@ import com.nexo.repository.AlunoRepository;
 import com.nexo.repository.FotoPerfilRepository;
 import com.nexo.repository.ProfessorRepository;
 import com.nexo.repository.UsuarioRepository;
+import com.nexo.security.PoliticaSenha;
+import com.nexo.security.RefreshTokenCookie;
 import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AuditoriaService;
+import com.nexo.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -61,16 +65,20 @@ public class UsuariosController {
     private final ProfessorRepository professores;
     private final PasswordEncoder passwordEncoder;
     private final AuditoriaService auditoria;
+    private final PoliticaSenha politicaSenha;
+    private final AuthService authService;
 
     public UsuariosController(UsuarioRepository usuarios, FotoPerfilRepository fotos, AlunoRepository alunos,
                               ProfessorRepository professores, PasswordEncoder passwordEncoder,
-                              AuditoriaService auditoria) {
+                              AuditoriaService auditoria, PoliticaSenha politicaSenha, AuthService authService) {
         this.usuarios = usuarios;
         this.fotos = fotos;
         this.alunos = alunos;
         this.professores = professores;
         this.passwordEncoder = passwordEncoder;
         this.auditoria = auditoria;
+        this.politicaSenha = politicaSenha;
+        this.authService = authService;
     }
 
     @GetMapping("/me")
@@ -166,18 +174,55 @@ public class UsuariosController {
         });
     }
 
+    /**
+     * Troca de senha do próprio usuário.
+     *
+     * <p>Duas coisas acontecem aqui além de gravar o hash novo:
+     * <ul>
+     *   <li>a senha passa pela {@link PoliticaSenha} — o {@code @Size} do DTO garante o
+     *       comprimento, mas não impede "12345678" nem o próprio login como senha;</li>
+     *   <li>a nova senha não pode ser a que já está em uso: "trocar" para a mesma coisa
+     *       respondia 204 e não trocava nada, o que é especialmente enganoso quando a
+     *       troca acontece porque a senha vazou;</li>
+     *   <li>as <b>outras</b> sessões são encerradas. Antes, trocar a senha não invalidava
+     *       nada: quem já tivesse um refresh token seguia renovando por até 7 dias, o que
+     *       anula o motivo mais comum de trocar a senha, que é desconfiar que ela vazou.
+     *       A sessão que fez o pedido é preservada pelo cookie que ela apresentou.</li>
+     * </ul>
+     *
+     * <p>Tudo numa transação só: senha nova e sessões derrubadas andam juntas, ou nenhuma
+     * das duas.
+     */
     // Mutação sem corpo de resposta: 204, não 200 com corpo vazio.
     @PostMapping("/me/senha")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Transactional
     public void trocarSenha(@AuthenticationPrincipal UsuarioAutenticado principal,
+                            @CookieValue(name = RefreshTokenCookie.NOME, required = false) String refreshToken,
                             @Valid @RequestBody TrocaSenhaRequest request) {
         Usuario usuario = carregar(principal);
+
+        // Código e campo próprios: sem eles a tela não distingue "errou a senha atual" de
+        // "a nova senha foi recusada" — os dois eram 400 — e acusava sempre o primeiro
+        // campo, mandando o usuário corrigir algo que estava certo.
         if (!passwordEncoder.matches(request.senhaAtual(), usuario.getSenhaHash())) {
-            throw ApiException.badRequest("Senha atual incorreta.");
+            final String motivo = "A senha atual não confere. Digite a senha com que você entrou no sistema.";
+            throw new ApiException(HttpStatus.BAD_REQUEST, "SENHA_ATUAL_INCORRETA", motivo,
+                    Map.of("senhaAtual", motivo));
         }
+        if (passwordEncoder.matches(request.novaSenha(), usuario.getSenhaHash())) {
+            final String motivo = "A nova senha é igual à atual. Escolha uma diferente.";
+            throw new ApiException(HttpStatus.BAD_REQUEST, "SENHA_IGUAL_A_ATUAL", motivo,
+                    Map.of("novaSenha", motivo));
+        }
+        politicaSenha.validar(request.novaSenha(), usuario.getLogin(), usuario.getNome());
+
         usuario.setSenhaHash(passwordEncoder.encode(request.novaSenha()));
         usuarios.save(usuario);
-        auditoria.registrar(usuario.getNome(), EventoAuditoria.Tipo.ALTERACAO, "Senha alterada", null, null);
+
+        int encerradas = authService.encerrarOutrasSessoes(usuario.getId(), refreshToken);
+        String detalhe = encerradas > 0 ? encerradas + " outra(s) sessão(ões) encerrada(s)" : null;
+        auditoria.registrar(usuario.getNome(), EventoAuditoria.Tipo.ALTERACAO, "Senha alterada", detalhe, null);
     }
 
     private Usuario carregar(UsuarioAutenticado principal) {

@@ -39,5 +39,13 @@ nexo:
     refresh-token-days: ${JWT_REFRESH_DAYS:7}
   cors:
     allowed-origins: ${CORS_ORIGINS:https://nexo-gestao-escolar.com.br}
+  auth:
+    max-tentativas-por-ip: ${AUTH_MAX_TENTATIVAS_IP:100}
+    max-refresh-invalidos-por-ip: ${AUTH_MAX_REFRESH_IP:30}
+  proxy:
+    # 1 = o proxy do Render, que termina o TLS e é quem acrescenta o endereço real do
+    # cliente ao fim do X-Forwarded-For. Ajuste se entrar outra camada (CDN, WAF) na
+    # frente: cada salto a mais é +1 aqui, senão o IP registrado vira o do intermediário.
+    saltos-confiaveis: ${PROXY_SALTOS_CONFIAVEIS:1}
   seed:
     enabled: ${SEED_ENABLED:false}      # não semear dados de exemplo em produção
