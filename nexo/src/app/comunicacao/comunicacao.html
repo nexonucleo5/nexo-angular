@@ -99,22 +99,33 @@
           </select>
           <div class="search-box">
             <i class="bi bi-search"></i>
-            <input type="text" class="form-control-custom" [(ngModel)]="buscaAluno" placeholder="Buscar por nome ou mat...">
+            <input type="text" class="form-control-custom" [(ngModel)]="buscaAluno" placeholder="Buscar por nome...">
           </div>
         </div>
         <div class="student-list">
-          <div class="chat-item p-3 mb-2"
-               *ngFor="let aluno of alunosFiltrados()"
-               [class.active]="alunoSelecionado?.alunoId === aluno.alunoId"
-               (click)="selecionarAluno(aluno)">
-            <div class="d-flex align-items-center gap-3">
-              <img [src]="avatarPadrao" class="avatar-img" alt="Avatar">
-              <div>
-                <h4 class="small fw-bold text-main mb-0">{{aluno.nome}}</h4>
-                <p class="text-soft extra-small m-0">Mat: {{aluno.matricula}}</p>
+          <!-- Lista vazia por falha e lista vazia de verdade são coisas diferentes,
+               e antes as duas apareciam iguais: em branco, sem explicação. -->
+          @if (erroAlunos()) {
+            <p class="text-danger small m-0">
+              <i class="bi bi-exclamation-circle"></i>
+              Não foi possível carregar seus alunos.
+            </p>
+          } @else if (alunosFiltrados().length === 0) {
+            <p class="text-soft small m-0">Nenhum aluno nesta turma.</p>
+          } @else {
+            <div class="chat-item p-3 mb-2"
+                 *ngFor="let aluno of alunosFiltrados()"
+                 [class.active]="alunoSelecionado?.alunoId === aluno.alunoId"
+                 (click)="selecionarAluno(aluno)">
+              <div class="d-flex align-items-center gap-3">
+                <img [src]="avatarPadrao" class="avatar-img" alt="Avatar">
+                <div>
+                  <h4 class="small fw-bold text-main mb-0">{{aluno.nome}}</h4>
+                  <p class="text-soft extra-small m-0">{{aluno.turma}}</p>
+                </div>
               </div>
             </div>
-          </div>
+          }
         </div>
       </div>
     </div>
@@ -125,7 +136,7 @@
           <img [src]="avatarPadrao" class="avatar-big" alt="Avatar Aluno">
           <div>
             <h2 class="h4 text-main fw-bold mb-1">{{alunoSelecionado.nome}}</h2>
-            <p class="text-soft small mb-0">{{alunoSelecionado.turma}} • Mat: {{alunoSelecionado.matricula}}</p>
+            <p class="text-soft small mb-0">{{alunoSelecionado.turma}}</p>
           </div>
         </div>
 

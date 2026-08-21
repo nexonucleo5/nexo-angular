@@ -1,0 +1,50 @@
+/* admin-dashboard.scss — o visual compartilhado das telas administrativas
+   (stat-card, botões, badges) é global: styles.scss §6.
+   Aqui ficam só os estilos específicos desta página. */
+
+/* Matéria com pouco conteúdo: o item de ação do painel. */
+.materia-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  transition: border-color 0.2s;
+  &:hover { border-color: #9b2fff; }
+}
+
+/* Cobertura do catálogo por matéria */
+.ocupacao-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+/* É um link (abre o catálogo da matéria), mas se apresenta como linha de dado;
+   o hover é quem conta que dá para clicar. */
+.ocupacao-linha {
+  display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px;
+  padding: 6px 8px; margin-inline: -8px; border-radius: 10px;
+  text-decoration: none;
+  transition: background-color 0.15s;
+  &:last-child { margin-bottom: 0; }
+  &:hover { background: var(--hover-overlay); }
+}
+
+.ocupacao-barra {
+  height: 8px; border-radius: 6px; background: var(--bg-input); overflow: hidden;
+  span {
+    display: block; height: 100%; border-radius: 6px;
+    background: linear-gradient(90deg, #9b2fff, #06d25e);
+    /* Zero por cento não desenha barra nenhuma, e uma matéria vazia é justamente
+       o que precisa saltar aos olhos — daí o traço vermelho de largura mínima. */
+    &.vazia { background: #ef4444; min-width: 4px; }
+  }
+}
+
+/* No celular a linha da matéria empilha e o selo desce para a linha de baixo. */
+@media (max-width: 767.98px) {
+  .materia-row {
+    > .flex-grow-1 { flex: 1 1 calc(100% - 60px); }
+    > .badge-compliance { flex: 1 1 100%; justify-content: center; }
+  }
+}

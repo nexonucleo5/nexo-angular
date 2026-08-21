@@ -35,9 +35,17 @@ export class Desafios {
   private readonly api = inject(DesafiosService);
   private readonly router = inject(Router);
 
-  buscaDeTermos = '';
-  materiaSelecionada = 'Todas as Matérias';
-  nivelSelecionado = 'Todos os Níveis';
+  /**
+   * Os três filtros são signals, e não campos comuns, porque {@link desafiosFiltrados}
+   * é um computed: ele só recalcula quando um signal do qual depende muda. Como
+   * propriedades simples, digitar na busca ou trocar o select não invalidava o
+   * cache — a lista continuava mostrando o resultado antigo e o filtro parecia
+   * morto. É o mesmo motivo pelo qual a tela de matérias foi convertida.
+   */
+  readonly buscaDeTermos = signal('');
+  readonly materiaSelecionada = signal('Todas as Matérias');
+  readonly nivelSelecionado = signal('Todos os Níveis');
+  readonly statusSelecionado = signal<'todos' | 'aberto' | 'progresso' | 'concluido'>('todos');
 
   readonly carregando = signal(true);
   private readonly desafios = signal<DesafioView[]>([]);
@@ -54,15 +62,41 @@ export class Desafios {
   ]);
   readonly niveis = ['Todos os Níveis', 'Fácil', 'Médio', 'Difícil'];
 
+  readonly statusOpcoes = [
+    { valor: 'todos' as const, rotulo: 'Todos' },
+    { valor: 'aberto' as const, rotulo: 'Não iniciados' },
+    { valor: 'progresso' as const, rotulo: 'Em andamento' },
+    { valor: 'concluido' as const, rotulo: 'Concluídos' },
+  ];
+
   readonly desafiosFiltrados = computed(() => {
-    const termo = this.buscaDeTermos.toLowerCase();
+    const termo = this.buscaDeTermos().trim().toLowerCase();
+    const materia = this.materiaSelecionada();
+    const nivel = this.nivelSelecionado();
+    const status = this.statusSelecionado();
     return this.desafios().filter(
       (d) =>
         d.titulo.toLowerCase().includes(termo) &&
-        (this.materiaSelecionada === 'Todas as Matérias' || d.materia === this.materiaSelecionada) &&
-        (this.nivelSelecionado === 'Todos os Níveis' || d.nivel === this.nivelSelecionado),
+        (materia === 'Todas as Matérias' || d.materia === materia) &&
+        (nivel === 'Todos os Níveis' || d.nivel === nivel) &&
+        (status === 'todos' || d.status === status),
     );
   });
+
+  /** Algum filtro em uso — controla o aviso de "nenhum resultado" e o botão de limpar. */
+  readonly temFiltro = computed(() =>
+    this.buscaDeTermos().trim() !== '' ||
+    this.materiaSelecionada() !== 'Todas as Matérias' ||
+    this.nivelSelecionado() !== 'Todos os Níveis' ||
+    this.statusSelecionado() !== 'todos',
+  );
+
+  limparFiltros(): void {
+    this.buscaDeTermos.set('');
+    this.materiaSelecionada.set('Todas as Matérias');
+    this.nivelSelecionado.set('Todos os Níveis');
+    this.statusSelecionado.set('todos');
+  }
 
   constructor() {
     this.carregar();

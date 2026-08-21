@@ -1,0 +1,170 @@
+<section class="page-content">
+
+  <!-- ── Cabeçalho ────────────────────────────────────────── -->
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+      <h1 class="page-title fw-bold">Catálogo de conteúdo</h1>
+      <p class="text-soft m-0">O que está no ar para o aluno, e em que ordem</p>
+    </div>
+  </div>
+
+  <!-- ── Abas ─────────────────────────────────────────────── -->
+  <div class="d-flex gap-2 mb-4">
+    <button class="aba-btn" [class.ativa]="aba() === 'conteudos'" (click)="abrirAba('conteudos')">
+      <i class="bi bi-journal-text"></i> Conteúdos
+    </button>
+    <button class="aba-btn" [class.ativa]="aba() === 'desafios'" (click)="abrirAba('desafios')">
+      <i class="bi bi-trophy"></i> Desafios
+    </button>
+  </div>
+
+  @if (acaoErro(); as msg) {
+    <p class="text-danger small"><i class="bi bi-exclamation-circle"></i> {{ msg }}</p>
+  }
+  @if (acaoSucesso(); as msg) {
+    <p class="text-success small"><i class="bi bi-check-circle"></i> {{ msg }}</p>
+  }
+
+  @if (carregando()) {
+    <p class="text-soft">Carregando o catálogo…</p>
+  } @else if (erro()) {
+    <div class="d-flex align-items-center gap-3">
+      <p class="text-soft mb-0">Não foi possível carregar o catálogo.</p>
+      <button class="btn btn-dark-custom" (click)="carregar()">Tentar novamente</button>
+    </div>
+  } @else if (aba() === 'conteudos') {
+
+  <div class="row g-4">
+
+    <!-- ── Matérias ─────────────────────────────────────────── -->
+    <div class="col-12 col-lg-4">
+      <h5 class="text-main fw-bold mb-3">Matérias</h5>
+      <div class="lista-materias">
+        @for (m of materias(); track m.id) {
+          <button class="materia-item"
+                  [class.selecionada]="m.id === materiaSelecionadaId()"
+                  (click)="selecionarMateria(m.id)">
+            <div class="d-flex justify-content-between align-items-center gap-2">
+              <span class="text-main fw-semibold">{{ m.nome }}</span>
+              <span class="badge-compliance"
+                    [ngClass]="m.conteudosPublicados === 0 ? 'status-danger' : 'status-ok'">
+                {{ m.conteudosPublicados }}/{{ m.conteudos }}
+              </span>
+            </div>
+            <small class="text-soft">{{ m.segmento === 'AMBOS' ? 'Fundamental e médio' : (m.segmento === 'MEDIO' ? 'Ensino médio' : 'Fundamental') }}</small>
+          </button>
+        } @empty {
+          <p class="text-soft m-0">Nenhuma matéria cadastrada.</p>
+        }
+      </div>
+    </div>
+
+    <!-- ── Conteúdos da matéria ─────────────────────────────── -->
+    <div class="col-12 col-lg-8">
+      @if (materiaSelecionada(); as m) {
+        <h5 class="text-main fw-bold mb-3">
+          {{ m.nome }}
+          <span class="text-soft fw-normal small">— na ordem em que o aluno estuda</span>
+        </h5>
+
+        @if (carregandoConteudos()) {
+          <p class="text-soft">Carregando os conteúdos…</p>
+        } @else if (conteudos().length === 0) {
+          <p class="text-soft">Esta matéria ainda não tem conteúdo cadastrado.</p>
+        } @else {
+          <div class="d-flex flex-column gap-2">
+            @for (c of conteudos(); track c.id; let i = $index) {
+              <div class="conteudo-row p-3 d-flex align-items-center gap-3 flex-wrap"
+                   [class.fora-do-ar]="!c.publicado">
+
+                <!-- Setas de ordem: a sequência é do conjunto, e o servidor
+                     recebe a lista inteira a cada movimento. -->
+                <div class="setas-ordem d-flex flex-column">
+                  <button class="seta" [disabled]="i === 0"
+                          [attr.aria-label]="'Subir ' + c.titulo"
+                          (click)="mover(i, -1)">
+                    <i class="bi bi-chevron-up"></i>
+                  </button>
+                  <button class="seta" [disabled]="i === conteudos().length - 1"
+                          [attr.aria-label]="'Descer ' + c.titulo"
+                          (click)="mover(i, 1)">
+                    <i class="bi bi-chevron-down"></i>
+                  </button>
+                </div>
+
+                <span class="posicao">{{ i + 1 }}</span>
+
+                <div class="flex-grow-1">
+                  <h6 class="text-main fw-bold mb-1">{{ c.titulo }}</h6>
+                  <small class="text-soft">
+                    {{ c.resumo || 'Sem resumo' }}
+                    @if (c.minutos > 0) { • {{ c.minutos }} min }
+                  </small>
+                </div>
+
+                <span class="badge-compliance" [ngClass]="c.publicado ? 'status-ok' : 'status-danger'">
+                  <i class="bi" [ngClass]="c.publicado ? 'bi-eye' : 'bi-eye-slash'"></i>
+                  {{ c.publicado ? 'No ar' : 'Fora do ar' }}
+                </span>
+
+                <button class="btn-sm px-3 py-1"
+                        [ngClass]="c.publicado ? 'btn btn-dark-custom' : 'gradient-btn'"
+                        [disabled]="acaoEmCurso() !== null"
+                        (click)="alternarPublicadoConteudo(c)">
+                  @if (acaoEmCurso() === c.id) {
+                    <i class="bi bi-arrow-repeat girando"></i>
+                  }
+                  {{ c.publicado ? 'Despublicar' : 'Publicar' }}
+                </button>
+              </div>
+            }
+          </div>
+        }
+      } @else {
+        <p class="text-soft">Escolha uma matéria à esquerda.</p>
+      }
+    </div>
+  </div>
+
+  } @else {
+
+  <!-- ── Desafios ─────────────────────────────────────────── -->
+  @if (carregandoDesafios()) {
+    <p class="text-soft">Carregando os desafios…</p>
+  } @else if (desafios().length === 0) {
+    <p class="text-soft">Nenhum desafio cadastrado.</p>
+  } @else {
+    <div class="d-flex flex-column gap-2">
+      @for (d of desafios(); track d.id) {
+        <div class="conteudo-row p-3 d-flex align-items-center gap-3 flex-wrap"
+             [class.fora-do-ar]="!d.publicado">
+          <div class="icon-box purple-gradient"><i class="bi bi-trophy"></i></div>
+
+          <div class="flex-grow-1">
+            <h6 class="text-main fw-bold mb-1">{{ d.titulo }}</h6>
+            <small class="text-soft">
+              {{ d.materia || 'Geral' }} • {{ d.nivel || 'sem nível' }} • {{ d.xp }} XP • {{ d.tempoMin }} min
+            </small>
+          </div>
+
+          <span class="badge-compliance" [ngClass]="d.publicado ? 'status-ok' : 'status-danger'">
+            <i class="bi" [ngClass]="d.publicado ? 'bi-eye' : 'bi-eye-slash'"></i>
+            {{ d.publicado ? 'No ar' : 'Fora do ar' }}
+          </span>
+
+          <button class="btn-sm px-3 py-1"
+                  [ngClass]="d.publicado ? 'btn btn-dark-custom' : 'gradient-btn'"
+                  [disabled]="acaoEmCurso() !== null"
+                  (click)="alternarPublicadoDesafio(d)">
+            @if (acaoEmCurso() === d.id) {
+              <i class="bi bi-arrow-repeat girando"></i>
+            }
+            {{ d.publicado ? 'Despublicar' : 'Publicar' }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  }
+</section>

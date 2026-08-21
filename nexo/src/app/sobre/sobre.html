@@ -1,0 +1,78 @@
+<section class="page-content">
+
+  <div class="page-heading mb-4">
+    <h1 class="page-title fw-bold">Sobre o Nexo</h1>
+    <p class="text-soft m-0">Sistema de gestão escolar — ano letivo {{ anoLetivo }}</p>
+  </div>
+
+  <!-- ── O que é ────────────────────────────────────────────── -->
+  <div class="sobre-destaque mb-4">
+    <div class="d-flex align-items-start gap-3 flex-wrap">
+      <div class="icon-box purple-gradient"><i class="bi bi-mortarboard-fill fs-4"></i></div>
+      <div class="flex-grow-1">
+        <h2 class="h5 fw-bold text-main mb-2">Uma escola inteira num lugar só</h2>
+        <p class="text-soft mb-0">
+          O Nexo reúne matrícula, diário de classe, notas, comunicação e documentos
+          num sistema único. Cada pessoa entra com o próprio perfil e encontra o que
+          é do trabalho dela — sem planilha paralela e sem papel circulando.
+        </p>
+      </div>
+      <span class="versao-tag">versão {{ versao }}</span>
+    </div>
+  </div>
+
+  <!-- ── Recursos ───────────────────────────────────────────── -->
+  <h2 class="h5 fw-bold text-main mb-3">Como o sistema trabalha</h2>
+  <div class="row g-3 mb-4">
+    @for (r of recursos; track r.titulo) {
+      <div class="col-12 col-md-6">
+        <div class="recurso-card h-100 d-flex gap-3 p-3">
+          <i class="bi {{ r.icone }} recurso-icone"></i>
+          <div>
+            <h3 class="h6 fw-bold text-main mb-1">{{ r.titulo }}</h3>
+            <p class="text-soft small mb-0">{{ r.texto }}</p>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ── Perfis e permissões ────────────────────────────────── -->
+  <h2 class="h5 fw-bold text-main mb-1">Quem faz o quê</h2>
+  <p class="text-soft small mb-3">
+    O acesso é decidido pelo perfil. Seu perfil está destacado.
+  </p>
+
+  <div class="row g-3 mb-4">
+    @for (p of permissoes; track p.perfil) {
+      <div class="col-12 col-xl-6">
+        <div class="perfil-card h-100 p-3"
+             [class.perfil-atual]="perfilAtual() === p.perfil.toLowerCase()">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <div class="icon-box {{ p.cor }}"><i class="bi {{ p.icone }} fs-5"></i></div>
+            <h3 class="h6 fw-bold text-main m-0">{{ p.perfil }}</h3>
+            @if (perfilAtual() === p.perfil.toLowerCase()) {
+              <span class="badge-compliance status-ok">você</span>
+            }
+          </div>
+          <ul class="lista-permissoes">
+            @for (item of p.faz; track item) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ── Rodapé ─────────────────────────────────────────────── -->
+  <div class="sobre-rodape d-flex align-items-center justify-content-between flex-wrap gap-3 p-3">
+    <p class="text-soft small m-0">
+      Precisa de ajuda ou encontrou algo errado?
+    </p>
+    <a routerLink="/suporte" class="gradient-btn px-4 py-2 text-decoration-none">
+      <i class="bi bi-life-preserver"></i> Ir para o suporte
+    </a>
+  </div>
+
+</section>

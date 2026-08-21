@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, roleGuard } from './core/guards';
+import { authGuard, roleGuard, visitanteGuard } from './core/guards';
 
 /**
  * Rotas com lazy loading (loadComponent) por perfil + guards usando a role
@@ -12,7 +12,10 @@ export const routes: Routes = [
 
   // ── Públicas ────────────────────────────────────────────────────────────────
   {
+    // visitanteGuard: com sessão ativa, /login manda para o painel em vez de
+    // desenhar o formulário dentro do sistema (ver o comentário do guard).
     path: 'login',
+    canActivate: [visitanteGuard],
     loadComponent: () => import('./login/login').then((m) => m.Login),
   },
 
@@ -38,6 +41,17 @@ export const routes: Routes = [
     loadComponent: () => import('./dashboards/dashboards').then((m) => m.Dashboards),
   },
   {
+    // Referência de perfis e permissões — a mesma matriz que o backend aplica.
+    path: 'sobre',
+    canActivate: [authGuard],
+    loadComponent: () => import('./sobre/sobre').then((m) => m.Sobre),
+  },
+  {
+    path: 'suporte',
+    canActivate: [authGuard],
+    loadComponent: () => import('./suporte/suporte').then((m) => m.Suporte),
+  },
+  {
     // Chat em tempo real entre papéis diferentes (aluno ↔ professor ↔ diretor)
     path: 'mensagens',
     canActivate: [authGuard, roleGuard('diretor', 'professor', 'aluno')],
@@ -48,7 +62,7 @@ export const routes: Routes = [
   {
     path: 'materias',
     canActivate: [authGuard, roleGuard('aluno')],
-    loadComponent: () => import('./matriculas-wrapper/matriculas-wrapper').then((m) => m.MatriculasWrapper),
+    loadComponent: () => import('./inscricoes-wrapper/inscricoes-wrapper').then((m) => m.InscricoesWrapper),
   },
   {
     path: 'disciplina/:id',
@@ -74,10 +88,34 @@ export const routes: Routes = [
   // já compartilhado; pode sair quando não houver mais acesso pelo path antigo.
   { path: 'meus_niveis_notas', redirectTo: '/meus-niveis-notas', pathMatch: 'full' },
 
+  // ── Administrador ────────────────────────────────────────────────────────────
+  // Contas e catálogo. O diretor entra junto, como já entrava no painel da
+  // secretaria que estas telas substituíram.
+  {
+    path: 'admin-dashboard',
+    canActivate: [authGuard, roleGuard('admin', 'diretor')],
+    loadComponent: () => import('./admin-dashboard/admin-dashboard').then((m) => m.AdminDashboard),
+  },
+  {
+    path: 'contas',
+    canActivate: [authGuard, roleGuard('admin', 'diretor')],
+    loadComponent: () => import('./contas/contas').then((m) => m.Contas),
+  },
+  {
+    path: 'catalogo',
+    canActivate: [authGuard, roleGuard('admin', 'diretor')],
+    loadComponent: () => import('./catalogo/catalogo').then((m) => m.Catalogo),
+  },
+  // Path antigo do painel da secretaria: mantido para não quebrar link já
+  // compartilhado ou favorito de quem usava a tela.
+  { path: 'secretaria-dashboard', redirectTo: '/admin-dashboard', pathMatch: 'full' },
+
   // ── Diretor ──────────────────────────────────────────────────────────────────
   {
+    // O administrador cria as contas de acesso; o backend espelha em
+    // POST /api/alunos com hasAnyRole('DIRETOR','ADMIN').
     path: 'cadastro',
-    canActivate: [authGuard, roleGuard('diretor')],
+    canActivate: [authGuard, roleGuard('diretor', 'admin')],
     loadComponent: () => import('./cadastro/cadastro').then((m) => m.Cadastro),
   },
   {
@@ -86,11 +124,13 @@ export const routes: Routes = [
     loadComponent: () => import('./diretor-dashboard/diretor-dashboard').then((m) => m.DashboardDiretor),
   },
   {
-    // wrapper redireciona por role (aluno vê matérias, diretor vê matrículas)
-    path: 'matriculas',
+    // wrapper redireciona por role (aluno vê matérias, gestão vê inscrições)
+    path: 'inscricoes',
     canActivate: [authGuard],
-    loadComponent: () => import('./matriculas-wrapper/matriculas-wrapper').then((m) => m.MatriculasWrapper),
+    loadComponent: () => import('./inscricoes-wrapper/inscricoes-wrapper').then((m) => m.InscricoesWrapper),
   },
+  // Path antigo, pelo mesmo motivo do /secretaria-dashboard acima.
+  { path: 'matriculas', redirectTo: '/inscricoes', pathMatch: 'full' },
   {
     path: 'evasao',
     canActivate: [authGuard, roleGuard('diretor')],

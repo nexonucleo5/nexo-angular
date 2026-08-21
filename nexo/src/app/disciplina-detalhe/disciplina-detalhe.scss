@@ -1,8 +1,6 @@
 /* disciplina-detalhe.scss — usa apenas variáveis do styles.scss */
 
-.page-content { background-color: var(--bg-primary); min-height: 100vh; }
-
-.page-title { font-size: 40px; }
+/* A caixa da página e o .page-title são padronizados no styles.scss §3. */
 
 .back-link {
   color: var(--text-muted);
@@ -180,3 +178,33 @@
 .subj-teal   { background: linear-gradient(135deg, #14b8a6, #06d25e) !important; }
 .subj-indigo { background: linear-gradient(135deg, #6366f1, #2e73f6) !important; }
 .subj-orange { background: linear-gradient(135deg, #ff6a00, #f59e0b) !important; }
+
+/* ── Conclusão de conteúdo (progresso real do aluno) ─────────────────────── */
+.topic-card.concluido {
+  border-color: rgba(6, 210, 94, 0.45);
+}
+
+.btn-concluir {
+  background: none;
+  border: none;
+  padding: 4px;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s, transform 0.15s;
+
+  &:hover { color: #06d25e; transform: scale(1.1); }
+  &.marcado { color: #06d25e; }
+  &:disabled { opacity: 0.5; cursor: wait; }
+}
+
+/* O CTA virou botão de verdade (o card deixou de ser um <button> para caber o
+   marcar dentro dele); mantém a aparência de link de ação. */
+.topic-cta {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}

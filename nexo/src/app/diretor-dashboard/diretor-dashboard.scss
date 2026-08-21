@@ -1,12 +1,7 @@
-.dashboard-executivo {
-  padding: 2rem;
-  background-color: var(--bg-primary);
-  min-height: 100vh;
-}
+/* A caixa da página e o .page-title são padronizados no styles.scss §3. */
 
 .dashboard-header {
-  .page-title { font-size: 32px; font-weight: 800; color: var(--text-main); margin-bottom: 4px; }
-  .text-soft  { color: var(--text-muted); }
+  .text-soft { color: var(--text-muted); }
 }
 
 /* KPI cards */

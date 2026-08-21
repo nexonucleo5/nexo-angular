@@ -1,10 +1,6 @@
 /* desafios.scss — usa apenas variáveis do styles.scss */
 
-.page-container {
-  padding: 2rem;
-  background-color: var(--bg-primary);
-  min-height: 100vh;
-}
+/* A caixa da página (recuo, fundo, altura) é padronizada no styles.scss §3. */
 
 /* Metric card */
 .metric-card {
@@ -89,3 +85,24 @@
 
 .text-main { color: var(--text-main) !important; }
 .text-soft { color: var(--text-muted) !important; }
+/* Filtro por situação — o corte mais usado da tela vira botão, não select */
+.status-aba {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+
+  &:hover { border-color: #9b2fff; }
+
+  &.ativa {
+    background: linear-gradient(90deg, #9b2fff, #06d25e);
+    border-color: transparent;
+    color: #fff;
+  }
+
+  &.limpar { color: var(--text-muted); }
+}

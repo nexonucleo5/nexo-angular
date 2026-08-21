@@ -23,6 +23,17 @@ import java.util.Map;
 @Service
 public class ProfessorService {
 
+    /** Não se contrata menor de idade para lecionar. */
+    private static final int IDADE_MINIMA_PROFESSOR = 18;
+    private static final int IDADE_MAXIMA_PROFESSOR = 100;
+
+    /**
+     * Teto de matérias por docente. Sem ele dava para marcar o catálogo inteiro e
+     * criar um professor que leciona tudo — o que, além de irreal, desmonta a regra
+     * de "só mexe na matéria dele": quem leciona todas não é limitado por nada.
+     */
+    private static final int MAXIMO_MATERIAS = 3;
+
     private final ProfessorRepository professores;
     private final MateriaRepository materias;
     private final CredenciaisService credenciais;
@@ -48,19 +59,8 @@ public class ProfessorService {
         if (dados.nome() == null || dados.nome().trim().length() < 3) {
             erros.put("nome", "Informe o nome completo.");
         }
-        LocalDate nascimento = null;
-        if (dados.dataNascimento() == null || dados.dataNascimento().isBlank()) {
-            erros.put("dataNascimento", "Informe a data de nascimento.");
-        } else {
-            try {
-                nascimento = LocalDate.parse(dados.dataNascimento());
-                if (nascimento.isAfter(LocalDate.now())) {
-                    erros.put("dataNascimento", "A data de nascimento não pode ser futura.");
-                }
-            } catch (java.time.format.DateTimeParseException e) {
-                erros.put("dataNascimento", "Data de nascimento inválida.");
-            }
-        }
+        LocalDate nascimento = DataNascimento.validar(dados.dataNascimento(),
+                IDADE_MINIMA_PROFESSOR, IDADE_MAXIMA_PROFESSOR, erros);
         if (dados.sexo() == null || dados.sexo().isBlank()) {
             erros.put("sexo", "Selecione o sexo.");
         }
@@ -68,6 +68,8 @@ public class ProfessorService {
         List<Materia> selecionadas = List.of();
         if (dados.materiaIds() == null || dados.materiaIds().isEmpty()) {
             erros.put("materiaIds", "Selecione ao menos uma matéria.");
+        } else if (dados.materiaIds().stream().distinct().count() > MAXIMO_MATERIAS) {
+            erros.put("materiaIds", "Um professor leciona no máximo " + MAXIMO_MATERIAS + " matérias.");
         } else {
             selecionadas = materias.findByIdIn(dados.materiaIds());
             if (selecionadas.size() != dados.materiaIds().stream().distinct().count()) {

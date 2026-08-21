@@ -1,4 +1,4 @@
-<div class="container-fluid cadastro-container p-4">
+<div class="page-content">
 
   <!-- ── Cabeçalho ─────────────────────────────────────── -->
   <header class="mb-4">
@@ -18,16 +18,24 @@
   <div *ngIf="mensagemSucesso()" class="alert alert-success">{{ mensagemSucesso() }}</div>
   <div *ngIf="mensagemErro()" class="alert alert-danger">{{ mensagemErro() }}</div>
 
-  <div *ngIf="acesso() as a" class="alert alert-info d-flex align-items-center gap-3 mb-4">
+  <div *ngIf="acesso() as a" class="alert alert-info d-flex align-items-center gap-3 mb-4 flex-wrap">
     <i class="bi bi-key-fill fs-4"></i>
-    <div>
+    <div class="flex-grow-1">
       <strong>Acesso gerado com sucesso!</strong><br>
       <small>
         Login: <strong>{{ a.login }}</strong>
         &nbsp;|&nbsp;
         Senha provisória: <strong>{{ a.senha }}</strong>
+        <span class="d-block">A senha aparece só esta vez — copie e repasse agora.</span>
       </small>
     </div>
+    <button type="button" class="btn btn-sm btn-copiar" (click)="copiarAcesso()">
+      @if (copiado()) {
+        <i class="bi bi-check-lg"></i> Copiado!
+      } @else {
+        <i class="bi bi-clipboard"></i> Copiar acesso
+      }
+    </button>
   </div>
 
   <!-- ── Aluno ────────────────────────────────────────── -->
@@ -46,34 +54,24 @@
       </div>
 
       <div class="col-md-6 mb-3">
-        <label class="form-label" for="aluno-nascimento">Data de nascimento:</label>
-        <input type="date" id="aluno-nascimento" formControlName="dataNascimento" class="form-control"
-               [class.is-invalid]="fa['dataNascimento'].invalid && fa['dataNascimento'].touched">
-        <div class="invalid-feedback">Data de nascimento obrigatória.</div>
-      </div>
-
-      <div class="col-md-6 mb-3">
-        <label class="form-label" for="aluno-sexo">Sexo:</label>
-        <select id="aluno-sexo" formControlName="sexo" class="form-select"
-                [class.is-invalid]="fa['sexo'].invalid && fa['sexo'].touched">
-          <option value="" disabled>Selecione</option>
-          <option value="M">Masculino</option>
-          <option value="F">Feminino</option>
-          <option value="N">Não informar</option>
-        </select>
-        <div class="invalid-feedback">Selecione o sexo.</div>
-      </div>
-
-      <div class="col-md-6 mb-3">
-        <label class="form-label" for="aluno-turma">Ano do ensino básico:</label>
+        <label class="form-label" for="aluno-turma">Turma:</label>
         <select id="aluno-turma" formControlName="turmaId" class="form-select"
                 [class.is-invalid]="fa['turmaId'].invalid && fa['turmaId'].touched">
-          <option [ngValue]="null" disabled>Selecione o ano</option>
+          <option [ngValue]="null" disabled>Selecione a turma</option>
           <option *ngFor="let t of turmas()" [ngValue]="t.id">{{ t.nome }}</option>
         </select>
-        <div class="invalid-feedback">Selecione o ano do ensino básico.</div>
+        <div class="invalid-feedback">Selecione a turma.</div>
+        <small class="form-text">É dela que sai o conteúdo que o aluno vai estudar.</small>
       </div>
     </div>
+
+    <!-- Nascimento, sexo e endereço saíram daqui: este sistema cuida de
+         aprendizado e retenção, e a ficha pessoal do aluno pertence ao sistema
+         de aula da escola. Menos dado guardado é menos coisa a vazar. -->
+    <p class="nota-privacidade">
+      <i class="bi bi-shield-check"></i>
+      Só pedimos nome e turma. Dados pessoais do aluno ficam no sistema de aula da escola.
+    </p>
 
     <button type="submit" class="btn btn-cadastro w-100 mt-2" [disabled]="enviando()">
       <i class="bi bi-check-circle me-2"></i>{{ enviando() ? 'Enviando...' : 'Cadastrar aluno' }}
@@ -98,8 +96,9 @@
       <div class="col-md-6 mb-3">
         <label class="form-label" for="prof-nascimento">Data de nascimento:</label>
         <input type="date" id="prof-nascimento" formControlName="dataNascimento" class="form-control"
+               [min]="limitesProfessor.min" [max]="limitesProfessor.max"
                [class.is-invalid]="fp['dataNascimento'].invalid && fp['dataNascimento'].touched">
-        <div class="invalid-feedback">Data de nascimento obrigatória.</div>
+        <div class="invalid-feedback">Data de nascimento obrigatória (professor maior de idade).</div>
       </div>
 
       <div class="col-md-6 mb-3">
@@ -116,10 +115,20 @@
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Matérias que leciona:</label>
+      <label class="form-label d-flex align-items-center gap-2 flex-wrap">
+        Matérias que leciona:
+        <span class="contador-materias"
+              [class.no-limite]="materiaIdsSelecionadas.length >= maximoMaterias">
+          {{ materiaIdsSelecionadas.length }} de {{ maximoMaterias }}
+        </span>
+      </label>
       <div class="materias-grid" [class.invalido]="fp['materiaIds'].invalid && fp['materiaIds'].touched">
+        <!-- Passado o teto, o que não está marcado fica fora de alcance: um clique
+             sem efeito seria lido como bug. -->
         <button type="button" *ngFor="let m of materias()" class="materia-chip"
-                [class.selecionada]="materiaSelecionada(m.id)" (click)="alternarMateria(m.id)">
+                [class.selecionada]="materiaSelecionada(m.id)"
+                [disabled]="materiaBloqueada(m.id)"
+                (click)="alternarMateria(m.id)">
           <i class="bi" [ngClass]="materiaSelecionada(m.id) ? 'bi-check-circle-fill' : 'bi-circle'"></i>
           {{ m.nome }}
         </button>

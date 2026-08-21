@@ -157,6 +157,18 @@ public class ConfiguracaoService {
                 m.put("aparencia", secao("temaEscuro", true, "animacoesInterface", true));
                 m.put("privacidade", secao("exibirDadosInstituicaoPublicamente", false));
             }
+            // Seções do dia a dia de quem administra o sistema — não as de gestão do
+            // diretor. O trabalho aqui é conta e catálogo; a seção "documentos" da
+            // antiga secretaria saiu junto com o checklist de documentos do aluno.
+            case ADMIN -> {
+                m.put("notificacoes", secao("novasContasCriadas", true, "contasInativas", true,
+                        "conteudoDespublicado", true, "notificacoesEmail", true));
+                Map<String, Object> catalogo = new LinkedHashMap<>();
+                catalogo.put("publicarConteudoNovoAutomaticamente", true);
+                catalogo.put("avisarMateriaComMenosDeNConteudos", 3);
+                m.put("catalogo", catalogo);
+                m.put("aparencia", secao("temaEscuro", true, "animacoesInterface", true));
+            }
         }
         return m;
     }

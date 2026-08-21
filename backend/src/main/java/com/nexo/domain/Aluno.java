@@ -3,8 +3,17 @@ package com.nexo.domain;
 import jakarta.persistence.*;
 
 import java.time.Instant;
-import java.time.LocalDate;
 
+/**
+ * Aluno como o sistema de aprendizado precisa dele: um nome, um acesso e a turma
+ * cujo conteúdo ele cursa.
+ *
+ * <p>Não há dado pessoal aqui de propósito — nascimento, sexo e endereço saíram, e
+ * as colunas são removidas no arranque (ver {@link com.nexo.config.SchemaMigracao}).
+ * Quem guarda a ficha do aluno é o sistema de aula da escola; este aqui cuida de
+ * aprendizado e retenção de conteúdo, e uma base invadida não deve entregar nada
+ * além de nome e progresso.
+ */
 @Entity
 @Table(name = "alunos")
 public class Aluno {
@@ -18,10 +27,6 @@ public class Aluno {
 
     @Column(nullable = false)
     private String nome;
-
-    private String sexo;
-
-    private LocalDate dataNascimento;
 
     @Column(unique = true)
     private String emailInstitucional;
@@ -58,10 +63,6 @@ public class Aluno {
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
-    public String getSexo() { return sexo; }
-    public void setSexo(String sexo) { this.sexo = sexo; }
-    public LocalDate getDataNascimento() { return dataNascimento; }
-    public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }
     public String getEmailInstitucional() { return emailInstitucional; }
     public void setEmailInstitucional(String emailInstitucional) { this.emailInstitucional = emailInstitucional; }
     public Turma getTurma() { return turma; }

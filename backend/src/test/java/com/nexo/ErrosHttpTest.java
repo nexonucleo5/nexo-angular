@@ -33,12 +33,12 @@ class ErrosHttpTest extends TesteApiBase {
     void parametroComTipoErrado() throws Exception {
         String diretor = bearer("diretor");
 
-        mvc.perform(get("/api/matriculas").param("status", "NAO_EXISTE")
+        mvc.perform(get("/api/inscricoes").param("ativo", "NAO_EXISTE")
                         .header(HttpHeaders.AUTHORIZATION, diretor))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
 
-        mvc.perform(get("/api/matriculas").param("turma", "abc")
+        mvc.perform(get("/api/inscricoes").param("turma", "abc")
                         .header(HttpHeaders.AUTHORIZATION, diretor))
                 .andExpect(status().isBadRequest());
     }

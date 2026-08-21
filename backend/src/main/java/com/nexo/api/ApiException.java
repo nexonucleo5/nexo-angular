@@ -52,6 +52,15 @@ public class ApiException extends RuntimeException {
     }
 
     /**
+     * 503 para falha em serviço de terceiro (hoje a consulta de CEP). Diferente de 500:
+     * diz ao cliente que o pedido estava correto e que vale tentar de novo — nada foi
+     * feito de errado aqui dentro.
+     */
+    public static ApiException servicoIndisponivel(String message) {
+        return new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", message);
+    }
+
+    /**
      * 429 acompanhado de Retry-After. Sem esse cabeçalho o cliente só sabe que foi
      * barrado, não quando pode voltar — e acaba repetindo em laço (RFC 9110, 15.5.30).
      */

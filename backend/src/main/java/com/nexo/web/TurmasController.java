@@ -44,9 +44,24 @@ public class TurmasController {
     private static final List<String> ORDEM_ANOS = List.of(
             "6º Ano", "7º Ano", "8º Ano", "9º Ano", "1º Ano EM", "2º Ano EM", "3º Ano EM");
 
+    /**
+     * As turmas que o operador enxerga. Para o PROFESSOR, só as que ele leciona —
+     * "minhas turmas", como em qualquer sistema escolar consolidado.
+     *
+     * <p>Antes devolvia a escola inteira para todo mundo, e as telas do professor
+     * (diário de classe, notas) enchiam o seletor com turmas de colegas: escolher
+     * uma delas só rendia 403 no primeiro clique seguinte, porque as ações já
+     * exigiam lecionar a turma. A lista agora casa com o que ele pode fazer.
+     */
     @GetMapping
-    public List<TurmaDTO> listar() {
-        return turmas.findAll().stream()
+    public List<TurmaDTO> listar(@AuthenticationPrincipal UsuarioAutenticado operador) {
+        List<Turma> visiveis = "PROFESSOR".equals(operador.role())
+                ? professores.findByUsuarioId(operador.id())
+                        .map(p -> turmas.findByProfessorIdOrderByNome(p.getId()))
+                        .orElseGet(List::of)
+                : turmas.findAll();
+
+        return visiveis.stream()
                 .sorted(Comparator.comparingInt(this::ordemDoAno).thenComparing(Turma::getNome))
                 .map(TurmaDTO::of)
                 .toList();

@@ -22,7 +22,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -35,15 +34,21 @@ public class AlunosController {
     private final NotaRepository notas;
     private final ObservacaoPedagogicaRepository observacoes;
     private final ProfessorRepository professores;
+    private final com.nexo.repository.TurmaRepository turmas;
+    private final com.nexo.service.EscopoDocente escopoDocente;
 
     public AlunosController(AlunoService alunoService, AlunoRepository alunos,
                             NotaRepository notas, ObservacaoPedagogicaRepository observacoes,
-                            ProfessorRepository professores) {
+                            ProfessorRepository professores,
+                            com.nexo.repository.TurmaRepository turmas,
+                            com.nexo.service.EscopoDocente escopoDocente) {
         this.alunoService = alunoService;
         this.alunos = alunos;
         this.notas = notas;
         this.observacoes = observacoes;
         this.professores = professores;
+        this.turmas = turmas;
+        this.escopoDocente = escopoDocente;
     }
 
     /** PROFESSOR só age sobre alunos da turma que leciona; DIRETOR tem acesso irrestrito. */
@@ -57,12 +62,17 @@ public class AlunosController {
         }
     }
 
-    public record AlunoDTO(Long id, String nome, String emailInstitucional, String sexo,
-                           LocalDate dataNascimento, Long turmaId, String turma,
-                           int engajamento, String foto) {
+    /**
+     * O aluno como este sistema o conhece: nome, acesso, turma e engajamento.
+     *
+     * <p>Não há nascimento, sexo nem endereço — e a ausência é o ponto, não uma
+     * omissão de exibição. A ficha pessoal do aluno pertence ao sistema de aula da
+     * escola; aqui só existe o necessário para servir conteúdo e medir retenção.
+     */
+    public record AlunoDTO(Long id, String nome, String emailInstitucional,
+                           Long turmaId, String turma, int engajamento, String foto) {
         static AlunoDTO of(Aluno a) {
-            return new AlunoDTO(a.getId(), a.getNome(), a.getEmailInstitucional(), a.getSexo(),
-                    a.getDataNascimento(),
+            return new AlunoDTO(a.getId(), a.getNome(), a.getEmailInstitucional(),
                     a.getTurma() != null ? a.getTurma().getId() : null,
                     a.getTurma() != null ? a.getTurma().getNome() : null,
                     a.getEngajamento(), a.getFoto());
@@ -70,11 +80,66 @@ public class AlunosController {
     }
 
     /**
-     * Recurso endereçável do aluno. Sem ele o POST não tinha para onde apontar o
-     * Location, e o aluno só existia dentro de listagens e agregações.
+     * Um aluno na listagem: o mínimo para escolhê-lo numa lista.
+     *
+     * <p>Mais enxuto que {@link AlunoDTO} de propósito. O e-mail institucional é o
+     * login do aluno, e uma coleção o entregaria da turma inteira de uma vez —
+     * quem precisa dele abre o aluno, onde a mesma checagem de escopo se aplica a
+     * um registro só.
+     */
+    public record AlunoResumoDTO(Long id, String nome, Long turmaId, String turma, String foto) {
+        static AlunoResumoDTO of(Aluno a) {
+            return new AlunoResumoDTO(a.getId(), a.getNome(),
+                    a.getTurma() != null ? a.getTurma().getId() : null,
+                    a.getTurma() != null ? a.getTurma().getNome() : null,
+                    a.getFoto());
+        }
+    }
+
+    /**
+     * Os alunos que o operador alcança — para o PROFESSOR, os das turmas que ele
+     * leciona; para DIRETOR e ADMIN, a escola inteira.
+     *
+     * <p>Faltava esta coleção: {@code /api/alunos} tinha POST e GET de item, mas não
+     * a lista, e a tela de comunicação do professor acabava pedindo a de matrículas
+     * — que sempre exigiu DIRETOR. O professor tomava 403 e a lista de alunos ficava
+     * vazia em silêncio, porque a chamada não tratava erro.
+     *
+     * <p>O recorte é feito aqui, no servidor, pelo mesmo motivo de
+     * {@code TurmasController.listar}: filtro de tela é conveniência, não regra de
+     * acesso.
+     */
+    @GetMapping
+    @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR','ADMIN')")
+    public List<AlunoResumoDTO> listar(@AuthenticationPrincipal UsuarioAutenticado operador) {
+        if (!"PROFESSOR".equals(operador.role())) {
+            return alunos.findAllComTurma().stream()
+                    .sorted(java.util.Comparator.comparing(Aluno::getNome,
+                            java.util.Comparator.nullsLast(String::compareToIgnoreCase)))
+                    .map(AlunoResumoDTO::of)
+                    .toList();
+        }
+
+        // Docente sem cadastro vinculado, ou sem turma atribuída, enxerga lista
+        // vazia — não a escola inteira.
+        List<Long> minhasTurmas = professores.findByUsuarioId(operador.id())
+                .map(p -> turmas.findByProfessorIdOrderByNome(p.getId()).stream()
+                        .map(Turma::getId).toList())
+                .orElseGet(List::of);
+        if (minhasTurmas.isEmpty()) return List.of();
+
+        return alunos.findByTurmaIdInComTurma(minhasTurmas).stream()
+                .map(AlunoResumoDTO::of)
+                .toList();
+    }
+
+    /**
+     * O ADMIN entra aqui porque é ele quem cria a conta do aluno: sem isto ele
+     * criava o registro e não conseguia reler o que acabou de gravar. Nota,
+     * observação e os painéis pedagógicos seguem fora do alcance dele.
      */
     @GetMapping("/{alunoId}")
-    @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
+    @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR','ADMIN')")
     public AlunoDTO detalhar(@PathVariable Long alunoId,
                              @AuthenticationPrincipal UsuarioAutenticado operador) {
         Aluno aluno = alunos.findById(alunoId)
@@ -86,7 +151,7 @@ public class AlunosController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('DIRETOR')")
+    @PreAuthorize("hasAnyRole('DIRETOR','ADMIN')")
     public ResponseEntity<AlunoService.AlunoCriado> cadastrar(
             @RequestBody AlunoService.CadastroAluno request,
             @AuthenticationPrincipal UsuarioAutenticado operador) {
@@ -125,7 +190,15 @@ public class AlunosController {
                 .orElseThrow(() -> ApiException.notFound("Aluno não encontrado."));
         exigirLeciona(aluno.getTurma(), operador);
 
-        String disciplina = request.disciplina() != null ? request.disciplina() : "Geral";
+        // Turma certa não basta: sem esta checagem o professor de História lançava
+        // nota de Matemática — a matéria vinha como texto livre e ninguém conferia.
+        // O "Geral" que existia como padrão também sumiu: era uma gaveta fora de
+        // qualquer matéria, e nota precisa dizer de que disciplina ela é.
+        escopoDocente.exigirMateria(request.disciplina(), operador);
+
+        String disciplina = request.disciplina() != null && !request.disciplina().isBlank()
+                ? request.disciplina().trim()
+                : "Geral";
         String periodo = request.periodo() != null ? request.periodo() : "2026-1";
 
         Nota nota = notas.findByAlunoIdAndDisciplinaAndPeriodo(alunoId, disciplina, periodo)

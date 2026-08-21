@@ -19,10 +19,11 @@ export class ConfiguracaoAlunoService {
     readonly isDarkMode = this.store.isDarkMode;
 
     constructor() {
-        // Modo foco: esconde sidebar/header (styles.scss espera a classe no body)
-        this.store.aoMudar(({ estudos }) =>
-            document.body.classList.toggle('modo-foco-ativo', estudos.modoFoco)
-        );
+        // O modo foco NÃO é aplicado aqui. A configuração diz "remove distrações
+        // durante atividades", e é isso que ela faz: quem liga a classe no body é
+        // o App, que sabe a rota atual e só esconde o menu na leitura de conteúdo
+        // e no quiz. Aplicando sempre, o aluno ficava sem navegação para chegar às
+        // matérias — tinha que desligar o modo foco para conseguir estudar.
 
         // Acessibilidade: classes globais aplicadas na raiz do documento
         this.store.aoMudar(({ acessibilidade }) => {

@@ -1,8 +1,6 @@
 /* monitoramento-docente.scss — usa apenas variáveis do styles.scss */
 
-.page-content { background-color: var(--bg-primary); min-height: 100vh; padding: 32px; }
-
-.page-title { color: var(--text-main); font-size: 32px; font-weight: 800; }
+/* A caixa da página e o .page-title são padronizados no styles.scss §3. */
 
 /* Stat cards */
 .stat-card {

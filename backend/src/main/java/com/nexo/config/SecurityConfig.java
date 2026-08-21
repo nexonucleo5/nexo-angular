@@ -117,7 +117,10 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(allowedOrigins); // Usa a sua lista do application.properties
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
+        // Só o que o cliente manda de fato: curinga em allowedHeaders com
+        // allowCredentials=true daria a qualquer origem permitida preflight para
+        // headers arbitrários — superfície à toa.
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         config.setExposedHeaders(List.of("Content-Disposition"));
         config.setAllowCredentials(true); // Garante o tráfego do cookie do Refresh Token
 

@@ -33,7 +33,7 @@ export interface KpiStat {
   tom?: 'positivo' | 'negativo' | 'neutro';
 }
 
-// ── Turmas / Alunos / Matrículas ─────────────────────────────────────────────
+// ── Turmas / Alunos / Inscrições ─────────────────────────────────────────────
 
 export interface TurmaDTO {
   id: number;
@@ -42,19 +42,36 @@ export interface TurmaDTO {
   turno: string;
 }
 
+/**
+ * GET /api/alunos — o aluno na listagem, já recortado por quem pergunta: o
+ * professor recebe os das turmas que leciona, diretor e administrador recebem
+ * todos. Mais enxuto que o item: o e-mail institucional é o login do aluno e não
+ * sai numa coleção.
+ */
+export interface AlunoResumoDTO {
+  id: number;
+  nome: string;
+  turmaId: number | null;
+  turma: string | null;
+  foto: string | null;
+}
+
 export interface AlunoCriado {
   id: number;
   nome: string;
   emailInstitucional: string;
   senhaProvisoria: string;
-  matriculaId: number;
+  inscricaoId: number;
 }
 
+/**
+ * O cadastro pede duas coisas, e é assim de propósito: nascimento, sexo e
+ * endereço saíram porque este sistema não guarda dado pessoal de aluno — a ficha
+ * dele vive no sistema de aula da escola.
+ */
 export interface CadastroAlunoRequest {
   nome: string;
-  dataNascimento: string;
-  sexo: string;
-  /** Ano do ensino básico em que o aluno entra (turma existente). */
+  /** Turma cujo conteúdo o aluno vai estudar. */
   turmaId: number | null;
 }
 
@@ -95,17 +112,104 @@ export interface ProfessorCriado {
   senhaProvisoria: string;
 }
 
-export type StatusMatricula = 'ATIVA' | 'PENDENTE' | 'TRANCADA' | 'CANCELADA';
-export type StatusDocumentacao = 'COMPLETA' | 'PENDENTE' | 'INCOMPLETA';
-
-export interface MatriculaDTO {
+/**
+ * GET /api/inscricoes — o vínculo aluno↔turma, e só. Status de trancamento,
+ * situação de documentação e ano letivo saíram com a matrícula.
+ */
+export interface InscricaoDTO {
   id: number;
   alunoId: number;
   aluno: string;
+  turmaId: number | null;
   turma: string | null;
-  status: StatusMatricula;
-  documentacao: StatusDocumentacao;
-  dataMatricula: string;
+  /** Desligada, o aluno não vê o conteúdo da turma — mas o progresso dele fica. */
+  ativo: boolean;
+  criadaEm: string;
+}
+
+/**
+ * GET /api/aluno/materias — as matérias que o aluno cursa, com o progresso real
+ * dele. Diferente de MateriaDTO (catálogo da escola): aqui o recorte é a etapa
+ * do aluno e os números vêm dos conteúdos que ele concluiu.
+ */
+export interface MateriaProgressoDTO {
+  id: number;
+  nome: string;
+  segmento: 'FUNDAMENTAL' | 'MEDIO' | 'AMBOS';
+  totalConteudos: number;
+  conteudosConcluidos: number;
+  percentual: number;
+}
+
+// ── Painel do administrador ──────────────────────────────────────────────────
+
+export type PapelConta = 'ALUNO' | 'PROFESSOR' | 'DIRETOR' | 'ADMIN';
+
+/** GET /api/admin/dashboard — acesso de um lado, catálogo do outro. */
+export interface DashboardAdminDTO {
+  contas: number;
+  contasInativas: number;
+  alunos: number;
+  professores: number;
+  diretores: number;
+  admins: number;
+  turmas: number;
+  materias: number;
+  conteudos: number;
+  conteudosDespublicados: number;
+  desafios: number;
+  desafiosDespublicados: number;
+}
+
+/**
+ * GET /api/admin/contas. Nome e login estão aqui porque sem eles não dá para
+ * saber de quem é a conta que se vai desativar — e a lista para aí: não há dado
+ * pessoal a expor porque o sistema não guarda nenhum.
+ */
+export interface ContaDTO {
+  id: number;
+  login: string;
+  nome: string;
+  cargo: string | null;
+  papel: PapelConta;
+  ativo: boolean;
+  criadoEm: string;
+}
+
+/** A senha em claro existe só nesta resposta. */
+export interface SenhaRedefinidaDTO {
+  login: string;
+  senhaProvisoria: string;
+}
+
+/** GET /api/admin/catalogo — quanto de cada matéria está no ar. */
+export interface MateriaCatalogoDTO {
+  id: number;
+  nome: string;
+  segmento: 'FUNDAMENTAL' | 'MEDIO' | 'AMBOS';
+  conteudos: number;
+  conteudosPublicados: number;
+}
+
+export interface ConteudoAdminDTO {
+  id: number;
+  materiaId: number | null;
+  materia: string | null;
+  titulo: string;
+  resumo: string | null;
+  minutos: number;
+  ordem: number;
+  publicado: boolean;
+}
+
+export interface DesafioAdminDTO {
+  id: number;
+  titulo: string;
+  materia: string | null;
+  nivel: string | null;
+  xp: number;
+  tempoMin: number;
+  publicado: boolean;
 }
 
 // ── Diário de classe ─────────────────────────────────────────────────────────

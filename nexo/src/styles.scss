@@ -36,6 +36,17 @@ html[data-theme='dark'] {
      onde começar; repetir o número deixaria os dois fora de sincronia na
      primeira vez que alguém mexesse no padding do header. */
   --altura-header: 68px;
+
+  /* Recuo lateral de toda tela. Existe num lugar só de propósito: cada página
+     cravava o seu (32px, 34px, 2rem, p-4 do Bootstrap) por cima do recuo do
+     layout, e o conteúdo começava numa coluna diferente em cada rota — 32px na
+     matrícula, 56px na evasão, 66px nas configurações. Quem aplica é a caixa da
+     página (seção 3); nenhuma tela deve repetir padding lateral. */
+  --gutter-pagina: 32px;
+
+  /* Título de página — um tamanho para todas. Antes ia de 28px a 44px conforme
+     a tela, o que fazia o mesmo cabeçalho parecer de outro sistema. */
+  --titulo-pagina: clamp(26px, 2.6vw, 34px);
 }
 
 /* ==========================================================================
@@ -100,6 +111,7 @@ html, body {
 app-menu,
 app-menu-diretor,
 app-menu-professor,
+app-menu-admin,
 .sidebar {
   width: var(--largura-sidebar) !important;
   height: 100vh;
@@ -126,7 +138,8 @@ app-menu-professor,
    mas a deixaria focável: o Tab cairia numa lista de links invisível. */
 app-menu,
 app-menu-diretor,
-app-menu-professor {
+app-menu-professor,
+app-menu-admin {
   transform: translateX(-100%);
   visibility: hidden;
   transition: transform 0.28s ease, visibility 0.28s ease,
@@ -136,7 +149,8 @@ app-menu-professor {
 
 .app-layout.menu-aberto app-menu,
 .app-layout.menu-aberto app-menu-diretor,
-.app-layout.menu-aberto app-menu-professor {
+.app-layout.menu-aberto app-menu-professor,
+.app-layout.menu-aberto app-menu-admin {
   transform: translateX(0);
   visibility: visible;
 }
@@ -165,22 +179,63 @@ app-menu-professor {
   max-width: calc(100% - var(--largura-sidebar));
 }
 
-/* Páginas filhas do router */
+/* A caixa da página: é ela que aplica o recuo de toda tela, uma vez só.
+   (.page-container-pushed saiu daqui junto com os wrappers que o usavam dentro
+   de componentes de rota — ali dentro ele somava um segundo recuo.) */
 .main-content > router-outlet + *,
 .main-content > ng-component,
-.main-content > div,
-.page-container-pushed {
+.main-content > div {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box;
-  padding: 32px !important;
+  padding: var(--gutter-pagina) !important;
   margin-left: 0 !important;
   /* Transparente de propósito: quem pinta o fundo é a .main-content, senão
      estas caixas cobririam a marca d'água da logo. */
   background-color: transparent;
+}
+
+/* A raiz de cada componente de página. São seis nomes porque as telas foram
+   escritas em épocas diferentes (.page-content, .page-container, .container-fluid
+   de uma, .dashboard-executivo de outra) — o que elas têm em comum é serem a
+   caixa que já está dentro do recuo do layout. Então aqui elas são niveladas:
+   sem padding lateral próprio, sem fundo opaco (que tapava a marca d'água em
+   umas telas e não em outras) e sem min-height: 100vh repetido dentro de um
+   container que já tem a altura toda — era isso que rendia rolagem sobrando. */
+.main-content .page-content,
+.main-content .page-container,
+.main-content .dashboard-executivo {
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+  background-color: transparent;
+  min-height: 0;
+}
+
+/* Cabeçalho de página: mesmo tamanho e mesmo espaçamento em todas as rotas. */
+.main-content .page-title,
+.main-content .settings-page-title {
+  font-size: var(--titulo-pagina);
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.2;
+  margin: 0 0 6px;
+  overflow-wrap: break-word;
+}
+
+.main-content .page-heading,
+.main-content .settings-header {
+  margin-bottom: 28px;
+}
+
+.main-content .page-heading p,
+.main-content .settings-page-subtitle {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin: 0;
 }
 
 /* Marca d'água da logo — a logo saiu da sidebar e virou fundo do sistema.
@@ -293,12 +348,9 @@ html[data-theme='light'] .main-content::before {
 
   .top-header app-menu-usuario { flex-shrink: 0; }
 
-  .main-content > router-outlet + *,
-  .main-content > ng-component,
-  .main-content > div,
-  .page-container-pushed {
-    padding: 18px !important;
-  }
+  /* Um token, um lugar: as caixas de página leem --gutter-pagina, então o recuo
+     do celular não precisa repetir a lista de seletores acima. */
+  :root { --gutter-pagina: 18px; }
 }
 
 /* ==========================================================================
@@ -312,6 +364,7 @@ html[data-theme='light'] .main-content::before {
   app-menu,
   app-menu-diretor,
   app-menu-professor,
+  app-menu-admin,
   .sidebar {
     width: 100% !important;
     border-right: none;
@@ -346,14 +399,10 @@ html[data-theme='light'] .main-content::before {
     height: 100%;
   }
 
-  /* Cada tela cravava o tamanho do próprio título, de 28px a 44px. Num celular
-     de 384px, 44px é mais largo que os cards embaixo — é o "letra maior que o
-     quadradinho". Aqui todos passam a caber na largura da tela.
-     Os três seletores existem para vencer os estilos de componente: eles saem
-     com [_ngcontent] e empatariam com `.page-title`, ganhando no desempate por
-     ordem. Com o caminho completo a regra global volta a ter a palavra final. */
-  .app-layout .main-content .page-title,
-  .app-layout .main-content .settings-page-title,
+  /* O clamp do título (--titulo-pagina) já encolhe sozinho; o que falta no
+     celular é o h1 de telas que não usam .page-title. O caminho completo existe
+     para vencer estilo de componente: ele sai com [_ngcontent] e empataria com
+     um seletor de uma classe, ganhando no desempate por ordem. */
   .app-layout .main-content h1 {
     font-size: clamp(22px, 6.2vw, 28px);
     line-height: 1.2;
@@ -498,9 +547,44 @@ input.form-control,
 }
 
 
+/* Modo foco (configuração do Aluno): tira a barra lateral e estreita a coluna
+   para leitura — mas o header FICA. Ele é a saída: o menu do usuário leva a
+   Perfil/Configurações e ao logout. Antes o header saía junto com a barra, e
+   quem ligava o modo foco dentro da própria tela de configurações perdia toda a
+   navegação de uma vez — sem nenhum jeito de voltar e desligar. */
 body.modo-foco-ativo {
-  .sidebar, .top-header { display: none; }
-  .main-content { margin-left: 0 !important; max-width: 800px; margin: 0 auto; }
+  /* Some o HOST, não só o <aside> de dentro. Quem é `position: fixed`, tem os
+     300px de largura, o z-index 1000 e o fundo pintado é o próprio elemento
+     app-menu* (ver "Sidebar global") — esconder apenas .sidebar deixava o host
+     no lugar como um painel cego, tampando os primeiros 300px de cada linha de
+     texto da tela. */
+  app-menu,
+  app-menu-diretor,
+  app-menu-professor,
+  app-menu-admin,
+  .sidebar { display: none; }
+
+  /* Os 3 riscos sem barra para abrir seriam um botão morto no header; a
+     navegação do modo foco é o menu do usuário. */
+  .btn-hamburguer { display: none; }
+
+  /* O !important cobre a regra de .app-layout.menu-aberto, que é mais
+     específica e continuaria empurrando o conteúdo para a direita atrás de uma
+     barra que não está mais lá. */
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Coluna de leitura centralizada — o recuo continua sendo o do layout. */
+  .main-content > div {
+    max-width: 960px;
+    margin-inline: auto !important;
+  }
+
+  /* Menos ruído enquanto estuda. */
+  .main-content::before { display: none; }
 }
 
 .sem-animacoes {
@@ -508,6 +592,20 @@ body.modo-foco-ativo {
     transition-duration: 0s !important;
     animation-duration: 0s !important;
   }
+}
+
+/* Troca de tema atômica.
+   Cada caixa declara a sua própria transição de cor (0.2s aqui, 0.3s ali, e
+   várias sem nenhuma), então virar o data-theme fazia o tema entrar em ondas:
+   header primeiro, cards depois, bordas por último. Durante a troca as
+   transições são cortadas e tudo repinta no mesmo frame; a classe sai no frame
+   seguinte, devolvendo as transições ao hover e aos outros estados.
+   Quem põe e tira a classe é aplicarTema() (settings-store.ts). */
+html.trocando-tema,
+html.trocando-tema *,
+html.trocando-tema *::before,
+html.trocando-tema *::after {
+  transition: none !important;
 }
 
 /* Acessibilidade (configurações do Aluno) */
@@ -551,3 +649,122 @@ html.alto-contraste {
 /* As regras de .brand-logo saíram junto com as <img> das sidebars e do login.
    A logo agora é fundo: marca d'água em .main-content::before (seção 3) e a
    logo grande da tela de login (login.scss). */
+
+/* ==========================================================================
+   6. TELAS ADMINISTRATIVAS (contas, catálogo, inscrições)
+   ==========================================================================
+   Padrões compartilhados que antes viviam copiados por página. Global (e não
+   partial por componente) pelo mesmo motivo do modal de detalhes acima: uma
+   página que redefine .stat-card no próprio SCSS continua ganhando — o estilo
+   de componente sai com [_ngcontent] e vence o global no desempate. */
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 20px;
+  height: 100%; /* cards da mesma linha alinham mesmo com rótulos de 1 ou 2 linhas */
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
+
+  h2 { font-size: clamp(24px, 2.2vw, 32px); }
+}
+
+.icon-box {
+  width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: white;
+  &.blue-gradient   { background: linear-gradient(135deg, #2196f3, #00bcd4); }
+  &.green           { background: linear-gradient(135deg, #06d25e, #00c853); }
+  &.orange          { background: linear-gradient(135deg, #ff9800, #ff5722); }
+  &.purple-gradient { background: linear-gradient(135deg, #9b2fff, #673ab7); }
+}
+
+.search-box {
+  display: flex; align-items: center; padding: 10px 14px;
+  background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 14px;
+  transition: border-color 0.2s;
+  &:focus-within { border-color: #9b2fff; }
+  i     { color: var(--text-muted); margin-right: 8px; }
+  input { background: transparent; border: none; color: var(--text-main); width: 100%;
+    &::placeholder { color: var(--text-muted); }
+    &:focus { outline: none; }
+  }
+}
+
+.filter-select {
+  background: var(--bg-input); border: 1px solid var(--border-color);
+  border-radius: 12px; padding: 10px 14px; color: var(--text-main);
+  font-size: 14px; width: 100%;
+  option { background: var(--bg-card); color: var(--text-main); }
+}
+
+.btn-dark-custom {
+  background: var(--bg-input); border: 1px solid var(--border-color);
+  color: var(--text-main); border-radius: 12px; padding: 10px 20px;
+  font-weight: 600; cursor: pointer; transition: border-color 0.2s;
+  &:hover { border-color: #9b2fff; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.gradient-btn {
+  background: linear-gradient(90deg, #9b2fff, #06d25e);
+  color: white; border: none; border-radius: 10px;
+  font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+  &:hover { opacity: 0.9; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.quick-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  height: 100%;
+  transition: transform 0.2s, border-color 0.2s;
+  &:hover { transform: translateY(-2px); border-color: #9b2fff; }
+}
+
+.student-row-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px; transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
+  &.alert-border { border-color: rgba(239, 68, 68, 0.4); }
+}
+
+.avatar-placeholder-circle {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: 14px; flex-shrink: 0;
+}
+
+/* A barra de progresso precisa de uma largura própria dentro do flex-wrap:
+   sem base ela encolhia a zero espremida pelos vizinhos. */
+.doc-progress-block { flex: 1 1 200px; min-width: 160px; max-width: 260px; }
+
+.badge-compliance {
+  font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 8px;
+  display: flex; align-items: center; gap: 4px;
+  &.status-ok     { background: rgba(6,210,94,0.1);   color: #06d25e; }
+  &.status-warn   { background: rgba(255,193,7,0.1);  color: #ffc107; }
+  &.status-danger { background: rgba(239,68,68,0.1);  color: #ef4444; }
+}
+
+/* Separa os dados do item das ações no modal de detalhes */
+.detalhe-separador { border-color: var(--border-color); opacity: 1; margin: 16px 0 14px; }
+
+/* Abaixo de 768px a linha vira pilha: cada bloco ocupa a largura toda em vez
+   de disputar os ~360px, e os botões crescem para dedo. */
+@media (max-width: 767.98px) {
+  .student-row-card {
+    .info-principal     { flex: 1 1 100%; }
+    .status-badges      { flex: 1 1 100%; flex-wrap: wrap; }
+    .doc-progress-block { flex: 1 1 100%; max-width: none; }
+    .acoes-item         { flex: 1 1 100%; align-items: stretch !important;
+      .gradient-btn, .btn-dark-custom { width: 100%; }
+    }
+  }
+
+  .stat-card { padding: 16px; }
+}

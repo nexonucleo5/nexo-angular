@@ -75,3 +75,22 @@ router-outlet + * {
   max-width: 100%;
   box-sizing: border-box;
 }
+/* Botão de saída do modo foco no header (só aparece com o modo ligado) */
+.btn-sair-foco {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: border-color 0.2s;
+  &:hover { border-color: #9b2fff; }
+}
+
+/* No celular o header já disputa espaço: fica só o ícone. */
+@media (max-width: 575.98px) {
+  .rotulo-sair-foco { display: none; }
+  .btn-sair-foco { padding: 6px 10px; }
+}

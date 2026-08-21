@@ -1,7 +1,4 @@
-.cadastro-container {
-  background-color: var(--bg-primary);
-  min-height: 100vh;
-}
+/* A caixa da página (recuo, fundo, altura) é padronizada no styles.scss §3. */
 
 /* Abas — mesmo padrão da tela de Avaliações */
 .tabs-container {
@@ -136,3 +133,49 @@
 .form-select.is-invalid { border-color: #dc3545; }
 
 .alert { display: block; }
+
+/* Nota que explica por que o formulário do aluno é tão curto. Ela precisa ser
+   lida como informação, e não como aviso de erro — daí o tom neutro. */
+.nota-privacidade {
+  display: flex; align-items: center; gap: 8px;
+  margin: 4px 0 0;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  i { color: #06d25e; font-size: 15px; }
+}
+
+.form-text { color: var(--text-muted); font-size: 12px; }
+
+/* Botão de copiar as credenciais recém-geradas */
+.btn-copiar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: border-color 0.2s;
+  &:hover { border-color: #9b2fff; color: var(--text-main); }
+  .bi-check-lg { color: #06d25e; }
+}
+
+/* Contador de matérias do professor (teto de 3, igual ao servidor) */
+.contador-materias {
+  font-size: 11px; font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 2px 10px;
+  &.no-limite { color: #ff9800; border-color: rgba(255, 152, 0, 0.4); }
+}
+
+.materia-chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  &:hover { border-color: var(--border-color); }
+}

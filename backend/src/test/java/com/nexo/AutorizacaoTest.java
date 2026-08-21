@@ -39,7 +39,8 @@ class AutorizacaoTest extends TesteApiBase {
         String aluno = bearer("aluno");
         for (String rota : new String[]{
                 "/api/evasao/risco", "/api/relatorios/desempenho", "/api/auditoria/eventos",
-                "/api/monitoramento/professores", "/api/matriculas", "/api/avaliacoes", "/api/mensagens"}) {
+                "/api/monitoramento/professores", "/api/inscricoes", "/api/avaliacoes", "/api/mensagens",
+                "/api/admin/dashboard", "/api/admin/contas"}) {
             mvc.perform(get(rota).header(HttpHeaders.AUTHORIZATION, aluno))
                     .andExpect(status().isForbidden());
         }
@@ -50,7 +51,8 @@ class AutorizacaoTest extends TesteApiBase {
     void professorNaoEscala() throws Exception {
         String professor = bearer("professor");
         for (String rota : new String[]{
-                "/api/evasao/risco", "/api/relatorios/desempenho", "/api/auditoria/eventos", "/api/matriculas"}) {
+                "/api/evasao/risco", "/api/relatorios/desempenho", "/api/auditoria/eventos",
+                "/api/inscricoes", "/api/admin/dashboard", "/api/admin/contas"}) {
             mvc.perform(get(rota).header(HttpHeaders.AUTHORIZATION, professor))
                     .andExpect(status().isForbidden());
         }
@@ -64,6 +66,36 @@ class AutorizacaoTest extends TesteApiBase {
         mvc.perform(get("/api/professor/dashboard").header(HttpHeaders.AUTHORIZATION, bearer("professor")))
                 .andExpect(status().isOk());
         mvc.perform(get("/api/evasao/risco").header(HttpHeaders.AUTHORIZATION, bearer("diretor")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("administrador cuida de contas, catálogo e inscrições, mas não escala para o resto")
+    void escopoDoAdministrador() throws Exception {
+        String admin = bearer("admin");
+
+        // O trabalho de quem administra: acesso e catálogo.
+        for (String rota : new String[]{
+                "/api/admin/dashboard", "/api/admin/contas", "/api/admin/catalogo",
+                "/api/admin/catalogo/desafios", "/api/inscricoes"}) {
+            mvc.perform(get(rota).header(HttpHeaders.AUTHORIZATION, admin))
+                    .andExpect(status().isOk());
+        }
+
+        // Gestão pedagógica e auditoria continuam sendo do diretor.
+        for (String rota : new String[]{
+                "/api/evasao/risco", "/api/relatorios/desempenho", "/api/auditoria/eventos",
+                "/api/monitoramento/professores", "/api/avaliacoes"}) {
+            mvc.perform(get(rota).header(HttpHeaders.AUTHORIZATION, admin))
+                    .andExpect(status().isForbidden());
+        }
+
+        // E os demais perfis não alcançam o painel do administrador (diretor supervisiona).
+        mvc.perform(get("/api/admin/dashboard").header(HttpHeaders.AUTHORIZATION, bearer("aluno")))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/api/admin/dashboard").header(HttpHeaders.AUTHORIZATION, bearer("professor")))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/api/admin/dashboard").header(HttpHeaders.AUTHORIZATION, bearer("diretor")))
                 .andExpect(status().isOk());
     }
 

@@ -1,0 +1,7 @@
+<div class="w-100">
+  @if (authService.usuarioLogado()?.role === 'diretor' || authService.usuarioLogado()?.role === 'admin') {
+  <app-inscricoes></app-inscricoes>
+  } @else {
+  <app-materias></app-materias>
+  }
+</div>

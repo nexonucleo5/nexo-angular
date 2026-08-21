@@ -27,7 +27,16 @@
       }
 
       <div class="dropdown-divider"></div>
-      
+
+      <a routerLink="/suporte" class="dropdown-item">
+        <i class="bi bi-life-preserver"></i> Suporte
+      </a>
+      <a routerLink="/sobre" class="dropdown-item">
+        <i class="bi bi-info-circle"></i> Sobre o Nexo
+      </a>
+
+      <div class="dropdown-divider"></div>
+
       <button (click)="signOut()" class="dropdown-item danger">
         <i class="bi bi-box-arrow-right"></i> Sair
       </button>

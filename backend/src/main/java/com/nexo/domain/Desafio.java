@@ -23,6 +23,14 @@ public class Desafio {
 
     private int tempoMin;
 
+    /**
+     * Desafio despublicado sai do catálogo do aluno sem apagar o que já foi
+     * respondido. Boolean pelo mesmo motivo de ConteudoMateria.publicado: a
+     * coluna nasce nula em banco já existente, e nulo lá vale como publicado.
+     */
+    @Column(name = "publicado")
+    private Boolean publicado = Boolean.TRUE;
+
     public Desafio() {}
 
     public Desafio(String titulo, String materia, String nivel, int xp, int tempoMin) {
@@ -39,4 +47,7 @@ public class Desafio {
     public String getNivel() { return nivel; }
     public int getXp() { return xp; }
     public int getTempoMin() { return tempoMin; }
+    /** Nunca nulo: desafio gravado antes da coluna existir já estava no ar. */
+    public boolean isPublicado() { return publicado == null || publicado; }
+    public void setPublicado(boolean publicado) { this.publicado = publicado; }
 }

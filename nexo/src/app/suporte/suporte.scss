@@ -1,0 +1,66 @@
+/* suporte.scss — .detalhe-row vem do styles.scss (modal de detalhes, reaproveitado aqui) */
+
+.faq-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  &.aberta { border-color: #9b2fff; }
+}
+
+.faq-pergunta {
+  width: 100%;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: none; border: none;
+  padding: 14px 16px;
+  color: var(--text-main);
+  font-weight: 600; font-size: 15px; text-align: left;
+  cursor: pointer;
+  i { color: var(--text-muted); flex-shrink: 0; }
+  &:hover { background: var(--hover-overlay); }
+}
+
+.faq-resposta {
+  margin: 0;
+  padding: 0 16px 16px;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.canal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+}
+
+.canal-icone { font-size: 20px; color: #9b2fff; flex-shrink: 0; }
+
+.canal-detalhe {
+  color: var(--text-main);
+  font-size: 14px; font-weight: 600;
+  word-break: break-all; /* e-mail longo não empurra o card no celular */
+}
+
+.info-tecnica {
+  background: var(--bg-card);
+  border: 1px dashed var(--border-color);
+  border-radius: 14px;
+}
+
+.btn-copiar-info {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 10px;
+  padding: 4px 12px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  &:hover { border-color: #9b2fff; }
+  .bi-check-lg { color: #06d25e; }
+}
+
+.link-sobre { color: #9b2fff; font-weight: 600; text-decoration: none;
+  &:hover { text-decoration: underline; }
+}

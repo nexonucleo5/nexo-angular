@@ -1,10 +1,6 @@
 /* materias.scss — usa apenas variáveis do styles.scss */
 
-.page-content { background-color: var(--bg-primary); min-height: 100vh; }
-
-/* Sem !important: no celular o styles.scss reduz .page-title, e um !important
-   aqui venceria essa regra e devolveria os 44px numa tela de 384px. */
-.page-title { color: var(--text-main); font-size: 44px; }
+/* A caixa da página e o .page-title são padronizados no styles.scss §3. */
 
 .filters-box {
   background: var(--bg-card);
@@ -100,3 +96,55 @@
   &:hover { transform: translateY(-2px); }
   .stat-number { font-size: 28px; font-weight: 800; color: var(--text-main) !important; margin-bottom: 4px; }
 }
+/* ── Filtro por progresso (substitui o antigo seletor de nível) ───────────── */
+.filtro-abas { justify-content: flex-end; }
+
+@media (max-width: 991.98px) {
+  .filtro-abas { justify-content: flex-start; }
+}
+
+.filtro-aba {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+
+  &:hover { border-color: #9b2fff; }
+
+  &.ativa {
+    background: linear-gradient(90deg, #9b2fff, #06d25e);
+    border-color: transparent;
+    color: #fff;
+    .filtro-contagem { background: rgba(255, 255, 255, 0.25); color: #fff; }
+  }
+}
+
+.filtro-contagem {
+  background: var(--bg-card);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.btn-limpar-busca {
+  background: none; border: none; padding: 0 4px;
+  color: var(--text-muted); cursor: pointer; line-height: 1;
+  &:hover { color: var(--text-main); }
+}
+
+.btn-limpar-filtros {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 12px; padding: 8px 18px;
+  font-weight: 600; cursor: pointer;
+  &:hover { border-color: #9b2fff; }
+}
+
+.sem-resultado { border: 1px dashed var(--border-color); }

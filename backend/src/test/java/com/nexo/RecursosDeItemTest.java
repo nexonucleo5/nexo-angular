@@ -42,8 +42,7 @@ class RecursosDeItemTest extends TesteApiBase {
         long turmaId = turmas.get(0).get("id").asLong();
 
         String location = mvc.perform(post("/api/alunos").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"nome\":\"Aluno De Teste\",\"dataNascimento\":\"2010-03-04\","
-                                + "\"sexo\":\"M\",\"turmaId\":" + turmaId + "}")
+                        .content("{\"nome\":\"Aluno De Teste\",\"turmaId\":" + turmaId + "}")
                         .header(HttpHeaders.AUTHORIZATION, diretor))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))

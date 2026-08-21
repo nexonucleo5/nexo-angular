@@ -16,8 +16,14 @@ interface AcessoGerado {
 }
 
 /**
- * Cadastros do diretor: aluno e professor em abas da mesma tela. As credenciais
- * são sempre geradas no backend — o client apenas exibe o que voltou.
+ * Cadastros: aluno e professor em abas da mesma tela. As credenciais são sempre
+ * geradas no backend — o client apenas exibe o que voltou.
+ *
+ * <p>O formulário do aluno pede nome e turma, e nada mais. Nascimento, sexo e
+ * endereço saíram junto com a busca de CEP: este sistema cuida de aprendizado e
+ * retenção de conteúdo, e a ficha pessoal do aluno vive no sistema de aula da
+ * escola. O do professor mantém os campos porque a validação de idade mínima
+ * para lecionar continua sendo regra do servidor.
  */
 @Component({
   selector: 'app-cadastro',
@@ -37,6 +43,25 @@ export class Cadastro {
   readonly turmas = signal<TurmaDTO[]>([]);
   readonly materias = signal<MateriaDTO[]>([]);
 
+  /**
+   * Limites do seletor de data — espelho da regra do servidor (ProfessorService).
+   * O navegador barrando já no calendário evita a viagem de ida e volta só para
+   * descobrir que 2205 não era 2005; quem decide continua sendo o backend.
+   */
+  readonly limitesProfessor = Cadastro.faixaDeDatas(18, 100);
+
+  /** Teto de matérias por docente, igual ao do ProfessorService. */
+  readonly maximoMaterias = 3;
+
+  private static faixaDeDatas(idadeMinima: number, idadeMaxima: number): { min: string; max: string } {
+    const hoje = new Date();
+    const iso = (d: Date) => d.toISOString().slice(0, 10);
+    return {
+      min: iso(new Date(hoje.getFullYear() - idadeMaxima, hoje.getMonth(), hoje.getDate())),
+      max: iso(new Date(hoje.getFullYear() - idadeMinima, hoje.getMonth(), hoje.getDate())),
+    };
+  }
+
   readonly enviando = signal(false);
   readonly acesso = signal<AcessoGerado | null>(null);
   readonly mensagemSucesso = signal('');
@@ -48,8 +73,6 @@ export class Cadastro {
   constructor() {
     this.alunoForm = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(3)]],
-      dataNascimento: ['', Validators.required],
-      sexo: ['', Validators.required],
       turmaId: [null, Validators.required],
     });
 
@@ -88,8 +111,14 @@ export class Cadastro {
     return this.materiaIdsSelecionadas.includes(id);
   }
 
+  /** Já no limite e não marcada: o clique não teria efeito, então some do alcance. */
+  materiaBloqueada(id: number): boolean {
+    return !this.materiaSelecionada(id) && this.materiaIdsSelecionadas.length >= this.maximoMaterias;
+  }
+
   alternarMateria(id: number): void {
     const atuais = this.materiaIdsSelecionadas;
+    if (this.materiaBloqueada(id)) return;
     const novas = atuais.includes(id) ? atuais.filter((m) => m !== id) : [...atuais, id];
     // `required` num array considera [] preenchido; o setErrors garante a validação.
     this.fp['materiaIds'].setValue(novas);
@@ -108,7 +137,7 @@ export class Cadastro {
         this.enviando.set(false);
         this.acesso.set({ login: criado.emailInstitucional, senha: criado.senhaProvisoria });
         this.mensagemSucesso.set(`Aluno ${criado.nome} cadastrado com sucesso.`);
-        this.alunoForm.reset({ nome: '', dataNascimento: '', sexo: '', turmaId: null });
+        this.alunoForm.reset({ nome: '', turmaId: null });
       },
       error: (erro: ApiErro) => this.falhar(erro),
     });
@@ -149,5 +178,22 @@ export class Cadastro {
     this.mensagemSucesso.set('');
     this.mensagemErro.set('');
     this.acesso.set(null);
+  }
+
+  // ── Copiar credenciais ──────────────────────────────────────────────
+  // A senha provisória aparece uma única vez; sem isto quem cadastra anotava no
+  // papel (e errava um caractere) para repassar ao aluno.
+
+  readonly copiado = signal(false);
+  private timerCopiado: ReturnType<typeof setTimeout> | null = null;
+
+  copiarAcesso(): void {
+    const a = this.acesso();
+    if (!a) return;
+    navigator.clipboard.writeText(`Login: ${a.login}\nSenha provisória: ${a.senha}`).then(() => {
+      this.copiado.set(true);
+      if (this.timerCopiado) clearTimeout(this.timerCopiado);
+      this.timerCopiado = setTimeout(() => this.copiado.set(false), 2500);
+    });
   }
 }
