@@ -103,6 +103,20 @@ USER nexo
 # sem isso ela dimensiona o heap pela RAM do host e o container leva OOM kill.
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
 
+# ─── Postura de segurança da imagem ──────────────────────────────────────────
+# Nenhum SPRING_PROFILES_ACTIVE é definido aqui, e isso é seguro DESDE que o
+# application.yml (o que vale sem perfil) tenha defaults seguros — que é o caso:
+# H2_CONSOLE_ENABLED e SEED_ENABLED nascem `false` e só se ligam por ambiente.
+#
+# Antes eles eram `true` fixo no application.yml, e como nem este arquivo nem o
+# compose ativavam perfil, TODO container subia publicando /h2-console (acesso
+# total ao banco com nexo/nexo) e com contas de senha conhecida. A proteção
+# dependia de alguém lembrar de setar o perfil no painel do Render; agora
+# esquecer é inofensivo, e é a exposição que exige ato deliberado.
+#
+# Quem quiser o inverso liga por ambiente: SEED_ENABLED=true no compose local,
+# SPRING_PROFILES_ACTIVE=prod (Postgres) no deploy.
+
 # Informativo: o Render (e o compose) injetam a porta real em $PORT.
 EXPOSE 8080
 

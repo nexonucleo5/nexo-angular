@@ -20,6 +20,19 @@ services:
       # um stack trace de Spring lá dentro.
       NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:?defina NEXO_JWT_SECRET no .env (openssl rand -base64 48)}
       PORT: 8080
+
+      # ── Ambiente de desenvolvimento, declarado ────────────────────────────
+      # A imagem sobe segura: sem seed e sem console do H2 (application.yml).
+      # Este compose é a máquina de quem desenvolve, então ele LIGA o seed de
+      # propósito — sem ele o banco nasce vazio e não há conta para entrar.
+      #
+      # Não confunda com o que vai para o Render: lá o perfil é prod, com
+      # Postgres e as duas flags desligadas. Ligar aqui não vaza para lá,
+      # porque quem decide é o ambiente de cada execução, não a imagem.
+      SEED_ENABLED: "true"
+      # O console dá acesso total ao banco (nexo/nexo). Fica desligado mesmo em
+      # dev; para depurar, rode com H2_CONSOLE_ENABLED=true no .env.
+      H2_CONSOLE_ENABLED: ${H2_CONSOLE_ENABLED:-false}
     volumes:
       # O H2 de dev grava em /app/data; no volume os dados sobrevivem ao rebuild.
       - nexo-data:/app/data

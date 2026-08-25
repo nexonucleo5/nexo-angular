@@ -58,7 +58,16 @@ spring:
 
   h2:
     console:
-      enabled: true
+      # Desligado por padrão, e ligado por opt-in no .env local (H2_CONSOLE_ENABLED=true).
+      #
+      # A ordem importa: este arquivo é o que vale quando NENHUM perfil é ativado,
+      # e é assim que a imagem Docker sobe — nem o Dockerfile nem o compose
+      # definiam SPRING_PROFILES_ACTIVE. Com `true` fixo aqui, todo container
+      # publicava o console web do H2, cujas credenciais (nexo/nexo) estão logo
+      # acima neste mesmo arquivo: acesso irrestrito de leitura e escrita ao banco
+      # para quem alcançasse a porta. Quem nega a rota é o SecurityConfig, e ele
+      # decide por esta flag.
+      enabled: ${H2_CONSOLE_ENABLED:false}
       path: /h2-console
 
   # Escapa não-ASCII como \uXXXX no JSON — imune a double-encoding de charset
@@ -111,4 +120,10 @@ nexo:
     # Origem do dev-server Angular
     allowed-origins: http://localhost:4200
   seed:
-    enabled: true
+    # Mesma inversão do console acima: desligado por padrão, ligado por opt-in.
+    #
+    # O seed cria contas com senha conhecida ("admin"/"123456" e as demais). A
+    # guarda do DataSeeder já impedia que isso chegasse a um Postgres, mas não
+    # a um container em H2 — que é exatamente como a imagem sobe. Ligar é uma
+    # decisão de quem roda, não o comportamento de quem esquece.
+    enabled: ${SEED_ENABLED:false}
