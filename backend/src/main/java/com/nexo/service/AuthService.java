@@ -10,6 +10,7 @@ import com.nexo.domain.Usuario;
 import com.nexo.repository.RefreshTokenRepository;
 import com.nexo.repository.UsuarioRepository;
 import com.nexo.security.AccessTokensRevogados;
+import com.nexo.security.JanelaDeTentativas;
 import com.nexo.security.JwtService;
 import com.nexo.security.UsuarioAutenticado;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,23 +24,16 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HexFormat;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class AuthService {
 
-    private static final int MAX_TENTATIVAS = 5;
+    private static final int MAX_TENTATIVAS_POR_LOGIN = 5;
     private static final Duration JANELA_BLOQUEIO = Duration.ofMinutes(15);
 
-    /**
-     * A partir daqui uma nova falha dispara a varredura de entradas vencidas. A chave do
-     * mapa é o login digitado — texto arbitrário vindo de fora —, então sem essa poda um
-     * atacante enche o heap só errando logins diferentes; o mapa só encolhia no login
-     * bem-sucedido ou quando a mesma chave era consultada de novo.
-     */
-    private static final int LIMITE_PODA = 1_000;
+    /** Janela mais curta para a renovação: ela é automática, não depende de digitação. */
+    private static final Duration JANELA_REFRESH = Duration.ofMinutes(5);
 
     private final UsuarioRepository usuarios;
     private final RefreshTokenRepository refreshTokens;
@@ -56,10 +50,24 @@ public class AuthService {
      */
     private final String hashFicticio;
 
-    /** Controle de tentativas de login por usuário (bloqueio temporário após excesso). */
-    private final Map<String, Tentativas> tentativasPorLogin = new ConcurrentHashMap<>();
+    /** Protege uma conta específica de força bruta: 5 erros na mesma conta e ela trava. */
+    private final JanelaDeTentativas porLogin;
 
-    private record Tentativas(int quantidade, Instant primeiraFalha) {}
+    /**
+     * Protege o conjunto das contas. O limite por login não enxerga <i>password
+     * spraying</i> — uma senha provável testada contra centenas de logins diferentes —,
+     * porque nesse ataque cada conta erra uma vez só e nenhuma chega perto do teto. Aqui
+     * a contagem é por origem, que é o que esse ataque tem em comum.
+     *
+     * <p>O teto é bem mais alto que o do login por causa do NAT: um laboratório inteiro
+     * sai pelo mesmo endereço público, e ali dezenas de erros honestos numa manhã são
+     * normais. Ajuste por {@code nexo.auth.max-tentativas-por-ip} (0 desliga) se a escola
+     * tiver muitas máquinas atrás de um IP só.
+     */
+    private final JanelaDeTentativas porOrigem;
+
+    /** Renovações inválidas por origem — ver {@link #refresh(String, String)}. */
+    private final JanelaDeTentativas refreshPorOrigem;
 
     public AuthService(UsuarioRepository usuarios,
                        RefreshTokenRepository refreshTokens,
@@ -67,7 +75,9 @@ public class AuthService {
                        AccessTokensRevogados accessTokensRevogados,
                        PasswordEncoder passwordEncoder,
                        AuditoriaService auditoria,
-                       @Value("${nexo.jwt.refresh-token-days}") long refreshTokenDays) {
+                       @Value("${nexo.jwt.refresh-token-days}") long refreshTokenDays,
+                       @Value("${nexo.auth.max-tentativas-por-ip:100}") int maxTentativasPorIp,
+                       @Value("${nexo.auth.max-refresh-invalidos-por-ip:30}") int maxRefreshInvalidosPorIp) {
         this.usuarios = usuarios;
         this.refreshTokens = refreshTokens;
         this.jwtService = jwtService;
@@ -76,6 +86,9 @@ public class AuthService {
         this.auditoria = auditoria;
         this.refreshTtl = Duration.ofDays(refreshTokenDays);
         this.hashFicticio = passwordEncoder.encode(UUID.randomUUID().toString());
+        this.porLogin = new JanelaDeTentativas(MAX_TENTATIVAS_POR_LOGIN, JANELA_BLOQUEIO);
+        this.porOrigem = new JanelaDeTentativas(maxTentativasPorIp, JANELA_BLOQUEIO);
+        this.refreshPorOrigem = new JanelaDeTentativas(maxRefreshInvalidosPorIp, JANELA_REFRESH);
     }
 
     /**
@@ -87,7 +100,10 @@ public class AuthService {
     @Transactional(noRollbackFor = ApiException.class)
     public SessaoEmitida login(String login, String senha, String ip) {
         String chave = login.trim().toLowerCase();
-        verificarBloqueio(chave);
+        verificarBloqueio(porLogin, chave, "LOGIN_BLOQUEADO",
+                "Muitas tentativas de login nesta conta. Tente novamente em alguns minutos.");
+        verificarBloqueio(porOrigem, ip, "ORIGEM_BLOQUEADA",
+                "Muitas tentativas malsucedidas vindas desta rede. Tente novamente em alguns minutos.");
 
         Usuario usuario = usuarios.findByLoginIgnoreCase(chave).orElse(null);
 
@@ -98,19 +114,47 @@ public class AuthService {
                 senha, usuario != null ? usuario.getSenhaHash() : hashFicticio);
 
         if (usuario == null || !usuario.isAtivo() || !senhaConfere) {
-            registrarFalha(chave);
+            porLogin.registrarFalha(chave);
+            porOrigem.registrarFalha(ip);
             auditoria.registrar(chave, EventoAuditoria.Tipo.ERRO, "Tentativa de login inválida", null, ip);
             throw ApiException.unauthorized("Credenciais inválidas.");
         }
 
-        tentativasPorLogin.remove(chave);
+        // Só a contagem da conta é zerada. A da origem sobrevive de propósito: num
+        // spraying o atacante costuma ter alguma credencial válida, e zerar tudo a cada
+        // acerto daria a ele um jeito barato de reiniciar o contador quando quisesse.
+        porLogin.limpar(chave);
         auditoria.registrar(usuario.getNome(), EventoAuditoria.Tipo.LOGIN, "Login realizado", null, ip);
         return gerarTokens(usuario);
     }
 
-    /** Ver {@link #login} — a revogação em cascata abaixo também precisa sobreviver ao throw. */
+    /** Renovação sem origem conhecida (usada em teste); o caminho HTTP usa a sobrecarga. */
     @Transactional(noRollbackFor = ApiException.class)
     public SessaoEmitida refresh(String refreshToken) {
+        return refresh(refreshToken, null);
+    }
+
+    /**
+     * Ver {@link #login} — a revogação em cascata abaixo também precisa sobreviver ao throw.
+     *
+     * <p>{@code /api/auth/refresh} é público por necessidade: quem chega nele ainda não
+     * tem access token para provar quem é. Sem limite, era o único endpoint da API em que
+     * dava para bater à vontade — cada tentativa custa uma consulta ao banco. Só a falha
+     * conta: o cliente legítimo renova de tempos em tempos e sempre com um token válido.
+     */
+    @Transactional(noRollbackFor = ApiException.class)
+    public SessaoEmitida refresh(String refreshToken, String ip) {
+        verificarBloqueio(refreshPorOrigem, ip, "REFRESH_BLOQUEADO",
+                "Muitas renovações inválidas vindas desta rede. Entre novamente.");
+        try {
+            return rotacionar(refreshToken);
+        } catch (ApiException erro) {
+            refreshPorOrigem.registrarFalha(ip);
+            throw erro;
+        }
+    }
+
+    private SessaoEmitida rotacionar(String refreshToken) {
         RefreshToken atual = refreshTokens.findByTokenHash(hash(refreshToken))
                 .orElseThrow(() -> ApiException.unauthorized("Refresh token inválido ou expirado."));
 
@@ -172,6 +216,32 @@ public class AuthService {
         auditoria.registrar(usuario.nome(), EventoAuditoria.Tipo.LOGOUT, "Logout realizado", null, ip);
     }
 
+    /**
+     * Revoga todas as sessões do usuário menos a que fez o pedido. Chamado na troca de
+     * senha: sem isso, trocar a senha não expulsava ninguém — quem tivesse copiado o
+     * refresh token continuava renovando por até 7 dias, justamente no cenário em que a
+     * troca acontece porque a senha vazou.
+     *
+     * <p>A sessão atual é poupada pelo hash do cookie que ela apresentou, para que quem
+     * trocou a senha não seja jogado de volta na tela de login.
+     *
+     * <p>O access token das outras sessões não é alcançável aqui — {@link
+     * AccessTokensRevogados} indexa por {@code jti}, e o {@code jti} das outras emissões
+     * não fica guardado em lugar nenhum. Na prática elas seguem lendo por no máximo o TTL
+     * do access token (15 min) e então param, porque a renovação já não passa.
+     *
+     * @return quantas sessões foram encerradas
+     */
+    @Transactional
+    public int encerrarOutrasSessoes(Long usuarioId, String refreshTokenAtual) {
+        // Sentinela em vez de null: comparar com null em JPQL exigiria um segundo ramo na
+        // consulta, e nenhum hash SHA-256 é a string vazia.
+        String hashPreservado = (refreshTokenAtual == null || refreshTokenAtual.isBlank())
+                ? ""
+                : hash(refreshTokenAtual);
+        return refreshTokens.revogarOutrasSessoes(usuarioId, hashPreservado);
+    }
+
     public UsuarioDTO me(Long usuarioId) {
         return usuarios.findById(usuarioId)
                 .map(UsuarioDTO::of)
@@ -203,34 +273,15 @@ public class AuthService {
         }
     }
 
-    private void verificarBloqueio(String chave) {
-        Tentativas t = tentativasPorLogin.get(chave);
-        if (t == null) return;
-        boolean dentroDaJanela = t.primeiraFalha().plus(JANELA_BLOQUEIO).isAfter(Instant.now());
-        if (!dentroDaJanela) {
-            tentativasPorLogin.remove(chave);
-            return;
+    /**
+     * Barra a chave se ela estourou o limite da janela. O {@code Retry-After} vem junto
+     * para o cliente saber quando voltar, em vez de repetir em laço.
+     */
+    private static void verificarBloqueio(JanelaDeTentativas janela, String chave,
+                                          String codigo, String mensagem) {
+        long faltam = janela.segundosDeBloqueio(chave);
+        if (faltam > 0) {
+            throw ApiException.tooManyRequests(codigo, mensagem, faltam);
         }
-        if (t.quantidade() >= MAX_TENTATIVAS) {
-            long faltam = Duration.between(Instant.now(), t.primeiraFalha().plus(JANELA_BLOQUEIO)).toSeconds();
-            throw ApiException.tooManyRequests("LOGIN_BLOQUEADO",
-                    "Muitas tentativas de login. Tente novamente em alguns minutos.",
-                    Math.max(1, faltam));
-        }
-    }
-
-    private void registrarFalha(String chave) {
-        if (tentativasPorLogin.size() >= LIMITE_PODA) {
-            podarVencidas();
-        }
-        tentativasPorLogin.merge(chave,
-                new Tentativas(1, Instant.now()),
-                (antiga, ignorada) -> new Tentativas(antiga.quantidade() + 1, antiga.primeiraFalha()));
-    }
-
-    /** Remove as janelas já encerradas — elas não bloqueiam mais ninguém, só ocupam heap. */
-    private void podarVencidas() {
-        Instant limite = Instant.now().minus(JANELA_BLOQUEIO);
-        tentativasPorLogin.values().removeIf(t -> t.primeiraFalha().isBefore(limite));
     }
 }

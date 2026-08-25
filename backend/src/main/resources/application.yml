@@ -110,5 +110,24 @@ nexo:
   cors:
     # Origem do dev-server Angular
     allowed-origins: http://localhost:4200
+  auth:
+    # Falhas de login toleradas por origem numa janela de 15 min, antes de a origem ser
+    # barrada. Existe para pegar password spraying (uma senha provável contra centenas de
+    # logins), que o limite por conta — 5 erros, fixo no código — não enxerga.
+    #
+    # O teto é alto de propósito: numa escola, um laboratório inteiro sai pelo mesmo IP
+    # público, e dezenas de erros honestos numa manhã são normais. Suba se houver muitas
+    # máquinas atrás de um NAT só; 0 desliga o limite por origem.
+    max-tentativas-por-ip: ${AUTH_MAX_TENTATIVAS_IP:100}
+    # Renovações inválidas por origem numa janela de 5 min. /api/auth/refresh é público
+    # por necessidade — quem chega nele ainda não tem access token —, então é o único
+    # endpoint em que dava para bater sem custo. 0 desliga.
+    max-refresh-invalidos-por-ip: ${AUTH_MAX_REFRESH_IP:30}
+  proxy:
+    # Quantos proxies existem entre o cliente e esta aplicação. 0 (padrão, e o caso ao
+    # rodar na sua máquina) faz o X-Forwarded-For ser ignorado: o endereço vem do peer da
+    # conexão. Ver ClienteIp — confiar no cabeçalho sem saber a quantidade de saltos deixa
+    # qualquer um forjar o próprio IP e escapar dos limites acima.
+    saltos-confiaveis: ${PROXY_SALTOS_CONFIAVEIS:0}
   seed:
     enabled: true

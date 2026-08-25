@@ -51,8 +51,10 @@ class AuthServiceTest {
 
     @BeforeEach
     void montar() {
+        // Limites por origem zerados (= desligados): estes testes exercitam o bloqueio por
+        // conta, e todos partem do mesmo IP fictício.
         authService = new AuthService(usuarios, refreshTokens, new JwtService(SEGREDO, 15),
-                accessTokensRevogados, encoder, auditoria, 7);
+                accessTokensRevogados, encoder, auditoria, 7, 0, 0);
 
         usuario = new Usuario();
         usuario.setId(1L);

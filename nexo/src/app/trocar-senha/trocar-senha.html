@@ -8,6 +8,8 @@
       <h1 class="senha-title">Alterar Senha</h1>
       <p class="senha-subtitle">Para sua segurança, informe a senha atual antes de definir uma nova.</p>
 
+      <!-- Só o que não pertence a um campo: falha de rede, sessão expirada, erro do servidor.
+           O que o backend atribui a um campo aparece embaixo dele, mais perto do problema. -->
       @if (mensagemErro()) {
         <div class="alert alert-danger py-2">{{ mensagemErro() }}</div>
       }
@@ -16,17 +18,37 @@
       }
 
       <form [formGroup]="form" (ngSubmit)="salvar()">
-        <div class="campo">
-          <label>Senha atual</label>
-          <input type="password" formControlName="senhaAtual" placeholder="Digite sua senha atual">
+        <div class="campo" [class.com-erro]="erroSenhaAtual()">
+          <label for="senhaAtual">Senha atual</label>
+          <input id="senhaAtual" type="password" formControlName="senhaAtual"
+                 placeholder="Digite sua senha atual"
+                 [attr.aria-invalid]="erroSenhaAtual() ? 'true' : null"
+                 [attr.aria-describedby]="erroSenhaAtual() ? 'erro-senhaAtual' : null">
+          @if (erroSenhaAtual()) {
+            <small class="erro-campo" id="erro-senhaAtual" role="alert">{{ erroSenhaAtual() }}</small>
+          }
         </div>
-        <div class="campo">
-          <label>Nova senha</label>
-          <input type="password" formControlName="novaSenha" placeholder="Mínimo 8 caracteres">
+
+        <div class="campo" [class.com-erro]="erroNovaSenha()">
+          <label for="novaSenha">Nova senha</label>
+          <input id="novaSenha" type="password" formControlName="novaSenha"
+                 placeholder="Mínimo 8 caracteres"
+                 [attr.aria-invalid]="erroNovaSenha() ? 'true' : null"
+                 [attr.aria-describedby]="erroNovaSenha() ? 'erro-novaSenha' : null">
+          @if (erroNovaSenha()) {
+            <small class="erro-campo" id="erro-novaSenha" role="alert">{{ erroNovaSenha() }}</small>
+          }
         </div>
-        <div class="campo">
-          <label>Confirmar nova senha</label>
-          <input type="password" formControlName="confirmar" placeholder="Repita a nova senha">
+
+        <div class="campo" [class.com-erro]="erroConfirmar()">
+          <label for="confirmar">Confirmar nova senha</label>
+          <input id="confirmar" type="password" formControlName="confirmar"
+                 placeholder="Repita a nova senha"
+                 [attr.aria-invalid]="erroConfirmar() ? 'true' : null"
+                 [attr.aria-describedby]="erroConfirmar() ? 'erro-confirmar' : null">
+          @if (erroConfirmar()) {
+            <small class="erro-campo" id="erro-confirmar" role="alert">{{ erroConfirmar() }}</small>
+          }
         </div>
 
         <button type="submit" class="btn-salvar" [disabled]="enviando()">

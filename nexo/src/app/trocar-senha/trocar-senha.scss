@@ -53,6 +53,21 @@
   }
 }
 
+/* Campo recusado pelo servidor: a borda marca qual é, e o texto explica o quê.
+   Antes a única pista era a faixa no topo, que nem sempre falava do campo certo. */
+.campo.com-erro input {
+  border-color: var(--danger, #dc3545);
+  &:focus { border-color: var(--danger, #dc3545); }
+}
+
+.erro-campo {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--danger, #dc3545);
+}
+
 .btn-salvar {
   width: 100%;
   background: linear-gradient(135deg, #9b2fff, #06d25e);

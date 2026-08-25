@@ -5,6 +5,7 @@ import com.nexo.api.dto.AuthDtos.LoginRequest;
 import com.nexo.api.dto.AuthDtos.SessaoEmitida;
 import com.nexo.api.dto.AuthDtos.TokenResponse;
 import com.nexo.api.dto.AuthDtos.UsuarioDTO;
+import com.nexo.security.ClienteIp;
 import com.nexo.security.RefreshTokenCookie;
 import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AuthService;
@@ -21,16 +22,18 @@ public class AuthController {
 
     private final AuthService authService;
     private final RefreshTokenCookie refreshCookie;
+    private final ClienteIp clienteIp;
 
-    public AuthController(AuthService authService, RefreshTokenCookie refreshCookie) {
+    public AuthController(AuthService authService, RefreshTokenCookie refreshCookie, ClienteIp clienteIp) {
         this.authService = authService;
         this.refreshCookie = refreshCookie;
+        this.clienteIp = clienteIp;
     }
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request,
                                               HttpServletRequest http) {
-        return comCookie(authService.login(request.login(), request.senha(), http.getRemoteAddr()), http);
+        return comCookie(authService.login(request.login(), request.senha(), clienteIp.de(http)), http);
     }
 
     /**
@@ -45,7 +48,7 @@ public class AuthController {
         if (refreshToken == null || refreshToken.isBlank()) {
             throw ApiException.unauthorized("Refresh token ausente.");
         }
-        return comCookie(authService.refresh(refreshToken), http);
+        return comCookie(authService.refresh(refreshToken, clienteIp.de(http)), http);
     }
 
     /**
@@ -57,7 +60,7 @@ public class AuthController {
             @AuthenticationPrincipal UsuarioAutenticado usuario,
             @CookieValue(name = RefreshTokenCookie.NOME, required = false) String refreshToken,
             HttpServletRequest http) {
-        authService.logout(usuario, refreshToken, http.getRemoteAddr());
+        authService.logout(usuario, refreshToken, clienteIp.de(http));
         return ResponseEntity.noContent()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.limpar(http.isSecure()))
                 .build();
