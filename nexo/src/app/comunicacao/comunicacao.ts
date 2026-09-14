@@ -5,7 +5,7 @@ import { Chat } from '../chat/chat';
 import { ComunicacaoService } from '../api/comunicacao.service';
 import { TurmasService } from '../api/turmas.service';
 import { AlunosService } from '../api/alunos.service';
-import { AvisoDTO, ConversaDTO, DuvidaDTO, NotaDTO, TurmaDTO } from '../core/api.models';
+import { AvisoDTO, ConversaDTO, DuvidaDTO, NotaDTO } from '../core/api.models';
 import { AVATAR_PADRAO } from '../core/avatar';
 
 interface ChatMessage {
@@ -44,6 +44,8 @@ interface DuvidaView {
 interface AlunoLista {
   alunoId: number;
   nome: string;
+  /** Vem de GET /api/alunos; é o que dispensa carregar a lista de turmas só para casar nomes. */
+  turmaId: number | null;
   turma: string;
 }
 
@@ -95,7 +97,6 @@ export class Comunicacao implements OnInit {
    * alunos vazia e indistinguível de uma turma sem aluno nenhum.
    */
   readonly erroAlunos = signal(false);
-  private readonly turmas = signal<TurmaDTO[]>([]);
 
   mensagemSelecionada: MensagemView | null = null;
   alunoSelecionado: AlunoLista | null = null;
@@ -131,7 +132,6 @@ export class Comunicacao implements OnInit {
     this.comunicacao.listarDuvidas().subscribe({
       next: (duvidas) => this.duvidas.set(duvidas.map((d) => this.duvidaView(d))),
     });
-    this.turmasApi.listar().subscribe({ next: (t) => this.turmas.set(t) });
     // GET /api/alunos já chega recortado pelas turmas que este professor leciona —
     // antes esta lista vinha de /api/matriculas, que é do diretor, e o professor
     // tomava 403 sem nada na tela dizendo por que a lista estava vazia.
@@ -141,6 +141,7 @@ export class Comunicacao implements OnInit {
           lista.map((a) => ({
             alunoId: a.id,
             nome: a.nome,
+            turmaId: a.turmaId,
             turma: a.turma ?? 'Sem turma',
           })),
         );
@@ -259,9 +260,8 @@ export class Comunicacao implements OnInit {
     this.notasAluno.set([]);
     this.observacoesAluno.set([]);
 
-    const turma = this.turmas().find((t) => t.nome === aluno.turma);
-    if (turma) {
-      this.turmasApi.notas(turma.id).subscribe({
+    if (aluno.turmaId != null) {
+      this.turmasApi.notas(aluno.turmaId).subscribe({
         next: (notas) =>
           this.notasAluno.set(
             notas

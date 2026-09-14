@@ -25,6 +25,16 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     @Query("select a from Aluno a left join fetch a.turma t where t.id in :turmaIds order by a.nome")
     List<Aluno> findByTurmaIdInComTurma(Collection<Long> turmaIds);
 
+    /**
+     * Uma turma só, com a mesma ordenação por id de {@link #findAllComTurma()}.
+     *
+     * <p>A ordem importa: listas como a de evasão ordenam por risco com sort estável, e
+     * o desempate vem da ordem de origem. Trocar por {@code findByTurmaIdOrderByNome}
+     * mudaria silenciosamente a ordem da tela quando o filtro de turma está ativo.
+     */
+    @Query("select a from Aluno a left join fetch a.turma t where t.id = :turmaId order by a.id")
+    List<Aluno> findByTurmaIdComTurma(Long turmaId);
+
     long countByTurmaId(Long turmaId);
 
     /** Ocupação de todas as turmas numa ida só: (turmaId, total de alunos). */

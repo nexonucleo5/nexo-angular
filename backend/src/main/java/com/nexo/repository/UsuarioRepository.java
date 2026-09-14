@@ -25,9 +25,23 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
                                                          @Param("busca") String busca,
                                                          org.springframework.data.domain.Pageable pageable);
 
+    /** Sem uso em produção desde o group by de contarPorPapelEAtivo(): fica como referência independente no AgregadosEContagensTest. */
     long countByRole(Role role);
 
+    /** Sem uso em produção desde o group by de contarPorPapelEAtivo(): fica como referência independente no AgregadosEContagensTest. */
     long countByAtivo(boolean ativo);
+
+    /**
+     * (papel, ativo, total) para a escola inteira numa consulta só.
+     *
+     * <p>O painel do administrador precisa de seis números sobre a tabela de usuários —
+     * total, inativos e um por papel. Eram seis {@code count(*)} separados, ou seja seis
+     * idas ao banco (e seis varreduras) para responder o que um único {@code group by}
+     * responde. O agrupamento também é por {@code ativo} porque a conta de inativos sai
+     * do mesmo resultado.
+     */
+    @Query("select u.role, u.ativo, count(u) from Usuario u group by u.role, u.ativo")
+    List<Object[]> contarPorPapelEAtivo();
 
     /**
      * Só o papel, sem materializar a entidade. Usado na checagem que roda a cada
