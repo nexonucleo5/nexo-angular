@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Aluno como o sistema de aprendizado precisa dele: um nome, um acesso e a turma
  * cujo conteúdo ele cursa.
@@ -16,6 +19,8 @@ import java.time.Instant;
  */
 @Entity
 @Table(name = "alunos")
+@Getter
+@Setter
 public class Aluno {
 
     @Id
@@ -56,37 +61,4 @@ public class Aluno {
     private int ofensivaDias;
     private int tarefasFeitasHoje;
     private int tarefasHoje;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
-    public String getEmailInstitucional() { return emailInstitucional; }
-    public void setEmailInstitucional(String emailInstitucional) { this.emailInstitucional = emailInstitucional; }
-    public Turma getTurma() { return turma; }
-    public void setTurma(Turma turma) { this.turma = turma; }
-    public int getEngajamento() { return engajamento; }
-    public void setEngajamento(int engajamento) { this.engajamento = engajamento; }
-    public String getFoto() { return foto; }
-    public void setFoto(String foto) { this.foto = foto; }
-    public Instant getUltimoAcessoEm() { return ultimoAcessoEm; }
-    public void setUltimoAcessoEm(Instant ultimoAcessoEm) { this.ultimoAcessoEm = ultimoAcessoEm; }
-    public int getIntervencoes() { return intervencoes; }
-    public void setIntervencoes(int intervencoes) { this.intervencoes = intervencoes; }
-    public Instant getUltimaIntervencaoEm() { return ultimaIntervencaoEm; }
-    public void setUltimaIntervencaoEm(Instant ultimaIntervencaoEm) { this.ultimaIntervencaoEm = ultimaIntervencaoEm; }
-    public int getXpTotal() { return xpTotal; }
-    public void setXpTotal(int xpTotal) { this.xpTotal = xpTotal; }
-    public int getXpSemana() { return xpSemana; }
-    public void setXpSemana(int xpSemana) { this.xpSemana = xpSemana; }
-    public int getMetaSemanalXp() { return metaSemanalXp; }
-    public void setMetaSemanalXp(int metaSemanalXp) { this.metaSemanalXp = metaSemanalXp; }
-    public int getOfensivaDias() { return ofensivaDias; }
-    public void setOfensivaDias(int ofensivaDias) { this.ofensivaDias = ofensivaDias; }
-    public int getTarefasFeitasHoje() { return tarefasFeitasHoje; }
-    public void setTarefasFeitasHoje(int tarefasFeitasHoje) { this.tarefasFeitasHoje = tarefasFeitasHoje; }
-    public int getTarefasHoje() { return tarefasHoje; }
-    public void setTarefasHoje(int tarefasHoje) { this.tarefasHoje = tarefasHoje; }
 }

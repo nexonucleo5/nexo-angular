@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Configurações do usuário armazenadas como documento JSON particionado por seção,
  * espelhando o formato do signal<Settings> do Angular. O PATCH parcial por seção
@@ -11,6 +14,8 @@ import java.time.Instant;
  */
 @Entity
 @Table(name = "configuracoes_usuario")
+@Getter
+@Setter
 public class ConfiguracaoUsuario {
 
     @Id
@@ -26,13 +31,4 @@ public class ConfiguracaoUsuario {
     private String json;
 
     private Instant atualizadaEm = Instant.now();
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
-    public String getJson() { return json; }
-    public void setJson(String json) { this.json = json; }
-    public Instant getAtualizadaEm() { return atualizadaEm; }
-    public void setAtualizadaEm(Instant atualizadaEm) { this.atualizadaEm = atualizadaEm; }
 }

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import lombok.Getter;
+
 /**
  * Foto de perfil enviada pelo usuário, guardada no banco.
  *
@@ -14,6 +16,7 @@ import java.time.Instant;
  */
 @Entity
 @Table(name = "fotos_perfil")
+@Getter
 public class FotoPerfil {
 
     /** UUID aleatório: também serve de cache-busting, pois muda a cada novo envio. */
@@ -47,10 +50,4 @@ public class FotoPerfil {
         this.dados = dados;
         this.atualizadaEm = atualizadaEm;
     }
-
-    public String getId() { return id; }
-    public Long getUsuarioId() { return usuarioId; }
-    public String getTipoConteudo() { return tipoConteudo; }
-    public byte[] getDados() { return dados; }
-    public Instant getAtualizadaEm() { return atualizadaEm; }
 }

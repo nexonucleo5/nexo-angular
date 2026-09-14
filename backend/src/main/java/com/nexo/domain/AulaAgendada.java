@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
+import lombok.Getter;
+
 /** Aula agendada na grade de horários do professor (próximas aulas do dashboard). */
 @Entity
 @Table(name = "aulas_agendadas")
+@Getter
 public class AulaAgendada {
 
     @Id
@@ -42,13 +45,4 @@ public class AulaAgendada {
         this.sala = sala;
         this.qtdAlunos = qtdAlunos;
     }
-
-    public Long getId() { return id; }
-    public Professor getProfessor() { return professor; }
-    public Turma getTurma() { return turma; }
-    public String getDisciplina() { return disciplina; }
-    public LocalDate getData() { return data; }
-    public String getHora() { return hora; }
-    public String getSala() { return sala; }
-    public int getQtdAlunos() { return qtdAlunos; }
 }

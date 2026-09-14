@@ -4,9 +4,14 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
 @Table(name = "eventos_auditoria",
        indexes = @Index(name = "idx_eventos_auditoria_criado_em", columnList = "criado_em"))
+@Getter
+@Setter
 public class EventoAuditoria {
 
     public enum Tipo { LOGIN, LOGOUT, ACESSO, ALTERACAO, ERRO }
@@ -40,19 +45,4 @@ public class EventoAuditoria {
         this.detalhe = detalhe;
         this.ip = ip;
     }
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getUsuarioNome() { return usuarioNome; }
-    public void setUsuarioNome(String usuarioNome) { this.usuarioNome = usuarioNome; }
-    public Tipo getTipo() { return tipo; }
-    public void setTipo(Tipo tipo) { this.tipo = tipo; }
-    public String getAcao() { return acao; }
-    public void setAcao(String acao) { this.acao = acao; }
-    public String getDetalhe() { return detalhe; }
-    public void setDetalhe(String detalhe) { this.detalhe = detalhe; }
-    public String getIp() { return ip; }
-    public void setIp(String ip) { this.ip = ip; }
-    public Instant getCriadoEm() { return criadoEm; }
-    public void setCriadoEm(Instant criadoEm) { this.criadoEm = criadoEm; }
 }

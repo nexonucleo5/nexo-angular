@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import lombok.Getter;
+
 /** Atividade recente do aluno (feed de gamificação do dashboard). */
 @Entity
 @Table(name = "atividades_aluno")
+@Getter
 public class AtividadeAluno {
 
     @Id
@@ -42,13 +45,4 @@ public class AtividadeAluno {
         this.icone = icone;
         this.criadaEm = criadaEm;
     }
-
-    public Long getId() { return id; }
-    public Aluno getAluno() { return aluno; }
-    public String getTitulo() { return titulo; }
-    public String getMateria() { return materia; }
-    public int getXp() { return xp; }
-    public int getProgresso() { return progresso; }
-    public String getIcone() { return icone; }
-    public Instant getCriadaEm() { return criadaEm; }
 }
