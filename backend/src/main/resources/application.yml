@@ -129,5 +129,11 @@ nexo:
     # conexão. Ver ClienteIp — confiar no cabeçalho sem saber a quantidade de saltos deixa
     # qualquer um forjar o próprio IP e escapar dos limites acima.
     saltos-confiaveis: ${PROXY_SALTOS_CONFIAVEIS:0}
+  auditoria:
+    # Dias de eventos de auditoria mantidos; o que for mais antigo é apagado às 03:30.
+    # Era a única tabela sem teto de crescimento — login e logout gravam um evento cada.
+    # Folgado de propósito: a tela consulta por ?periodo=<dias> e um corte curto faria a
+    # resposta parecer "sem eventos" onde na verdade foram removidos. 0 desliga.
+    retencao-dias: ${AUDITORIA_RETENCAO_DIAS:365}
   seed:
     enabled: true
