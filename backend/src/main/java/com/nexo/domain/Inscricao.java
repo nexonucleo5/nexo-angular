@@ -21,7 +21,9 @@ import lombok.Setter;
  * conteúdo da turma sem apagar o histórico de progresso do aluno.
  */
 @Entity
-@Table(name = "inscricoes")
+@Table(name = "inscricoes",
+       // InscricaoRepository.buscar filtra por turma quando a tela escolhe uma.
+       indexes = @Index(name = "idx_inscricoes_turma", columnList = "turma_id"))
 @Getter
 @Setter
 public class Inscricao {

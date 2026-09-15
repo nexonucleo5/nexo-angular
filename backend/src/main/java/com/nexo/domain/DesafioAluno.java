@@ -8,7 +8,10 @@ import lombok.Setter;
 
 /** Progresso de um aluno em um desafio. */
 @Entity
-@Table(name = "desafios_aluno")
+@Table(name = "desafios_aluno",
+       // Composto e nesta ordem: serve tanto findByAlunoId (prefixo) quanto
+       // findByAlunoIdAndDesafioId, que roda a cada abertura e conclusão de desafio.
+       indexes = @Index(name = "idx_desafios_aluno_aluno_desafio", columnList = "aluno_id, desafio_id"))
 @Getter
 public class DesafioAluno {
 

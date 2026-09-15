@@ -8,7 +8,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "avaliacoes")
+@Table(name = "avaliacoes",
+       // Os dois KPIs do dashboard (somarPendentesCorrecao, contarPorTurmasNoPeriodo)
+       // e buscarPorTurmas filtram por turma.id in (...).
+       indexes = @Index(name = "idx_avaliacoes_turma", columnList = "turma_id"))
 @Getter
 @Setter
 public class Avaliacao {

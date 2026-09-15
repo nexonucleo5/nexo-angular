@@ -8,7 +8,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "refresh_tokens")
+@Table(name = "refresh_tokens",
+       // revogarTodosDoUsuario/revogarOutrasSessoes: um UPDATE por usuário a cada
+       // logout e a cada conta desativada.
+       indexes = @Index(name = "idx_refresh_tokens_usuario", columnList = "usuario_id"))
 @Getter
 @Setter
 public class RefreshToken {

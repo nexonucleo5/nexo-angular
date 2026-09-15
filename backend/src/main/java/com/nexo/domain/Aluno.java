@@ -18,7 +18,11 @@ import lombok.Setter;
  * além de nome e progresso.
  */
 @Entity
-@Table(name = "alunos")
+@Table(name = "alunos",
+       // Recorte por turma: é o filtro de praticamente toda tela de professor, e a
+       // coluna que os agregados de nota/frequência atravessam para chegar à turma.
+       // Sem ele o Postgres varre a tabela de alunos inteira em cada uma dessas telas.
+       indexes = @Index(name = "idx_alunos_turma", columnList = "turma_id"))
 @Getter
 @Setter
 public class Aluno {

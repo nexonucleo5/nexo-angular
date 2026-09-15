@@ -8,7 +8,10 @@ import lombok.Getter;
 
 /** Aula agendada na grade de horários do professor (próximas aulas do dashboard). */
 @Entity
-@Table(name = "aulas_agendadas")
+@Table(name = "aulas_agendadas",
+       // findTop6ByProfessorIdOrderByDataAscHoraAsc — a ordem das colunas reproduz a
+       // do ORDER BY, então as próximas aulas saem do índice sem ordenação extra.
+       indexes = @Index(name = "idx_aulas_prof_data_hora", columnList = "professor_id, data, hora"))
 @Getter
 public class AulaAgendada {
 

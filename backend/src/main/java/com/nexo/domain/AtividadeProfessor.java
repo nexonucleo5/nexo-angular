@@ -8,7 +8,10 @@ import lombok.Getter;
 
 /** Atividade recente do professor (feed do dashboard). */
 @Entity
-@Table(name = "atividades_professor")
+@Table(name = "atividades_professor",
+       // findTop6ByProfessorIdOrderByCriadaEmDesc: a data entra no índice para o
+       // "top 6" sair dele já ordenado, sem sort. O B-tree é lido de trás para frente.
+       indexes = @Index(name = "idx_atividades_prof_criada", columnList = "professor_id, criada_em"))
 @Getter
 public class AtividadeProfessor {
 

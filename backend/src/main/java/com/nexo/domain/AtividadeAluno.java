@@ -8,7 +8,9 @@ import lombok.Getter;
 
 /** Atividade recente do aluno (feed de gamificação do dashboard). */
 @Entity
-@Table(name = "atividades_aluno")
+@Table(name = "atividades_aluno",
+       // Mesmo caso: findTop6ByAlunoIdOrderByCriadaEmDesc.
+       indexes = @Index(name = "idx_atividades_aluno_criada", columnList = "aluno_id, criada_em"))
 @Getter
 public class AtividadeAluno {
 

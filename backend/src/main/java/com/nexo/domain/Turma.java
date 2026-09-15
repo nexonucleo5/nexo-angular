@@ -7,7 +7,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "turmas")
+@Table(name = "turmas",
+       // TurmaRepository.findByProfessorIdOrderByNome — primeira consulta do dashboard
+       // do professor, e a que define o escopo de todas as outras.
+       indexes = @Index(name = "idx_turmas_professor", columnList = "professor_id"))
 @Getter
 @Setter
 public class Turma {
