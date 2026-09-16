@@ -23,7 +23,7 @@ ENV npm_config_fund=false \
 
 # package*.json antes do resto: mexer no código-fonte não reinstala as deps.
 COPY nexo/package.json nexo/package-lock.json ./
-RUN --mount=type=cache,id=npm-cache,target=/root/.npm,sharing=locked \
+RUN --mount=type=cache,id=s/e673b7de-75fd-4dfa-905b-d18f32ce9c4e-/root/.npm,target=/root/.npm,sharing=locked \
     npm ci
 
 COPY nexo/ ./
@@ -51,7 +51,7 @@ COPY --from=frontend /build/dist/nexo/ ./src/main/resources/static/
 # message body") e um único jar pela metade derruba o build inteiro — o que no
 # Render, que constrói do zero a cada deploy, vira deploy falho. Cada tentativa
 # reaproveita o que já veio, então repetir custa pouco.
-RUN --mount=type=cache,id=m2-cache,target=/root/.m2,sharing=locked \
+RUN --mount=type=cache,id=s/e673b7de-75fd-4dfa-905b-d18f32ce9c4e-/root/.m2,target=/root/.m2,sharing=locked \
     for tentativa in 1 2 3; do \
         mvn -B -ntp package -DskipTests && exit 0; \
         echo ">> tentativa $tentativa falhou; refazendo os downloads truncados"; \
