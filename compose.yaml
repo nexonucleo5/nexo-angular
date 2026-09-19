@@ -17,9 +17,7 @@ services:
 
   # 2. API Spring Boot
   spring-api:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
+    build: ./backend
     container_name: spring-api
     restart: always
     depends_on:
@@ -38,9 +36,7 @@ services:
 
   # 3. Front-end Angular
   angular-frontend:
-    build:
-      context: .
-      dockerfile: nexo/Dockerfile
+    build: ./nexo
     container_name: angular-frontend
     restart: always
     depends_on:
