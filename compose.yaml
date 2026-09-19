@@ -1,40 +1,53 @@
-# Sobe o monolito (Angular embutido no Spring) igual ao que roda no Render.
-#
-#   docker compose up --build      → http://localhost:8080
-#   docker compose down            → para, mantendo o banco no volume
-#   docker compose down -v         → para e apaga o banco
 name: nexo
 
 services:
-  app:
+  # 1. Banco de Dados PostgreSQL
+  postgres-db:
+    image: postgres:15
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: nexo
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: root_pg_admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. API Spring Boot (Lê a subpasta /backend)
+  spring-api:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: nexo-app:local
-    # HOST_PORT só troca a porta de fora; dentro o app fica sempre no 8080.
+      dockerfile: backend/Dockerfile
+    container_name: spring-api
+    restart: always
+    depends_on:
+      - postgres-db
     ports:
-      - "${HOST_PORT:-8080}:8080"
+      - "8080:8080"
     environment:
-      # Vem do .env da raiz — o mesmo arquivo que o app lê fora do Docker.
-      # Sem segredo o container não sobe, e o erro sai aqui em vez de virar
-      # um stack trace de Spring lá dentro.
-      NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:?defina NEXO_JWT_SECRET no .env (openssl rand -base64 48)}
-      PORT: 8080
-    volumes:
-      # O H2 de dev grava em /app/data; no volume os dados sobrevivem ao rebuild.
-      - nexo-data:/app/data
-    # ── Endurecimento do runtime ──────────────────────────────────────────────
-    # Filesystem só de leitura: um upload malicioso não consegue deixar nada
-    # gravado na imagem. As duas únicas coisas que precisam escrever são o banco
-    # (volume acima) e o /tmp do Tomcat (tmpfs, some quando o container morre).
-    read_only: true
-    tmpfs:
-      - /tmp
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    restart: unless-stopped
+      DB_URL: jdbc:postgresql://postgres-db:5432/nexo
+      DB_USER: admin
+      DB_PASSWORD: root_pg_admin
+      NEXO_JWT_SECRET: minhasenhasecretajwtmuitosegura123456
+      SPRING_PROFILES_ACTIVE: prod
+      CORS_ORIGINS: http://clavison.ddns.net,http://localhost
+      PROXY_SALTOS_CONFIAVEIS: 1
+      DDL_AUTO: update
+
+  # 3. Front-end Angular (Lê a subpasta /nexo)
+  angular-frontend:
+    build:
+      context: .
+      dockerfile: nexo/Dockerfile
+    container_name: angular-frontend
+    restart: always
+    depends_on:
+      - spring-api
+    ports:
+      - "80:80"
+      - "443:443"
 
 volumes:
-  nexo-data:
+  postgres_data:
