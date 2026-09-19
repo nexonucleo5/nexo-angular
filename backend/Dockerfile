@@ -1,6 +1,8 @@
 FROM eclipse-temurin:17-jdk-alpine AS build
 WORKDIR /app
 COPY . .
+# Garante a permissão de execução antes de compilar
+RUN chmod +x ./mvnw
 RUN ./mvnw clean package -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
