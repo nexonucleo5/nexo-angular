@@ -1,20 +1,24 @@
 # Etapa 1: Compilar o projeto Angular
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 WORKDIR /app
 
+# Copia dependências
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
+# Copia o código-fonte
 COPY . .
 
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+# Desativa telemetria e limita a memória do Node a 2GB (evita estouro de RAM no Linux)
 ENV NG_CLI_ANALYTICS=false
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-# Roda o build e, se der erro, exibe o log detalhado no console do Docker
-RUN npm run build -- --configuration=production || (cat /tmp/* /root/.npm/_logs/* 2>/dev/null; exit 1)
+# Compila diretamente com o CLI local
+RUN npx ng build --configuration=production
 
-# Etapa 2: Servir no Nginx
+# Etapa 2: Servir os arquivos no Nginx
 FROM nginx:alpine
+# Copia a pasta gerada pelo Angular 17+
 COPY --from=build /app/dist/nexo/browser/ /usr/share/nginx/html/
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
