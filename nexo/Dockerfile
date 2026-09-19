@@ -9,16 +9,17 @@ RUN npm install --legacy-peer-deps
 # Copia o código-fonte
 COPY . .
 
-# Desativa telemetria e limita a memória do Node a 2GB (evita estouro de RAM no Linux)
+# Desativa telemetria e limita a memória do Node a 2GB
 ENV NG_CLI_ANALYTICS=false
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-# Compila diretamente com o CLI local
+# Compila o projeto em modo produção
 RUN npx ng build --configuration=production
 
 # Etapa 2: Servir os arquivos no Nginx
 FROM nginx:alpine
-# Copia a pasta gerada pelo Angular 17+
-COPY --from=build /app/dist/nexo/browser/ /usr/share/nginx/html/
+# Copia o conteúdo gerado direto de dist/nexo/ para a raiz do Nginx
+COPY --from=build /app/dist/nexo/ /usr/share/nginx/html/
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
