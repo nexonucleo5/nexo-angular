@@ -2,28 +2,25 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 
-# Instala o Angular CLI globalmente
-RUN npm install -g @angular/cli@17
-
 # Copia arquivos de dependência
 COPY package*.json ./
 
-# Instala todas as dependências do projeto ignorando conflitos de versão
+# Instala todas as dependências do projeto
 RUN npm install --legacy-peer-deps
 
 # Copia o restante do código-fonte
 COPY . .
 
-# Desativa telemetria e define limite de memória do Node
+# Aumenta a memória do Node e desativa telemetria
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV NG_CLI_ANALYTICS=false
 
-# Compila o projeto forçando o output para a pasta /app/dist/nexo
-RUN ng build --configuration production --output-path=dist/nexo
+# Roda o script de build oficial do seu package.json
+RUN npm run build -- --configuration=production
 
 # Etapa 2: Servir os arquivos compilados no Nginx
 FROM nginx:alpine
-# Copia tudo que foi gerado dentro de dist/nexo (incluindo subpasta browser se existir)
-COPY --from=build /app/dist/nexo /usr/share/nginx/html/
+# Copia o resultado do build (pega tudo dentro de dist, independente da subpasta)
+COPY --from=build /app/dist/ /usr/share/nginx/html/
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
