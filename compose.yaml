@@ -15,11 +15,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # 2. API Spring Boot (Lê a subpasta /backend)
+  # 2. API Spring Boot
   spring-api:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: spring-api
     restart: always
     depends_on:
@@ -36,11 +36,11 @@ services:
       PROXY_SALTOS_CONFIAVEIS: 1
       DDL_AUTO: update
 
-  # 3. Front-end Angular (Lê a subpasta /nexo)
+  # 3. Front-end Angular
   angular-frontend:
     build:
-      context: .
-      dockerfile: nexo/Dockerfile
+      context: ./nexo
+      dockerfile: Dockerfile
     container_name: angular-frontend
     restart: always
     depends_on:
