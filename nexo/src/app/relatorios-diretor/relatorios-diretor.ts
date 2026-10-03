@@ -1,6 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { GestaoDiretorService } from '../api/gestao-diretor.service';
@@ -29,18 +28,13 @@ interface Gargalo {
 @Component({
   selector: 'app-relatorios-diretor',
   standalone: true,
-  imports: [CommonModule, FormsModule, BaseChartDirective],
+  imports: [CommonModule, BaseChartDirective],
   providers: [provideCharts(withDefaultRegisterables())],
   templateUrl: './relatorios-diretor.html',
   styleUrl: './relatorios-diretor.scss',
 })
 export class RelatoriosDiretor {
   private readonly gestao = inject(GestaoDiretorService);
-
-  readonly periodoSelecionado = signal('Este Bimestre');
-  readonly visaoSelecionada = signal('Visão Geral');
-  readonly periodos = ['Este Bimestre', 'Este Semestre', 'Geral'];
-  readonly visoes = ['Visão Geral', 'Pedagógico', 'Financeiro'];
 
   readonly carregando = signal(true);
   readonly erro = signal(false);
@@ -140,9 +134,11 @@ export class RelatoriosDiretor {
   exportar(formato: 'pdf' | 'xlsx'): void {
     if (this.exportando()) return;
     this.exportando.set(true);
-    // Não repassa periodo/visao: os rótulos da tela ("Este Bimestre"…) não correspondem
-    // aos valores gravados em Nota.periodo ("2026-1"), e enviá-los zera todas as médias
-    // do relatório. Ligar o filtro exige antes definir o vocabulário de período.
+    // Sem periodo/visao: os seletores de "Período" e "Visão" foram removidos da tela
+    // (eram decorativos — rótulos como "Este Bimestre" não correspondem ao formato
+    // gravado em Nota.periodo, ex. "2026-1", e "Financeiro" nunca teve dado real por
+    // trás). O relatório exportado é sempre o geral. Religar os filtros exige antes
+    // definir o vocabulário de período e, para "Financeiro", implementar o domínio.
     this.gestao.exportarDesempenho(formato).subscribe({
       next: (blob) => {
         const url = URL.createObjectURL(blob);
