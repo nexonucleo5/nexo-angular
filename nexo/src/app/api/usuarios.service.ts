@@ -13,6 +13,12 @@ interface UsuarioApiDTO {
   role: 'ALUNO' | 'PROFESSOR' | 'DIRETOR';
 }
 
+export interface ValidacaoSenha {
+  valida: boolean;
+  codigo: string | null;
+  motivo: string | null;
+}
+
 /** Perfil do usuário logado: edição de dados e troca de senha (contrato usuarios/me). */
 @Injectable({ providedIn: 'root' })
 export class UsuariosService {
@@ -48,6 +54,11 @@ export class UsuariosService {
 
   private sincronizar(u: UsuarioApiDTO): void {
     this.auth.atualizarUsuarioLocal({ nome: u.nome, foto: resolverFoto(u.foto), cargo: u.cargo });
+  }
+
+  /** Pergunta ao backend se a senha seria aceita pela política, sem gravar nada. */
+  validarSenha(novaSenha: string): Observable<ValidacaoSenha> {
+    return this.http.post<ValidacaoSenha>(`${this.api}/me/senha/validar`, { novaSenha });
   }
 
   /** Troca de senha exige a senha atual (validada no backend). */

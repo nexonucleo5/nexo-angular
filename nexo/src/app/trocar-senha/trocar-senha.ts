@@ -2,6 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, of } from 'rxjs';
 import { UsuariosService } from '../api/usuarios.service';
 import { ApiErro } from '../core/api.models';
 
@@ -35,11 +37,40 @@ export class TrocarSenha {
   readonly erroNovaSenha = signal('');
   readonly erroConfirmar = signal('');
 
+  /** Espelha o limite da política do backend; lá a contagem é em bytes, aqui em caracteres. */
+  readonly maxSenha = 50;
+
+  /** Veredito da checagem prévia no servidor ({@code null} enquanto não houve resposta). */
+  readonly senhaValida = signal<boolean | null>(null);
+
   readonly form = this.fb.group({
     senhaAtual: ['', [Validators.required]],
-    novaSenha: ['', [Validators.required, Validators.minLength(8)]],
+    novaSenha: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(this.maxSenha)]],
     confirmar: ['', [Validators.required]],
   });
+
+  constructor() {
+    // O servidor é a única fonte das regras (lista de comuns, login, nome): a tela só
+    // pergunta, depois de uma pausa na digitação, e mostra a mesma mensagem do "Salvar".
+    this.form.controls.novaSenha.valueChanges
+      .pipe(
+        takeUntilDestroyed(),
+        distinctUntilChanged(),
+        debounceTime(400),
+        filter((valor): valor is string => {
+          const pronta = !!valor && valor.length >= 8 && valor.length <= this.maxSenha;
+          if (!pronta) this.senhaValida.set(null);
+          return pronta;
+        }),
+        switchMap((valor) =>
+          this.usuarios.validarSenha(valor).pipe(catchError(() => of(null))),
+        ),
+      )
+      .subscribe((res) => {
+        this.senhaValida.set(res ? res.valida : null);
+        this.erroNovaSenha.set(res && !res.valida ? (res.motivo ?? '') : '');
+      });
+  }
 
   salvar(): void {
     this.limparErros();
@@ -55,6 +86,8 @@ export class TrocarSenha {
         this.erroNovaSenha.set('Informe a nova senha.');
       } else if (this.form.controls.novaSenha.hasError('minlength')) {
         this.erroNovaSenha.set('A nova senha precisa ter pelo menos 8 caracteres.');
+      } else if (this.form.controls.novaSenha.hasError('maxlength')) {
+        this.erroNovaSenha.set(`A nova senha pode ter no máximo ${this.maxSenha} caracteres.`);
       }
       if (this.form.controls.confirmar.invalid) {
         this.erroConfirmar.set('Repita a nova senha.');

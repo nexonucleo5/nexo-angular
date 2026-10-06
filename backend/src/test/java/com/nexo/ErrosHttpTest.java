@@ -130,4 +130,35 @@ class ErrosHttpTest extends TesteApiBase {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.fields.novaSenha").exists());
     }
+
+    @Test
+    @DisplayName("validar senha responde 200 com o veredito, sem gravar nada")
+    void validarSenhaDevolveVeredito() throws Exception {
+        String auth = bearer("aluno");
+
+        mvc.perform(post("/api/usuarios/me/senha/validar").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"novaSenha\":\"Chuva#Azul42\"}")
+                        .header(HttpHeaders.AUTHORIZATION, auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.valida").value(true))
+                .andExpect(jsonPath("$.codigo").doesNotExist());
+
+        mvc.perform(post("/api/usuarios/me/senha/validar").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"novaSenha\":\"12345678\"}")
+                        .header(HttpHeaders.AUTHORIZATION, auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.valida").value(false))
+                .andExpect(jsonPath("$.codigo").value("SENHA_SEQUENCIAL"));
+
+        // não trocou nada: a senha padrão continua entrando
+        autenticar("aluno", SENHA_PADRAO);
+    }
+
+    @Test
+    @DisplayName("validar senha exige autenticação")
+    void validarSenhaExigeLogin() throws Exception {
+        mvc.perform(post("/api/usuarios/me/senha/validar").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"novaSenha\":\"Chuva#Azul42\"}"))
+                .andExpect(status().isUnauthorized());
+    }
 }
