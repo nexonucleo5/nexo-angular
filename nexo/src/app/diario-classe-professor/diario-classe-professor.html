@@ -88,7 +88,7 @@
                 <tr *ngFor="let aluno of alunos()">
                   <td style="width:45%;">
                     <div class="d-flex align-items-center gap-3">
-                      <img [src]="aluno.foto" class="avatar-student" alt="Aluno">
+                      <img loading="lazy" decoding="async" [src]="aluno.foto" class="avatar-student" alt="Aluno">
                       <span class="text-main fw-semibold">{{ aluno.nome }}</span>
                     </div>
                   </td>

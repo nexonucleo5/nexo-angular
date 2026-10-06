@@ -94,7 +94,7 @@
             <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
                 <div class="d-flex gap-3 align-items-center">
                     <div class="avatar-container position-relative">
-                        <img [src]="aluno.foto" [alt]="aluno.nome" class="rounded-circle student-avatar">
+                        <img loading="lazy" decoding="async" [src]="aluno.foto" [alt]="aluno.nome" class="rounded-circle student-avatar">
                         <span class="status-badge-icon position-absolute" [ngClass]="getClasseRisco(aluno.risco)">
                             <i class="bi" [ngClass]="aluno.risco === 'Alto' ? 'bi-exclamation-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
                         </span>

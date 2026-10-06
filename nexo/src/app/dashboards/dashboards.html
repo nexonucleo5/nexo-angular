@@ -167,7 +167,7 @@
                                         [class.text-soft]="user.pos > 3">
                                         #{{ user.pos }}
                                     </span>
-                                    <img [src]="user.foto" alt="Foto" class="rank-user-img ms-3">
+                                    <img loading="lazy" decoding="async" [src]="user.foto" alt="Foto" class="rank-user-img ms-3">
                                     <div class="ms-3 flex-grow-1">
                                         <p class="mb-0 fw-bold title-adaptive fs-6">{{ user.nome }}</p>
                                         <small class="text-soft">{{ user.xp }} XP</small>

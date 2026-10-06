@@ -70,7 +70,7 @@
           <div class="student-row d-flex align-items-center justify-content-between p-3 border-custom rounded-12"
                *ngFor="let aluno of alunosAtencao()">
             <div class="d-flex align-items-center gap-3">
-              <img [src]="aluno.foto" class="avatar-img rounded-circle" alt="Foto">
+              <img loading="lazy" decoding="async" [src]="aluno.foto" class="avatar-img rounded-circle" alt="Foto">
               <div>
                 <h6 class="text-main fw-bold mb-0">{{ aluno.nome }}</h6>
                 <small class="text-soft">{{ aluno.turma }} • Último acesso: {{ aluno.ultimaAtividade }}</small>

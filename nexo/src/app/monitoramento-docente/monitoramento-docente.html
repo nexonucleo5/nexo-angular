@@ -66,7 +66,7 @@
                     <div class="performer-item d-flex align-items-center justify-content-between" *ngFor="let top of topPerformers(); let i = index">
                         <div class="d-flex align-items-center gap-3">
                             <div class="rank-badge">{{ i + 1 }}</div>
-                            <img [src]="top.foto" class="rounded-circle performer-avatar">
+                            <img loading="lazy" decoding="async" [src]="top.foto" class="rounded-circle performer-avatar">
                             <div>
                                 <p class="text-main fw-bold mb-0">{{ top.nome }}</p>
                                 <small class="text-soft">{{ top.materia }}</small>
@@ -91,7 +91,7 @@
             <div class="row align-items-center gy-3">
                 <div class="col-md-4">
                     <div class="d-flex gap-3 align-items-center">
-                        <img [src]="prof.foto" class="rounded-circle teacher-avatar">
+                        <img loading="lazy" decoding="async" [src]="prof.foto" class="rounded-circle teacher-avatar">
                         <div>
                             <h3 class="fs-5 text-main fw-bold mb-1">{{ prof.nome }}</h3>
                             <p class="text-soft mb-2 small">{{ prof.materia }}</p>

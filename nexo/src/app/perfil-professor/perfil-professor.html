@@ -83,7 +83,7 @@
         @if (alunosAtencao().length) {
           @for (aluno of alunosAtencao(); track aluno.nome) {
             <div class="lista-item">
-              <img class="lista-avatar"
+              <img loading="lazy" decoding="async" class="lista-avatar"
                    [src]="fotoDe(aluno.foto)"
                    [alt]="aluno.nome">
               <div class="flex-grow-1">
