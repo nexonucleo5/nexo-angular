@@ -42,7 +42,8 @@
                     @else { Portal do Diretor }
                 </h2>
 
-                <button (click)="alternarTema()" class="btn-theme ms-2">
+                <button type="button" (click)="alternarTema()" class="btn-theme ms-2"
+                        [attr.aria-label]="temaEscuro() ? 'Mudar para tema claro' : 'Mudar para tema escuro'">
                     <i class="bi" [ngClass]="temaEscuro() ? 'bi-sun-fill' : 'bi-moon-fill'"></i>
                 </button>
 

@@ -88,14 +88,14 @@
 
     <section class="teachers-list d-flex flex-column gap-3 mb-5">
         <div class="teacher-card p-4 rounded-4 shadow-sm" *ngFor="let prof of professores()">
-            <div class="row align-items-center">
+            <div class="row align-items-center gy-3">
                 <div class="col-md-4">
                     <div class="d-flex gap-3 align-items-center">
                         <img [src]="prof.foto" class="rounded-circle teacher-avatar">
                         <div>
                             <h3 class="fs-5 text-main fw-bold mb-1">{{ prof.nome }}</h3>
                             <p class="text-soft mb-2 small">{{ prof.materia }}</p>
-                            <div class="d-flex gap-2 align-items-center">
+                            <div class="d-flex gap-2 align-items-center flex-wrap">
                                 <span class="badge-status" [ngClass]="prof.statusClasse">{{ prof.status }}</span>
                                 <small class="text-soft">Turmas: {{ prof.turmas }}</small>
                             </div>
@@ -104,7 +104,7 @@
                 </div>
 
                 <div class="col-md-5">
-                    <div class="d-flex justify-content-around text-center">
+                    <div class="teacher-metrics d-flex justify-content-around text-center">
                         <div>
                             <p class="text-soft mb-1 small">Correções Pendentes</p>
                             <span class="text-main fw-bold fs-5">{{ prof.pendentes }}</span>

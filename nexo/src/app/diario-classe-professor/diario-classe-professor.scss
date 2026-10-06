@@ -122,3 +122,38 @@
     &:hover { color: var(--text-main); }
   }
 }
+/* No celular a tabela de frequência vira lista: nome em cima, matrícula e os dois
+   botões embaixo. Antes eram duas tabelas (cabeçalho e corpo) com larguras em % que
+   não fechavam em 360px — a matrícula colava no nome e o botão de falta saía da caixa. */
+@media (max-width: 767.98px) {
+  /* a tabela do cabeçalho: sem colunas, sem cabeçalho */
+  .table-responsive > .table-custom { display: none; }
+
+  .table-body-scroll {
+    max-height: none;
+    padding-right: 0;
+  }
+
+  .table-custom tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .table-custom tbody tr:last-child { border-bottom: none; }
+
+  .table-custom tbody td {
+    display: block;
+    width: auto !important;
+    padding: 0;
+    border-bottom: none;
+    text-align: left !important;
+  }
+  .table-custom tbody td:nth-child(1) { flex: 1 1 100%; }
+  .table-custom tbody td:nth-child(2) { flex: 1 1 auto; font-size: 13px; }
+  .table-custom tbody td:nth-child(3) { flex: 0 0 auto; }
+
+  .btn-presence { width: 44px; height: 44px; font-size: 16px; }
+}

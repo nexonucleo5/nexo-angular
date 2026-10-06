@@ -89,6 +89,7 @@ html, body {
   display: flex;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
   background-color: var(--bg-primary);
 
@@ -115,6 +116,7 @@ app-menu-admin,
 .sidebar {
   width: var(--largura-sidebar) !important;
   height: 100vh;
+  height: 100dvh;
   position: fixed;
   top: 0;
   left: 0;
@@ -163,6 +165,7 @@ app-menu-admin {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--bg-primary);
   margin-left: 0;
   width: 100%;
@@ -767,4 +770,117 @@ html.alto-contraste {
   }
 
   .stat-card { padding: 16px; }
+}
+/* ==========================================================================
+   9. CELULAR — acabamento de toque
+   ==========================================================================
+   Nada aqui muda o desktop: tudo que depende de dedo fica atrás de
+   (pointer: coarse) ou de max-width, e o que é global só tira atrito
+   (flash de toque, zoom de duplo toque, texto que o iOS reescala). */
+html {
+  /* O iOS aumenta o texto ao girar a tela; o layout já é fluido e não precisa. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  /* Rolar a lista de uma gaveta/modal não puxa a página atrás junto. */
+  overscroll-behavior-y: none;
+}
+
+/* Sem o atraso e o zoom de duplo toque nos controles: tocar duas vezes num
+   botão (ex.: "Responder" duas vezes seguidas) virava zoom da página. */
+button, a, select, label, summary, [role="button"], input:not([type="text"]):not([type="password"]):not([type="search"]):not([type="email"]) {
+  touch-action: manipulation;
+}
+
+/* Botão de tema do header: era um <button> sem estilo (quadrado branco do
+   navegador, 32x30). Agora segue o tema e tem área de toque de verdade. */
+.btn-theme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-input);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+
+  &:hover { border-color: #9b2fff; }
+  &:focus-visible { outline: 2px solid #9b2fff; outline-offset: 2px; }
+}
+
+/* Telas com notch/barra de gestos (precisa de viewport-fit=cover no index).
+   O padding do header mora no app.scss, junto da regra base dele. */
+.main-content {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* A gaveta de navegação cobre a tela toda: a lista rola por dentro e o último
+   link não pode ficar sob a barra de gestos do iPhone. */
+.app-layout .sidebar .sidebar-menu {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 767.98px) {
+  /* iOS dá zoom na página ao focar campo com fonte menor que 16px — e não
+     desfaz sozinho. !important porque os campos têm 14px em CSS de componente. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea,
+  .form-control,
+  .form-select {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* Tabela que rola na horizontal: o campo dentro da célula tem width: 100%, e
+     percentual não conta para a largura mínima da coluna — então a tabela
+     espremia as colunas de nota até sobrar uma tira de ~15px onde não dá para
+     digitar. O min-width devolve ao campo um tamanho de uso; quem sobra rola. */
+  .table-responsive .form-control,
+  .table-responsive .form-select,
+  .table-responsive select,
+  .table-responsive-custom .form-control,
+  .table-responsive-custom select {
+    min-width: 72px;
+  }
+
+  /* Rolagem horizontal com inércia no iOS, sem "puxar" a página ao chegar no fim. */
+  .table-responsive,
+  .table-responsive-custom {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+}
+
+@media (pointer: coarse) {
+  /* Alvo mínimo de toque de 44px (Apple HIG / WCAG 2.5.5) nos controles que a
+     auditoria achou com 26–39px: abas, filtros, selects, botões de ação. */
+  button:not(.btn-close):not(.btn-theme):not(.btn-hamburguer):not(.seta),
+  .btn,
+  select,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]) {
+    min-height: 44px;
+  }
+
+  /* Setinhas e ícones soltos: a área de toque cresce sem o desenho crescer. */
+  .btn-theme, .btn-hamburguer, .seta, .btn-presence {
+    position: relative;
+  }
+  .btn-theme::after, .btn-hamburguer::after, .seta::after, .btn-presence::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+  }
+
+  /* O 'Mostrar senha' e as chaves eram clicáveis só no quadradinho. */
+  .form-check-input { width: 1.4em; height: 1.4em; }
 }
