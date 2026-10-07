@@ -55,6 +55,19 @@ describe('escolha da voz', () => {
     expect(escolherVozPt([voz('en-US'), voz('pt-PT')])?.lang).toBe('pt-PT');
   });
 
+  it('entre vozes pt-BR, prefere a neural à voz antiga do sistema', () => {
+    const vozes = [
+      voz('pt-BR', 'Microsoft Maria Desktop - Portuguese (Brazil)'),
+      voz('pt-BR', 'Microsoft Francisca Online (Natural) - Portuguese (Brazil)'),
+    ];
+    expect(escolherVozPt(vozes)?.name).toContain('Natural');
+  });
+
+  it('pt-BR comum ainda vence pt-PT neural', () => {
+    const vozes = [voz('pt-PT', 'Microsoft Raquel Online (Natural)'), voz('pt-BR', 'Luciana')];
+    expect(escolherVozPt(vozes)?.name).toBe('Luciana');
+  });
+
   it('sem português, nenhuma voz — melhor não ler do que ler com sotaque errado', () => {
     expect(escolherVozPt([voz('en-US'), voz('es-ES')])).toBeNull();
   });
@@ -122,21 +135,31 @@ describe('LeituraVozService', () => {
     expect(faladas).toHaveLength(0);
   });
 
-  it('lê os trechos em sequência, na voz portuguesa, e termina sozinho', () => {
+  it('enfileira todos os trechos de uma vez, na voz portuguesa, e termina sozinho', () => {
     const svc = montar([voz('en-US'), voz('pt-BR')]);
     const longo = Array.from({ length: 20 }, (_, i) => `Frase número ${i} do texto.`).join(' ');
 
     svc.ler('a', longo);
 
     expect(svc.falandoId()).toBe('a');
-    expect(faladas).toHaveLength(1); // um por vez: o próximo só depois do onend
-    expect(faladas[0].lang).toBe('pt-BR');
+    expect(faladas.length).toBeGreaterThan(1); // sem esperar o onend entre um e outro
+    expect(faladas.every((f) => f.lang === 'pt-BR')).toBe(true);
 
-    while (faladas.at(-1)!.onend && svc.falandoId() === 'a') {
-      faladas.at(-1)!.onend!();
-    }
-    expect(faladas.length).toBeGreaterThan(1);
+    // o fim dos trechos do meio não encerra a leitura; só o do último
+    faladas.slice(0, -1).forEach((f) => f.onend!());
+    expect(svc.falandoId()).toBe('a');
+    faladas.at(-1)!.onend!();
     expect(svc.falandoId()).toBeNull();
+  });
+
+  it('um erro no meio da leitura derruba o resto da fila', () => {
+    const svc = montar([voz('pt-BR')]);
+    svc.ler('a', Array.from({ length: 20 }, (_, i) => `Frase número ${i} do texto.`).join(' '));
+
+    faladas[0].onerror!();
+
+    expect(svc.falandoId()).toBeNull();
+    expect(sintese.cancel).toHaveBeenCalled();
   });
 
   it('clicar de novo no mesmo texto para a leitura', () => {

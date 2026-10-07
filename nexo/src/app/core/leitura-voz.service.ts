@@ -55,14 +55,25 @@ export function dividirEmTrechos(texto: string, max = TAMANHO_MAX_TRECHO): strin
   return trechos.filter(Boolean);
 }
 
-/** pt-BR primeiro; qualquer português serve (pt-PT é melhor que ler em inglês). */
+/**
+ * Só português serve (ler em inglês é pior que não ler); pt-BR vale mais que pt-PT. Dentro
+ * do mesmo idioma, ganha a voz neural: a "Maria Desktop" do Windows e as vozes antigas do
+ * sistema soam robóticas, enquanto as "Natural"/"Online" do Edge, as do Google e as
+ * "Enhanced"/"Premium" da Apple soam bem mais humanas. O sort é estável, então em empate
+ * vale a ordem em que o navegador listou.
+ */
 export function escolherVozPt(vozes: readonly SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
-  const norm = (v: SpeechSynthesisVoice) => v.lang.replace('_', '-').toLowerCase();
-  return (
-    vozes.find((v) => norm(v) === 'pt-br') ??
-    vozes.find((v) => norm(v).startsWith('pt')) ??
-    null
-  );
+  const pontos = (v: SpeechSynthesisVoice): number => {
+    const lang = v.lang.replace('_', '-').toLowerCase();
+    if (!lang.startsWith('pt')) return -1;
+    let p = lang === 'pt-br' ? 100 : 50;
+    if (/natural|neural|online|enhanced|premium|aprimorad/i.test(v.name)) p += 30;
+    else if (/google/i.test(v.name)) p += 20;
+    if (/desktop/i.test(v.name)) p -= 10;
+    return p;
+  };
+  const melhor = [...vozes].sort((a, b) => pontos(b) - pontos(a))[0];
+  return melhor && pontos(melhor) >= 0 ? melhor : null;
 }
 
 /**
@@ -81,6 +92,8 @@ export class LeituraVozService {
   private readonly vozes = signal<readonly SpeechSynthesisVoice[]>([]);
   /** Cada fala nova invalida as anteriores: o cancel() delas dispara onend/onerror tardios. */
   private geracao = 0;
+  /** O Chrome coleta falas sem referência e nunca dispara o onend delas: guardamos a fila. */
+  private fila: SpeechSynthesisUtterance[] = [];
 
   /** Quem está falando agora (o id do botão), ou null. */
   readonly falandoId = signal<string | null>(null);
@@ -133,28 +146,28 @@ export class LeituraVozService {
     const voz = this.vozPt()!;
     this.falandoId.set(id);
 
-    const falar = (i: number) => {
-      if (minha !== this.geracao) return;
-      if (i >= trechos.length) {
-        this.falandoId.set(null);
-        return;
-      }
-      const fala = new SpeechSynthesisUtterance(trechos[i]);
+    // Todos os trechos entram na fila do navegador de uma vez: ele já sintetiza o próximo
+    // enquanto fala o atual, sem a pausa de esperar o onend para só então pedir o seguinte.
+    this.fila = trechos.map((trecho, i) => {
+      const fala = new SpeechSynthesisUtterance(trecho);
       fala.voice = voz;
       fala.lang = voz.lang;
-      fala.onend = () => falar(i + 1);
-      fala.onerror = () => {
-        // 'interrupted' e 'canceled' são o nosso próprio parar(); qualquer outro erro
-        // também encerra, para o botão não ficar preso em "parar".
-        if (minha === this.geracao) this.falandoId.set(null);
+      fala.onend = () => {
+        if (minha === this.geracao && i === trechos.length - 1) this.falandoId.set(null);
       };
-      this.sintese!.speak(fala);
-    };
-    falar(0);
+      fala.onerror = () => {
+        // 'interrupted' e 'canceled' são o nosso próprio parar() (a geração já mudou);
+        // qualquer outro erro derruba o resto da fila, para o botão não ficar preso em "parar".
+        if (minha === this.geracao) this.parar();
+      };
+      return fala;
+    });
+    this.fila.forEach((fala) => this.sintese!.speak(fala));
   }
 
   parar(): void {
     this.geracao++;
+    this.fila = [];
     this.sintese?.cancel();
     if (this.falandoId() !== null) this.falandoId.set(null);
   }
