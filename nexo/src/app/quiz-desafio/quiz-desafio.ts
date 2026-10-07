@@ -7,6 +7,7 @@ import {
   QuizPerguntaDTO,
   QuizResultadoDTO,
 } from '../api/desafios.service';
+import { BotaoOuvir } from '../botao-ouvir/botao-ouvir';
 
 const NIVEL_LABEL: Record<string, string> = { FACIL: 'Fácil', MEDIO: 'Médio', DIFICIL: 'Difícil' };
 
@@ -23,7 +24,7 @@ const NIVEL_LABEL: Record<string, string> = { FACIL: 'Fácil', MEDIO: 'Médio', 
 @Component({
   selector: 'app-quiz-desafio',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, BotaoOuvir],
   templateUrl: './quiz-desafio.html',
   styleUrl: './quiz-desafio.scss',
 })
@@ -49,6 +50,13 @@ export class QuizDesafio implements OnInit {
 
   /** perguntaId -> índice da alternativa escolhida */
   readonly respostas = signal<Record<number, number>>({});
+
+  /** A pergunta como a voz a lê: enunciado e as alternativas com a letra, na ordem da tela. */
+  falaDaPergunta(p: QuizPerguntaDTO, indice: number): string {
+    const letras = 'ABCDEFGH';
+    const alternativas = p.alternativas.map((alt, i) => `Alternativa ${letras[i] ?? i + 1}: ${alt}`);
+    return [`Pergunta ${indice + 1}. ${p.enunciado}`, ...alternativas].join('\n');
+  }
 
   readonly nivelLabel = computed(() => {
     const d = this.desafio();

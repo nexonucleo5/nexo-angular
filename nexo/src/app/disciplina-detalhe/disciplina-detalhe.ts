@@ -5,6 +5,7 @@ import { SUBJECTS } from '../materias/materias.data';
 import { MateriasService } from '../api/materias.service';
 import { AlunoDashboardService } from '../api/aluno-dashboard.service';
 import { ConteudoMateriaDTO } from '../core/api.models';
+import { BotaoOuvir } from '../botao-ouvir/botao-ouvir';
 
 /**
  * Detalhe de uma disciplina.
@@ -16,7 +17,7 @@ import { ConteudoMateriaDTO } from '../core/api.models';
 @Component({
   selector: 'app-disciplina-detalhe',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, BotaoOuvir],
   templateUrl: './disciplina-detalhe.html',
   styleUrl: './disciplina-detalhe.scss',
 })
@@ -168,6 +169,13 @@ export class DisciplinaDetalhe {
   irParaProximo(): void {
     const proximo = this.topicoProximo();
     if (proximo) this.abrirDoTopo(proximo);
+  }
+
+  /** O que a voz lê de um conteúdo: título, resumo, texto e o exemplo, na ordem da tela. */
+  falaDoTopico(t: ConteudoMateriaDTO): string {
+    return [t.titulo, t.resumo, t.texto, t.exemplo ? 'Na prática. ' + t.exemplo : '']
+      .filter((parte) => !!parte)
+      .join('\n');
   }
 
   voltarTopicos(): void {

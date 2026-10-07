@@ -1,0 +1,9 @@
+@if (voz.ativo()) {
+  <button type="button" class="btn-ouvir" [class.falando]="falando()"
+          [attr.aria-pressed]="falando()"
+          [attr.aria-label]="falando() ? 'Parar a leitura' : rotulo() + ' em voz alta'"
+          (click)="alternar()">
+    <i class="bi" [ngClass]="falando() ? 'bi-stop-fill' : 'bi-volume-up-fill'" aria-hidden="true"></i>
+    {{ falando() ? 'Parar' : rotulo() }}
+  </button>
+}

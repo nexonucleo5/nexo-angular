@@ -1,0 +1,23 @@
+.btn-ouvir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, background-color 0.2s;
+
+  &:hover { border-color: #9b2fff; }
+  &:focus-visible { outline: 2px solid #9b2fff; outline-offset: 2px; }
+
+  &.falando {
+    border-color: #9b2fff;
+    background: rgba(155, 47, 255, 0.14);
+  }
+}

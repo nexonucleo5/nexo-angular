@@ -177,7 +177,13 @@
       <div class="settings-item toggle-item">
         <div>
           <span>Leitura em voz alta</span>
-          <small>Permite ouvir enunciados e conteúdos</small>
+          <small>Mostra um botão "Ouvir" nos conteúdos e nas perguntas dos desafios</small>
+          @if (leituraVoz.semVozNoAparelho()) {
+            <small class="text-warning d-block mt-1">
+              Este aparelho não tem voz em português instalada, então o botão não vai aparecer.
+              Instale uma voz em português nas configurações de idioma ou de acessibilidade do sistema.
+            </small>
+          }
         </div>
         <input type="checkbox" class="custom-switch" [checked]="acessibilidade().leituraVozAlta"
           (change)="onAcessibilidadeChange('leituraVozAlta', $any($event.target).checked)">

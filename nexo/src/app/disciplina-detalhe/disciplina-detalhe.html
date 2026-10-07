@@ -45,6 +45,7 @@
             <span class="leitura-tempo"><i class="bi bi-clock"></i> {{ topico.minutos }} min de leitura</span>
           }
           <span class="leitura-posicao">{{ topico.ordem }} de {{ conteudos().length }}</span>
+          <app-botao-ouvir class="ms-auto" [id]="'topico-' + topico.id" [texto]="falaDoTopico(topico)" />
         </div>
 
         <h2 class="section-title fw-bold mb-2" style="color: var(--text-main);">{{ topico.titulo }}</h2>
