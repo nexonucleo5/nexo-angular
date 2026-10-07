@@ -65,4 +65,20 @@ public class Aluno {
     private int ofensivaDias;
     private int tarefasFeitasHoje;
     private int tarefasHoje;
+
+    // ── Privacidade (espelho das chaves de Configurações → Privacidade do aluno) ──
+    // O documento JSON de configuração segue sendo o que a tela lê e grava; estas duas
+    // colunas existem porque o ranking precisa filtrar no banco, e abrir o JSON de
+    // todos os alunos a cada request seria varrer a escola inteira. Quem as mantém é o
+    // ConfiguracaoService, na mesma transação que grava o JSON.
+    // default true no DDL: o Hibernate adiciona coluna NOT NULL em tabela com linhas
+    // só se ela tiver valor padrão.
+
+    /** Aparece no ranking dos outros alunos. */
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean exibirNoRanking = true;
+
+    /** Outros alunos veem a foto (hoje, o ranking é o único lugar em que um aluno vê outro). */
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean perfilPublico = true;
 }

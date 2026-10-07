@@ -7,6 +7,7 @@ import { AuthService } from '../services/auth.service';
 import { AlunoDashboardService } from '../api/aluno-dashboard.service';
 import { AlunoDashboardDTO } from '../core/api.models';
 import { resolverFoto } from '../core/avatar';
+import { ConfiguracaoAlunoService } from '../configuracao-aluno/configuracao-aluno.service';
 
 const COR_PROGRESSO = ['blue-fill', 'green-fill', 'purple-fill', 'orange-fill'];
 
@@ -20,6 +21,7 @@ const COR_PROGRESSO = ['blue-fill', 'green-fill', 'purple-fill', 'orange-fill'];
 export class Dashboards {
   public authService = inject(AuthService);
   private readonly alunoDashboard = inject(AlunoDashboardService);
+  private readonly configAluno = inject(ConfiguracaoAlunoService);
 
   readonly carregando = signal(true);
   readonly erro = signal(false);
@@ -35,6 +37,9 @@ export class Dashboards {
   });
   readonly ofensivaDias = computed(() => this.dados()?.ofensivaDias ?? 0);
   readonly posicao = computed(() => this.dados()?.posicao ?? 0);
+  readonly foraDoRanking = computed(() => this.dados()?.foraDoRanking ?? false);
+  /** Preferência de exibição (Configurações → Gamificação): esconde o quadro, não tira ninguém do ranking. */
+  readonly mostrarRanking = computed(() => this.configAluno.settings().gamificacao.rankingTurma);
   readonly turmaNome = computed(() => this.dados()?.turmaNome ?? '');
   readonly tarefasFeitasHoje = computed(() => this.dados()?.tarefasFeitasHoje ?? 0);
   readonly tarefasHoje = computed(() => this.dados()?.tarefasHoje ?? 0);

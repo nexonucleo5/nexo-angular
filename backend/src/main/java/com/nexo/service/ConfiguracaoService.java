@@ -6,6 +6,7 @@ import com.nexo.api.ApiException;
 import com.nexo.domain.ConfiguracaoUsuario;
 import com.nexo.domain.Role;
 import com.nexo.domain.Usuario;
+import com.nexo.repository.AlunoRepository;
 import com.nexo.repository.ConfiguracaoUsuarioRepository;
 import com.nexo.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,13 +27,16 @@ public class ConfiguracaoService {
 
     private final ConfiguracaoUsuarioRepository configuracoes;
     private final UsuarioRepository usuarios;
+    private final AlunoRepository alunos;
     private final ObjectMapper mapper;
 
     public ConfiguracaoService(ConfiguracaoUsuarioRepository configuracoes,
                                UsuarioRepository usuarios,
+                               AlunoRepository alunos,
                                ObjectMapper mapper) {
         this.configuracoes = configuracoes;
         this.usuarios = usuarios;
+        this.alunos = alunos;
         this.mapper = mapper;
     }
 
@@ -70,16 +75,70 @@ public class ConfiguracaoService {
         Map<String, Object> campos = atual.computeIfAbsent(secao, s -> new LinkedHashMap<>(defaults.get(secao)));
         campos.putAll(patch);
 
-        validar(secao, campos);
+        validar(usuario.getRole(), secao, campos);
 
         config.setJson(escrever(atual));
         config.setAtualizadaEm(Instant.now());
         configuracoes.save(config);
+        if (usuario.getRole() == Role.ALUNO && SECAO_PRIVACIDADE.equals(secao)) {
+            aplicarPrivacidadeNoAluno(usuarioId, campos);
+        }
         return obter(usuarioId);
     }
 
+    static final String SECAO_PRIVACIDADE = "privacidade";
+
+    /** Chaves de privacidade do aluno que o servidor faz valer. */
+    private static final List<String> PRIVACIDADE_ALUNO = List.of("perfilPublico", "exibirNoRanking");
+
+    /**
+     * Copia as chaves de privacidade do JSON para as colunas do aluno, que é onde o
+     * ranking as lê. Na mesma transação do JSON: não existe estado em que a tela mostra
+     * "desligado" e o ranking ainda mostra o aluno.
+     */
+    private void aplicarPrivacidadeNoAluno(Long usuarioId, Map<String, Object> campos) {
+        alunos.findByUsuarioId(usuarioId).ifPresent(aluno -> {
+            aluno.setPerfilPublico(!Boolean.FALSE.equals(campos.get("perfilPublico")));
+            aluno.setExibirNoRanking(!Boolean.FALSE.equals(campos.get("exibirNoRanking")));
+        });
+    }
+
+    /**
+     * Aplica ao banco o que um JSON de configuração já gravado diz — para os alunos que
+     * desligaram algo antes de essas chaves valerem para o servidor. Idempotente.
+     */
+    @Transactional
+    public int sincronizarPrivacidadeDosAlunos() {
+        int ajustados = 0;
+        for (var aluno : alunos.findAll()) {
+            if (aluno.getUsuario() == null) continue;
+            var json = configuracoes.findByUsuarioId(aluno.getUsuario().getId());
+            if (json.isEmpty()) continue;
+            Map<String, Object> priv = ler(json.get().getJson()).get(SECAO_PRIVACIDADE);
+            if (priv == null) continue;
+            boolean ranking = !Boolean.FALSE.equals(priv.get("exibirNoRanking"));
+            boolean publico = !Boolean.FALSE.equals(priv.get("perfilPublico"));
+            if (aluno.isExibirNoRanking() != ranking || aluno.isPerfilPublico() != publico) {
+                aluno.setExibirNoRanking(ranking);
+                aluno.setPerfilPublico(publico);
+                ajustados++;
+            }
+        }
+        return ajustados;
+    }
+
     /** Validações de negócio reforçadas no servidor (ex.: início < fim na Disponibilidade). */
-    private void validar(String secao, Map<String, Object> campos) {
+    private void validar(Role role, String secao, Map<String, Object> campos) {
+        // Chave de privacidade que o servidor faz valer só aceita booleano de verdade:
+        // "false" (texto) ou null seriam lidos como "ligado" e expõem o aluno sem aviso.
+        if (role == Role.ALUNO && SECAO_PRIVACIDADE.equals(secao)) {
+            for (String chave : PRIVACIDADE_ALUNO) {
+                if (campos.containsKey(chave) && !(campos.get(chave) instanceof Boolean)) {
+                    throw ApiException.validation("Valor inválido.",
+                            Map.of(chave, "Use verdadeiro ou falso."));
+                }
+            }
+        }
         if ("disponibilidade".equals(secao)) {
             String inicio = String.valueOf(campos.getOrDefault("horarioInicio", "08:00"));
             String fim = String.valueOf(campos.getOrDefault("horarioFim", "18:00"));
@@ -127,8 +186,9 @@ public class ConfiguracaoService {
                 m.put("aparencia", secao("temaEscuro", true, "animacoesInterface", true));
                 m.put("acessibilidade", secao("fonteAmpliada", false, "altoContraste", false,
                         "leituraVozAlta", false));
-                m.put("privacidade", secao("perfilPublico", true, "exibirNoRanking", true,
-                        "visivelResponsaveis", true));
+                // visivelResponsaveis saiu: o sistema não tem conta nem dado de responsável,
+                // então a chave não tinha o que controlar.
+                m.put("privacidade", secao("perfilPublico", true, "exibirNoRanking", true));
             }
             case PROFESSOR -> {
                 m.put("notificacoes", secao("novasEntregasAlunos", true, "mensagensAlunosResponsaveis", true,

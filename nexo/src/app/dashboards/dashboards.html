@@ -86,13 +86,13 @@
                             </div>
                             <div>
                                 <p class="summary-title">Posição</p>
-                                <h3 class="summary-number">#{{ posicao() }}</h3>
+                                <h3 class="summary-number">{{ foraDoRanking() ? '—' : '#' + posicao() }}</h3>
                             </div>
                         </div>
                         <div class="summary-progress-track">
                             <div class="summary-progress-fill blue-fill" style="width: 90%;"></div>
                         </div>
-                        <p class="summary-footer-text mt-2 mb-0">Turma {{ turmaNome() }}</p>
+                        <p class="summary-footer-text mt-2 mb-0">{{ foraDoRanking() ? 'Fora do ranking' : 'Turma ' + turmaNome() }}</p>
                     </div>
                 </div>
 
@@ -151,6 +151,7 @@
                     </div>
                 </div>
 
+                @if (mostrarRanking()) {
                 <div class="col-xl-4">
                     <div class="content-card shadow-sm">
                         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -159,6 +160,13 @@
                                 Ranking
                             </h2>
                         </div>
+
+                        @if (foraDoRanking()) {
+                            <p class="text-soft small mb-3">
+                                Você está fora do ranking e não aparece para os outros alunos.
+                                Para voltar, ligue <strong>Exibir no ranking</strong> em Configurações → Privacidade.
+                            </p>
+                        }
 
                         <div class="ranking-list d-flex flex-column gap-3">
                             <div class="rank-item-card" *ngFor="let user of ranking()" [class.user-is-me]="user.isMe">
@@ -178,6 +186,7 @@
                         </div>
                     </div>
                 </div>
+                }
             </div>
         </section>
 

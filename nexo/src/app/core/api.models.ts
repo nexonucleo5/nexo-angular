@@ -395,6 +395,8 @@ export interface RankingItemDTO {
 }
 
 export interface AlunoDashboardDTO {
+  /** Aluno que desligou "Exibir no ranking": sem posição (0) e sem linha própria. */
+  foraDoRanking: boolean;
   nome: string;
   xpSemana: number;
   metaSemanalXp: number;

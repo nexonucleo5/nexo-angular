@@ -42,7 +42,9 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     List<Object[]> totalPorTurma();
 
     /**
-     * Só as quatro colunas que o ranking de gamificação exibe, já ordenadas pelo banco.
+     * Só as colunas que o ranking de gamificação exibe, já ordenadas pelo banco.
+     * Quem desligou "Exibir no ranking" não entra: nem na lista dos outros, nem na conta
+     * da posição de ninguém.
      * O dashboard mostra 5 posições, mas precisa varrer a escola inteira para achar a
      * colocação do aluno logado — com {@code findAll()} isso trazia toda a tabela como
      * entidade gerenciada (cada uma com o snapshot de dirty-checking do Hibernate junto).
@@ -53,11 +55,14 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
         String getNome();
         int getXpTotal();
         String getFoto();
+        boolean isPerfilPublico();
     }
 
     @Query("""
-           select a.id as id, a.nome as nome, a.xpTotal as xpTotal, a.foto as foto
+           select a.id as id, a.nome as nome, a.xpTotal as xpTotal, a.foto as foto,
+                  a.perfilPublico as perfilPublico
            from Aluno a
+           where a.exibirNoRanking = true
            order by a.xpTotal desc, a.id asc
            """)
     List<RankingXp> rankingPorXp();

@@ -28,7 +28,6 @@ export interface AcessibilidadeConfig {
 export interface AlunoPrivacidadeConfig {
     perfilPublico: boolean;
     exibirNoRanking: boolean;
-    visivelResponsaveis: boolean;
 }
 
 export interface AlunoSettings {
@@ -70,6 +69,5 @@ export const ALUNO_DEFAULTS: AlunoSettings = {
     privacidade: {
         perfilPublico: true,
         exibirNoRanking: true,
-        visivelResponsaveis: true,
     },
 };

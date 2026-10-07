@@ -60,6 +60,16 @@ public class SchemaMigracao {
             "alter table if exists inscricoes drop column if exists data_matricula",
             "alter table if exists professores drop column if exists disciplina");
 
+    /**
+     * Depois do schema e antes do seed: quem já tinha desligado "Exibir no ranking" ou
+     * "Perfil público" antes de o servidor respeitar essas chaves continua desligado.
+     */
+    @Bean
+    @Order(1)
+    CommandLineRunner sincronizarPrivacidade(com.nexo.service.ConfiguracaoService configuracoes) {
+        return args -> configuracoes.sincronizarPrivacidadeDosAlunos();
+    }
+
     @Bean
     @Order(0) // antes de qualquer runner que grave dados
     CommandLineRunner migrarSchema(JdbcTemplate jdbc, MateriaRepository materias) {
