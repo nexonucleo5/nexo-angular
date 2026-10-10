@@ -26,7 +26,7 @@
 /* Links */
 .sidebar-link {
   display: flex; align-items: center; gap: 16px;
-  padding: 18px 22px; border-radius: 20px;
+  padding: 18px 22px; border-radius: var(--nx-radius-card, 14px);
   color: var(--text-main); font-size: 17px; font-weight: 600;
   text-decoration: none; transition: background 0.2s, color 0.2s; cursor: pointer;
 
@@ -36,14 +36,14 @@
   }
 
   &:hover {
-    background: rgba(155, 47, 255, 0.08);
-    i { color: #9b2fff; }
+    background: color-mix(in srgb, var(--nx-brand, #6D28D9) 8%, transparent);
+    i { color: var(--nx-brand, #6D28D9); }
   }
 
   &.active {
-    background: linear-gradient(90deg, #9b2fff, #06d25e);
+    background: var(--nx-brand-deep, #5B21B6);
     color: #fff !important;
-    box-shadow: 0 8px 24px rgba(102, 65, 190, 0.25);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 30%, transparent);
     i { color: #fff !important; -webkit-text-fill-color: #fff; background: none; }
   }
 }

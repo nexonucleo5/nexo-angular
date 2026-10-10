@@ -15,7 +15,7 @@
     padding: 8px 16px;
     font-weight: 600;
     font-size: 14px;
-    border-radius: 20px;
+    border-radius: var(--nx-radius-card, 14px);
     transition: all 0.2s ease;
     cursor: pointer;
 
@@ -60,7 +60,7 @@
 
   &:focus {
     box-shadow: none;
-    border-color: #9b2fff;
+    border-color: var(--nx-brand, #6D28D9);
     background-color: var(--bg-input);
     color: var(--text-main);
   }
@@ -90,7 +90,7 @@
   gap: 6px;
   background: transparent;
   border: 1px solid var(--border-color);
-  border-radius: 20px;
+  border-radius: var(--nx-radius-card, 14px);
   padding: 6px 14px;
   font-size: 13px;
   font-weight: 600;
@@ -115,7 +115,7 @@
 
 /* Botão */
 .btn-cadastro {
-  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   border: none;
   color: white;
   font-weight: 600;
@@ -159,7 +159,7 @@
   font-weight: 600;
   white-space: nowrap;
   transition: border-color 0.2s;
-  &:hover { border-color: #9b2fff; color: var(--text-main); }
+  &:hover { border-color: var(--nx-brand, #6D28D9); color: var(--text-main); }
   .bi-check-lg { color: #06d25e; }
 }
 
@@ -171,11 +171,24 @@
   border: 1px solid var(--border-color);
   border-radius: 999px;
   padding: 2px 10px;
-  &.no-limite { color: #ff9800; border-color: rgba(255, 152, 0, 0.4); }
+  &.no-limite { color: var(--nx-accent, #0FA3C2); border-color: color-mix(in srgb, var(--nx-accent, #0FA3C2) 40%, transparent); }
 }
 
 .materia-chip:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   &:hover { border-color: var(--border-color); }
+}
+
+/* Botão primário do redesign: marca profunda, texto branco, hover mais escuro */
+.btn-cadastro {
+  min-height: 44px;
+  color: #FFFFFF;
+  border-radius: var(--nx-radius-control, 10px);
+  opacity: 1;
+  &:hover:not(:disabled) {
+    opacity: 1;
+    color: #FFFFFF;
+    background: color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 85%, #000000);
+  }
 }

@@ -24,8 +24,15 @@
                     <span>Progresso para o próximo nível</span>
                     <span class="xp">{{ nivel().xpAtual }} / {{ nivel().xpTotal }} XP</span>
                 </div>
-                <div class="barra-progresso">
-                    <div class="fill" [style.width.%]="xpPercentual()"></div>
+                <!-- 25 blocos de 4% cada; o percentual vem de xpPercentual() -->
+                <div class="barra-blocos" role="progressbar"
+                    aria-valuemin="0"
+                    [attr.aria-valuemax]="nivel().xpTotal"
+                    [attr.aria-valuenow]="nivel().xpAtual"
+                    [attr.aria-label]="nivel().xpAtual + ' de ' + nivel().xpTotal + ' XP, ' + xpPercentual() + ' por cento'">
+                    @for (bloco of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]; track bloco) {
+                    <span class="bloco" [class.cheio]="bloco * 4 < xpPercentual()" [style.--i]="bloco"></span>
+                    }
                 </div>
                 <p class="faltam mb-0">
                     Faltam {{ xpFaltam() }} XP para alcançar o Nível {{ nivel().proximoNivel }}

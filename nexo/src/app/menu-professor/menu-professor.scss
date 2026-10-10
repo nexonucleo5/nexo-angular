@@ -49,7 +49,7 @@
   align-items: center;
   gap: 16px;
   padding: 18px 22px;
-  border-radius: 20px;
+  border-radius: var(--nx-radius-card, 14px);
   color: var(--text-main);
   font-size: 17px;
   font-weight: 600;
@@ -74,16 +74,16 @@
   }
 
   &:hover {
-    background-color: rgba(155, 47, 255, 0.1);
+    background-color: color-mix(in srgb, var(--nx-brand, #6D28D9) 10%, transparent);
     color: var(--text-main);
-    i { color: #9b2fff; }
+    i { color: var(--nx-brand, #6D28D9); }
   }
 
-  /* Item ativo — gradiente roxo → verde */
+  /* Item ativo — marca profunda sólida */
   &.active {
-    background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
+    background: var(--nx-brand-deep, #5B21B6);
     color: #ffffff !important;
-    box-shadow: 0 8px 20px rgba(102, 65, 190, 0.25);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 30%, transparent);
 
     i {
       color: #ffffff !important;
@@ -94,7 +94,7 @@
     span { color: #ffffff; }
 
     &:hover {
-      background: linear-gradient(90deg, #8825e8 0%, #7a58c9 45%, #05bb54 100%);
+      background: color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 85%, #000000);
     }
   }
 }

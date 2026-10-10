@@ -1,7 +1,7 @@
 /* Mixin interno para evitar repetição */
 %card-base {
   background: var(--bg-card);
-  border-radius: 20px;
+  border-radius: var(--nx-radius-card, 14px);
   border: 1px solid var(--border-color);
 }
 
@@ -14,7 +14,7 @@
 /* CORRIGIDO: era @extend .main-card — substituído por propriedades diretas */
 .metric-card {
   background: var(--bg-card);
-  border-radius: 20px;
+  border-radius: var(--nx-radius-card, 14px);
   border: 1px solid var(--border-color);
   text-align: left;
   transition: transform 0.2s;
@@ -33,7 +33,7 @@
   font-size: 14px;
   transition: border-color 0.2s;
 
-  &:focus   { border-color: #9b2fff; outline: none; }
+  &:focus   { border-color: var(--nx-brand, #6D28D9); outline: none; }
   &::placeholder { color: var(--text-muted); }
 
   option {
@@ -42,7 +42,7 @@
   }
 }
 
-.purple-focus:focus { border-color: #9b2fff !important; }
+.purple-focus:focus { border-color: var(--nx-brand, #6D28D9) !important; }
 .text-area-custom   { resize: none; }
 
 /* Botões */
@@ -60,7 +60,7 @@
   font-weight: bold; border-radius: 12px;
   padding: 10px 20px; font-size: 13px;
   transition: background 0.2s; cursor: pointer;
-  &:hover { border-color: #9b2fff; }
+  &:hover { border-color: var(--nx-brand, #6D28D9); }
 }
 
 /* Tabela de frequência */
@@ -106,7 +106,7 @@
 .btn-icon-obs {
   background: transparent; border: none;
   color: var(--text-muted); font-size: 16px; cursor: pointer;
-  &:hover { color: #9b2fff; }
+  &:hover { color: var(--nx-brand, #6D28D9); }
 }
 
 /* Histórico */

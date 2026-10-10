@@ -8,14 +8,14 @@
   border: 1px solid var(--border-color);
   border-radius: 14px;
   transition: border-color 0.2s;
-  &:hover { border-color: #9b2fff; }
+  &:hover { border-color: var(--nx-brand, #6D28D9); }
 }
 
 /* Cobertura do catálogo por matéria */
 .ocupacao-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 18px;
+  border-radius: var(--nx-radius-card, 14px);
   padding: 20px;
 }
 
@@ -34,7 +34,7 @@
   height: 8px; border-radius: 6px; background: var(--bg-input); overflow: hidden;
   span {
     display: block; height: 100%; border-radius: 6px;
-    background: linear-gradient(90deg, #9b2fff, #06d25e);
+    background: var(--nx-brand-deep, #5B21B6);
     /* Zero por cento não desenha barra nenhuma, e uma matéria vazia é justamente
        o que precisa saltar aos olhos — daí o traço vermelho de largura mínima. */
     &.vazia { background: #ef4444; min-width: 4px; }
@@ -48,3 +48,11 @@
     > .badge-compliance { flex: 1 1 100%; justify-content: center; }
   }
 }
+
+/* Barras preenchem ao carregar (nx-draw); desligado sem animações */
+.ocupacao-barra span {
+  transform-origin: left center;
+  animation: nx-draw 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both;
+}
+:host-context(.sem-animacoes) :is(.ocupacao-barra span) { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { :is(.ocupacao-barra span) { animation: none !important; } }

@@ -12,7 +12,7 @@
 .senha-card {
   background: var(--bg-card);
   border: 1px solid #06d25e;
-  border-radius: 18px;
+  border-radius: var(--nx-radius-card, 14px);
 }
 
 .acoes-conta { align-items: center; }

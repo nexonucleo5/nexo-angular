@@ -6,7 +6,7 @@
 .metric-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 20px; padding: 20px;
+  border-radius: var(--nx-radius-card, 14px); padding: 20px;
   transition: transform 0.2s;
   &:hover { transform: translateY(-3px); }
 }
@@ -15,18 +15,18 @@
   width: 44px; height: 44px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   color: white; font-size: 18px;
-  &.orange { background: linear-gradient(135deg, #ff9800, #ff5722); }
+  &.orange { background: linear-gradient(135deg, var(--nx-accent, #0FA3C2), #0E7490); }
   &.green  { background: linear-gradient(135deg, #06d25e, #00c853); }
   &.red    { background: linear-gradient(135deg, #ff3d00, #ff1744); }
   &.blue   { background: linear-gradient(135deg, #2196f3, #00bcd4); }
-  &.purple { background: linear-gradient(135deg, #9b2fff, #673ab7); }
+  &.purple { background: linear-gradient(135deg, #7C3AED, #5B21B6); }
 }
 
 /* Filtros */
 .main-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 20px;
+  border-radius: var(--nx-radius-card, 14px);
 }
 
 .search-box {
@@ -50,12 +50,12 @@
   border: 1px solid var(--border-color);
   border-radius: 12px; color: var(--text-main);
   padding: 10px 14px; width: 100%;
-  &:focus { outline: none; border-color: #9b2fff; }
+  &:focus { outline: none; border-color: var(--nx-brand, #6D28D9); }
   option { background: var(--bg-card); color: var(--text-main); }
 }
 
 /* Cards de desafio */
-.main-card.active-border { border-color: #9b2fff; }
+.main-card.active-border { border-color: var(--nx-brand, #6D28D9); }
 
 /* Level tags */
 .level-tag {
@@ -76,12 +76,12 @@
   color: var(--text-main); border-radius: 12px;
   padding: 10px 20px; font-weight: 600;
   transition: all 0.2s; cursor: pointer;
-  &:hover { border-color: #9b2fff; color: #9b2fff; }
+  &:hover { border-color: var(--nx-brand, #6D28D9); color: var(--nx-brand, #6D28D9); }
 }
 
 /* Barra de progresso */
 .progress { height: 6px; background: var(--border-color); border-radius: 10px; overflow: hidden; }
-.progress-bar { background: linear-gradient(90deg, #9b2fff, #06d25e); border-radius: 10px; }
+.progress-bar { background: var(--nx-brand-deep, #5B21B6); border-radius: 10px; }
 
 .text-main { color: var(--text-main) !important; }
 .text-soft { color: var(--text-muted) !important; }
@@ -96,13 +96,16 @@
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
 
-  &:hover { border-color: #9b2fff; }
+  &:hover { border-color: var(--nx-brand, #6D28D9); }
 
   &.ativa {
-    background: linear-gradient(90deg, #9b2fff, #06d25e);
+    background: var(--nx-brand-deep, #5B21B6);
     border-color: transparent;
     color: #fff;
   }
 
   &.limpar { color: var(--text-muted); }
 }
+
+/* XP é ciano (claro #0FA3C2, escuro #5EE0F2) */
+.bi-lightning-fill.text-warning { color: var(--nx-accent, #0FA3C2) !important; }

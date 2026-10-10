@@ -28,7 +28,7 @@
               <i class="bi bi-trophy-fill me-2 icone-sucesso"></i>Parabéns, você acertou tudo!
             </h2>
             <p class="text-soft mb-0">{{ p.acertos }} de {{ p.total }} corretas.</p>
-            <p class="text-soft mb-0" *ngIf="p.xpGanho > 0">+{{ p.xpGanho }} XP creditado no seu perfil</p>
+            <p class="text-soft mb-0 xp-ganho" *ngIf="p.xpGanho > 0">+{{ p.xpGanho }} XP creditado no seu perfil</p>
             <p class="text-soft mb-0" *ngIf="p.xpGanho === 0">Desafio já concluído anteriormente</p>
           </div>
           <button class="btn btn-outline-main" (click)="voltar()">Voltar aos Desafios</button>
