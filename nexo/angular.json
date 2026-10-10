@@ -36,6 +36,8 @@
               }
             ],
             "styles": [
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
               "src/styles.scss",
               "node_modules/@fontsource-variable/bricolage-grotesque/index.css",
               "node_modules/@fontsource-variable/figtree/index.css",
@@ -47,7 +49,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
+                  "maximumWarning": "750kB",
                   "maximumError": "1MB"
                 },
                 {
@@ -57,6 +59,7 @@
                 }
               ],
               "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json",
               "optimization": {
                 "scripts": true,
                 "styles": {

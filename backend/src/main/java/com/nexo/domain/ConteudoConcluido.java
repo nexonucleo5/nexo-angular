@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Marca que um aluno concluiu um conteúdo de matéria.
  *
@@ -18,6 +21,8 @@ import java.time.Instant;
 @Table(name = "conteudos_concluidos",
         uniqueConstraints = @UniqueConstraint(name = "uk_conteudo_por_aluno",
                 columnNames = {"aluno_id", "conteudo_id"}))
+@Getter
+@Setter
 public class ConteudoConcluido {
 
     @Id
@@ -40,13 +45,4 @@ public class ConteudoConcluido {
         this.aluno = aluno;
         this.conteudo = conteudo;
     }
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Aluno getAluno() { return aluno; }
-    public void setAluno(Aluno aluno) { this.aluno = aluno; }
-    public ConteudoMateria getConteudo() { return conteudo; }
-    public void setConteudo(ConteudoMateria conteudo) { this.conteudo = conteudo; }
-    public Instant getConcluidoEm() { return concluidoEm; }
-    public void setConcluidoEm(Instant concluidoEm) { this.concluidoEm = concluidoEm; }
 }

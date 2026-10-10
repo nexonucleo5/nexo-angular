@@ -4,8 +4,16 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
-@Table(name = "avaliacoes")
+@Table(name = "avaliacoes",
+       // Os dois KPIs do dashboard (somarPendentesCorrecao, contarPorTurmasNoPeriodo)
+       // e buscarPorTurmas filtram por turma.id in (...).
+       indexes = @Index(name = "idx_avaliacoes_turma", columnList = "turma_id"))
+@Getter
+@Setter
 public class Avaliacao {
 
     public enum Status { RASCUNHO, PUBLICADA, EM_CORRECAO, CORRIGIDA }
@@ -34,23 +42,4 @@ public class Avaliacao {
     private int entregas;
 
     private int pendentesCorrecao;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getTitulo() { return titulo; }
-    public void setTitulo(String titulo) { this.titulo = titulo; }
-    public String getDisciplina() { return disciplina; }
-    public void setDisciplina(String disciplina) { this.disciplina = disciplina; }
-    public Turma getTurma() { return turma; }
-    public void setTurma(Turma turma) { this.turma = turma; }
-    public String getTipo() { return tipo; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
-    public Status getStatus() { return status; }
-    public void setStatus(Status status) { this.status = status; }
-    public LocalDate getData() { return data; }
-    public void setData(LocalDate data) { this.data = data; }
-    public int getEntregas() { return entregas; }
-    public void setEntregas(int entregas) { this.entregas = entregas; }
-    public int getPendentesCorrecao() { return pendentesCorrecao; }
-    public void setPendentesCorrecao(int pendentesCorrecao) { this.pendentesCorrecao = pendentesCorrecao; }
 }

@@ -124,7 +124,7 @@
             <!-- Aluno -->
             <td>
               <div class="d-flex align-items-center gap-3">
-                <img [src]="aluno.foto" [alt]="aluno.nome" class="avatar-img">
+                <img loading="lazy" decoding="async" [src]="aluno.foto" [alt]="aluno.nome" class="avatar-img">
                 <div>
                   <h4 class="student-name mb-0">{{ aluno.nome }}</h4>
                   <span class="student-id">{{ aluno.matricula }}</span>

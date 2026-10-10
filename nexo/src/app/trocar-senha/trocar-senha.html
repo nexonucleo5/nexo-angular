@@ -32,11 +32,13 @@
         <div class="campo" [class.com-erro]="erroNovaSenha()">
           <label for="novaSenha">Nova senha</label>
           <input id="novaSenha" type="password" formControlName="novaSenha"
-                 placeholder="Mínimo 8 caracteres"
+                 placeholder="Entre 8 e 50 caracteres" [attr.maxlength]="maxSenha" autocomplete="new-password"
                  [attr.aria-invalid]="erroNovaSenha() ? 'true' : null"
                  [attr.aria-describedby]="erroNovaSenha() ? 'erro-novaSenha' : null">
           @if (erroNovaSenha()) {
             <small class="erro-campo" id="erro-novaSenha" role="alert">{{ erroNovaSenha() }}</small>
+          } @else if (senhaValida()) {
+            <small class="ok-campo" role="status">✓ Senha aceita.</small>
           }
         </div>
 

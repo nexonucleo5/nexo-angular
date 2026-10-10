@@ -171,6 +171,10 @@ $nx-anel: 0 0 0 3px color-mix(in srgb, var(--nx-brand, #6D28D9) 35%, transparent
   &:hover { background: color-mix(in srgb, var(--nx-brand, #6D28D9) 10%, transparent); }
 }
 html[data-theme='dark'] #{$nx-escopo} .btn-hamburguer span { background: var(--nx-brand, #A78BFA); }
+#{$nx-escopo} .btn-theme {
+  border-radius: var(--nx-radius-control, 10px);
+  &:hover { border-color: var(--nx-brand, #6D28D9); }
+}
 #{$nx-escopo} .profile-image { border-color: var(--nx-brand, #6D28D9); }
 #{$nx-escopo} .avatar-placeholder-circle { background: linear-gradient(135deg, #7C3AED, #5B21B6); }
 #{$nx-escopo} .progress { background-color: color-mix(in srgb, var(--nx-line, #B2A8CC) 55%, transparent); }

@@ -2,6 +2,10 @@ package com.nexo.domain;
 
 import jakarta.persistence.*;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Catálogo de matérias da escola. Antes existia apenas como lista hardcoded no
  * client (materias.data.ts) e como texto solto em Professor/Nota/Avaliação;
@@ -9,6 +13,8 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "materias")
+@Getter
+@Setter
 public class Materia {
 
     @Id
@@ -28,6 +34,7 @@ public class Materia {
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "segmento", length = 20)
+    @Getter(AccessLevel.NONE)
     private SegmentoEnsino segmento = SegmentoEnsino.AMBOS;
 
     public Materia() {}
@@ -41,11 +48,6 @@ public class Materia {
         this.segmento = segmento;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
     /** Nunca nulo: linha gravada antes da coluna existir vale como AMBOS. */
     public SegmentoEnsino getSegmento() { return segmento != null ? segmento : SegmentoEnsino.AMBOS; }
-    public void setSegmento(SegmentoEnsino segmento) { this.segmento = segmento; }
 }

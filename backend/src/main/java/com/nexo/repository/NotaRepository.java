@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,4 +59,24 @@ public interface NotaRepository extends JpaRepository<Nota, Long> {
            where n.periodo = :periodo
            """)
     List<NotaBruta> projetarPorPeriodo(@Param("periodo") String periodo);
+
+    /**
+     * As mesmas notas cruas, mas só dos alunos das turmas indicadas.
+     *
+     * <p>{@link #projetarTodas()} lê a tabela inteira — todas as notas de todos os
+     * alunos da escola — mesmo quando quem pediu enxerga só as próprias turmas, como o
+     * dashboard do professor. Em produção (Postgres gerenciado) isso é um seq scan por
+     * request, e é o que domina a conta do banco. O recorte é por {@code aluno.turma}, e
+     * não por {@code n.turma}, para trazer exatamente as linhas que o scan completo
+     * contribuiria para esses alunos — a média por aluno continua idêntica.
+     */
+    @Query("""
+           select n.aluno.id as alunoId, n.p1 as p1, n.p2 as p2,
+                  n.t1 as t1, n.participacao as participacao
+           from Nota n
+           where n.aluno.turma.id in :turmaIds
+             and (:periodo is null or n.periodo = :periodo)
+           """)
+    List<NotaBruta> projetarPorTurmas(@Param("turmaIds") Collection<Long> turmaIds,
+                                      @Param("periodo") String periodo);
 }

@@ -96,3 +96,12 @@
   transition: all 0.2s; cursor: pointer;
   &:hover { border-color: #9b2fff; color: #9b2fff; }
 }
+/* No celular as 4 métricas viram grade 2x2: lado a lado em ~300px os rótulos
+   ("Interações" / "Avaliação") se tocavam e a nota quebrava em duas linhas. */
+@media (max-width: 767.98px) {
+  .teacher-metrics {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 8px;
+  }
+}

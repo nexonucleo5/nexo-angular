@@ -8,7 +8,13 @@ public final class AuthDtos {
 
     private AuthDtos() {}
 
-    public record LoginRequest(@NotBlank String login, @NotBlank String senha) {}
+    /**
+     * O teto de 128 caracteres só impede hashear um corpo gigante: o BCrypt ignora tudo
+     * depois de 72 bytes. É maior que o limite da política (50) de propósito — contas
+     * criadas quando o limite era 72 precisam continuar entrando.
+     */
+    public record LoginRequest(@NotBlank @Size(max = 254) String login,
+                               @NotBlank @Size(max = 128) String senha) {}
 
     public record UsuarioDTO(Long id, String nome, String cargo, String foto, String role) {
         public static UsuarioDTO of(Usuario u) {
@@ -31,9 +37,15 @@ public final class AuthDtos {
      */
     public record SessaoEmitida(TokenResponse resposta, String refreshTokenPlano) {}
 
-    public record TrocaSenhaRequest(@NotBlank String senhaAtual,
+    public record TrocaSenhaRequest(@NotBlank @Size(max = 128) String senhaAtual,
                                     @NotBlank @Size(min = 8, message = "A nova senha deve ter ao menos 8 caracteres")
                                     String novaSenha) {}
+
+    /** Pergunta "essa senha seria aceita?" — nada é gravado. */
+    public record ValidarSenhaRequest(@Size(max = 128) String novaSenha) {}
+
+    /** {@code codigo} e {@code motivo} vêm nulos quando a senha é válida. */
+    public record ValidacaoSenhaResponse(boolean valida, String codigo, String motivo) {}
 
     public record AtualizarPerfilRequest(String nome, String foto) {}
 }

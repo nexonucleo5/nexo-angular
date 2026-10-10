@@ -55,7 +55,11 @@
 
       <!-- Perguntas -->
       <div class="main-card p-4 mb-3" *ngFor="let pergunta of perguntas(); let i = index">
-        <h3 class="h6 fw-bold text-main mb-3 enunciado">{{ i + 1 }}. {{ pergunta.enunciado }}</h3>
+        <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+          <h3 class="h6 fw-bold text-main mb-0 enunciado">{{ i + 1 }}. {{ pergunta.enunciado }}</h3>
+          <app-botao-ouvir class="flex-shrink-0" [id]="'pergunta-' + pergunta.id"
+                           [texto]="falaDaPergunta(pergunta, i)" />
+        </div>
         <div class="alternativas">
           <button type="button" class="alternativa" *ngFor="let alt of pergunta.alternativas; let ai = index"
                   [class]="classeAlternativa(pergunta, ai)"

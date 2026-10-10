@@ -4,6 +4,7 @@
   padding: 34px;
   background-color: var(--bg-primary);
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .senha-wrapper {
@@ -81,4 +82,12 @@
   margin-top: 8px;
   &:hover { opacity: 0.9; }
   &:disabled { opacity: 0.6; cursor: default; }
+}
+
+.ok-campo {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--success, #198754);
 }

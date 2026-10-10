@@ -48,7 +48,7 @@
         
         <div class="student-list">
           <div class="student-row d-flex align-items-center p-3 mb-2" *ngFor="let a of alunosRisco()">
-            <img [src]="a.foto" class="avatar-circle me-3" alt="Foto do aluno">
+            <img loading="lazy" decoding="async" [src]="a.foto" class="avatar-circle me-3" alt="Foto do aluno">
             <div class="flex-grow-1">
               <h6 class="text-main fw-bold mb-0 fs-6">{{a.nome}}</h6>
               <small class="text-soft">{{a.turma}}</small>

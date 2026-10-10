@@ -4,9 +4,15 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import lombok.Getter;
+
 /** Atividade recente do professor (feed do dashboard). */
 @Entity
-@Table(name = "atividades_professor")
+@Table(name = "atividades_professor",
+       // findTop6ByProfessorIdOrderByCriadaEmDesc: a data entra no índice para o
+       // "top 6" sair dele já ordenado, sem sort. O B-tree é lido de trás para frente.
+       indexes = @Index(name = "idx_atividades_prof_criada", columnList = "professor_id, criada_em"))
+@Getter
 public class AtividadeProfessor {
 
     @Id
@@ -42,13 +48,4 @@ public class AtividadeProfessor {
         this.cor = cor;
         this.criadaEm = criadaEm;
     }
-
-    public Long getId() { return id; }
-    public Professor getProfessor() { return professor; }
-    public String getTipo() { return tipo; }
-    public String getDescricao() { return descricao; }
-    public String getTurma() { return turma; }
-    public String getIcone() { return icone; }
-    public String getCor() { return cor; }
-    public Instant getCriadaEm() { return criadaEm; }
 }

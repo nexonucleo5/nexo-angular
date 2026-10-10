@@ -4,6 +4,8 @@ import com.nexo.api.ApiException;
 import com.nexo.api.dto.AuthDtos.AtualizarPerfilRequest;
 import com.nexo.api.dto.AuthDtos.TrocaSenhaRequest;
 import com.nexo.api.dto.AuthDtos.UsuarioDTO;
+import com.nexo.api.dto.AuthDtos.ValidacaoSenhaResponse;
+import com.nexo.api.dto.AuthDtos.ValidarSenhaRequest;
 import com.nexo.domain.EventoAuditoria;
 import com.nexo.domain.FotoPerfil;
 import com.nexo.domain.Usuario;
@@ -223,6 +225,24 @@ public class UsuariosController {
         int encerradas = authService.encerrarOutrasSessoes(usuario.getId(), refreshToken);
         String detalhe = encerradas > 0 ? encerradas + " outra(s) sessão(ões) encerrada(s)" : null;
         auditoria.registrar(usuario.getNome(), EventoAuditoria.Tipo.ALTERACAO, "Senha alterada", detalhe, null);
+    }
+
+    /**
+     * Checagem prévia da nova senha, para a tela avisar enquanto a pessoa digita em vez de
+     * só no "Salvar". Aplica exatamente a {@link PoliticaSenha} da troca real — inclusive a
+     * comparação com o login e o nome do usuário — mas não toca na senha atual nem grava
+     * nada, então responde 200 com o veredito (e não 400): senha recusada aqui é resposta,
+     * não erro.
+     */
+    @PostMapping("/me/senha/validar")
+    public ValidacaoSenhaResponse validarSenha(@AuthenticationPrincipal UsuarioAutenticado principal,
+                                               @Valid @RequestBody ValidarSenhaRequest request) {
+        Usuario usuario = carregar(principal);
+        PoliticaSenha.Recusa recusa = politicaSenha.avaliar(
+                request.novaSenha(), usuario.getLogin(), usuario.getNome());
+        return recusa == null
+                ? new ValidacaoSenhaResponse(true, null, null)
+                : new ValidacaoSenhaResponse(false, recusa.codigo(), recusa.motivo());
     }
 
     private Usuario carregar(UsuarioAutenticado principal) {

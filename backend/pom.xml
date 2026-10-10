@@ -102,6 +102,15 @@
             <version>5.5.1</version>
         </dependency>
 
+        <!-- Gera os acessores triviais das entidades em @Entity. optional=true: é
+             ferramenta de compilação, não vai para o classpath de quem consome o jar,
+             e o spring-boot-maven-plugin já a exclui do fat jar. -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -116,9 +125,37 @@
 
     <build>
         <plugins>
+            <!-- O processador do Lombok é declarado aqui, e não deixado para o javac
+                 descobrir sozinho no classpath: a partir do JDK 21 essa descoberta
+                 implícita é avisada como obsoleta e some numa versão futura. Declarado,
+                 o build continua igual quando isso acontecer. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- O Lombok só existe em tempo de compilação: o bytecode gerado não
+                         referencia nada dele. Sem esta exclusão o repackage o empacota
+                         mesmo com optional=true, e o jar de deploy carrega ~2 MB mortos. -->
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

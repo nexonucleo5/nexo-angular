@@ -45,15 +45,17 @@ public class SecurityConfig {
     private boolean h2ConsoleHabilitado;
 
     /**
-     * O index.html carrega Bootstrap/Bootstrap Icons via CDN (ver index.html) e Angular
-     * injeta &lt;style&gt; por componente sem nonce — daí o 'unsafe-inline' em style-src
-     * e o host do jsdelivr. Fora isso, tudo (JS, fotos, API, WebSocket) é same-origin.
+     * Angular injeta &lt;style&gt; por componente sem nonce — daí o 'unsafe-inline' em
+     * style-src. Bootstrap e Bootstrap Icons saem do próprio bundle, então tudo (JS, CSS,
+     * fontes, fotos, API, WebSocket e service worker) é same-origin.
      */
     private static final String CSP = String.join("; ",
             "default-src 'self'",
             "script-src 'self'",
-            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
-            "font-src 'self' https://cdn.jsdelivr.net",
+            "style-src 'self' 'unsafe-inline'",
+            "font-src 'self'",
+            "manifest-src 'self'",
+            "worker-src 'self'",
             "img-src 'self' data:",
             "connect-src 'self'",
             "object-src 'none'",

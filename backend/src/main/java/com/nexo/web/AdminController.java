@@ -84,19 +84,56 @@ public class AdminController {
     @GetMapping("/dashboard")
     @Transactional(readOnly = true)
     public DashboardAdminDTO dashboard() {
+        // Doze números, cinco consultas. Eram doze — um count(*) por número, cada um uma
+        // ida ao banco —, e as seis primeiras varriam a mesma tabela de usuários para
+        // recortá-la de seis maneiras. Um group by responde as seis de uma vez, e o mesmo
+        // vale para os pares total/despublicados de conteúdo e desafio.
+        var porPapel = new java.util.EnumMap<Role, Long>(Role.class);
+        long contas = 0;
+        long contasInativas = 0;
+        for (Object[] linha : usuarios.contarPorPapelEAtivo()) {
+            Role papel = (Role) linha[0];
+            boolean ativo = Boolean.TRUE.equals(linha[1]);
+            long total = ((Number) linha[2]).longValue();
+            contas += total;
+            if (!ativo) contasInativas += total;
+            porPapel.merge(papel, total, Long::sum);
+        }
+
+        long[] conteudo = totalEDespublicados(conteudos.contarPorPublicado());
+        long[] desafio = totalEDespublicados(desafios.contarPorPublicado());
+
         return new DashboardAdminDTO(
-                usuarios.count(),
-                usuarios.countByAtivo(false),
-                usuarios.countByRole(Role.ALUNO),
-                usuarios.countByRole(Role.PROFESSOR),
-                usuarios.countByRole(Role.DIRETOR),
-                usuarios.countByRole(Role.ADMIN),
+                contas,
+                contasInativas,
+                porPapel.getOrDefault(Role.ALUNO, 0L),
+                porPapel.getOrDefault(Role.PROFESSOR, 0L),
+                porPapel.getOrDefault(Role.DIRETOR, 0L),
+                porPapel.getOrDefault(Role.ADMIN, 0L),
                 turmas.count(),
                 materias.count(),
-                conteudos.count(),
-                conteudos.countByPublicado(false),
-                desafios.count(),
-                desafios.countByPublicado(false));
+                conteudo[0],
+                conteudo[1],
+                desafio[0],
+                desafio[1]);
+    }
+
+    /**
+     * Reduz o {@code (publicado, total)} agrupado a {@code [total, despublicados]}.
+     *
+     * <p>Só o {@code false} explícito conta como despublicado — {@code publicado} nulo é
+     * registro anterior à coluna e vale como no ar, a mesma regra de
+     * {@code ConteudoMateriaRepository.publicadosDaMateria}.
+     */
+    private static long[] totalEDespublicados(List<Object[]> agrupado) {
+        long total = 0;
+        long despublicados = 0;
+        for (Object[] linha : agrupado) {
+            long quantidade = ((Number) linha[1]).longValue();
+            total += quantidade;
+            if (Boolean.FALSE.equals(linha[0])) despublicados += quantidade;
+        }
+        return new long[] { total, despublicados };
     }
 
     // ── Contas e acesso ──────────────────────────────────────────────────────
