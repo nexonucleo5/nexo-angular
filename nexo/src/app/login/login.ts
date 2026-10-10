@@ -1,15 +1,15 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { ApiErro } from '../core/api.models';
-import { LogoNexo } from '../logo-nexo/logo-nexo';
+import { aplicarTema, temaSalvoEscuro } from '../configuracoes/settings-store';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, LogoNexo],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -24,11 +24,19 @@ export class Login {
   public mensagemErro    = '';
   public mensagemSucesso = '';
 
+  /** Tema antes do login: mesma chave de cache que o App e o SettingsStore usam. */
+  public temaEscuro = signal(temaSalvoEscuro());
+
   constructor() {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
+  }
+
+  public alternarTema(): void {
+    this.temaEscuro.update((escuro) => !escuro);
+    aplicarTema(this.temaEscuro());
   }
 
   public realizarLogin(): void {

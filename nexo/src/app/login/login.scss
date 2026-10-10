@@ -1,103 +1,218 @@
+/* Tokens do Login definidos aqui (e não só em nexo-tokens.scss) para o tema
+   acompanhar o data-theme do <html> mesmo sem o stylesheet global. */
 .login-container {
-  position: relative;
-  min-height: 100vh;
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 20px;
-  padding-right: 8vw;
-  background-color: var(--bg-primary);
-  overflow: hidden;
+  --nx-bg: #E9E6F1;
+  --nx-card: #FFFFFF;
+  --nx-line: #B2A8CC;
+  --nx-field: #FFFFFF;
+  --nx-text: #1A1030;
+  --nx-muted: #4B4566;
+  --nx-brand: #6D28D9;
+  --nx-brand-deep: #5B21B6;
+  --nx-danger: #B3261E;
+  --nx-danger-bg: #F8D9D6;
+  --nx-ok: #14663F;
+  --nx-ok-bg: #D5EFE0;
+  --nx-shadow: rgba(26, 16, 48, 0.14);
 }
 
-/* Logo de fundo — grande, à esquerda, passando por baixo do card. A largura
-   vem pelo input do <app-logo-nexo> (login.html); a altura segue a arte. */
-.login-marca {
-  position: absolute;
-  top: 50%;
-  left: 5vw;
-  transform: translateY(-50%);
-  opacity: 0.5;
-  pointer-events: none;
-  z-index: 0;
+:host-context(html[data-theme='dark']) .login-container {
+  --nx-bg: #0B0716;
+  --nx-card: #171128;
+  --nx-line: #5A4A8F;
+  --nx-field: #221A3A;
+  --nx-text: #F4F1FF;
+  --nx-muted: #C9C1E6;
+  --nx-brand: #A78BFA;
+  --nx-brand-deep: #7C3AED;
+  --nx-danger: #FF8A80;
+  --nx-danger-bg: #3A1C22;
+  --nx-ok: #7BE0A8;
+  --nx-ok-bg: #12301F;
+  --nx-shadow: rgba(0, 0, 0, 0.5);
+}
+
+/* Ocupa a viewport inteira, ignorando o padding/margem do layout do app */
+.login-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow-y: auto;
+  display: flex;
+  background-color: var(--nx-bg, #E9E6F1);
+  color: var(--nx-text, #1A1030);
+  font-family: var(--nx-font-text, 'Segoe UI', system-ui, sans-serif);
+}
+
+/* Painel de marca: roxo fixo nos dois temas, para a logo branca sempre ter contraste */
+.login-painel {
+  flex: 1 1 52%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #fff;
+  background-color: #5B21B6;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+
+.login-painel__logo { display: block; width: min(300px, 70%); height: auto; }
+
+/* Lado do formulário */
+.login-lado {
+  position: relative;
+  flex: 1 1 48%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
 }
 
 .login-form {
-  position: relative;
-  z-index: 1;   /* o card fica por cima da logo */
   width: 100%;
-  max-width: 400px;
-  background-color: var(--bg-card);
-  padding: 40px;
-  border-radius: 16px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 8px 25px var(--shadow-color);
+  max-width: 420px;
+  padding: 36px;
+  background-color: var(--nx-card, #FFFFFF);
+  border: 1px solid var(--nx-line, #B2A8CC);
+  border-radius: var(--nx-radius-card, 14px);
+  box-shadow: 0 20px 50px var(--nx-shadow, rgba(26, 16, 48, 0.14));
 }
 
 .login-title {
-  font-size: 28px;
+  font-family: var(--nx-font-display, 'Segoe UI', system-ui, sans-serif);
   font-weight: 700;
-  color: var(--text-main);
-  text-align: center;
-  margin-bottom: 8px;
+  font-size: 30px;
+  letter-spacing: -0.02em;
+  color: var(--nx-text, #1A1030);
+  margin: 0 0 6px;
 }
 
 .login-subtitle {
-  font-size: 14px;
-  color: var(--text-muted);
-  text-align: center;
-  margin-bottom: 28px;
+  font-size: 15px;
+  color: var(--nx-muted, #4B4566);
+  margin: 0 0 24px;
 }
 
 .form-label {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-main);
+  color: var(--nx-text, #1A1030);
   margin-bottom: 6px;
 }
 
 .form-control {
-  height: 46px;
-  font-size: 14px;
-  border-radius: 10px;
-  background-color: var(--bg-input);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  transition: border-color 0.2s;
+  min-height: 46px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: var(--nx-radius-control, 10px);
+  background-color: var(--nx-field, #FFFFFF);
+  border: 1px solid var(--nx-line, #B2A8CC);
+  color: var(--nx-text, #1A1030);
+  transition: border-color 0.2s, box-shadow 0.2s;
 
-  &::placeholder { color: var(--text-muted); }
+  &::placeholder { color: var(--nx-muted, #4B4566); }
 
   &:focus {
-    box-shadow: none;
-    border-color: #9b2fff;
-    background-color: var(--bg-input);
-    color: var(--text-main);
+    background-color: var(--nx-field, #FFFFFF);
+    color: var(--nx-text, #1A1030);
+    border-color: var(--nx-brand, #6D28D9);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--nx-brand, #6D28D9) 35%, transparent);
   }
+
+  &.is-invalid { border-color: var(--nx-danger, #B3261E); background-image: none; }
 }
 
-.form-text {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 6px;
-}
+.invalid-feedback { color: var(--nx-danger, #B3261E); font-size: 13px; font-weight: 600; }
+.form-text { font-size: 13px; color: var(--nx-muted, #4B4566); margin-top: 6px; }
 
 .form-check-input {
-  background-color: var(--bg-input);
-  border: 1px solid var(--border-color);
+  width: 1.15em;
+  height: 1.15em;
+  background-color: var(--nx-field, #FFFFFF);
+  border: 1px solid var(--nx-line, #B2A8CC);
 
-  &:focus    { box-shadow: none; border-color: #9b2fff; }
-  &:checked  { background-color: #9b2fff; border-color: #9b2fff; }
+  &:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--nx-brand, #6D28D9) 35%, transparent); border-color: var(--nx-brand, #6D28D9); }
+  &:checked { background-color: var(--nx-brand-deep, #5B21B6); border-color: var(--nx-brand-deep, #5B21B6); }
+}
+.form-check-label { font-size: 14px; color: var(--nx-muted, #4B4566); }
+
+/* Alternar tema (a tela de login não tem o header do app) */
+.btn-tema {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--nx-text, #1A1030);
+  background-color: var(--nx-card, #FFFFFF);
+  border: 1px solid var(--nx-line, #B2A8CC);
+  border-radius: var(--nx-radius-control, 10px);
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:hover { border-color: var(--nx-brand, #6D28D9); }
+  &:focus-visible { outline: 3px solid var(--nx-brand, #6D28D9); outline-offset: 2px; }
 }
 
-.form-check-label { font-size: 13px; color: var(--text-muted); }
+/* Alertas: ícone + texto, nunca só cor */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  border-radius: var(--nx-radius-control, 10px);
+  border: 1px solid currentColor;
+  font-size: 14px;
+  font-weight: 600;
+  i { flex: none; margin-top: 2px; }
+}
+.alert-danger  { background-color: var(--nx-danger-bg, #F8D9D6); color: var(--nx-danger, #B3261E); }
+.alert-success { background-color: var(--nx-ok-bg, #D5EFE0); color: var(--nx-ok, #14663F); }
 
 .btn-login {
-  width: 100%; height: 46px;
-  font-size: 15px; font-weight: 600; border-radius: 10px;
-  background: linear-gradient(135deg, #9b2fff, #06d25e);
-  border: none; color: white;
-  transition: opacity 0.2s;
-  &:hover { opacity: 0.9; color: white; }
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  min-height: 48px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: var(--nx-radius-control, 10px);
+  border: none;
+  background: var(--nx-brand-deep, #5B21B6);
+  color: #FFFFFF;
+  transition: transform 0.2s, filter 0.2s;
+
+  &:hover:not(:disabled) { color: #FFFFFF; filter: brightness(0.88); transform: translateY(-1px); }
+  &:active:not(:disabled) { transform: none; }
+  &:focus-visible { outline: 3px solid var(--nx-brand, #6D28D9); outline-offset: 3px; box-shadow: none; }
+  &:disabled { color: #FFFFFF; opacity: 0.6; cursor: not-allowed; }
+}
+
+/* Animações novas */
+@keyframes nx-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+.login-form { animation: nx-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.alert { animation: nx-rise 0.3s ease both; }
+
+
+/* Animações desligadas (classe no html ou preferência do sistema): o conteúdo já nasce visível */
+:host-context(html.sem-animacoes) .login-form,
+:host-context(html.sem-animacoes) .alert { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .login-form, .alert { animation: none !important; }
+}
+
+/* Celular e tablet: o painel vira uma faixa curta com a logo */
+@media (max-width: 900px) {
+  .login-container { flex-direction: column; }
+  .login-lado { flex: 1 0 auto; }
+  .login-painel { flex: none; padding: 20px 24px; }
+  .login-painel__logo { width: auto; height: 56px; }
+  .login-lado { padding: 24px 16px 40px; align-items: flex-start; }
+  .login-form { padding: 28px 22px; }
 }

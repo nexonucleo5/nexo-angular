@@ -36,7 +36,10 @@
               }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/@fontsource-variable/bricolage-grotesque/index.css",
+              "node_modules/@fontsource-variable/figtree/index.css",
+              "src/styles/nexo-tokens.scss"
             ]
           },
           "configurations": {
