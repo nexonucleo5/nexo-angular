@@ -54,8 +54,6 @@
   padding: 40px;
   color: #fff;
   background-color: #5B21B6;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1.2px);
-  background-size: 18px 18px;
 }
 
 .login-painel__logo { display: block; width: min(300px, 70%); height: auto; }
@@ -172,7 +170,7 @@
   border: 1px solid currentColor;
   font-size: 14px;
   font-weight: 600;
-  i { flex: none; margin-top: 2px; }
+  :is(i, .ic) { flex: none; margin-top: 2px; }
 }
 .alert-danger  { background-color: var(--nx-danger-bg, #F8D9D6); color: var(--nx-danger, #B3261E); }
 .alert-success { background-color: var(--nx-ok-bg, #D5EFE0); color: var(--nx-ok, #14663F); }

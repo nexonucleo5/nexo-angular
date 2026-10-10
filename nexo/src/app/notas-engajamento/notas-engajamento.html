@@ -11,7 +11,7 @@
       </p>
     </div>
     <button class="btn btn-export d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
-      <i class="bi bi-download"></i> Exportar Relatório
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-download"></use></svg> Exportar Relatório
     </button>
   </header>
 
@@ -56,7 +56,12 @@
       <div class="kpi-card p-4 rounded-4 h-100 d-flex flex-column justify-content-between">
         <div class="d-flex justify-content-between align-items-start mb-4">
           <div class="icon-wrapper" [ngClass]="[kpi.iconeBgClasse, kpi.iconeCorClasse]">
-            <i class="bi" [ngClass]="kpi.icone"></i>
+            @switch (kpi.icone) {
+                @case ('bi-check-lg') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg> }
+                @case ('bi-exclamation-triangle') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg> }
+                @case ('bi-people') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-users"></use></svg> }
+                @default { <i class="bi" [ngClass]="kpi.icone"></i> }
+              }
           </div>
         </div>
         <div>
@@ -76,7 +81,7 @@
     <div class="col-12">
       <div class="chart-card p-4 rounded-4 h-100">
         <div class="d-flex align-items-center gap-2 mb-4">
-          <i class="bi bi-bar-chart text-green fs-5"></i>
+          <svg class="ic text-green fs-5" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bars"></use></svg>
           <h3 class="h5 fw-bold mb-0" style="color: var(--text-main);">
             Distribuição de Notas
           </h3>
@@ -153,7 +158,7 @@
             <!-- Ações -->
             <td class="text-center">
               <button class="btn btn-action-view" title="Ver detalhes">
-                <i class="bi bi-eye"></i>
+                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-eye"></use></svg>
               </button>
             </td>
           </tr>

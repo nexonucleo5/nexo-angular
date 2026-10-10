@@ -4,11 +4,9 @@
 .text-soft    { color: var(--text-muted) !important; }
 .title-adaptive { color: var(--text-main) !important; }
 
-/* Banner de nível: roxo sólido com textura de pontos (sem gradiente de fundo) */
+/* Banner de nível: roxo sólido; o único gradiente aprovado é o dos blocos de XP */
 .borda {
   background-color: #7A2BFF;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1.2px);
-  background-size: 16px 16px;
   border-radius: var(--nx-radius-card, 14px); padding: 30px; color: #FFFFFF;
   box-shadow: 0 10px 28px rgba(26, 5, 70, 0.28);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -83,10 +81,10 @@
   width: 46px; height: 46px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   font-size: 20px; margin-bottom: 12px; color: white;
-  &.roxo   { background: linear-gradient(135deg, #7C3AED, #5B21B6); }
-  &.verde  { background: linear-gradient(135deg, #06d25e, #059669); }
-  &.azul   { background: linear-gradient(135deg, #2196f3, #1e40af); }
-  &.laranja { background: linear-gradient(135deg, var(--nx-accent, #0FA3C2), #0E7490); }
+  &.roxo   { background: var(--nx-brand-deep, #5B21B6); }
+  &.verde  { background: #059669; }
+  &.azul   { background: #1D4ED8; }
+  &.laranja { background: #0E7490; }
 }
 
 /* Gráficos SVG */

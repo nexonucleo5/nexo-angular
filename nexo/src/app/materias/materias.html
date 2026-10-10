@@ -15,7 +15,7 @@
         <div class="row g-3 align-items-center">
             <div class="col-lg-6">
                 <div class="search-box custom-input d-flex align-items-center px-3 py-2 rounded-pill">
-                    <i class="bi bi-search me-2"></i>
+                    <svg class="ic me-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
                     <input
                         type="text"
                         [ngModel]="buscaDeTermos()" (ngModelChange)="buscaDeTermos.set($event)"
@@ -25,7 +25,7 @@
                     >
                     @if (buscaDeTermos()) {
                         <button type="button" class="btn-limpar-busca" (click)="limparBusca()" aria-label="Limpar busca">
-                            <i class="bi bi-x-lg"></i>
+                            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-x"></use></svg>
                         </button>
                     }
                 </div>
@@ -58,7 +58,7 @@
     <section class="subjects-section mb-5">
         @if (filtradas().length === 0) {
             <div class="sem-resultado card-theme p-4 rounded-4 text-center">
-                <i class="bi bi-search fs-3 text-soft"></i>
+                <svg class="ic fs-3 text-soft" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
                 <p class="text-soft mt-2 mb-3">Nenhuma matéria encontrada com esses filtros.</p>
                 <button class="btn-limpar-filtros" (click)="limparBusca(); selecionarFiltro('todas')">
                     Limpar filtros
@@ -72,7 +72,19 @@
                         <div class="d-flex gap-3 subject-identity">
                             <div [class]="'subject-icon d-flex align-items-center justify-content-center rounded-4 ' + subject.colorClass"
                                  style="width: 70px; height: 70px; color: #fff;">
-                                <i *ngIf="subject.iconClass" [class]="'bi ' + subject.iconClass + ' fs-2'"></i>
+                                @if (subject.iconClass) {
+                                @switch (subject.iconClass) {
+                                  @case ('bi-heart-pulse') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-pulse"></use></svg> }
+                                  @case ('bi-calculator') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-calc"></use></svg> }
+                                  @case ('bi-book') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg> }
+                                  @case ('bi-hourglass-split') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-hourglass"></use></svg> }
+                                  @case ('bi-globe-americas') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-globe"></use></svg> }
+                                  @case ('bi-lightning-charge') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bolt"></use></svg> }
+                                  @case ('bi-palette') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-palette"></use></svg> }
+                                  @case ('bi-journal-text') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg> }
+                                  @default { <i [class]="'bi ' + subject.iconClass + ' fs-2'"></i> }
+                                }
+                                }
                                 <span *ngIf="subject.iconText" class="fw-bold">{{subject.iconText}}</span>
                             </div>
                             <div>

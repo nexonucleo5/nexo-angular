@@ -2,12 +2,12 @@
 
 @if (carregando()) {
   <div class="content-card estado-vazio">
-    <i class="bi bi-hourglass-split"></i>
+    <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-hourglass"></use></svg>
     Carregando seus dados docentes…
   </div>
 } @else if (erro()) {
   <div class="content-card estado-vazio">
-    <i class="bi bi-exclamation-triangle"></i>
+    <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg>
     Não foi possível carregar seus dados.
     <div><button class="btn-tentar" (click)="carregar()">Tentar novamente</button></div>
   </div>
@@ -20,7 +20,13 @@
         <div class="summary-card">
           <div class="summary-card-top mb-0">
             <div class="summary-icon" [ngClass]="kpi.cor + '-summary'">
-              <i class="bi" [ngClass]="kpi.icone"></i>
+              @switch (kpi.icone) {
+                @case ('bi-clipboard-check') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-file"></use></svg> }
+                @case ('bi-mortarboard-fill') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-cap"></use></svg> }
+                @case ('bi-pencil-square') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-pencil"></use></svg> }
+                @case ('bi-people-fill') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-users"></use></svg> }
+                @default { <i class="bi" [ngClass]="kpi.icone"></i> }
+              }
             </div>
             <div>
               <p class="summary-title">{{ kpi.label }}</p>
@@ -38,7 +44,7 @@
     <div class="col-xl-7">
       <div class="content-card">
         <h2 class="section-card-title">
-          <i class="bi bi-people-fill title-icon purple-text"></i> Minhas Turmas
+          <svg class="ic title-icon purple-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-users"></use></svg> Minhas Turmas
         </h2>
 
         @if (turmas().length) {
@@ -66,7 +72,7 @@
           </p>
         } @else {
           <div class="estado-vazio">
-            <i class="bi bi-inbox"></i>
+            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-mail"></use></svg>
             Você ainda não tem turmas atribuídas.
           </div>
         }
@@ -77,7 +83,7 @@
     <div class="col-xl-5">
       <div class="content-card h-100">
         <h2 class="section-card-title">
-          <i class="bi bi-exclamation-triangle-fill title-icon orange-text"></i> Alunos em Atenção
+          <svg class="ic title-icon orange-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg> Alunos em Atenção
         </h2>
 
         @if (alunosAtencao().length) {

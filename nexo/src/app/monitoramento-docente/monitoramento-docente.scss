@@ -54,7 +54,7 @@
 /* Performers */
 .rank-badge {
   width: 28px; height: 28px; border-radius: 8px;
-  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   color: white; font-weight: 700; font-size: 13px;
   display: flex; align-items: center; justify-content: center;
 }
@@ -86,7 +86,7 @@
 
 /* Barra de produtividade */
 .progress { height: 6px; background: var(--border-color); border-radius: 10px; overflow: hidden; }
-.bg-gradient-purple { background: linear-gradient(90deg, #9b2fff, #06d25e) !important; }
+.bg-gradient-purple { background: var(--nx-brand-deep, #5B21B6) !important; }
 
 /* Botões de ação */
 .btn-action-icon {

@@ -18,15 +18,15 @@
   color: var(--text-main); font-size: 16px; font-weight: 600;
   text-decoration: none; transition: background 0.2s; cursor: pointer;
 
-  i { font-size: 20px; color: var(--text-muted); transition: color 0.2s; background: none; -webkit-text-fill-color: unset; }
+  :is(i, .ic) { font-size: 20px; color: var(--text-muted); transition: color 0.2s; background: none; -webkit-text-fill-color: unset; }
 
-  &:hover { background: rgba(155, 47, 255, 0.08); i { color: #9b2fff; } }
+  &:hover { background: rgba(155, 47, 255, 0.08); :is(i, .ic) { color: #9b2fff; } }
 
   &.active {
-    background: linear-gradient(90deg, #9b2fff, #06d25e);
+    background: var(--nx-brand-deep, #5B21B6);
     color: #fff !important;
     box-shadow: 0 8px 24px rgba(102, 65, 190, 0.25);
-    i { color: #fff !important; -webkit-text-fill-color: #fff; background: none; }
+    :is(i, .ic) { color: #fff !important; -webkit-text-fill-color: #fff; background: none; }
   }
 }
 

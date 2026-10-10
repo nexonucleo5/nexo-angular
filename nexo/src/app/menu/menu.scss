@@ -31,21 +31,21 @@
   color: var(--text-main); font-size: 17px; font-weight: 600;
   text-decoration: none; transition: background 0.2s, color 0.2s; cursor: pointer;
 
-  i {
+  :is(i, .ic) {
     font-size: 22px; color: var(--text-muted); transition: color 0.2s;
     background: none; -webkit-text-fill-color: unset;
   }
 
   &:hover {
     background: color-mix(in srgb, var(--nx-brand, #6D28D9) 8%, transparent);
-    i { color: var(--nx-brand, #6D28D9); }
+    :is(i, .ic) { color: var(--nx-brand, #6D28D9); }
   }
 
   &.active {
     background: var(--nx-brand-deep, #5B21B6);
     color: #fff !important;
     box-shadow: 0 8px 20px color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 30%, transparent);
-    i { color: #fff !important; -webkit-text-fill-color: #fff; background: none; }
+    :is(i, .ic) { color: #fff !important; -webkit-text-fill-color: #fff; background: none; }
   }
 }
 

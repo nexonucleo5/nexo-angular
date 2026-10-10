@@ -25,7 +25,7 @@
           <p class="text-soft small mb-1 fw-semibold">Total de contas</p>
           <h2 class="fw-bold m-0 text-main">{{ contas().length }}</h2>
         </div>
-        <div class="icon-box blue-gradient"><i class="bi bi-shield-lock-fill fs-4"></i></div>
+        <div class="icon-box blue-gradient"><svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-shield"></use></svg></div>
       </div>
     </div>
     <div class="col-12 col-md-4">
@@ -34,7 +34,7 @@
           <p class="text-soft small mb-1 fw-semibold">Ativas</p>
           <h2 class="fw-bold m-0 text-main">{{ totalAtivas() }}</h2>
         </div>
-        <div class="icon-box green"><i class="bi bi-person-check-fill fs-4"></i></div>
+        <div class="icon-box green"><svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg></div>
       </div>
     </div>
     <div class="col-12 col-md-4">
@@ -43,7 +43,7 @@
           <p class="text-soft small mb-1 fw-semibold">Inativas</p>
           <h2 class="fw-bold m-0 text-main">{{ totalInativas() }}</h2>
         </div>
-        <div class="icon-box orange"><i class="bi bi-person-slash fs-4"></i></div>
+        <div class="icon-box orange"><svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg></div>
       </div>
     </div>
   </div>
@@ -52,7 +52,7 @@
   <div class="row g-3 mb-4">
     <div class="col-12 col-lg-6">
       <div class="search-box">
-        <i class="bi bi-search"></i>
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
         <input type="text" placeholder="Buscar por nome ou login…"
                [ngModel]="buscaTermo()" (ngModelChange)="buscaTermo.set($event)">
       </div>
@@ -73,10 +73,10 @@
   </div>
 
   @if (acaoErro(); as msg) {
-    <p class="text-danger small"><i class="bi bi-exclamation-circle"></i> {{ msg }}</p>
+    <p class="text-danger small"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg> {{ msg }}</p>
   }
   @if (acaoSucesso(); as msg) {
-    <p class="text-success small"><i class="bi bi-check-circle"></i> {{ msg }}</p>
+    <p class="text-success small"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg> {{ msg }}</p>
   }
 
   <!-- ── Senha provisória recém-gerada ────────────────────── -->
@@ -87,7 +87,7 @@
       <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
         <div>
           <h6 class="text-main fw-bold mb-2">
-            <i class="bi bi-key-fill"></i> Senha provisória gerada
+            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-key"></use></svg> Senha provisória gerada
           </h6>
           <p class="text-soft small mb-1">Login: <span class="text-main fw-semibold">{{ s.login }}</span></p>
           <p class="text-soft small mb-0">
@@ -99,7 +99,7 @@
         </div>
         <div class="d-flex gap-2">
           <button class="gradient-btn px-3 py-2" (click)="copiarSenha()">
-            <i class="bi" [ngClass]="copiado() ? 'bi-check-lg' : 'bi-clipboard'"></i>
+            <svg class="ic" aria-hidden="true"><use [attr.href]="'assets/icones/nexo-icons.svg#ic-' + (copiado() ? 'check' : 'file')"></use></svg>
             {{ copiado() ? 'Copiado' : 'Copiar' }}
           </button>
           <button class="btn btn-dark-custom" (click)="fecharSenha()">Fechar</button>
@@ -125,10 +125,10 @@
 
           <div class="d-flex gap-2 flex-wrap">
             <span class="badge-compliance status-ok">
-              <i class="bi bi-person-badge"></i> {{ papelLabel(c.papel) }}
+              <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg> {{ papelLabel(c.papel) }}
             </span>
             <span class="badge-compliance" [ngClass]="c.ativo ? 'status-ok' : 'status-danger'">
-              <i class="bi" [ngClass]="c.ativo ? 'bi-check-circle' : 'bi-slash-circle'"></i>
+              <svg class="ic" aria-hidden="true"><use [attr.href]="'assets/icones/nexo-icons.svg#ic-' + (c.ativo ? 'check' : 'circ')"></use></svg>
               {{ c.ativo ? 'Ativa' : 'Inativa' }}
             </span>
           </div>
@@ -137,16 +137,16 @@
             <button class="btn btn-dark-custom btn-sm"
                     [disabled]="acaoEmCurso() !== null"
                     (click)="redefinirSenha(c)">
-              <i class="bi bi-key"></i> Nova senha
+              <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-key"></use></svg> Nova senha
             </button>
             <button class="btn-sm px-3 py-1"
                     [ngClass]="c.ativo ? 'btn btn-dark-custom' : 'gradient-btn'"
                     [disabled]="acaoEmCurso() !== null"
                     (click)="alternarAtivo(c)">
               @if (acaoEmCurso() === c.id) {
-                <i class="bi bi-arrow-repeat girando"></i>
+                <svg class="ic girando" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-refresh"></use></svg>
               } @else {
-                <i class="bi" [ngClass]="c.ativo ? 'bi-slash-circle' : 'bi-check-lg'"></i>
+                <svg class="ic" aria-hidden="true"><use [attr.href]="'assets/icones/nexo-icons.svg#ic-' + (c.ativo ? 'circ' : 'check')"></use></svg>
               }
               {{ c.ativo ? 'Desativar' : 'Ativar' }}
             </button>

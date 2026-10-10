@@ -33,7 +33,7 @@
   color: var(--text-main);
   transition: border-color 0.2s;
   &:focus-within { border-color: var(--nx-brand, #6D28D9); }
-  i     { color: var(--text-muted); }
+  :is(i, .ic)     { color: var(--text-muted); }
   input {
     background: transparent; border: none; color: var(--text-main);
     &:focus { outline: none; }
@@ -73,16 +73,16 @@
 .subject-title { font-size: 1.25rem; color: var(--text-main) !important; font-weight: 700; margin: 0; }
 
 /* Cores por disciplina (ícone + barra de progresso) */
-.subj-blue   { background: linear-gradient(135deg, #2e73f6, #10c6df) !important; }
-.subj-cyan   { background: linear-gradient(135deg, #10c6df, #22d3ee) !important; }
-.subj-amber  { background: linear-gradient(135deg, #f59e0b, #CA8A04) !important; }
-.subj-green  { background: linear-gradient(135deg, #06d25e, #10c6df) !important; }
-.subj-red    { background: linear-gradient(135deg, #ef4444, #B91C1C) !important; }
-.subj-purple { background: linear-gradient(135deg, #7C3AED, #d946ef) !important; }
-.subj-pink   { background: linear-gradient(135deg, #f2389d, #7C3AED) !important; }
-.subj-teal   { background: linear-gradient(135deg, #14b8a6, #06d25e) !important; }
-.subj-indigo { background: linear-gradient(135deg, #6366f1, #2e73f6) !important; }
-.subj-orange { background: linear-gradient(135deg, var(--nx-accent, #0FA3C2), #0E7490) !important; }
+.subj-blue   { background: #2E73F6 !important; }
+.subj-cyan   { background: #0E7490 !important; }
+.subj-amber  { background: #A16207 !important; }
+.subj-green  { background: #15803D !important; }
+.subj-red    { background: #DC2626 !important; }
+.subj-purple { background: #7C3AED !important; }
+.subj-pink   { background: #DB2777 !important; }
+.subj-teal   { background: #0F766E !important; }
+.subj-indigo { background: #4F46E5 !important; }
+.subj-orange { background: #0E7490 !important; }
 
 
 /* Stats */

@@ -25,7 +25,7 @@
                 </div>
                 <div class="col-md-4 text-md-end">
                     <button class="btn-action-primary">
-                        <i class="bi bi-play-fill"></i> Continuar Estudos
+                        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-play"></use></svg> Continuar Estudos
                     </button>
                 </div>
             </div>
@@ -46,7 +46,7 @@
                     <div class="summary-card shadow-sm">
                         <div class="summary-card-top mb-3">
                             <div class="summary-icon purple-summary">
-                                <i class="bi bi-lightning-charge"></i>
+                                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bolt"></use></svg>
                             </div>
                             <div>
                                 <p class="summary-title">XP na Semana</p>
@@ -64,7 +64,7 @@
                     <div class="summary-card shadow-sm">
                         <div class="summary-card-top mb-3">
                             <div class="summary-icon fire-summary">
-                                <i class="bi bi-fire"></i>
+                                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-flame"></use></svg>
                             </div>
                             <div>
                                 <p class="summary-title">Ofensiva</p>
@@ -82,7 +82,7 @@
                     <div class="summary-card shadow-sm">
                         <div class="summary-card-top mb-3">
                             <div class="summary-icon gold-summary">
-                                <i class="bi bi-trophy"></i>
+                                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trophy"></use></svg>
                             </div>
                             <div>
                                 <p class="summary-title">Posição</p>
@@ -100,7 +100,7 @@
                     <div class="summary-card shadow-sm">
                         <div class="summary-card-top mb-3">
                             <div class="summary-icon green-summary">
-                                <i class="bi bi-check-circle"></i>
+                                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg>
                             </div>
                             <div>
                                 <p class="summary-title">Tarefas Hoje</p>
@@ -123,7 +123,7 @@
                 <div class="col-xl-8">
                     <div class="content-card shadow-sm">
                         <h2 class="section-card-title">
-                            <i class="bi bi-clock-history title-icon purple-text"></i>
+                            <svg class="ic title-icon purple-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-clock"></use></svg>
                             Atividades Recentes
                         </h2>
 
@@ -156,7 +156,7 @@
                     <div class="content-card shadow-sm">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h2 class="section-card-title m-0">
-                                <i class="bi bi-bar-chart-fill title-icon blue-text"></i>
+                                <svg class="ic title-icon blue-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bars"></use></svg>
                                 Ranking
                             </h2>
                         </div>
@@ -180,7 +180,7 @@
                                         <p class="mb-0 fw-bold title-adaptive fs-6">{{ user.nome }}</p>
                                         <small class="text-soft">{{ user.xp }} XP</small>
                                     </div>
-                                    <i *ngIf="user.isMe" class="bi bi-caret-up-fill green-text"></i>
+                                    <svg class="ic green-text" *ngIf="user.isMe" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-up"></use></svg>
                                 </div>
                             </div>
                         </div>

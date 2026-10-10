@@ -17,11 +17,11 @@ $color-red:    #ef4444;
   width: 48px; height: 48px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center; color: white;
 
-  &.blue   { background: linear-gradient(135deg, #2196f3, #00bcd4); }
-  &.green  { background: linear-gradient(135deg, #06d25e, #00c853); }
-  &.orange { background: linear-gradient(135deg, var(--nx-accent, #0FA3C2), #0E7490); }
-  &.purple { background: linear-gradient(135deg, #7C3AED, #5B21B6); }
-  &.red    { background: linear-gradient(135deg, #ff3d00, #ff1744); }
+  &.blue   { background: #1976D2; }
+  &.green  { background: #15803D; }
+  &.orange { background: #0E7490; }
+  &.purple { background: var(--nx-brand-deep, #5B21B6); }
+  &.red    { background: #DC2626; }
 }
 
 /* Cards */
@@ -91,9 +91,9 @@ $color-red:    #ef4444;
 .subject-line-fill {
   height: 100%; border-radius: 10px;
   transition: width 0.8s ease;
-  &.blue-fill   { background: linear-gradient(135deg, #2e73f6, #10c6df); }
-  &.green-fill  { background: linear-gradient(135deg, #0fcd5c, #08d6a2); }
-  &.orange-fill { background: linear-gradient(135deg, var(--nx-accent, #0FA3C2), #0E7490); }
+  &.blue-fill   { background: #2E73F6; }
+  &.green-fill  { background: #15803D; }
+  &.orange-fill { background: var(--nx-accent, #0FA3C2); }
   &.purple-fill { background: var(--nx-brand-deep, #5B21B6); }
 }
 

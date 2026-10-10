@@ -7,7 +7,7 @@
     <section class="login-lado">
         <button type="button" class="btn-tema" (click)="alternarTema()"
             [attr.aria-label]="temaEscuro() ? 'Mudar para o tema claro' : 'Mudar para o tema escuro'">
-            <i class="bi" [class.bi-sun-fill]="temaEscuro()" [class.bi-moon-fill]="!temaEscuro()" aria-hidden="true"></i>
+            <svg class="ic" aria-hidden="true"><use [attr.href]="'assets/icones/nexo-icons.svg#ic-' + (temaEscuro() ? 'sun' : 'moon')"></use></svg>
         </button>
         <form class="login-form" [formGroup]="loginForm" (ngSubmit)="realizarLogin()">
             <h1 class="login-title">Entrar</h1>
@@ -15,13 +15,13 @@
 
             @if (mensagemErro) {
             <div class="alert alert-danger" role="alert">
-                <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg>
                 <span>{{ mensagemErro }}</span>
             </div>
             }
             @if (mensagemSucesso) {
             <div class="alert alert-success" role="status">
-                <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg>
                 <span>{{ mensagemSucesso }}</span>
             </div>
             }

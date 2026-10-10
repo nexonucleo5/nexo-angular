@@ -145,7 +145,7 @@
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  i { color: #06d25e; font-size: 15px; }
+  :is(i, .ic) { color: #06d25e; font-size: 15px; }
 }
 
 .form-text { color: var(--text-muted); font-size: 12px; }
@@ -160,7 +160,7 @@
   white-space: nowrap;
   transition: border-color 0.2s;
   &:hover { border-color: var(--nx-brand, #6D28D9); color: var(--text-main); }
-  .bi-check-lg { color: #06d25e; }
+  .ic { color: #06d25e; }
 }
 
 /* Contador de matérias do professor (teto de 3, igual ao servidor) */

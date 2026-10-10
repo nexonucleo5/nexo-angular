@@ -48,19 +48,16 @@
                     @else { Portal do Diretor }
                 </h2>
 
-                <app-logo-nexo class="logo-header ms-3" largura="clamp(44px, 8vw, 64px)" />
-
-                <button type="button" (click)="alternarTema()" class="btn-theme ms-2"
-                        [attr.aria-label]="temaEscuro() ? 'Mudar para tema claro' : 'Mudar para tema escuro'">
-                    <i class="bi" [ngClass]="temaEscuro() ? 'bi-sun-fill' : 'bi-moon-fill'"></i>
-                </button>
+                <!-- Logo v2 em lockup (3,33:1): a largura cresceu para manter a altura
+                     de antes (28 a 41px). A troca de tema mora no menu do usuário. -->
+                <app-logo-nexo class="logo-header ms-3" largura="clamp(94px, 17vw, 136px)" />
 
                 <!-- Saída do modo foco. Sem ela, desligar exigia lembrar que a chave
                      está em Configurações → Estudos — com a barra lateral escondida,
                      que é justamente o que o modo foco faz. -->
                 @if (modoFoco()) {
                     <button type="button" class="btn-sair-foco ms-2" (click)="sairDoModoFoco()">
-                        <i class="bi bi-eye"></i>
+                        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-eye"></use></svg>
                         <span class="rotulo-sair-foco">Sair do modo foco</span>
                     </button>
                 }
@@ -69,7 +66,9 @@
             <app-menu-usuario
                 [userName]="usuario.nome"
                 [userClass]="usuario.cargo"
-                [userPhoto]="usuario.foto">
+                [userPhoto]="usuario.foto"
+                [temaEscuro]="temaEscuro()"
+                (alternarTema)="alternarTema()">
             </app-menu-usuario>
         </header>
         }

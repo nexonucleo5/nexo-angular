@@ -1,7 +1,7 @@
 <div class="page-container">
 
   <a routerLink="/desafios" class="back-link d-inline-flex align-items-center gap-2 mb-4">
-    <i class="bi bi-arrow-left"></i> Voltar para Desafios
+    <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-arrowl"></use></svg> Voltar para Desafios
   </a>
 
   <div *ngIf="carregando()" class="text-soft">Carregando quiz...</div>
@@ -16,7 +16,7 @@
         <div class="d-flex align-items-center gap-3 flex-wrap">
           <span class="text-soft">{{ d.materia }}</span>
           <span class="level-tag" [ngClass]="d.nivel.toLowerCase()">{{ nivelLabel() }}</span>
-          <span class="text-soft small"><i class="bi bi-lightning-fill text-warning"></i> {{ d.xp }} XP</span>
+          <span class="text-soft small"><svg class="ic text-warning" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bolt"></use></svg> {{ d.xp }} XP</span>
         </div>
       </header>
 
@@ -25,7 +25,7 @@
         <div class="d-flex align-items-center gap-3 flex-wrap justify-content-between">
           <div>
             <h2 class="fw-bold mb-1 text-main">
-              <i class="bi bi-trophy-fill me-2 icone-sucesso"></i>Parabéns, você acertou tudo!
+              <svg class="ic me-2 icone-sucesso" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trophy"></use></svg>Parabéns, você acertou tudo!
             </h2>
             <p class="text-soft mb-0">{{ p.acertos }} de {{ p.total }} corretas.</p>
             <p class="text-soft mb-0 xp-ganho" *ngIf="p.xpGanho > 0">+{{ p.xpGanho }} XP creditado no seu perfil</p>
@@ -40,7 +40,7 @@
         <div class="d-flex align-items-center gap-3 flex-wrap justify-content-between">
           <div>
             <h2 class="fw-bold mb-1 text-main">
-              <i class="bi bi-arrow-counterclockwise me-2 icone-retentar"></i>Ainda não foi dessa vez
+              <svg class="ic me-2 icone-retentar" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-refresh"></use></svg>Ainda não foi dessa vez
             </h2>
             <p class="text-soft mb-0">
               É preciso acertar todas as perguntas para concluir o desafio. Revise o conteúdo e responda de novo — nenhum XP foi creditado.
@@ -65,10 +65,11 @@
                   [class]="classeAlternativa(pergunta, ai)"
                   [disabled]="modoRevisao()"
                   (click)="escolher(pergunta.id, ai)">
-            <i class="bi" [ngClass]="{
-                 'bi-check-circle-fill': classeAlternativa(pergunta, ai) === 'selecionada' || classeAlternativa(pergunta, ai) === 'correta',
-                 'bi-circle': classeAlternativa(pergunta, ai) === ''
-               }"></i>
+            @if (classeAlternativa(pergunta, ai) === 'selecionada' || classeAlternativa(pergunta, ai) === 'correta') {
+              <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg>
+            } @else if (classeAlternativa(pergunta, ai) === '') {
+              <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-circ"></use></svg>
+            }
             {{ alt }}
           </button>
         </div>

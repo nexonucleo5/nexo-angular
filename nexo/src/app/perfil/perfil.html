@@ -17,11 +17,11 @@
 
                     <div class="profile-tags">
                         <div class="profile-tag" *ngIf="usuario.role === 'aluno'">
-                            <i class="bi bi-envelope"></i>
+                            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-mail"></use></svg>
                             <span>{{ gerarEmail(usuario.nome) }}</span>
                         </div>
                         <div class="profile-tag">
-                            <i class="bi bi-person-badge"></i>
+                            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg>
                             <span class="text-capitalize">Acesso: {{ usuario.role }}</span>
                         </div>
                         <div class="profile-tag" *ngIf="usuario.role === 'aluno'">
@@ -33,10 +33,10 @@
 
                 <div class="d-flex flex-column gap-2">
                     <button class="btn-perfil-acao" (click)="abrirEdicao()">
-                        <i class="bi bi-pencil-square me-2"></i>Editar Perfil
+                        <svg class="ic me-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-pencil"></use></svg>Editar Perfil
                     </button>
                     <button class="btn-perfil-acao secundario" (click)="irParaSenha()">
-                        <i class="bi bi-key me-2"></i>Alterar Senha
+                        <svg class="ic me-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-key"></use></svg>Alterar Senha
                     </button>
                 </div>
             </div>
@@ -74,7 +74,7 @@
                         <div class="summary-card">
                             <div class="summary-card-top">
                                 <div class="summary-icon purple-summary">
-                                    <i class="bi bi-arrow-up-right"></i>
+                                    <svg class="ic ic-rot-315" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-arrowr"></use></svg>
                                 </div>
                                 <div>
                                     <p class="summary-title">Progresso Semanal</p>
@@ -95,7 +95,7 @@
                     <div class="col-xl-6">
                         <div class="content-card">
                             <h2 class="section-card-title">
-                                <i class="bi bi-arrow-up-right title-icon green-text"></i> Progresso por Matéria
+                                <svg class="ic ic-rot-315 title-icon green-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-arrowr"></use></svg> Progresso por Matéria
                             </h2>
                             <div class="subject-progress-list">
                                 <div class="subject-progress-item" *ngFor="let materia of materiasProgresso">
@@ -117,7 +117,7 @@
                     <div class="col-xl-6">
                         <div class="content-card h-100">
                             <h2 class="section-card-title">
-                                <i class="bi bi-bar-chart-fill title-icon purple-text"></i> Estatísticas
+                                <svg class="ic title-icon purple-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bars"></use></svg> Estatísticas
                             </h2>
                             <div class="row text-center g-4 mt-1">
                                 <div class="col-6" *ngFor="let stat of estatisticas()">

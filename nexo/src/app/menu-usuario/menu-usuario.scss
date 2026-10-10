@@ -57,6 +57,40 @@
   &.danger   { color: #dc3545; font-weight: 600; }
 }
 
+/* Seletor de tema (Claro | Escuro), acima de "Perfil" */
+.seletor-tema {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 4px 10px 8px;
+  padding: 4px;
+  background: var(--nx-soft, #EDE9F6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--nx-radius-control, 10px);
+}
+
+.opcao-tema {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 36px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+
+  .ic { width: 16px; height: 16px; }
+
+  &:hover { color: var(--text-main); }
+
+  &[aria-checked='true'] {
+    background: var(--nx-brand-deep, #5B21B6);
+    color: #FFFFFF;
+  }
+}
+
 .dropdown-divider {
   height: 1px;
   background: var(--border-color);     /* ← era #eee hardcoded */

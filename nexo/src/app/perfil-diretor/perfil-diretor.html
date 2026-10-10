@@ -2,12 +2,12 @@
 
 @if (carregando()) {
   <div class="content-card estado-vazio">
-    <i class="bi bi-hourglass-split"></i>
+    <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-hourglass"></use></svg>
     Carregando o panorama institucional…
   </div>
 } @else if (erro()) {
   <div class="content-card estado-vazio">
-    <i class="bi bi-exclamation-triangle"></i>
+    <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg>
     Não foi possível carregar os dados institucionais.
     <div><button class="btn-tentar" (click)="carregar()">Tentar novamente</button></div>
   </div>
@@ -20,7 +20,13 @@
         <div class="summary-card">
           <div class="summary-card-top mb-0">
             <div class="summary-icon" [ngClass]="kpi.cor + '-summary'">
-              <i class="bi" [ngClass]="kpi.icone"></i>
+              @switch (kpi.icone) {
+                @case ('bi-calendar-check') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-calendar"></use></svg> }
+                @case ('bi-graph-up') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trend"></use></svg> }
+                @case ('bi-mortarboard-fill') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-cap"></use></svg> }
+                @case ('bi-star-fill') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-star"></use></svg> }
+                @default { <i class="bi" [ngClass]="kpi.icone"></i> }
+              }
             </div>
             <div>
               <p class="summary-title">{{ kpi.label }}</p>
@@ -38,7 +44,7 @@
     <div class="col-xl-7">
       <div class="content-card">
         <h2 class="section-card-title">
-          <i class="bi bi-bar-chart-fill title-icon purple-text"></i> Desempenho por Turma
+          <svg class="ic title-icon purple-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bars"></use></svg> Desempenho por Turma
         </h2>
 
         @if (turmas().length) {
@@ -62,7 +68,7 @@
           }
         } @else {
           <div class="estado-vazio">
-            <i class="bi bi-inbox"></i>
+            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-mail"></use></svg>
             Nenhuma turma com alunos cadastrados.
           </div>
         }
@@ -73,7 +79,7 @@
     <div class="col-xl-5">
       <div class="content-card h-100">
         <h2 class="section-card-title">
-          <i class="bi bi-person-video3 title-icon blue-text"></i> Corpo Docente
+          <svg class="ic title-icon blue-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg> Corpo Docente
         </h2>
 
         @if (topDocentes().length) {
@@ -97,7 +103,7 @@
           }
         } @else {
           <div class="estado-vazio">
-            <i class="bi bi-person-x"></i>
+            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg>
             Nenhum professor cadastrado.
           </div>
         }

@@ -15,11 +15,11 @@
   width: 44px; height: 44px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   color: white; font-size: 18px;
-  &.orange { background: linear-gradient(135deg, var(--nx-accent, #0FA3C2), #0E7490); }
-  &.green  { background: linear-gradient(135deg, #06d25e, #00c853); }
-  &.red    { background: linear-gradient(135deg, #ff3d00, #ff1744); }
-  &.blue   { background: linear-gradient(135deg, #2196f3, #00bcd4); }
-  &.purple { background: linear-gradient(135deg, #7C3AED, #5B21B6); }
+  &.orange { background: #0E7490; }
+  &.green  { background: #15803D; }
+  &.red    { background: #DC2626; }
+  &.blue   { background: #1976D2; }
+  &.purple { background: var(--nx-brand-deep, #5B21B6); }
 }
 
 /* Filtros */
@@ -34,7 +34,7 @@
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   border-radius: 14px; padding: 8px 14px;
-  i { color: var(--text-muted); margin-right: 8px; }
+  :is(i, .ic) { color: var(--text-muted); margin-right: 8px; }
   input {
     background: transparent; border: none;
     color: var(--text-main); width: 100%;
@@ -108,4 +108,4 @@
 }
 
 /* XP é ciano (claro #0FA3C2, escuro #5EE0F2) */
-.bi-lightning-fill.text-warning { color: var(--nx-accent, #0FA3C2) !important; }
+.ic.text-warning { color: var(--nx-accent, #0FA3C2) !important; }

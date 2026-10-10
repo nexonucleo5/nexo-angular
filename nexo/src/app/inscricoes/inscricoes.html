@@ -7,7 +7,7 @@
       <p class="text-soft m-0">De qual turma cada aluno vê o conteúdo</p>
     </div>
     <button class="btn btn-dark-custom" (click)="exportar()">
-      <i class="bi bi-download"></i> Exportar CSV
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-download"></use></svg> Exportar CSV
     </button>
   </div>
 
@@ -28,7 +28,7 @@
           <p class="text-soft small mb-1 fw-semibold">Inscrições</p>
           <h2 class="fw-bold m-0 text-main">{{ total() }}</h2>
         </div>
-        <div class="icon-box blue-gradient"><i class="bi bi-people-fill fs-4"></i></div>
+        <div class="icon-box blue-gradient"><svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-users"></use></svg></div>
       </div>
     </div>
     <div class="col-12 col-md-4">
@@ -37,7 +37,7 @@
           <p class="text-soft small mb-1 fw-semibold">Ativas</p>
           <h2 class="fw-bold m-0 text-main">{{ ativas() }}</h2>
         </div>
-        <div class="icon-box green"><i class="bi bi-person-check-fill fs-4"></i></div>
+        <div class="icon-box green"><svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg></div>
       </div>
     </div>
     <div class="col-12 col-md-4">
@@ -46,7 +46,7 @@
           <p class="text-soft small mb-1 fw-semibold">Inativas</p>
           <h2 class="fw-bold m-0 text-main">{{ inativas() }}</h2>
         </div>
-        <div class="icon-box orange"><i class="bi bi-person-slash fs-4"></i></div>
+        <div class="icon-box orange"><svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg></div>
       </div>
     </div>
   </div>
@@ -55,7 +55,7 @@
   <div class="row g-3 mb-4">
     <div class="col-12 col-lg-6">
       <div class="search-box">
-        <i class="bi bi-search"></i>
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
         <input type="text" placeholder="Buscar aluno pelo nome…"
                [ngModel]="buscaTermo()" (ngModelChange)="buscaTermo.set($event)">
       </div>
@@ -90,7 +90,7 @@
           </div>
 
           <span class="badge-compliance" [ngClass]="i.ativo ? 'status-ok' : 'status-danger'">
-            <i class="bi" [ngClass]="i.ativo ? 'bi-check-circle' : 'bi-slash-circle'"></i>
+            <svg class="ic" aria-hidden="true"><use [attr.href]="'assets/icones/nexo-icons.svg#ic-' + (i.ativo ? 'check' : 'circ')"></use></svg>
             {{ i.ativo ? 'Ativa' : 'Inativa' }}
           </span>
 
@@ -115,15 +115,15 @@
             </div>
           </div>
           <button class="btn btn-dark-custom btn-sm" (click)="fecharDetalhes()" aria-label="Fechar">
-            <i class="bi bi-x-lg"></i>
+            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-x"></use></svg>
           </button>
         </div>
 
         @if (acaoErro(); as msg) {
-          <p class="text-danger small"><i class="bi bi-exclamation-circle"></i> {{ msg }}</p>
+          <p class="text-danger small"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg> {{ msg }}</p>
         }
         @if (acaoSucesso(); as msg) {
-          <p class="text-success small"><i class="bi bi-check-circle"></i> {{ msg }}</p>
+          <p class="text-success small"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg> {{ msg }}</p>
         }
 
         <hr class="detalhe-separador">
@@ -139,7 +139,7 @@
                   [ngClass]="i.ativo ? 'btn btn-dark-custom' : 'gradient-btn'"
                   [disabled]="acaoEmCurso()"
                   (click)="alternarAtivo(i)">
-            <i class="bi" [ngClass]="i.ativo ? 'bi-slash-circle' : 'bi-check-lg'"></i>
+            <svg class="ic" aria-hidden="true"><use [attr.href]="'assets/icones/nexo-icons.svg#ic-' + (i.ativo ? 'circ' : 'check')"></use></svg>
             {{ i.ativo ? 'Desativar inscrição' : 'Reativar inscrição' }}
           </button>
         </div>

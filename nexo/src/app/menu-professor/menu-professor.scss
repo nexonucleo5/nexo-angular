@@ -59,7 +59,7 @@
   pointer-events: auto;      /* garante que o link responde a cliques */
   transition: background 0.2s, color 0.2s;
 
-  i {
+  :is(i, .ic) {
     font-size: 22px;
     color: var(--text-muted);
     transition: color 0.2s;
@@ -77,7 +77,7 @@
   &:hover {
     background-color: color-mix(in srgb, var(--nx-brand, #6D28D9) 10%, transparent);
     color: var(--text-main);
-    i { color: var(--nx-brand, #6D28D9); }
+    :is(i, .ic) { color: var(--nx-brand, #6D28D9); }
   }
 
   /* Item ativo — marca profunda sólida */
@@ -86,7 +86,7 @@
     color: #ffffff !important;
     box-shadow: 0 8px 20px color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 30%, transparent);
 
-    i {
+    :is(i, .ic) {
       color: #ffffff !important;
       background: none;
       -webkit-text-fill-color: #ffffff;

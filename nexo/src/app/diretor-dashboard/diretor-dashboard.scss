@@ -20,10 +20,10 @@
 .icon-square {
   width: 46px; height: 46px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center; color: white;
-  &.blue   { background: linear-gradient(135deg, #2196f3, #00bcd4); }
-  &.red    { background: linear-gradient(135deg, #ff3d00, #ff1744); }
-  &.green  { background: linear-gradient(135deg, #06d25e, #00c853); }
-  &.purple { background: linear-gradient(135deg, #9b2fff, #673ab7); }
+  &.blue   { background: #1976D2; }
+  &.red    { background: #DC2626; }
+  &.green  { background: #15803D; }
+  &.purple { background: var(--nx-brand-deep, #5B21B6); }
 }
 
 .trend-tag {

@@ -302,7 +302,7 @@ app-menu-admin {
     height: 3px;
     width: 100%;
     border-radius: 3px;
-    background: linear-gradient(90deg, #9b2fff, #06d25e);
+    background: var(--nx-brand-deep, #5B21B6);
     transition: transform 0.25s ease, opacity 0.2s ease;
   }
 
@@ -421,13 +421,13 @@ app-menu-admin {
 .orange-text { color: #f59e0b !important; }
 .red-text    { color: #ef4444 !important; }
 
-.green-gradient  { background: linear-gradient(135deg, #0fcd5c, #08d6a2); }
-.blue-gradient   { background: linear-gradient(135deg, #2e73f6, #10c6df); }
-.orange-gradient { background: linear-gradient(135deg, #ff6a00, #ff5f79); }
-.pink-gradient   { background: linear-gradient(135deg, #8f24ff, #f2389d); }
+.green-gradient  { background: #15803D; }
+.blue-gradient   { background: #2E73F6; }
+.orange-gradient { background: var(--nx-accent, #0FA3C2); }
+.pink-gradient   { background: #DB2777; }
 
 .btn-gradient {
-  background: linear-gradient(90deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   color: white; border: none; border-radius: 12px;
   font-weight: 600; padding: 10px 20px; cursor: pointer;
   transition: opacity 0.2s;
@@ -483,7 +483,7 @@ input.form-control,
   padding: 8px 14px;
   transition: border-color 0.2s;
 
-  i { color: var(--text-muted); margin-right: 10px; }
+  :is(i, .ic) { color: var(--text-muted); margin-right: 10px; }
 
   input {
     background: transparent;
@@ -505,7 +505,7 @@ input.form-control,
   overflow: hidden;
 }
 .progress-bar {
-  background: linear-gradient(90deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   border-radius: 10px;
 }
 
@@ -521,11 +521,11 @@ input.form-control,
   .icon-square {
     width: 45px; height: 45px; border-radius: 12px;
     display: flex; align-items: center; justify-content: center; color: white;
-    &.blue   { background: linear-gradient(135deg, #2196f3, #00bcd4); }
-    &.green  { background: linear-gradient(135deg, #06d25e, #00c853); }
-    &.orange { background: linear-gradient(135deg, #ff9800, #ff5722); }
-    &.purple { background: linear-gradient(135deg, #9b2fff, #673ab7); }
-    &.red    { background: linear-gradient(135deg, #ff3d00, #ff1744); }
+    &.blue   { background: #1976D2; }
+    &.green  { background: #15803D; }
+    &.orange { background: #0E7490; }
+    &.purple { background: var(--nx-brand-deep, #5B21B6); }
+    &.red    { background: #DC2626; }
   }
 }
 
@@ -664,10 +664,10 @@ html.alto-contraste {
 .icon-box {
   width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; color: white;
-  &.blue-gradient   { background: linear-gradient(135deg, #2196f3, #00bcd4); }
-  &.green           { background: linear-gradient(135deg, #06d25e, #00c853); }
-  &.orange          { background: linear-gradient(135deg, #ff9800, #ff5722); }
-  &.purple-gradient { background: linear-gradient(135deg, #9b2fff, #673ab7); }
+  &.blue-gradient   { background: #1976D2; }
+  &.green           { background: #15803D; }
+  &.orange          { background: #0E7490; }
+  &.purple-gradient { background: var(--nx-brand-deep, #5B21B6); }
 }
 
 .search-box {
@@ -675,7 +675,7 @@ html.alto-contraste {
   background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 14px;
   transition: border-color 0.2s;
   &:focus-within { border-color: #9b2fff; }
-  i     { color: var(--text-muted); margin-right: 8px; }
+  :is(i, .ic)     { color: var(--text-muted); margin-right: 8px; }
   input { background: transparent; border: none; color: var(--text-main); width: 100%;
     &::placeholder { color: var(--text-muted); }
     &:focus { outline: none; }
@@ -698,7 +698,7 @@ html.alto-contraste {
 }
 
 .gradient-btn {
-  background: linear-gradient(90deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   color: white; border: none; border-radius: 10px;
   font-weight: 600; cursor: pointer; transition: opacity 0.2s;
   &:hover { opacity: 0.9; }
@@ -724,7 +724,7 @@ html.alto-contraste {
 
 .avatar-placeholder-circle {
   width: 44px; height: 44px; border-radius: 50%;
-  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   display: flex; align-items: center; justify-content: center;
   color: white; font-weight: 700; font-size: 14px; flex-shrink: 0;
 }
@@ -782,27 +782,6 @@ button, a, select, label, summary, [role="button"], input:not([type="text"]):not
   touch-action: manipulation;
 }
 
-/* Botão de tema do header: era um <button> sem estilo (quadrado branco do
-   navegador, 32x30). Agora segue o tema e tem área de toque de verdade. */
-.btn-theme {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  padding: 0;
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-input);
-  color: var(--text-main);
-  cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
-
-  &:hover { border-color: #9b2fff; }
-  &:focus-visible { outline: 2px solid #9b2fff; outline-offset: 2px; }
-}
-
 /* Telas com notch/barra de gestos (precisa de viewport-fit=cover no index).
    O padding do header mora no app.scss, junto da regra base dele. */
 .main-content {
@@ -851,7 +830,7 @@ button, a, select, label, summary, [role="button"], input:not([type="text"]):not
 @media (pointer: coarse) {
   /* Alvo mínimo de toque de 44px (Apple HIG / WCAG 2.5.5) nos controles que a
      auditoria achou com 26–39px: abas, filtros, selects, botões de ação. */
-  button:not(.btn-close):not(.btn-theme):not(.btn-hamburguer):not(.seta),
+  button:not(.btn-close):not(.btn-hamburguer):not(.seta),
   .btn,
   select,
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]) {
@@ -859,10 +838,10 @@ button, a, select, label, summary, [role="button"], input:not([type="text"]):not
   }
 
   /* Setinhas e ícones soltos: a área de toque cresce sem o desenho crescer. */
-  .btn-theme, .btn-hamburguer, .seta, .btn-presence {
+  .btn-hamburguer, .seta, .btn-presence {
     position: relative;
   }
-  .btn-theme::after, .btn-hamburguer::after, .seta::after, .btn-presence::after {
+  .btn-hamburguer::after, .seta::after, .btn-presence::after {
     content: "";
     position: absolute;
     inset: -4px;
