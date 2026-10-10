@@ -2,7 +2,7 @@
     <!-- A logo é o fundo da tela: fica grande, atrás do card, e é a única
          marca da página (saiu de dentro do formulário). Decorativa, então
          fica fora da árvore de acessibilidade. -->
-    <div class="login-marca" aria-hidden="true"></div>
+    <app-logo-nexo class="login-marca" largura="min(820px, 52vw)" aria-hidden="true" />
 
     <form class="login-form" [formGroup]="loginForm" (ngSubmit)="realizarLogin()">
         <h2 class="login-title">Entrar</h2>

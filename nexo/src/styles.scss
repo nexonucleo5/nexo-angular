@@ -243,33 +243,20 @@ app-menu-admin {
    conteúdo, só marcar o fundo. */
 .main-content { position: relative; }
 
-.main-content::before {
-  content: '';
+.main-content > .marca-fundo {
   position: fixed;      /* não rola junto com a página */
-  inset: 0;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: min(560px, 58vw);
-  opacity: 0.04;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.06;
   pointer-events: none;
   z-index: 0;
-}
-
-html[data-theme='dark'] .main-content::before {
-  background-image: url('/assets/imagensProjeto/logo-nexo-dark.png');
-}
-html[data-theme='light'] .main-content::before {
-  background-image: url('/assets/imagensProjeto/logo-nexo-light.png');
 }
 
 /* Conteúdo sempre acima da marca d'água. O header fica de fora: ele tem
    position/z-index próprios e no mobile precisa passar por cima da sidebar
    para os 3 riscos continuarem clicáveis com a barra aberta. */
-.main-content > *:not(.top-header) { position: relative; z-index: 1; }
-
-/* No login quem manda é a logo grande do login.scss — duas marcas d'água
-   sobrepostas ficariam sujas. */
-.app-layout.tela-autenticacao .main-content::before { display: none; }
+.main-content > *:not(.top-header):not(.marca-fundo) { position: relative; z-index: 1; }
 
 /* Header fixo */
 .top-header {
@@ -584,7 +571,7 @@ body.modo-foco-ativo {
   }
 
   /* Menos ruído enquanto estuda. */
-  .main-content::before { display: none; }
+  .main-content > .marca-fundo { display: none; }
 }
 
 .sem-animacoes {
@@ -647,7 +634,7 @@ html.alto-contraste {
 }
 
 /* As regras de .brand-logo saíram junto com as <img> das sidebars e do login.
-   A logo agora é fundo: marca d'água em .main-content::before (seção 3) e a
+   A logo agora é o <app-logo-nexo>: marca d'água .marca-fundo (seção 3), header e a
    logo grande da tela de login (login.scss). */
 
 /* ==========================================================================

@@ -1,0 +1,126 @@
+/* As duas peças são PNGs do mesmo tamanho, empilhados: a clara só tem desenho
+   acima da linha de divisão (--costura) e a escura só abaixo — juntas formam o
+   NEXO inteiro.
+
+   Cada tema acende a peça de cor oposta ao fundo (contraste):
+     modo escuro → peça clara acesa, escura apagada
+     modo claro  → peça escura acesa, clara apagada
+   "Apagar" a camada viva é recortá-la (clip-path) até virar uma linha fina na
+   costura; o fantasma por baixo continua segurando a palavra.
+
+   As animações são @keyframes, não transition: a troca de tema corta todas as
+   transitions da página por um frame (html.trocando-tema, styles.scss), e
+   animations não são afetadas por isso. */
+
+:host {
+  /* posição da linha que divide a arte: 307px de 594px de altura */
+  --costura: 51.7%;
+  --recolhida: inset(var(--costura) 0 calc(100% - var(--costura)) 0);
+  --duracao: 0.65s;
+
+  position: relative;
+  display: inline-block;
+  aspect-ratio: 924 / 594;
+  line-height: 0;
+  user-select: none;
+}
+
+.peca,
+.brilho,
+.fantasma,
+.viva {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.fantasma {
+  opacity: var(--logo-fantasma);
+  filter: saturate(0.6);
+}
+
+/* Brilho fica no wrapper porque clip-path é aplicado depois do filter — no
+   próprio <img> o brilho seria cortado junto com a peça. */
+.peca-clara .brilho {
+  filter: drop-shadow(0 0 3px rgba(235, 220, 255, 0.5)) drop-shadow(0 0 12px rgba(180, 140, 255, 0.4));
+}
+.peca-escura .brilho {
+  filter: drop-shadow(0 2px 6px rgba(70, 20, 120, 0.25));
+}
+
+/* ── Estado parado ─────────────────────────────────────────────────────── */
+
+/* modo claro: escura acesa */
+.peca-clara .viva  { clip-path: var(--recolhida); }
+.peca-escura .viva { clip-path: inset(0); }
+
+/* modo escuro: clara acesa */
+:host(.escuro) {
+  .peca-clara .viva  { clip-path: inset(0); }
+  .peca-escura .viva { clip-path: var(--recolhida); }
+}
+
+/* ── Virada de tema ────────────────────────────────────────────────────── */
+/* A peça que apaga recolhe até a costura, a costura acende e a peça que
+   acende cresce a partir dela. Os nomes trocam com o tema para a animação
+   reiniciar a cada virada. */
+
+:host(.animar) {
+  .peca-clara .viva  { animation: logo-recolhe 0.3s cubic-bezier(0.55, 0, 1, 0.45) both; }
+  .peca-escura .viva { animation: logo-nasce var(--duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.18s both; }
+  .costura           { animation: logo-costura-clara var(--duracao) ease-out both; }
+}
+
+:host(.animar.escuro) {
+  .peca-clara .viva  { animation: logo-nasce var(--duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.18s both; }
+  .peca-escura .viva { animation: logo-recolhe 0.3s cubic-bezier(0.55, 0, 1, 0.45) both; }
+  .costura           { animation: logo-costura-escura var(--duracao) ease-out both; }
+}
+
+@keyframes logo-recolhe {
+  from { clip-path: inset(0); }
+  to   { clip-path: var(--recolhida); }
+}
+
+@keyframes logo-nasce {
+  from { clip-path: var(--recolhida); }
+  to   { clip-path: inset(0); }
+}
+
+/* Linha de luz na divisão, que "costura" uma peça na outra */
+.costura {
+  position: absolute;
+  left: 2%;
+  right: 2%;
+  top: var(--costura);
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #f3d9ff 20%, #ffffff 50%, #f3d9ff 80%, transparent);
+  box-shadow: 0 0 8px 1px rgba(190, 110, 255, 0.8);
+  opacity: 0;
+  transform: scaleX(0);
+  pointer-events: none;
+}
+
+@keyframes logo-costura-escura {
+  0%   { opacity: 1; transform: scaleX(0); }
+  40%  { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+/* mesma animação, nome diferente (força reinício); no claro o brilho é mais contido */
+@keyframes logo-costura-clara {
+  0%   { opacity: 0.7; transform: scaleX(0); }
+  40%  { opacity: 0.7; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host(.animar) .viva,
+  :host(.animar) .costura {
+    animation: none !important;
+  }
+}

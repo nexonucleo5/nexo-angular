@@ -19,6 +19,12 @@
         [class.content-diretor]="authService.usuarioLogado()?.role === 'diretor'"
         [class.content-professor]="authService.usuarioLogado()?.role === 'professor'">
 
+        <!-- Marca d'água de fundo. No login quem manda é a logo grande do
+             login.scss — duas marcas sobrepostas ficariam sujas. -->
+        @if (authService.usuarioLogado()) {
+            <app-logo-nexo class="marca-fundo" largura="min(560px, 58vw)" aria-hidden="true" />
+        }
+
         @if (authService.usuarioLogado(); as usuario) {
         <header class="top-header">
             <div class="d-flex align-items-center">
@@ -41,6 +47,8 @@
                     @else if (usuario.role === 'admin') { Portal do Administrador }
                     @else { Portal do Diretor }
                 </h2>
+
+                <app-logo-nexo class="logo-header ms-3" largura="clamp(44px, 8vw, 64px)" />
 
                 <button (click)="alternarTema()" class="btn-theme ms-2">
                     <i class="bi" [ngClass]="temaEscuro() ? 'bi-sun-fill' : 'bi-moon-fill'"></i>

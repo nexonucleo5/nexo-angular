@@ -11,28 +11,16 @@
   overflow: hidden;
 }
 
-/* Logo de fundo — ocupa boa parte da tela e passa por baixo do card. */
+/* Logo de fundo — grande, à esquerda, passando por baixo do card. A largura
+   vem pelo input do <app-logo-nexo> (login.html); a altura segue a arte. */
 .login-marca {
   position: absolute;
   top: 50%;
-  left: 0;
-  transform: translate(-15%, -50%);
-  width: min(1000px, 85vw);
-  aspect-ratio: 1 / 1;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  opacity: 0.3;
+  left: 5vw;
+  transform: translateY(-50%);
+  opacity: 0.5;
   pointer-events: none;
   z-index: 0;
-}
-
-:host-context(html[data-theme='dark']) .login-marca {
-  background-image: url('/assets/imagensProjeto/logo-nexo-dark.png');
-}
-:host-context(html[data-theme='light']) .login-marca {
-  background-image: url('/assets/imagensProjeto/logo-nexo-light.png');
-  opacity: 0.22; /* no claro a logo tem mais contraste e pesa mais */
 }
 
 .login-form {

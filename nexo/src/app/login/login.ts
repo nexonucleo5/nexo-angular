@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { ApiErro } from '../core/api.models';
+import { LogoNexo } from '../logo-nexo/logo-nexo';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, LogoNexo],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
