@@ -2,6 +2,7 @@ package com.nexo.service;
 
 import com.nexo.domain.ChatMensagem;
 import com.nexo.domain.Role;
+import com.nexo.domain.Usuario;
 import com.nexo.repository.ChatMensagemRepository;
 import com.nexo.repository.UsuarioRepository;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** Chat direto em tempo real entre usuários de papéis diferentes. Persiste o histórico. */
 @Service
@@ -32,10 +34,13 @@ public class ChatService {
 
     private final ChatMensagemRepository mensagens;
     private final UsuarioRepository usuarios;
+    private final ConfiguracaoService configuracoes;
 
-    public ChatService(ChatMensagemRepository mensagens, UsuarioRepository usuarios) {
+    public ChatService(ChatMensagemRepository mensagens, UsuarioRepository usuarios,
+                       ConfiguracaoService configuracoes) {
         this.mensagens = mensagens;
         this.usuarios = usuarios;
+        this.configuracoes = configuracoes;
     }
 
     /**
@@ -51,14 +56,28 @@ public class ChatService {
             Role.PROFESSOR, List.of(Role.ALUNO, Role.DIRETOR),
             Role.DIRETOR,   List.of(Role.ALUNO, Role.PROFESSOR)));
 
-    /** Contatos disponíveis para o usuário, conforme {@link #INTERLOCUTORES}. */
+    /**
+     * Contatos disponíveis para o usuário, conforme {@link #INTERLOCUTORES}.
+     *
+     * <p>Para o aluno, o professor que desligou "Perfil visível para alunos" vem sem a
+     * foto (a tela cai no avatar padrão). Continua na lista: tirar o professor do chat
+     * deixaria o aluno sem como falar com ele.
+     */
     @Transactional(readOnly = true)
     public List<ContatoDTO> contatos(Long usuarioId) {
         Role meuPapel = usuarios.findRoleById(usuarioId).orElse(null);
         if (meuPapel == null) return List.of();
-        return usuarios.findByRoleInOrderByNome(INTERLOCUTORES.get(meuPapel)).stream()
+        List<Usuario> lista = usuarios.findByRoleInOrderByNome(INTERLOCUTORES.get(meuPapel)).stream()
                 .filter(u -> !u.getId().equals(usuarioId))
-                .map(u -> new ContatoDTO(u.getId(), u.getNome(), u.getRole().name(), u.getFoto()))
+                .toList();
+
+        Set<Long> semFoto = meuPapel != Role.ALUNO ? Set.of()
+                : configuracoes.comPerfilOcultoParaAlunos(lista.stream()
+                        .filter(u -> u.getRole() == Role.PROFESSOR).map(Usuario::getId).toList());
+
+        return lista.stream()
+                .map(u -> new ContatoDTO(u.getId(), u.getNome(), u.getRole().name(),
+                        semFoto.contains(u.getId()) ? null : u.getFoto()))
                 .toList();
     }
 
