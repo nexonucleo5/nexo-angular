@@ -13,6 +13,11 @@ export interface Usuario {
   cargo: string;
   foto: string;
   role: RoleCliente;
+  /**
+   * Senha provisória (sorteada no cadastro ou redefinida pelo administrador) ainda em
+   * uso: os guards prendem o usuário na troca de senha até ele definir uma própria.
+   */
+  precisaTrocarSenha?: boolean;
 }
 
 interface UsuarioApi {
@@ -21,6 +26,7 @@ interface UsuarioApi {
   cargo: string;
   foto: string;
   role: 'ALUNO' | 'PROFESSOR' | 'DIRETOR' | 'ADMIN';
+  precisaTrocarSenha: boolean;
 }
 
 /** O refresh token não está aqui de propósito: ele vem em cookie HttpOnly. */
@@ -160,7 +166,9 @@ export class AuthService {
   }
 
   /** Atualiza os dados do usuário na sessão local após edição de perfil. */
-  public atualizarUsuarioLocal(patch: Partial<Pick<Usuario, 'nome' | 'foto' | 'cargo'>>): void {
+  public atualizarUsuarioLocal(
+    patch: Partial<Pick<Usuario, 'nome' | 'foto' | 'cargo' | 'precisaTrocarSenha'>>,
+  ): void {
     const atual = this.usuarioLogado();
     if (!atual) return;
     const atualizado: Usuario = { ...atual, ...patch };
@@ -175,6 +183,7 @@ export class AuthService {
       cargo: resposta.usuario.cargo,
       foto: resolverFoto(resposta.usuario.foto),
       role: resposta.usuario.role.toLowerCase() as RoleCliente,
+      precisaTrocarSenha: resposta.usuario.precisaTrocarSenha,
     };
     this.accessToken = resposta.token;
     localStorage.setItem(USUARIO_KEY, JSON.stringify(usuario));

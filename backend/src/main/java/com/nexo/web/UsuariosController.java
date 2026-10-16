@@ -220,6 +220,8 @@ public class UsuariosController {
         politicaSenha.validar(request.novaSenha(), usuario.getLogin(), usuario.getNome());
 
         usuario.setSenhaHash(passwordEncoder.encode(request.novaSenha()));
+        // A senha agora é só do usuário: a provisória, que outra pessoa viu, deixou de valer.
+        usuario.setPrecisaTrocarSenha(false);
         usuarios.save(usuario);
 
         int encerradas = authService.encerrarOutrasSessoes(usuario.getId(), refreshToken);

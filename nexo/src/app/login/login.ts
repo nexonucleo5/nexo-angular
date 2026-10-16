@@ -51,10 +51,14 @@ export class Login {
     const { username, password } = this.loginForm.value;
 
     this.authService.login(username, password).subscribe({
-      next: () => {
+      next: (resposta) => {
         this.carregando = false;
-        this.mensagemSucesso = '✅ Login realizado com sucesso! Redirecionando...';
-        setTimeout(() => this.router.navigate(['/dashboards']), 120);
+        // Senha provisória: o primeiro passo é trocá-la, antes de qualquer outra tela.
+        const destino = resposta.usuario.precisaTrocarSenha ? '/trocar-senha' : '/dashboards';
+        this.mensagemSucesso = resposta.usuario.precisaTrocarSenha
+          ? '✅ Login realizado! Defina uma senha nova para continuar...'
+          : '✅ Login realizado com sucesso! Redirecionando...';
+        setTimeout(() => this.router.navigate([destino]), 120);
       },
       error: (erro: ApiErro) => {
         this.carregando = false;

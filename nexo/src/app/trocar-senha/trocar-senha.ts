@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, of } from 'rxjs';
 import { UsuariosService } from '../api/usuarios.service';
 import { ApiErro } from '../core/api.models';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-trocar-senha',
@@ -18,6 +19,13 @@ export class TrocarSenha {
   private readonly fb = inject(FormBuilder);
   private readonly usuarios = inject(UsuariosService);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
+
+  /**
+   * Primeiro acesso com senha provisória: o guard prende o usuário aqui, então a tela
+   * some com o "Voltar" (não há para onde voltar) e, ao salvar, segue para o painel.
+   */
+  readonly obrigatoria = computed(() => !!this.auth.usuarioLogado()?.precisaTrocarSenha);
 
   readonly enviando = signal(false);
   /** Erro que não pertence a um campo específico (rede, 500, sessão expirada). */
@@ -105,9 +113,12 @@ export class TrocarSenha {
     this.usuarios.trocarSenha({ senhaAtual: senhaAtual!, novaSenha: novaSenha! }).subscribe({
       next: () => {
         this.enviando.set(false);
+        const destino = this.obrigatoria() ? '/dashboards' : '/configuracoes';
+        // O backend já desligou a flag; a sessão local acompanha para o guard liberar o resto.
+        this.auth.atualizarUsuarioLocal({ precisaTrocarSenha: false });
         this.mensagemSucesso.set('✅ Senha alterada com sucesso! As outras sessões foram encerradas.');
         this.form.reset();
-        setTimeout(() => this.router.navigate(['/configuracoes']), 1500);
+        setTimeout(() => this.router.navigate([destino]), 1500);
       },
       error: (erro: ApiErro) => {
         this.enviando.set(false);
