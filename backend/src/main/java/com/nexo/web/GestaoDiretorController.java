@@ -65,16 +65,19 @@ public class GestaoDiretorController {
     // ── Relatórios ───────────────────────────────────────────────────────────
 
     @GetMapping("/api/relatorios/desempenho")
-    public RelatorioService.Desempenho desempenho(@RequestParam(required = false) String periodo,
-                                                  @RequestParam(required = false) String visao) {
-        return relatorioService.desempenho(periodo, visao);
+    public RelatorioService.Desempenho desempenho(@RequestParam(required = false) String periodo) {
+        return relatorioService.desempenho(periodo);
+    }
+
+    @GetMapping("/api/relatorios/periodos")
+    public List<String> periodos() {
+        return relatorioService.periodosDisponiveis();
     }
 
     @GetMapping("/api/relatorios/desempenho/export")
     public ResponseEntity<byte[]> exportar(@RequestParam String formato,
-                                           @RequestParam(required = false) String periodo,
-                                           @RequestParam(required = false) String visao) {
-        byte[] arquivo = relatorioService.exportar(formato, periodo, visao);
+                                           @RequestParam(required = false) String periodo) {
+        byte[] arquivo = relatorioService.exportar(formato, periodo);
         boolean pdf = "pdf".equalsIgnoreCase(formato);
         String nome = "relatorio-desempenho." + (pdf ? "pdf" : "xlsx");
         MediaType tipo = pdf ? MediaType.APPLICATION_PDF

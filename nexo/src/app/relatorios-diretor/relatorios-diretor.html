@@ -26,13 +26,9 @@
   <div class="card-glass p-3 mb-4 d-flex gap-3 gap-lg-4 align-items-center flex-wrap">
     <div class="filter-group">
       <svg class="ic small" style="color: var(--text-muted);" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-filter"></use></svg>
-      <select class="custom-select" [ngModel]="periodoSelecionado()" (ngModelChange)="periodoSelecionado.set($event)" style="color: var(--text-main);">
-        <option *ngFor="let p of periodos" [value]="p">{{ p }}</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <select class="custom-select" [ngModel]="visaoSelecionada()" (ngModelChange)="visaoSelecionada.set($event)" style="color: var(--text-main);">
-        <option *ngFor="let v of visoes" [value]="v">{{ v }}</option>
+      <select class="custom-select" aria-label="Período" [ngModel]="periodoSelecionado()" (ngModelChange)="selecionarPeriodo($event)" style="color: var(--text-main);">
+        <option value="">Todos os períodos</option>
+        <option *ngFor="let p of periodos()" [value]="p">{{ p }}</option>
       </select>
     </div>
     <span class="ms-auto small" style="color: var(--text-muted);">{{ totalAlunos() }} alunos avaliados</span>

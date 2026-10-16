@@ -24,6 +24,10 @@ public interface NotaRepository extends JpaRepository<Nota, Long> {
 
     List<Nota> findByAlunoId(Long alunoId);
 
+    /** Períodos letivos que existem de fato nas notas (ex.: "2026-1"), do mais recente ao mais antigo. */
+    @Query("select distinct n.periodo from Nota n where n.periodo is not null order by n.periodo desc")
+    List<String> listarPeriodos();
+
     /**
      * A nota exata que a edição altera. Existe a constraint única
      * (aluno_id, disciplina, periodo), então isso devolve no máximo uma linha —
