@@ -90,7 +90,8 @@
               "buildTarget": "nexo:build:production"
             },
             "development": {
-              "buildTarget": "nexo:build:development"
+              "buildTarget": "nexo:build:development",
+              "proxyConfig": "proxy.conf.js"
             }
           },
           "defaultConfiguration": "development"

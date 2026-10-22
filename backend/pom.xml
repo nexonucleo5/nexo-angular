@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>com.nexo</groupId>
-    <artifactId>nexo-backend</artifactId>
+    <artifactId>pedagogico-api</artifactId>
     <version>0.1.1</version>
     <name>nexo-backend</name>
     <description>Backend Java/Spring do Nexo - Gestão Escolar (arquitetura_java.md)</description>

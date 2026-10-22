@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    build: 
+      context: ./data
+    ports:
+      - "1521:1521"
+      - "8082:8082"
+    volumes:
+      - h2data:/data
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:h2:tcp://db:1521/nexo;MODE=PostgreSQL
+      SPRING_DATASOURCE_USERNAME: nexo
+      SPRING_DATASOURCE_PASSWORD: nexo
+
+  frontend:
+    build:
+      context: ./nexo
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+    volumes:
+      - ./nexo:/app
+      - /app/node_modules
+
+volumes:
+  h2data:

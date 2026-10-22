@@ -6,9 +6,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-public class NexoApplication {
+public class PedagogicoApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(NexoApplication.class, args);
+        SpringApplication.run(PedagogicoApplication.class, args);
     }
 }

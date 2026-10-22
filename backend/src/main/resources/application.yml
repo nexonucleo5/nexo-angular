@@ -16,7 +16,7 @@ spring:
     timeout-per-shutdown-phase: 20s
 
   datasource:
-    url: jdbc:h2:file:./data/nexo;MODE=PostgreSQL;AUTO_SERVER=TRUE
+    url: jdbc:h2:tcp://db:1521/nexo;MODE=PostgreSQL
     driver-class-name: org.h2.Driver
     username: nexo
     password: nexo
@@ -56,10 +56,10 @@ spring:
           plan_cache_max_size: 256
           plan_parameter_metadata_max_size: 64
 
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+  # h2:
+  #   console:
+  #     enabled: true
+  #     path: /h2-console
 
   # Escapa não-ASCII como \uXXXX no JSON — imune a double-encoding de charset
   # (evita mojibake de acentos nas respostas da API); o client decodifica de volta.

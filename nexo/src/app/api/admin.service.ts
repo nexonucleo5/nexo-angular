@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   ContaDTO,
@@ -13,6 +13,14 @@ import {
   SenhaRedefinidaDTO,
 } from '../core/api.models';
 
+/** GET /api/admin/contas/resumo (usuario-api). */
+type ResumoContas = Pick<DashboardAdminDTO,
+  'contas' | 'contasInativas' | 'alunos' | 'professores' | 'diretores' | 'admins'>;
+
+/** GET /api/admin/dashboard (pedagogico-api). */
+type ResumoCatalogo = Pick<DashboardAdminDTO,
+  'turmas' | 'materias' | 'conteudos' | 'conteudosDespublicados'>;
+
 /**
  * Painel do administrador: contas e catálogo de conteúdo. Substituiu o
  * SecretariaService, que servia fila de matrícula, documentação e ocupação de
@@ -23,8 +31,24 @@ export class AdminService {
   private http = inject(HttpClient);
   private api = `${environment.apiUrl}/admin`;
 
+  /**
+   * O painel junta três fontes, uma por backend: contas (usuario-api), catálogo
+   * (pedagogico-api) e desafios (ainda no monólito). Os desafios são o único pedaço
+   * dispensável: se o monólito estiver fora do ar, o painel abre com 0 em vez de falhar.
+   */
   dashboard(): Observable<DashboardAdminDTO> {
-    return this.http.get<DashboardAdminDTO>(`${this.api}/dashboard`);
+    return forkJoin({
+      contas: this.http.get<ResumoContas>(`${this.api}/contas/resumo`),
+      catalogo: this.http.get<ResumoCatalogo>(`${this.api}/dashboard`),
+      desafios: this.desafios().pipe(catchError(() => of([] as DesafioAdminDTO[]))),
+    }).pipe(
+      map(({ contas, catalogo, desafios }) => ({
+        ...contas,
+        ...catalogo,
+        desafios: desafios.length,
+        desafiosDespublicados: desafios.filter((d) => !d.publicado).length,
+      })),
+    );
   }
 
   // ── Contas ─────────────────────────────────────────────────────────────────
