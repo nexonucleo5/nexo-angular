@@ -1,40 +1,85 @@
-# Sobe o monolito (Angular embutido no Spring) igual ao que roda no Render.
-#
-#   docker compose up --build      → http://localhost:8080
-#   docker compose down            → para, mantendo o banco no volume
-#   docker compose down -v         → para e apaga o banco
+# docker compose up --build   → http://localhost:8080
+# Mais comandos e variáveis em docker/README.md. Atalho: docker/nexo.cmd. Monolito (Render): docker/monolito/compose.yaml.
 name: nexo
 
+x-endurecimento: &endurecimento
+  read_only: true
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  restart: unless-stopped
+
 services:
-  app:
+  db:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: nexo-app:local
-    # HOST_PORT só troca a porta de fora; dentro o app fica sempre no 8080.
-    ports:
-      - "${HOST_PORT:-8080}:8080"
+      dockerfile: docker/database/Dockerfile
+    image: ${REGISTRY_NAMESPACE:-nexo}/nexo-db:${TAG:-latest}
     environment:
-      # Vem do .env da raiz — o mesmo arquivo que o app lê fora do Docker.
-      # Sem segredo o container não sobe, e o erro sai aqui em vez de virar
-      # um stack trace de Spring lá dentro.
-      NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:?defina NEXO_JWT_SECRET no .env (openssl rand -base64 48)}
-      PORT: 8080
+      POSTGRES_DB: ${POSTGRES_DB:-nexo}
+      POSTGRES_USER: ${POSTGRES_USER:-nexo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
     volumes:
-      # O H2 de dev grava em /app/data; no volume os dados sobrevivem ao rebuild.
-      - nexo-data:/app/data
-    # ── Endurecimento do runtime ──────────────────────────────────────────────
-    # Filesystem só de leitura: um upload malicioso não consegue deixar nada
-    # gravado na imagem. As duas únicas coisas que precisam escrever são o banco
-    # (volume acima) e o /tmp do Tomcat (tmpfs, some quando o container morre).
-    read_only: true
-    tmpfs:
-      - /tmp
+      - nexo-pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${DB_HOST_PORT:-5433}:5432"
+    networks: [interna]
+    restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    cap_drop:
-      - ALL
+
+  backend:
+    <<: *endurecimento
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    image: ${REGISTRY_NAMESPACE:-nexo}/nexo-backend:${TAG:-latest}
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-nexo}
+      DB_USER: ${POSTGRES_USER:-nexo}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:?defina NEXO_JWT_SECRET no .env (openssl rand -base64 48)}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      PROXY_SALTOS_CONFIAVEIS: 1
+      SEED_ENABLED: ${SEED_ENABLED:-true}
+    tmpfs:
+      - /tmp
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [interna]
+
+  frontend:
+    <<: *endurecimento
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    image: ${REGISTRY_NAMESPACE:-nexo}/nexo-frontend:${TAG:-latest}
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    tmpfs:
+      - /tmp
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks: [interna]
+
+  # Só sobe com --profile registry.
+  registry:
+    image: registry:2
+    profiles: [registry]
+    ports:
+      - "127.0.0.1:${REGISTRY_PORT:-5000}:5000"
+    volumes:
+      - ./docker/registry/config.yml:/etc/docker/registry/config.yml:ro
+      - nexo-registry:/var/lib/registry
     restart: unless-stopped
 
+networks:
+  interna:
+
 volumes:
-  nexo-data:
+  nexo-pgdata:
+  nexo-registry:
