@@ -163,19 +163,10 @@
       <div class="settings-item toggle-item">
         <div>
           <span>Perfil visível para alunos</span>
-          <small>Alunos podem ver seu perfil e disciplinas</small>
+          <small>Alunos veem sua foto no chat. Desligado, aparece o avatar padrão</small>
         </div>
         <input type="checkbox" class="custom-switch" [checked]="privacidade().perfilVisivelAlunos"
           (change)="onPrivacidadeChange('perfilVisivelAlunos', $any($event.target).checked)">
-      </div>
-
-      <div class="settings-item toggle-item">
-        <div>
-          <span>Exibir contato para responsáveis</span>
-          <small>Responsáveis podem ver seu e-mail institucional</small>
-        </div>
-        <input type="checkbox" class="custom-switch" [checked]="privacidade().exibirContatoResponsaveis"
-          (change)="onPrivacidadeChange('exibirContatoResponsaveis', $any($event.target).checked)">
       </div>
     </div>
 

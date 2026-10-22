@@ -14,9 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.UncheckedIOException;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Configurações por usuário, particionadas por seção (espelha o ConfiguracoesService do Angular).
@@ -88,8 +91,28 @@ public class ConfiguracaoService {
 
     static final String SECAO_PRIVACIDADE = "privacidade";
 
-    /** Chaves de privacidade do aluno que o servidor faz valer. */
-    private static final List<String> PRIVACIDADE_ALUNO = List.of("perfilPublico", "exibirNoRanking");
+    /** Chaves de privacidade que o servidor faz valer, por perfil. */
+    private static final Map<Role, List<String>> PRIVACIDADE_APLICADA = Map.of(
+            Role.ALUNO, List.of("perfilPublico", "exibirNoRanking"),
+            Role.PROFESSOR, List.of("perfilVisivelAlunos"));
+
+    /**
+     * Entre os usuários dados, quem desligou "Perfil visível para alunos" (professor).
+     * Lido do JSON direto: são poucos professores por escola e só o chat do aluno pergunta,
+     * então não compensa espelhar em coluna como o ranking do aluno.
+     */
+    @Transactional(readOnly = true)
+    public Set<Long> comPerfilOcultoParaAlunos(Collection<Long> usuarioIds) {
+        if (usuarioIds.isEmpty()) return Set.of();
+        Set<Long> ocultos = new HashSet<>();
+        for (ConfiguracaoUsuario c : configuracoes.findByUsuarioIdIn(usuarioIds)) {
+            Map<String, Object> priv = ler(c.getJson()).get(SECAO_PRIVACIDADE);
+            if (priv != null && Boolean.FALSE.equals(priv.get("perfilVisivelAlunos"))) {
+                ocultos.add(c.getUsuario().getId());
+            }
+        }
+        return ocultos;
+    }
 
     /**
      * Copia as chaves de privacidade do JSON para as colunas do aluno, que é onde o
@@ -130,9 +153,9 @@ public class ConfiguracaoService {
     /** Validações de negócio reforçadas no servidor (ex.: início < fim na Disponibilidade). */
     private void validar(Role role, String secao, Map<String, Object> campos) {
         // Chave de privacidade que o servidor faz valer só aceita booleano de verdade:
-        // "false" (texto) ou null seriam lidos como "ligado" e expõem o aluno sem aviso.
-        if (role == Role.ALUNO && SECAO_PRIVACIDADE.equals(secao)) {
-            for (String chave : PRIVACIDADE_ALUNO) {
+        // "false" (texto) ou null seriam lidos como "ligado" e expõem o usuário sem aviso.
+        if (SECAO_PRIVACIDADE.equals(secao)) {
+            for (String chave : PRIVACIDADE_APLICADA.getOrDefault(role, List.of())) {
                 if (campos.containsKey(chave) && !(campos.get(chave) instanceof Boolean)) {
                     throw ApiException.validation("Valor inválido.",
                             Map.of(chave, "Use verdadeiro ou falso."));
@@ -201,7 +224,9 @@ public class ConfiguracaoService {
                 disponibilidade.put("horarioFim", "18:00");
                 m.put("disponibilidade", disponibilidade);
                 m.put("aparencia", secao("temaEscuro", true, "animacoesInterface", true));
-                m.put("privacidade", secao("perfilVisivelAlunos", true, "exibirContatoResponsaveis", false));
+                // exibirContatoResponsaveis saiu pelo mesmo motivo do visivelResponsaveis do
+                // aluno: não existe conta de responsável para ver o contato.
+                m.put("privacidade", secao("perfilVisivelAlunos", true));
             }
             case DIRETOR -> {
                 m.put("notificacoes", secao("novosCadastrosPendentes", true, "relatoriosPendentes", true,
@@ -215,7 +240,8 @@ public class ConfiguracaoService {
                 m.put("integracoes", secao("exportarRelatoriosAutomaticamente", false,
                         "sincronizarCalendarioInstitucional", true));
                 m.put("aparencia", secao("temaEscuro", true, "animacoesInterface", true));
-                m.put("privacidade", secao("exibirDadosInstituicaoPublicamente", false));
+                // Sem seção de privacidade: a única chave (exibirDadosInstituicaoPublicamente)
+                // não tinha o que controlar — não há página pública da instituição.
             }
             // Seções do dia a dia de quem administra o sistema — não as de gestão do
             // diretor. O trabalho aqui é conta e catálogo; a seção "documentos" da

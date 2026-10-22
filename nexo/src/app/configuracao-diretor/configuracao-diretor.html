@@ -160,23 +160,6 @@
       </div>
     </div>
 
-    <!-- PRIVACIDADE -->
-    <div class="content-card settings-card">
-      <h2 class="section-card-title">
-        <span class="ic-off"><svg class="ic title-icon orange-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-eye"></use></svg></span>
-        Privacidade
-      </h2>
-
-      <div class="settings-item toggle-item">
-        <div>
-          <span>Exibir dados da instituição publicamente</span>
-          <small>Informações básicas visíveis fora da plataforma</small>
-        </div>
-        <input type="checkbox" class="custom-switch" [checked]="privacidade().exibirDadosInstituicaoPublicamente"
-          (change)="onPrivacidadeChange('exibirDadosInstituicaoPublicamente', $any($event.target).checked)">
-      </div>
-    </div>
-
     <!-- CONTA -->
     <div class="content-card settings-card">
       <h2 class="section-card-title">
