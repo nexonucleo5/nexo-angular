@@ -1,32 +1,68 @@
-# Sobe o monolito (Angular embutido no Spring) igual ao que roda no Render.
+# Stack do Nexo em três containers independentes — cada um com a sua imagem e a
+# sua pasta de build em docker/:
 #
-#   docker compose up --build      → http://localhost:8080
-#   docker compose down            → para, mantendo o banco no volume
-#   docker compose down -v         → para e apaga o banco
+#   database  → docker/database   PostgreSQL (dados no volume nexo-pgdata)
+#   backend   → docker/backend    API Spring (só o jar, sem o Angular)
+#   frontend  → docker/frontend   Angular + nginx (proxy de /api e /ws)
+#
+#   docker compose up --build     → http://localhost:8080
+#   docker compose down           → para, mantendo o banco no volume
+#   docker compose down -v        → para e APAGA o banco
+#
+# Imagens prontas (sem build local):  docker compose pull && docker compose up -d
+# Publicar no Docker Hub:             docker compose build && docker compose push
+# Detalhes de registry/Docker Hub em docker/README.md.
 name: nexo
 
+# Imagem = <IMAGE_REGISTRY>/<IMAGE_NAMESPACE>/nexo-<serviço>:<NEXO_TAG>. Sem nada no
+# .env vira docker.io/nexo/nexo-*:latest; no Docker Hub o namespace é o seu usuário.
 services:
-  app:
+  database:
     build:
-      context: .
-      dockerfile: Dockerfile
-    image: nexo-app:local
-    # HOST_PORT só troca a porta de fora; dentro o app fica sempre no 8080.
-    ports:
-      - "${HOST_PORT:-8080}:8080"
+      context: docker/database
+    image: ${IMAGE_REGISTRY:-docker.io}/${IMAGE_NAMESPACE:-nexo}/nexo-database:${NEXO_TAG:-latest}
     environment:
-      # Vem do .env da raiz — o mesmo arquivo que o app lê fora do Docker.
-      # Sem segredo o container não sobe, e o erro sai aqui em vez de virar
-      # um stack trace de Spring lá dentro.
-      NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:?defina NEXO_JWT_SECRET no .env (openssl rand -base64 48)}
-      PORT: 8080
+      POSTGRES_DB: ${POSTGRES_DB:-nexo}
+      POSTGRES_USER: ${POSTGRES_USER:-nexo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+    ports:
+      # Só na sua máquina (127.0.0.1): dá para abrir o DBeaver/psql sem expor o
+      # banco na rede. Dentro do compose o backend o alcança por "database:5432".
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
-      # O H2 de dev grava em /app/data; no volume os dados sobrevivem ao rebuild.
-      - nexo-data:/app/data
-    # ── Endurecimento do runtime ──────────────────────────────────────────────
-    # Filesystem só de leitura: um upload malicioso não consegue deixar nada
-    # gravado na imagem. As duas únicas coisas que precisam escrever são o banco
-    # (volume acima) e o /tmp do Tomcat (tmpfs, some quando o container morre).
+      - nexo-pgdata:/var/lib/postgresql/data
+    networks:
+      - dados
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  backend:
+    build:
+      # Contexto = só o backend; o Dockerfile mora em docker/backend.
+      context: backend
+      dockerfile: ../docker/backend/Dockerfile
+    image: ${IMAGE_REGISTRY:-docker.io}/${IMAGE_NAMESPACE:-nexo}/nexo-backend:${NEXO_TAG:-latest}
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      # SPRING_PROFILES_ACTIVE=prod já vem da imagem (Postgres, console H2 off).
+      DB_URL: jdbc:postgresql://database:5432/${POSTGRES_DB:-nexo}
+      DB_USER: ${POSTGRES_USER:-nexo}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:?defina NEXO_JWT_SECRET no .env (openssl rand -base64 48)}
+      # Origem que o NAVEGADOR usa para chegar ao frontend: é ela que o CORS e o
+      # handshake do WebSocket comparam. Mudou a porta/domínio? Mude aqui também.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:${FRONTEND_PORT:-8080}}
+      # Banco novo e vazio: com true o app cria as contas e os dados de exemplo.
+      # Em instalação real, SEED_ENABLED=false e cadastre os usuários de verdade.
+      SEED_ENABLED: ${SEED_ENABLED:-true}
+      # O nginx é o único proxy à frente do backend (1 salto confiável).
+      PROXY_SALTOS_CONFIAVEIS: 1
+    networks:
+      - dados
+      - web
     read_only: true
     tmpfs:
       - /tmp
@@ -36,5 +72,32 @@ services:
       - ALL
     restart: unless-stopped
 
+  frontend:
+    build:
+      # Contexto = raiz: o Dockerfile precisa de nexo/ e de docker/frontend/.
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    image: ${IMAGE_REGISTRY:-docker.io}/${IMAGE_NAMESPACE:-nexo}/nexo-frontend:${NEXO_TAG:-latest}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-8080}:8080"
+    networks:
+      - web
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+networks:
+  # O banco só é visível para o backend; o frontend não enxerga a rede "dados".
+  dados:
+  web:
+
 volumes:
-  nexo-data:
+  nexo-pgdata:

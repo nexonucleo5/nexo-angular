@@ -1,0 +1,66 @@
+name: Publicar imagens no Docker Hub
+
+# Publica nexo-database, nexo-backend e nexo-frontend. Só roda quando alguém
+# empurra para a master, cria uma tag vX.Y.Z ou dispara à mão — nunca em PR,
+# porque PR de fork não tem acesso aos secrets (e não deve publicar nada).
+#
+# Secrets do repositório (Settings → Secrets and variables → Actions):
+#   DOCKERHUB_USERNAME  usuário do Docker Hub (vira o namespace das imagens)
+#   DOCKERHUB_TOKEN     Access Token com permissão Read & Write
+#                       (hub.docker.com → Account Settings → Personal access tokens)
+on:
+  push:
+    branches: [ master ]
+    tags: [ 'v*.*.*' ]
+  workflow_dispatch:
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - servico: database
+            context: docker/database
+            dockerfile: docker/database/Dockerfile
+          - servico: backend
+            context: backend
+            dockerfile: docker/backend/Dockerfile
+          - servico: frontend
+            context: .
+            dockerfile: docker/frontend/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      # latest só na master; tag vX.Y.Z gera X.Y.Z e X.Y; sha curto sempre, para
+      # dar para voltar a um build exato.
+      - name: Tags e labels
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/nexo-${{ matrix.servico }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=,format=short
+
+      - name: Build e push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.servico }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.servico }}

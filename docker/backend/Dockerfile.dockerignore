@@ -1,0 +1,12 @@
+# Contexto = ./backend. Só pom.xml e src/ são usados pelo Dockerfile.
+target
+data
+.mvn
+mvnw
+mvnw.cmd
+.idea
+.vscode
+*.iml
+*.log
+.env
+.env.*

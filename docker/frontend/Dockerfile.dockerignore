@@ -1,0 +1,11 @@
+# Contexto = raiz do repo. Lista de permissão: nega tudo e libera só o que o
+# Dockerfile usa, para o backend, o .git e o .env nunca entrarem no contexto.
+*
+!nexo
+!docker/frontend
+
+nexo/node_modules
+nexo/dist
+nexo/.angular
+nexo/.vscode
+nexo/coverage

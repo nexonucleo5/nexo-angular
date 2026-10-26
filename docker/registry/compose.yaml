@@ -1,0 +1,27 @@
+# Registry privado local (registry:2). Serve para ensaiar o fluxo build → push →
+# pull sem tocar no Docker Hub, e como cache de imagens na rede da equipe.
+#
+#   docker compose -f docker/registry/compose.yaml up -d
+#   → localhost:5000   (localhost é tratado como seguro pelo Docker: sem TLS)
+#
+# Catálogo:  curl http://localhost:5000/v2/_catalog
+#
+# Sem autenticação e preso em 127.0.0.1 de propósito. Para expor na rede, ponha
+# TLS e htpasswd na frente antes de trocar o bind.
+name: nexo-registry
+
+services:
+  registry:
+    image: registry:2
+    ports:
+      - "127.0.0.1:${REGISTRY_PORT:-5000}:5000"
+    environment:
+      # Permite apagar tags (DELETE /v2/.../manifests/<digest>); sem isso o
+      # registry só cresce.
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-data:/var/lib/registry
+    restart: unless-stopped
+
+volumes:
+  registry-data:
