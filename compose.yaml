@@ -1,40 +1,82 @@
-# Sobe o monolito (Angular embutido no Spring) igual ao que roda no Render.
+# Stack separada: banco + backend + frontend (cada um com sua pasta e imagem).
 #
-#   docker compose up --build      → http://localhost:8080
-#   docker compose down            → para, mantendo o banco no volume
-#   docker compose down -v         → para e apaga o banco
+#   cp .env.docker.example .env.docker   (preencha NEXO_JWT_SECRET e POSTGRES_PASSWORD)
+#   docker compose --env-file .env.docker up -d --build   → http://localhost:4200
+#   docker compose --env-file .env.docker down            → para, mantém o banco
+#   docker compose --env-file .env.docker down -v         → para e apaga o banco
+#
+# Usar as imagens já publicadas no Docker Hub, sem build:
+#   docker compose --env-file .env.docker pull
+#   docker compose --env-file .env.docker up -d --no-build
+#
+# Registry local opcional (localhost:5000):
+#   docker compose --env-file .env.docker --profile registry up -d registry
+#
+# O monolito antigo (Render) continua em compose.monolito.yaml.
 name: nexo
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: nexo-app:local
-    # HOST_PORT só troca a porta de fora; dentro o app fica sempre no 8080.
-    ports:
-      - "${HOST_PORT:-8080}:8080"
+  database:
+    build: ./database
+    image: ${DOCKERHUB_USER:-nexonucleo5}/nexo-database:${TAG:-latest}
     environment:
-      # Vem do .env da raiz — o mesmo arquivo que o app lê fora do Docker.
-      # Sem segredo o container não sobe, e o erro sai aqui em vez de virar
-      # um stack trace de Spring lá dentro.
-      NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:?defina NEXO_JWT_SECRET no .env (openssl rand -base64 48)}
-      PORT: 8080
+      POSTGRES_DB: ${POSTGRES_DB:-nexo}
+      POSTGRES_USER: ${POSTGRES_USER:-nexo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env.docker}
     volumes:
-      # O H2 de dev grava em /app/data; no volume os dados sobrevivem ao rebuild.
-      - nexo-data:/app/data
-    # ── Endurecimento do runtime ──────────────────────────────────────────────
-    # Filesystem só de leitura: um upload malicioso não consegue deixar nada
-    # gravado na imagem. As duas únicas coisas que precisam escrever são o banco
-    # (volume acima) e o /tmp do Tomcat (tmpfs, some quando o container morre).
+      - nexo-pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks: [interna]
+
+  backend:
+    build: ./backend
+    image: ${DOCKERHUB_USER:-nexonucleo5}/nexo-backend:${TAG:-latest}
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://database:5432/${POSTGRES_DB:-nexo}
+      DB_USER: ${POSTGRES_USER:-nexo}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:?defina NEXO_JWT_SECRET no .env.docker (openssl rand -base64 48)}
+      SEED_ENABLED: ${SEED_ENABLED:-true}
+      # Origem que o navegador enxerga (CORS e handshake do WebSocket).
+      CORS_ORIGINS: http://localhost:${FRONT_PORT:-4200}
+      PROXY_SALTOS_CONFIAVEIS: 1   # o nginx do frontend
+      PORT: 8080
     read_only: true
-    tmpfs:
-      - /tmp
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+    networks: [interna]
+
+  frontend:
+    build: ./nexo
+    image: ${DOCKERHUB_USER:-nexonucleo5}/nexo-frontend:${TAG:-latest}
+    depends_on: [backend]
+    environment:
+      BACKEND_HOST: backend
+      BACKEND_PORT: 8080
+    ports:
+      - "${FRONT_PORT:-4200}:8080"
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+    networks: [interna]
+
+  registry:
+    image: registry:2
+    profiles: [registry]
+    ports: ["5000:5000"]
+    volumes:
+      - nexo-registry:/var/lib/registry
     restart: unless-stopped
 
+networks:
+  interna:
+
 volumes:
-  nexo-data:
+  nexo-pgdata:
+  nexo-registry:
