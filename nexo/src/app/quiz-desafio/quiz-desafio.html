@@ -31,7 +31,10 @@
             <p class="text-soft mb-0 xp-ganho" *ngIf="p.xpGanho > 0">+{{ p.xpGanho }} XP creditado no seu perfil</p>
             <p class="text-soft mb-0" *ngIf="p.xpGanho === 0">Desafio já concluído anteriormente</p>
           </div>
-          <button class="btn btn-outline-main" (click)="voltar()">Voltar aos Desafios</button>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <app-botao-ouvir [id]="'resultado-quiz'" [texto]="falaDoPlacar(p)" />
+            <button class="btn btn-outline-main" (click)="voltar()">Voltar aos Desafios</button>
+          </div>
         </div>
       </div>
 
@@ -47,7 +50,10 @@
             </p>
             <p class="text-soft small mb-0 mt-1">{{ textoTentativas() }} até agora</p>
           </div>
-          <button class="btn btn-outline-main" (click)="voltar()">Voltar aos Desafios</button>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <app-botao-ouvir [id]="'aviso-tentativa-quiz'" [texto]="falaDaTentativa()" />
+            <button class="btn btn-outline-main" (click)="voltar()">Voltar aos Desafios</button>
+          </div>
         </div>
       </div>
 

@@ -76,6 +76,7 @@ describe('escolha da voz', () => {
 class FalaFalsa {
   voice: SpeechSynthesisVoice | null = null;
   lang = '';
+  rate = 0;
   onend: (() => void) | null = null;
   onerror: (() => void) | null = null;
   constructor(public text: string) {}
@@ -204,5 +205,66 @@ describe('LeituraVozService', () => {
 
     expect(svc.falandoId()).toBeNull();
     expect(sintese.cancel).toHaveBeenCalled();
+  });
+
+  describe('velocidade', () => {
+    beforeEach(() => localStorage.removeItem('nexo.leituraVoz.velocidade'));
+    afterEach(() => localStorage.removeItem('nexo.leituraVoz.velocidade'));
+
+    it('começa no normal e vai para cada trecho falado', () => {
+      const svc = montar([voz('pt-BR')]);
+      svc.ler('a', 'Um texto.');
+
+      expect(svc.velocidade()).toBe(1);
+      expect(faladas.every((f) => f.rate === 1)).toBe(true);
+    });
+
+    it('a escolha vale na próxima leitura e fica salva no aparelho', () => {
+      const svc = montar([voz('pt-BR')]);
+
+      svc.definirVelocidade(0.75);
+      svc.ler('a', 'Um texto.');
+
+      expect(faladas.at(-1)!.rate).toBe(0.75);
+      expect(localStorage.getItem('nexo.leituraVoz.velocidade')).toBe('0.75');
+    });
+
+    it('lembra a escolha de uma visita anterior', () => {
+      localStorage.setItem('nexo.leituraVoz.velocidade', '1.25');
+
+      expect(montar([voz('pt-BR')]).velocidade()).toBe(1.25);
+    });
+
+    it('valor fora da lista (lixo no storage ou chamada errada) cai no normal', () => {
+      localStorage.setItem('nexo.leituraVoz.velocidade', '9');
+      const svc = montar([voz('pt-BR')]);
+
+      expect(svc.velocidade()).toBe(1);
+      svc.definirVelocidade(5);
+      expect(svc.velocidade()).toBe(1);
+    });
+  });
+
+  it('sem addEventListener na síntese (Safari antigo), carrega as vozes por onvoiceschanged', () => {
+    const vozes: SpeechSynthesisVoice[] = [];
+    const antiga: any = { speak: vi.fn(), cancel: vi.fn(), getVoices: () => [...vozes] }; // o navegador devolve um array novo a cada chamada
+    Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: antiga });
+    (globalThis as any).SpeechSynthesisUtterance = FalaFalsa;
+    ligado = signal(true);
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: ConfiguracaoAlunoService,
+          useValue: { settings: () => ({ acessibilidade: { leituraVozAlta: ligado() } }) },
+        },
+      ],
+    });
+    const svc = TestBed.inject(LeituraVozService);
+    expect(svc.ativo()).toBe(false); // as vozes ainda não chegaram
+
+    vozes.push(voz('pt-BR'));
+    antiga.onvoiceschanged();
+
+    expect(svc.ativo()).toBe(true);
   });
 });

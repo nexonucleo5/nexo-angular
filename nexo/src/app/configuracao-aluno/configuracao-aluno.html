@@ -188,6 +188,22 @@
         <input type="checkbox" class="custom-switch" [checked]="acessibilidade().leituraVozAlta"
           (change)="onAcessibilidadeChange('leituraVozAlta', $any($event.target).checked)">
       </div>
+
+      @if (acessibilidade().leituraVozAlta && leituraVoz.suportado()) {
+        <div class="settings-item toggle-item">
+          <div>
+            <span id="rotulo-velocidade-voz">Velocidade da leitura</span>
+            <small>Vale nas próximas leituras e fica salva só neste aparelho</small>
+          </div>
+          <select class="form-select-custom velocidade-voz" aria-labelledby="rotulo-velocidade-voz"
+            [value]="leituraVoz.velocidade()"
+            (change)="onVelocidadeVozChange($any($event.target).value)">
+            @for (v of velocidadesVoz; track v) {
+              <option [value]="v" [selected]="v === leituraVoz.velocidade()">{{ rotuloVelocidade(v) }}</option>
+            }
+          </select>
+        </div>
+      }
     </div>
 
     <!-- PRIVACIDADE -->
