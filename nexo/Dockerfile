@@ -8,7 +8,9 @@ FROM node:${NODE_VERSION}-bookworm-slim AS build
 WORKDIR /build
 ENV npm_config_fund=false npm_config_audit=false npm_config_update_notifier=false
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci
+# --legacy-peer-deps: o ng2-charts pede um @angular/cdk que conflita com o Angular 21
+# do projeto (o cdk não está no package.json). Sem a flag, o npm recusa instalar.
+RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci --legacy-peer-deps
 COPY . ./
 RUN npx ng build --configuration production --base-href /
 # saída: /build/dist/nexo (angular.json usa browser:"")
