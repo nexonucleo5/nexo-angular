@@ -82,9 +82,13 @@ class AutorizacaoTest extends TesteApiBase {
                     .andExpect(status().isOk());
         }
 
-        // Gestão pedagógica e auditoria continuam sendo do diretor.
+        // Os logs são dele, e só dele (ver AuditoriaTest).
+        mvc.perform(get("/api/auditoria/eventos").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk());
+
+        // Gestão pedagógica continua sendo do diretor.
         for (String rota : new String[]{
-                "/api/evasao/risco", "/api/relatorios/desempenho", "/api/auditoria/eventos",
+                "/api/evasao/risco", "/api/relatorios/desempenho",
                 "/api/monitoramento/professores", "/api/avaliacoes"}) {
             mvc.perform(get(rota).header(HttpHeaders.AUTHORIZATION, admin))
                     .andExpect(status().isForbidden());

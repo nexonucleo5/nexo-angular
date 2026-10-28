@@ -1,0 +1,170 @@
+/* Estilos comuns às duas abas de Logs (atividade e sistema). Incluído por ambos os
+   componentes via styleUrls — o escopo de componente do Angular não passa de pai para filho.
+
+   Reaproveita o que já é global (stat-card, icon-box, search-box, filter-select, btn-dark-custom,
+   page-title); aqui ficam só o cartão de seção, a tabela, os rótulos de nível e o gráfico. */
+
+:host {
+  --erro: #dc2626;
+  --erro-bg: rgba(220, 38, 38, 0.1);
+  --aviso: #b45309;
+  --aviso-bg: rgba(217, 119, 6, 0.13);
+  --ok: #15803d;
+  --ok-bg: rgba(21, 128, 61, 0.12);
+  --neutro-bg: rgba(127, 127, 127, 0.14);
+  --codigo-bg: rgba(0, 0, 0, 0.05);
+}
+:host-context(html[data-theme='dark']) {
+  --erro: #f87171;
+  --erro-bg: rgba(248, 113, 113, 0.14);
+  --aviso: #fbbf24;
+  --aviso-bg: rgba(251, 191, 36, 0.13);
+  --ok: #4ade80;
+  --ok-bg: rgba(74, 222, 128, 0.12);
+  --codigo-bg: rgba(0, 0, 0, 0.32);
+}
+
+/* ── Cartão de seção ───────────────────────────────────────────────────── */
+.cartao {
+  margin-bottom: 20px;
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+}
+
+.cartao-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 16px 20px;
+
+  h2 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-main); }
+  p { margin: 2px 0 0; font-size: 13px; color: var(--text-soft); }
+}
+
+/* Barra de filtros colada ao topo da tabela, dentro do mesmo cartão. */
+.cartao-barra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 20px 16px;
+
+  .busca { flex: 1 1 280px; min-width: 0; }
+  select { flex: 0 1 190px; }
+}
+
+/* ── Tabela ────────────────────────────────────────────────────────────── */
+.tabela-wrap { overflow-x: auto; border-top: 1px solid var(--border-color); }
+
+.tabela {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th {
+    padding: 10px 16px;
+    text-align: left;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-soft);
+    background: var(--neutro-bg);
+  }
+  td {
+    padding: 12px 16px;
+    vertical-align: top;
+    color: var(--text-main);
+    border-top: 1px solid var(--border-color);
+  }
+  th:first-child, td:first-child { padding-left: 20px; }
+  th:last-child, td:last-child { padding-right: 20px; }
+  tbody tr:first-child td { border-top: 0; }
+
+  .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+  tr.clicavel { cursor: pointer; }
+  tr.clicavel:hover td { background: var(--neutro-bg); }
+}
+
+/* Erro se destaca pela linha, não só pelo rótulo: é o que se procura numa varredura. */
+tr.com-erro td { background: var(--erro-bg); }
+tr.com-erro td:first-child { box-shadow: inset 3px 0 0 var(--erro); }
+
+.hora { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hora .data { color: var(--text-soft); margin-right: 6px; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; color: var(--text-soft); }
+.quebra { overflow-wrap: anywhere; }
+.sub { display: block; margin-top: 3px; font-size: 12px; color: var(--text-soft); overflow-wrap: anywhere; }
+
+/* ── Rótulo de nível/tipo ──────────────────────────────────────────────── */
+.chip {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.chip-erro { color: var(--erro); background: var(--erro-bg); }
+.chip-aviso { color: var(--aviso); background: var(--aviso-bg); }
+.chip-ok { color: var(--ok); background: var(--ok-bg); }
+.chip-info { color: var(--text-soft); background: var(--neutro-bg); }
+
+/* ── Rodapé: contagem e paginação ──────────────────────────────────────── */
+.rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 12px 20px;
+  font-size: 13px;
+  color: var(--text-soft);
+  border-top: 1px solid var(--border-color);
+
+  .paginas { display: flex; align-items: center; gap: 10px; }
+  .btn { padding: 6px 14px; }
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8b5cf6;
+  cursor: pointer;
+
+  &:hover { text-decoration: underline; }
+  &:disabled { color: var(--text-soft); text-decoration: none; cursor: default; }
+}
+
+.vazio {
+  margin: 0;
+  padding: 36px 20px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-soft);
+  border-top: 1px solid var(--border-color);
+}
+
+/* Celular: a tabela deixa de rolar de lado e perde as colunas de apoio (id, IP, hora da
+   última ocorrência) — o que decide o que fazer cabe na mensagem e no nível. */
+@media (max-width: 767.98px) {
+  .cartao-cab { padding: 14px 16px; }
+  .cartao-barra { padding: 0 16px 14px; }
+  .cartao-barra select { flex: 1 1 140px; }
+  .tabela { min-width: 0; }
+  .tabela .col-extra { display: none; }
+  .tabela th, .tabela td { padding: 10px 8px; }
+  .tabela th:first-child, .tabela td:first-child { padding-left: 14px; }
+  .tabela th:last-child, .tabela td:last-child { padding-right: 14px; }
+  .hora .data { display: block; margin: 0; font-size: 12px; }
+  .rodape { padding: 12px 14px; }
+}

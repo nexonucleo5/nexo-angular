@@ -176,6 +176,75 @@ export interface ContaDTO {
   criadoEm: string;
 }
 
+export type TipoEvento = 'LOGIN' | 'LOGOUT' | 'ACESSO' | 'ALTERACAO' | 'ERRO';
+
+/** GET /api/auditoria/eventos — a trilha do sistema; leitura exclusiva do administrador. */
+export interface EventoAuditoriaDTO {
+  id: number;
+  usuario: string | null;
+  tipo: TipoEvento;
+  acao: string;
+  detalhe: string | null;
+  ip: string | null;
+  criadoEm: string;
+}
+
+export type NivelLog = 'INFO' | 'WARN' | 'ERROR';
+
+/** GET /api/auditoria/sistema/logs — log da aplicação (o que o sistema viveu, não o que as pessoas fizeram). */
+export interface LogAplicacaoDTO {
+  id: number;
+  nivel: NivelLog;
+  origem: string;
+  mensagem: string;
+  excecao: string | null;
+  requisicaoId: string | null;
+  metodo: string | null;
+  caminho: string | null;
+  usuario: string | null;
+  /** Só nos avisos de lentidão. */
+  duracaoMs: number | null;
+  criadoEm: string;
+}
+
+/** Um problema que se repetiu: o mesmo texto, da mesma origem, agrupado. */
+export interface ProblemaDTO {
+  nivel: NivelLog;
+  origem: string;
+  mensagem: string;
+  metodo: string | null;
+  caminho: string | null;
+  total: number;
+  ultimaVez: string;
+}
+
+/** Erros e avisos de uma hora cheia; {@code hora} é o início dela. */
+export interface HoraDTO {
+  hora: string;
+  erros: number;
+  avisos: number;
+}
+
+/** GET /api/auditoria/sistema/resumo — por onde começar a olhar a saúde do sistema. */
+export interface ResumoSistemaDTO {
+  erros24h: number;
+  avisos24h: number;
+  ultimoErro: string | null;
+  logsDescartados: number;
+  /** Logins inválidos e reuso de refresh token — o termômetro de tentativa de invasão. */
+  falhasDeAcesso24h: number;
+  principaisProblemas: ProblemaDTO[];
+  /** 24 baldes de uma hora, do mais antigo ao mais recente, sempre completos. */
+  porHora: HoraDTO[];
+  /** Há webhook configurado para avisar a cada ERROR. */
+  alertaAtivo: boolean;
+  bancoOk: boolean;
+  bancoMs: number;
+  heapUsadoMb: number;
+  heapMaxMb: number;
+  uptimeSegundos: number;
+}
+
 /** A senha em claro existe só nesta resposta. */
 export interface SenhaRedefinidaDTO {
   login: string;

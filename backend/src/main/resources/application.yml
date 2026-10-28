@@ -135,5 +135,20 @@ nexo:
     # Folgado de propósito: a tela consulta por ?periodo=<dias> e um corte curto faria a
     # resposta parecer "sem eventos" onde na verdade foram removidos. 0 desliga.
     retencao-dias: ${AUDITORIA_RETENCAO_DIAS:365}
+  logs:
+    # Log da aplicação (WARN/ERROR) gravado em logs_aplicacao e lido pelo administrador.
+    # Complementa a auditoria: aquela conta o que as pessoas fizeram, este o que o sistema viveu.
+    nivel-minimo: ${LOGS_NIVEL_MINIMO:WARN}      # INFO, WARN ou ERROR
+    # Dias mantidos; log de sistema serve para diagnóstico, não para histórico. 0 desliga a limpeza.
+    retencao-dias: ${LOGS_RETENCAO_DIAS:30}
+    # Quantas vezes a MESMA mensagem (mesmo nível e origem) é gravada por minuto. Impede que um
+    # loop de erro encha a tabela; o excedente é só contado. 0 desliga o limite.
+    max-por-minuto: ${LOGS_MAX_POR_MINUTO:20}
+    # Resposta de /api mais lenta que isso (ms) vira WARN. 0 desliga.
+    requisicao-lenta-ms: ${LOGS_REQUISICAO_LENTA_MS:2000}
+    # Webhook (Slack ou Discord) que recebe um aviso a cada ERROR. Vazio = desligado.
+    # Vai só a mensagem já mascarada, sem stack trace. O mesmo erro avisa uma vez por janela.
+    alerta-webhook-url: ${LOGS_ALERTA_WEBHOOK_URL:}
+    alerta-intervalo-min: ${LOGS_ALERTA_INTERVALO_MIN:10}
   seed:
     enabled: true
