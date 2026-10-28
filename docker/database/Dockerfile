@@ -11,6 +11,11 @@ FROM postgres:17-alpine
 # Usuário, senha e banco vêm do ambiente (POSTGRES_USER/PASSWORD/DB) — nada de
 # credencial na imagem, que vai para o Docker Hub.
 #
+# Scripts de criação: tudo que está em init/ roda UMA vez, na primeira subida
+# com o volume vazio, em ordem alfabética (docker-entrypoint-initdb.d). Com o
+# volume já populado o Postgres ignora esta pasta.
+COPY init/ /docker-entrypoint-initdb.d/
+
 # max_connections: o pool do backend usa 5 (DB_POOL_MAX); 50 sobra com folga
 # para psql/DBeaver e para reiniciar o backend sem esperar as conexões antigas.
 CMD ["postgres", "-c", "max_connections=50"]

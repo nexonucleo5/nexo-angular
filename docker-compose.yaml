@@ -5,13 +5,13 @@
 #   backend   → docker/backend    API Spring (só o jar, sem o Angular)
 #   frontend  → docker/frontend   Angular + nginx (proxy de /api e /ws)
 #
-#   docker compose up --build     → http://localhost:8080
+#   docker compose up -d --build  → http://localhost:8080
 #   docker compose down           → para, mantendo o banco no volume
 #   docker compose down -v        → para e APAGA o banco
 #
 # Imagens prontas (sem build local):  docker compose pull && docker compose up -d
 # Publicar no Docker Hub:             docker compose build && docker compose push
-# Detalhes de registry/Docker Hub em docker/README.md.
+# Detalhes de registry/Docker Hub no README.md.
 name: nexo
 
 # Imagem = <IMAGE_REGISTRY>/<IMAGE_NAMESPACE>/nexo-<serviço>:<NEXO_TAG>. Sem nada no
@@ -24,11 +24,13 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-nexo}
       POSTGRES_USER: ${POSTGRES_USER:-nexo}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      # Padrão só para subir o ambiente local sem configurar nada. Em qualquer
+      # ambiente real defina POSTGRES_PASSWORD no .env.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nexo_dev_senha}
     ports:
       # Só na sua máquina (127.0.0.1): dá para abrir o DBeaver/psql sem expor o
       # banco na rede. Dentro do compose o backend o alcança por "database:5432".
-      - "127.0.0.1:${DB_PORT:-5432}:5432"
+      - "127.0.0.1:${DB_PORT:-5433}:5432"
     volumes:
       - nexo-pgdata:/var/lib/postgresql/data
     networks:
@@ -50,8 +52,10 @@ services:
       # SPRING_PROFILES_ACTIVE=prod já vem da imagem (Postgres, console H2 off).
       DB_URL: jdbc:postgresql://database:5432/${POSTGRES_DB:-nexo}
       DB_USER: ${POSTGRES_USER:-nexo}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:?defina NEXO_JWT_SECRET no .env (openssl rand -base64 48)}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-nexo_dev_senha}
+      # Padrão público, só para o ambiente local/avaliação: quem tem este valor
+      # forja token. Em qualquer ambiente real: openssl rand -base64 48 no .env.
+      NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:-nexo-segredo-jwt-apenas-para-desenvolvimento-local-0123456789}
       # Origem que o NAVEGADOR usa para chegar ao frontend: é ela que o CORS e o
       # handshake do WebSocket comparam. Mudou a porta/domínio? Mude aqui também.
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:${FRONTEND_PORT:-8080}}
