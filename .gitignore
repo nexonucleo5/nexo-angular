@@ -64,4 +64,6 @@ backend/data/
 
 data/*.db
 data/*.lock.db
-data/*.mv.db.env.docker
+data/*.mv.db
+.env.docker
+!README.md
