@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Trava a correção do achado da revisão de segurança: o seed criava a conta
  * administrativa com a senha padrão em QUALQUER banco já povoado, incluindo o de
- * produção — porque nem o Dockerfile nem o compose.yaml ativam o perfil prod, e
+ * produção — porque nem o Dockerfile nem o docker-compose.yaml ativam o perfil prod, e
  * fora dele nexo.seed.enabled continua true.
  *
  * <p>Aqui o banco é H2 (o de desenvolvimento), então a conta existe. O que a

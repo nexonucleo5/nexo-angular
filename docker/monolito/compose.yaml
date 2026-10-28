@@ -1,5 +1,5 @@
 # Sobe o monolito (Angular embutido no Spring, H2 em arquivo) igual ao que roda
-# no Render. Para o dia a dia use o compose.yaml.
+# no Render. Para o dia a dia use o docker-compose.yaml da raiz.
 #
 #   docker compose -f docker/monolito/compose.yaml --env-file .env up --build   → http://localhost:8080
 #   docker compose -f docker/monolito/compose.yaml down                          → para, mantendo o banco

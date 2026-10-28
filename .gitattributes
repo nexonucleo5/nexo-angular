@@ -1,0 +1,8 @@
+# Arquivos que rodam dentro de containers Linux precisam de LF. No Windows, com
+# core.autocrlf=true, um .sh em CRLF falha com "/bin/sh^M: bad interpreter" e
+# aborta a inicialização do Postgres.
+*.sh            text eol=lf
+*.sql           text eol=lf
+*.conf          text eol=lf
+Dockerfile      text eol=lf
+docker/**/Dockerfile text eol=lf

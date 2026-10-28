@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Contexto: raiz do repo. docker build -f docker/frontend/Dockerfile -t nexo-frontend .
+# build a partir da raiz: docker build -f docker/frontend/Dockerfile -t nexo-frontend .
 ARG NODE_VERSION=22
 ARG NGINX_VERSION=1.28
 
@@ -10,8 +10,7 @@ ENV npm_config_fund=false \
     npm_config_audit=false \
     npm_config_update_notifier=false
 
-# --legacy-peer-deps: ng2-charts pede @angular/cdk, que não está no package.json,
-# e sem a flag o npm ci falha com ERESOLVE.
+# --legacy-peer-deps: o ng2-charts pede @angular/cdk e o npm ci dá ERESOLVE sem a flag
 COPY nexo/package.json nexo/package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm,sharing=locked \
     npm ci --legacy-peer-deps

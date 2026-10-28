@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Contexto: raiz do repo. docker build -f docker/backend/Dockerfile -t nexo-backend .
+# build a partir da raiz: docker build -f docker/backend/Dockerfile -t nexo-backend .
 ARG JAVA_VERSION=21
 ARG MAVEN_VERSION=3.9
 
@@ -9,7 +9,7 @@ WORKDIR /build
 COPY backend/pom.xml ./
 COPY backend/src ./src
 
-# Maven Central às vezes corta o download no meio; repete até 3 vezes.
+# tenta 3x porque o Maven Central às vezes corta o download
 RUN --mount=type=cache,target=/root/.m2,sharing=locked \
     for tentativa in 1 2 3; do \
         mvn -B -ntp package -DskipTests && exit 0; \
@@ -19,7 +19,7 @@ RUN --mount=type=cache,target=/root/.m2,sharing=locked \
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS runtime
 
-# gnupg/coreutils vêm na base do Temurin e trazem CVEs que o app não usa.
+# remove pacotes da base que o app não usa
 RUN apk upgrade --no-cache \
  && apk add --no-cache tzdata \
  && apk del --purge gnupg gnupg-dirmngr gnupg-gpgconf gnupg-keyboxd \
@@ -27,6 +27,7 @@ RUN apk upgrade --no-cache \
                     coreutils coreutils-env coreutils-fmt coreutils-sha512sum
 ENV TZ=America/Sao_Paulo
 
+# usuário sem root
 RUN addgroup -S nexo && adduser -S -G nexo -h /app nexo
 WORKDIR /app
 RUN chown nexo:nexo /app
@@ -41,7 +42,6 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError" \
 
 EXPOSE 8080
 
-# Sem actuator nem rota pública de saúde: só testa a porta.
 HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=5 \
     CMD nc -z 127.0.0.1 "${PORT:-8080}" || exit 1
 

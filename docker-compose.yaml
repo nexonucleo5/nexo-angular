@@ -1,5 +1,7 @@
-# docker compose up --build   → http://localhost:8080
-# Mais comandos e variáveis em docker/README.md. Atalho: docker/nexo.cmd. Monolito (Render): docker/monolito/compose.yaml.
+# docker compose up -d --build  ->  http://localhost:8080
+#
+# Funciona sem .env: os valores abaixo são padrões de desenvolvimento.
+# Para trocar senha/segredo, crie um .env (veja .env.example).
 name: nexo
 
 x-endurecimento: &endurecimento
@@ -15,11 +17,11 @@ services:
     build:
       context: .
       dockerfile: docker/database/Dockerfile
-    image: ${REGISTRY_NAMESPACE:-nexo}/nexo-db:${TAG:-latest}
+    image: ${REGISTRY_NAMESPACE:-1dzk}/nexo-db:${TAG:-1.0}
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-nexo}
       POSTGRES_USER: ${POSTGRES_USER:-nexo}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nexo-dev}
     volumes:
       - nexo-pgdata:/var/lib/postgresql/data
     ports:
@@ -34,13 +36,13 @@ services:
     build:
       context: .
       dockerfile: docker/backend/Dockerfile
-    image: ${REGISTRY_NAMESPACE:-nexo}/nexo-backend:${TAG:-latest}
+    image: ${REGISTRY_NAMESPACE:-1dzk}/nexo-backend:${TAG:-1.0}
     environment:
       SPRING_PROFILES_ACTIVE: prod
       DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-nexo}
       DB_USER: ${POSTGRES_USER:-nexo}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
-      NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:?defina NEXO_JWT_SECRET no .env (openssl rand -base64 48)}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-nexo-dev}
+      NEXO_JWT_SECRET: ${NEXO_JWT_SECRET:-nexo-dev-jwt-secret-troque-em-producao-0123456789}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
       PROXY_SALTOS_CONFIAVEIS: 1
       SEED_ENABLED: ${SEED_ENABLED:-true}
@@ -56,7 +58,7 @@ services:
     build:
       context: .
       dockerfile: docker/frontend/Dockerfile
-    image: ${REGISTRY_NAMESPACE:-nexo}/nexo-frontend:${TAG:-latest}
+    image: ${REGISTRY_NAMESPACE:-1dzk}/nexo-frontend:${TAG:-1.0}
     ports:
       - "${HOST_PORT:-8080}:8080"
     tmpfs:
@@ -66,7 +68,7 @@ services:
         condition: service_healthy
     networks: [interna]
 
-  # Só sobe com --profile registry.
+  # só sobe com --profile registry
   registry:
     image: registry:2
     profiles: [registry]

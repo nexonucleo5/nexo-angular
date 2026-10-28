@@ -329,7 +329,7 @@ public class DataSeeder {
          *
          * <p>Trava de segurança, e não conveniência: {@code nexo.seed.enabled} é
          * {@code true} no application.yml e só o perfil {@code prod} o desliga — mas
-         * nem o Dockerfile nem o compose.yaml ativam esse perfil, então um container
+         * nem o Dockerfile nem o docker-compose.yaml ativam esse perfil, então um container
          * sobe com o seed LIGADO. Sem esta checagem, subir a aplicação contra um
          * Postgres de verdade criaria ali a conta do administrador com a senha padrão do
          * seed, numa base em uso. Dado de exemplo pertence ao banco de exemplo.

@@ -4,6 +4,7 @@ ENV TZ=America/Sao_Paulo \
     POSTGRES_DB=nexo \
     POSTGRES_USER=nexo
 
+# scripts de initdb rodam só quando o volume está vazio
 COPY docker/database/initdb/ /docker-entrypoint-initdb.d/
 
 EXPOSE 5432
