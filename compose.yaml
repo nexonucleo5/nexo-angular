@@ -1,49 +1,16 @@
-name: nexo
-
 services:
-  # 1. Banco de Dados PostgreSQL
-  postgres-db:
-    image: postgres:15
-    container_name: postgres-db
-    restart: always
-    environment:
-      POSTGRES_DB: nexo
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: root_pg_admin
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - "3000:3000"  # Backend acessível em http://localhost:3000
 
-  # 2. API Spring Boot
-  spring-api:
-    build: ./backend
-    container_name: spring-api
-    restart: always
+  mobile:
+    build:
+      context: ./nexo
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"  # Mobile acessível em http://localhost:8080
     depends_on:
-      - postgres-db
-    ports:
-      - "8080:8080"
-    environment:
-      DB_URL: jdbc:postgresql://postgres-db:5432/nexo
-      DB_USER: admin
-      DB_PASSWORD: root_pg_admin
-      NEXO_JWT_SECRET: minhasenhasecretajwtmuitosegura123456
-      SPRING_PROFILES_ACTIVE: prod
-      CORS_ORIGINS: http://clavison.ddns.net,http://localhost
-      PROXY_SALTOS_CONFIAVEIS: 1
-      DDL_AUTO: update
-
-  # 3. Front-end Angular
-  angular-frontend:
-    build: ./nexo
-    container_name: angular-frontend
-    restart: always
-    depends_on:
-      - spring-api
-    ports:
-      - "80:80"
-      - "443:443"
-
-volumes:
-  postgres_data:
+      - backend
