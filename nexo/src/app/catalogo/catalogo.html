@@ -11,18 +11,18 @@
   <!-- ── Abas ─────────────────────────────────────────────── -->
   <div class="d-flex gap-2 mb-4">
     <button class="aba-btn" [class.ativa]="aba() === 'conteudos'" (click)="abrirAba('conteudos')">
-      <i class="bi bi-journal-text"></i> Conteúdos
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg> Conteúdos
     </button>
     <button class="aba-btn" [class.ativa]="aba() === 'desafios'" (click)="abrirAba('desafios')">
-      <i class="bi bi-trophy"></i> Desafios
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trophy"></use></svg> Desafios
     </button>
   </div>
 
   @if (acaoErro(); as msg) {
-    <p class="text-danger small"><i class="bi bi-exclamation-circle"></i> {{ msg }}</p>
+    <p class="text-danger small"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg> {{ msg }}</p>
   }
   @if (acaoSucesso(); as msg) {
-    <p class="text-success small"><i class="bi bi-check-circle"></i> {{ msg }}</p>
+    <p class="text-success small"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg> {{ msg }}</p>
   }
 
   @if (carregando()) {
@@ -83,12 +83,12 @@
                   <button class="seta" [disabled]="i === 0"
                           [attr.aria-label]="'Subir ' + c.titulo"
                           (click)="mover(i, -1)">
-                    <i class="bi bi-chevron-up"></i>
+                    <svg class="ic ic-rot-180" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-chev"></use></svg>
                   </button>
                   <button class="seta" [disabled]="i === conteudos().length - 1"
                           [attr.aria-label]="'Descer ' + c.titulo"
                           (click)="mover(i, 1)">
-                    <i class="bi bi-chevron-down"></i>
+                    <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-chev"></use></svg>
                   </button>
                 </div>
 
@@ -103,7 +103,7 @@
                 </div>
 
                 <span class="badge-compliance" [ngClass]="c.publicado ? 'status-ok' : 'status-danger'">
-                  <i class="bi" [ngClass]="c.publicado ? 'bi-eye' : 'bi-eye-slash'"></i>
+                  <span [class.ic-off]="!c.publicado"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-eye"></use></svg></span>
                   {{ c.publicado ? 'No ar' : 'Fora do ar' }}
                 </span>
 
@@ -112,7 +112,7 @@
                         [disabled]="acaoEmCurso() !== null"
                         (click)="alternarPublicadoConteudo(c)">
                   @if (acaoEmCurso() === c.id) {
-                    <i class="bi bi-arrow-repeat girando"></i>
+                    <svg class="ic girando" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-refresh"></use></svg>
                   }
                   {{ c.publicado ? 'Despublicar' : 'Publicar' }}
                 </button>
@@ -138,7 +138,7 @@
       @for (d of desafios(); track d.id) {
         <div class="conteudo-row p-3 d-flex align-items-center gap-3 flex-wrap"
              [class.fora-do-ar]="!d.publicado">
-          <div class="icon-box purple-gradient"><i class="bi bi-trophy"></i></div>
+          <div class="icon-box purple-gradient"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trophy"></use></svg></div>
 
           <div class="flex-grow-1">
             <h6 class="text-main fw-bold mb-1">{{ d.titulo }}</h6>
@@ -148,7 +148,7 @@
           </div>
 
           <span class="badge-compliance" [ngClass]="d.publicado ? 'status-ok' : 'status-danger'">
-            <i class="bi" [ngClass]="d.publicado ? 'bi-eye' : 'bi-eye-slash'"></i>
+            <span [class.ic-off]="!d.publicado"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-eye"></use></svg></span>
             {{ d.publicado ? 'No ar' : 'Fora do ar' }}
           </span>
 
@@ -157,7 +157,7 @@
                   [disabled]="acaoEmCurso() !== null"
                   (click)="alternarPublicadoDesafio(d)">
             @if (acaoEmCurso() === d.id) {
-              <i class="bi bi-arrow-repeat girando"></i>
+              <svg class="ic girando" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-refresh"></use></svg>
             }
             {{ d.publicado ? 'Despublicar' : 'Publicar' }}
           </button>
@@ -165,6 +165,6 @@
       }
     </div>
   }
-/*Só para a criação da nova branch*/
+/*Só para a criação da nova branch feature*/
   }
 </section>

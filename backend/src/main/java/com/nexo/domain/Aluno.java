@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Aluno como o sistema de aprendizado precisa dele: um nome, um acesso e a turma
  * cujo conteúdo ele cursa.
@@ -15,7 +18,13 @@ import java.time.Instant;
  * além de nome e progresso.
  */
 @Entity
-@Table(name = "alunos")
+@Table(name = "alunos",
+       // Recorte por turma: é o filtro de praticamente toda tela de professor, e a
+       // coluna que os agregados de nota/frequência atravessam para chegar à turma.
+       // Sem ele o Postgres varre a tabela de alunos inteira em cada uma dessas telas.
+       indexes = @Index(name = "idx_alunos_turma", columnList = "turma_id"))
+@Getter
+@Setter
 public class Aluno {
 
     @Id
@@ -57,36 +66,19 @@ public class Aluno {
     private int tarefasFeitasHoje;
     private int tarefasHoje;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
-    public String getEmailInstitucional() { return emailInstitucional; }
-    public void setEmailInstitucional(String emailInstitucional) { this.emailInstitucional = emailInstitucional; }
-    public Turma getTurma() { return turma; }
-    public void setTurma(Turma turma) { this.turma = turma; }
-    public int getEngajamento() { return engajamento; }
-    public void setEngajamento(int engajamento) { this.engajamento = engajamento; }
-    public String getFoto() { return foto; }
-    public void setFoto(String foto) { this.foto = foto; }
-    public Instant getUltimoAcessoEm() { return ultimoAcessoEm; }
-    public void setUltimoAcessoEm(Instant ultimoAcessoEm) { this.ultimoAcessoEm = ultimoAcessoEm; }
-    public int getIntervencoes() { return intervencoes; }
-    public void setIntervencoes(int intervencoes) { this.intervencoes = intervencoes; }
-    public Instant getUltimaIntervencaoEm() { return ultimaIntervencaoEm; }
-    public void setUltimaIntervencaoEm(Instant ultimaIntervencaoEm) { this.ultimaIntervencaoEm = ultimaIntervencaoEm; }
-    public int getXpTotal() { return xpTotal; }
-    public void setXpTotal(int xpTotal) { this.xpTotal = xpTotal; }
-    public int getXpSemana() { return xpSemana; }
-    public void setXpSemana(int xpSemana) { this.xpSemana = xpSemana; }
-    public int getMetaSemanalXp() { return metaSemanalXp; }
-    public void setMetaSemanalXp(int metaSemanalXp) { this.metaSemanalXp = metaSemanalXp; }
-    public int getOfensivaDias() { return ofensivaDias; }
-    public void setOfensivaDias(int ofensivaDias) { this.ofensivaDias = ofensivaDias; }
-    public int getTarefasFeitasHoje() { return tarefasFeitasHoje; }
-    public void setTarefasFeitasHoje(int tarefasFeitasHoje) { this.tarefasFeitasHoje = tarefasFeitasHoje; }
-    public int getTarefasHoje() { return tarefasHoje; }
-    public void setTarefasHoje(int tarefasHoje) { this.tarefasHoje = tarefasHoje; }
+    // ── Privacidade (espelho das chaves de Configurações → Privacidade do aluno) ──
+    // O documento JSON de configuração segue sendo o que a tela lê e grava; estas duas
+    // colunas existem porque o ranking precisa filtrar no banco, e abrir o JSON de
+    // todos os alunos a cada request seria varrer a escola inteira. Quem as mantém é o
+    // ConfiguracaoService, na mesma transação que grava o JSON.
+    // default true no DDL: o Hibernate adiciona coluna NOT NULL em tabela com linhas
+    // só se ela tiver valor padrão.
+
+    /** Aparece no ranking dos outros alunos. */
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean exibirNoRanking = true;
+
+    /** Outros alunos veem a foto (hoje, o ranking é o único lugar em que um aluno vê outro). */
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean perfilPublico = true;
 }

@@ -4,9 +4,14 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
 @Table(name = "observacoes_pedagogicas",
        indexes = @Index(name = "idx_observacoes_aluno_criada", columnList = "aluno_id, criada_em"))
+@Getter
+@Setter
 public class ObservacaoPedagogica {
 
     @Id
@@ -23,15 +28,4 @@ public class ObservacaoPedagogica {
     private String texto;
 
     private Instant criadaEm = Instant.now();
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Aluno getAluno() { return aluno; }
-    public void setAluno(Aluno aluno) { this.aluno = aluno; }
-    public String getAutorNome() { return autorNome; }
-    public void setAutorNome(String autorNome) { this.autorNome = autorNome; }
-    public String getTexto() { return texto; }
-    public void setTexto(String texto) { this.texto = texto; }
-    public Instant getCriadaEm() { return criadaEm; }
-    public void setCriadaEm(Instant criadaEm) { this.criadaEm = criadaEm; }
 }

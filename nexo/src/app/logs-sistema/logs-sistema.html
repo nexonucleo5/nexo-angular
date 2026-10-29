@@ -1,0 +1,250 @@
+@if (resumo(); as r) {
+
+  <!-- ── Estado agora: a cor do ícone diz se está tudo bem ─── -->
+  <div class="kpis">
+    <div class="stat-card">
+      <div>
+        <p class="text-soft small mb-1 fw-semibold">Erros (24h)</p>
+        <h2 class="fw-bold m-0 text-main">{{ r.erros24h }}</h2>
+        <small class="text-soft">{{ r.ultimoErro ? 'último às ' + (r.ultimoErro | date:'HH:mm') : 'nenhum registrado' }}</small>
+      </div>
+      <div class="icon-box" [ngClass]="r.erros24h > 0 ? 'st-erro' : 'st-ok'">
+        <svg class="ic fs-4" aria-hidden="true"><use [attr.href]="'assets/icones/nexo-icons.svg#ic-' + (r.erros24h > 0 ? 'alert' : 'check')"></use></svg>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div>
+        <p class="text-soft small mb-1 fw-semibold">Avisos (24h)</p>
+        <h2 class="fw-bold m-0 text-main">{{ r.avisos24h }}</h2>
+        <small class="text-soft">403 e lentidão</small>
+      </div>
+      <div class="icon-box" [ngClass]="r.avisos24h > 0 ? 'st-aviso' : 'st-ok'">
+        <svg class="ic fs-4" aria-hidden="true"><use [attr.href]="'assets/icones/nexo-icons.svg#ic-' + (r.avisos24h > 0 ? 'info' : 'check')"></use></svg>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div>
+        <p class="text-soft small mb-1 fw-semibold">Falhas de acesso (24h)</p>
+        <h2 class="fw-bold m-0 text-main">{{ r.falhasDeAcesso24h }}</h2>
+        <small class="text-soft">logins inválidos</small>
+      </div>
+      <div class="icon-box" [ngClass]="estadoFalhas(r.falhasDeAcesso24h)">
+        <svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-lock"></use></svg>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div>
+        <p class="text-soft small mb-1 fw-semibold">Banco de dados</p>
+        <h2 class="fw-bold m-0 text-main">{{ r.bancoOk ? 'Online' : 'Fora do ar' }}</h2>
+        <small class="text-soft">{{ r.bancoOk ? 'responde em ' + r.bancoMs + ' ms' : 'sem resposta' }}</small>
+      </div>
+      <div class="icon-box" [ngClass]="r.bancoOk ? 'st-ok' : 'st-erro'">
+        <svg class="ic fs-4" aria-hidden="true"><use [attr.href]="'assets/icones/nexo-icons.svg#ic-' + (r.bancoOk ? 'check' : 'x')"></use></svg>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="flex-grow-1">
+        <p class="text-soft small mb-1 fw-semibold">Memória</p>
+        <h2 class="fw-bold m-0 text-main">{{ memoriaPercentual() }}%</h2>
+        <small class="text-soft">{{ r.heapUsadoMb }} de {{ r.heapMaxMb }} MB • no ar há {{ formatarUptime(r.uptimeSegundos) }}</small>
+        <div class="barra" [ngClass]="estadoMemoria()"><span [style.width.%]="memoriaPercentual()"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Só o que pede ação aparece como faixa. -->
+  @if (!r.bancoOk) {
+    <div class="faixa faixa-erro" role="alert">
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg>
+      <span>O banco de dados não está respondendo.</span>
+    </div>
+  }
+  @if (!r.alertaAtivo) {
+    <div class="faixa faixa-aviso">
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bell"></use></svg>
+      <span>
+        Ninguém é avisado quando ocorre um erro. Defina <code>LOGS_ALERTA_WEBHOOK_URL</code>
+        para receber cada ERROR no Slack ou no Discord.
+      </span>
+    </div>
+  }
+  @if (r.logsDescartados > 0) {
+    <div class="faixa faixa-aviso">
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-info"></use></svg>
+      <span>{{ r.logsDescartados }} registros repetidos não foram gravados (limite por minuto para a mesma mensagem).</span>
+    </div>
+  }
+
+  <!-- ── Linha do tempo: quando os problemas aconteceram ──── -->
+  <div class="cartao">
+    <div class="cartao-cab">
+      <div>
+        <h2>Últimas 24 horas</h2>
+        <p>Erros e avisos por hora</p>
+      </div>
+      <div class="legenda">
+        <span><i class="ponto ponto-erro"></i>Erros ({{ totalErros() }})</span>
+        <span><i class="ponto ponto-aviso"></i>Avisos ({{ totalAvisos() }})</span>
+      </div>
+    </div>
+    <div class="grafico-corpo">
+      <div class="grafico" role="img" [attr.aria-label]="descricaoGrafico()">
+        @for (h of r.porHora; track h.hora) {
+          <div class="col" [title]="tituloHora(h)">
+            <div class="pilha">
+              @if (h.erros > 0) { <span class="seg seg-erro" [style.height.%]="pct(h.erros)"></span> }
+              @if (h.avisos > 0) { <span class="seg seg-aviso" [style.height.%]="pct(h.avisos)"></span> }
+              @if (h.erros + h.avisos === 0) { <span class="seg seg-vazio"></span> }
+            </div>
+            <span class="rotulo">{{ h.hora | date:'HH' }}h</span>
+          </div>
+        }
+        @if (totalErros() + totalAvisos() === 0) {
+          <p class="grafico-vazio">Nenhum aviso ou erro nas últimas 24 horas.</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Mais frequentes ──────────────────────────────────── -->
+  <div class="cartao">
+    <div class="cartao-cab">
+      <div>
+        <h2>Mais frequentes</h2>
+        <p>O que mais se repetiu nas últimas 24 horas. Clique para ver as ocorrências.</p>
+      </div>
+    </div>
+    @if (r.principaisProblemas.length > 0) {
+      <div class="tabela-wrap">
+        <table class="tabela">
+          <thead>
+            <tr><th>Nível</th><th>Problema</th><th class="num">Vezes</th><th class="col-extra">Última</th></tr>
+          </thead>
+          <tbody>
+            @for (p of r.principaisProblemas; track p.origem + p.mensagem + p.caminho) {
+              <tr class="clicavel" (click)="filtrarPor(p)" title="Ver as ocorrências">
+                <td><span class="chip" [ngClass]="nivelClasse(p.nivel)">{{ nivelLabel(p.nivel) }}</span></td>
+                <td class="quebra">
+                  {{ p.mensagem }}
+                  <span class="sub">
+                    @if (p.caminho) { {{ p.metodo }} {{ p.caminho }} }
+                    @if (mostrarOrigem(p.origem)) { @if (p.caminho) { · } {{ origemCurta(p.origem) }} }
+                  </span>
+                </td>
+                <td class="num">{{ p.total }}</td>
+                <td class="hora col-extra">{{ p.ultimaVez | date:'dd/MM HH:mm' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="vazio">Nada a reportar nas últimas 24 horas.</p>
+    }
+  </div>
+
+} @else if (resumoErro()) {
+  <div class="faixa faixa-erro" role="alert">
+    <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg>
+    <span>Não foi possível carregar o estado do sistema.</span>
+  </div>
+}
+
+<!-- ── Registros ────────────────────────────────────────── -->
+<div class="cartao">
+  <div class="cartao-cab">
+    <div>
+      <h2>Registros</h2>
+      <p>Cada aviso e erro gravado, do mais recente para o mais antigo</p>
+    </div>
+  </div>
+
+  <div class="cartao-barra">
+    <div class="search-box busca">
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
+      <input type="text" placeholder="Buscar mensagem, rota, usuário ou id"
+             aria-label="Buscar nos registros"
+             [ngModel]="busca()" (ngModelChange)="aoDigitar($event)">
+    </div>
+    <select class="filter-select" aria-label="Nível"
+            [ngModel]="nivel()" (ngModelChange)="nivel.set($event); aplicarFiltro()">
+      <option value="">Todos os níveis</option>
+      @for (n of nivelOpcoes; track n) {
+        <option [value]="n">{{ nivelLabel(n) }}</option>
+      }
+    </select>
+    <select class="filter-select" aria-label="Período"
+            [ngModel]="periodo()" (ngModelChange)="periodo.set(+$event); aplicarFiltro()">
+      @for (p of periodoOpcoes; track p.dias) {
+        <option [value]="p.dias">{{ p.label }}</option>
+      }
+    </select>
+  </div>
+
+  @if (erro()) {
+    <p class="vazio">Não foi possível carregar. <button class="link" (click)="carregar()">Tentar de novo</button></p>
+  } @else if (carregando() && logs().length === 0) {
+    <p class="vazio">Carregando…</p>
+  } @else if (logs().length === 0) {
+    <p class="vazio">Nenhum registro com esses filtros.</p>
+  } @else {
+    <div class="tabela-wrap" [style.opacity]="carregando() ? 0.6 : 1">
+      <table class="tabela">
+        <thead>
+          <tr><th>Quando</th><th>Nível</th><th>Mensagem</th><th class="col-extra">Requisição</th></tr>
+        </thead>
+        <tbody>
+          @for (l of logs(); track l.id) {
+            <tr [class.com-erro]="l.nivel === 'ERROR'">
+              <td class="hora" [title]="l.criadoEm | date:'dd/MM/yyyy HH:mm:ss'">
+                <span class="data">{{ l.criadoEm | date:'dd/MM' }}</span>{{ l.criadoEm | date:'HH:mm:ss' }}
+              </td>
+              <td><span class="chip" [ngClass]="nivelClasse(l.nivel)">{{ nivelLabel(l.nivel) }}</span></td>
+              <td class="quebra">
+                {{ l.mensagem }}
+                @if (l.excecao) {
+                  <button class="link ms-2" (click)="alternar(l.id)" [attr.aria-expanded]="abertos().has(l.id)">
+                    {{ abertos().has(l.id) ? 'ocultar trace' : 'ver trace' }}
+                  </button>
+                }
+                <span class="sub">
+                  @if (l.caminho) { {{ l.metodo }} {{ l.caminho }} }
+                  @if (l.duracaoMs !== null) { · {{ l.duracaoMs }} ms }
+                  @if (l.usuario) { · {{ l.usuario }} }
+                  @if (mostrarOrigem(l.origem)) { · {{ origemCurta(l.origem) }} }
+                </span>
+              </td>
+              <td class="mono col-extra">{{ l.requisicaoId || '—' }}</td>
+            </tr>
+            @if (l.excecao && abertos().has(l.id)) {
+              <tr>
+                <td colspan="4" class="detalhe">
+                  <div class="detalhe-cab">
+                    <span>Stack trace</span>
+                    <button class="link" (click)="copiar(l)">{{ copiadoId() === l.id ? 'Copiado' : 'Copiar' }}</button>
+                  </div>
+                  <pre>{{ l.excecao }}</pre>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rodape">
+      <span aria-live="polite">{{ intervalo() }} de {{ total() }}</span>
+      @if (totalPaginas() > 1) {
+        <span class="paginas">
+          <button class="btn btn-dark-custom btn-sm" [disabled]="pagina() === 0 || carregando()" (click)="irParaPagina(pagina() - 1)">Anterior</button>
+          Página {{ pagina() + 1 }} de {{ totalPaginas() }}
+          <button class="btn btn-dark-custom btn-sm" [disabled]="pagina() >= totalPaginas() - 1 || carregando()" (click)="irParaPagina(pagina() + 1)">Próxima</button>
+        </span>
+      }
+    </div>
+  }
+</div>

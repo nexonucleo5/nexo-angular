@@ -9,9 +9,9 @@
   font-weight: 600; cursor: pointer;
   display: inline-flex; align-items: center; gap: 6px;
   transition: border-color 0.2s, color 0.2s;
-  &:hover { border-color: #9b2fff; }
+  &:hover { border-color: var(--nx-brand, #6D28D9); }
   &.ativa {
-    border-color: #9b2fff;
+    border-color: var(--nx-brand, #6D28D9);
     color: var(--text-main);
     background: var(--bg-card);
   }
@@ -29,8 +29,8 @@
   padding: 12px 14px;
   text-align: left; width: 100%; cursor: pointer;
   transition: border-color 0.2s;
-  &:hover { border-color: #9b2fff; }
-  &.selecionada { border-color: #9b2fff; background: var(--hover-overlay); }
+  &:hover { border-color: var(--nx-brand, #6D28D9); }
+  &.selecionada { border-color: var(--nx-brand, #6D28D9); background: var(--hover-overlay); }
 }
 
 .conteudo-row {
@@ -38,7 +38,7 @@
   border: 1px solid var(--border-color);
   border-radius: 14px;
   transition: border-color 0.2s;
-  &:hover { border-color: #9b2fff; }
+  &:hover { border-color: var(--nx-brand, #6D28D9); }
 
   /* Fora do ar fica apagado: a lista mistura publicado e não, e a diferença
      precisa saltar numa varredura rápida. */
@@ -59,7 +59,7 @@
   width: 28px; height: 22px; line-height: 1;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: border-color 0.2s;
-  &:hover:not(:disabled) { border-color: #9b2fff; }
+  &:hover:not(:disabled) { border-color: var(--nx-brand, #6D28D9); }
   &:disabled { opacity: 0.35; cursor: not-allowed; }
 }
 

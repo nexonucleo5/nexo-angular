@@ -18,11 +18,19 @@ export class MenuUsuario {
 
   onLogout = output<void>();
 
+  /** Tema atual e pedido de troca: quem persiste é o App (serviço do perfil → aplicarTema). */
+  temaEscuro = input(false);
+  alternarTema = output<void>();
+
   menuOpen = signal(false);
   menuRef = viewChild<ElementRef>('menuRef');
 
   toggleMenu() {
     this.menuOpen.update(v => !v);
+  }
+
+  escolherTema(escuro: boolean) {
+    if (escuro !== this.temaEscuro()) this.alternarTema.emit();
   }
 
   @HostListener('document:click', ['$event'])

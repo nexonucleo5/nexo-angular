@@ -14,7 +14,13 @@
             <h2 class="fw-bold mb-0 text-main">{{ stat.value }}</h2>
           </div>
           <div class="icon-square" [ngClass]="stat.color">
-            <i [class]="'bi ' + stat.icon"></i>
+            @switch (stat.icon) {
+              @case ('bi-check2-circle') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg> }
+              @case ('bi-clock-history') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-clock"></use></svg> }
+              @case ('bi-graph-up') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trend"></use></svg> }
+              @case ('bi-journal-text') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg> }
+              @default { <i [class]="'bi ' + stat.icon"></i> }
+            }
           </div>
         </div>
       </div>
@@ -33,7 +39,7 @@
   <div *ngIf="abaAtiva === 'ativas'">
     <div class="main-card p-3 mb-4">
       <div class="search-box">
-        <i class="bi bi-search"></i>
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
         <input type="text" class="form-control-custom" [(ngModel)]="buscaTermo" placeholder="Buscar avaliações...">
       </div>
     </div>
@@ -47,7 +53,7 @@
               <h3 class="h5 text-main fw-bold d-inline-block align-middle mb-0">{{ avaliacao.titulo }}</h3>
             </div>
             <div class="d-flex gap-2">
-              <button class="btn-action" (click)="verDetalhes(avaliacao)"><i class="bi bi-eye"></i></button>
+              <button class="btn-action" (click)="verDetalhes(avaliacao)"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-eye"></use></svg></button>
             </div>
           </div>
           <p class="text-soft small mb-3">{{ avaliacao.tipo }} • {{ avaliacao.turma }} • {{ avaliacao.data }}</p>
@@ -87,7 +93,7 @@
             <td><span class="priority-tag alta">{{ item.pendentes }} pendente(s)</span></td>
             <td class="text-end">
               <button class="btn btn-sm btn-gradient py-1 px-3">
-                <i class="bi bi-pencil-square me-1"></i> Corrigir
+                <svg class="ic me-1" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-pencil"></use></svg> Corrigir
               </button>
             </td>
           </tr>
@@ -104,7 +110,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="h4 text-main fw-bold mb-0">Banco de Questões</h2>
       <button class="btn btn-gradient" (click)="abrirNovaQuestao()">
-        <i class="bi bi-plus-lg me-2"></i> Nova Questão
+        <svg class="ic me-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-plus"></use></svg> Nova Questão
       </button>
     </div>
 
@@ -141,8 +147,8 @@
           <div class="d-flex justify-content-between align-items-start mb-3">
             <h4 class="h6 text-main fw-bold mb-0">{{ q.enunciado }}</h4>
             <div class="d-flex gap-2">
-              <button class="btn-action" (click)="editarQuestao(q)"><i class="bi bi-pencil"></i></button>
-              <button class="btn-action btn-delete" (click)="excluirQuestao(q)"><i class="bi bi-trash"></i></button>
+              <button class="btn-action" (click)="editarQuestao(q)"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-pencil"></use></svg></button>
+              <button class="btn-action btn-delete" (click)="excluirQuestao(q)"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trash"></use></svg></button>
             </div>
           </div>
           <div class="d-flex gap-2 flex-wrap">

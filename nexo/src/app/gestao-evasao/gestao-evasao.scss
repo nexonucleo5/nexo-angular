@@ -21,7 +21,7 @@
   background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 14px; padding: 8px 14px;
   transition: border-color 0.2s;
   &:focus-within { border-color: #9b2fff; }
-  i { color: var(--text-muted); margin-right: 8px; }
+  :is(i, .ic) { color: var(--text-muted); margin-right: 8px; }
   input { background: transparent; border: none; color: var(--text-main); width: 100%;
     &::placeholder { color: var(--text-muted); } &:focus { outline: none; }
   }
@@ -32,7 +32,7 @@
   option { background: var(--bg-card); color: var(--text-main); }
 }
 .gradient-btn {
-  background: linear-gradient(90deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   color: white; border: none; border-radius: 12px;
   font-weight: 600; padding: 10px 20px; cursor: pointer; transition: opacity 0.2s;
   &:hover { opacity: 0.9; }
@@ -57,7 +57,7 @@
   &.medio { background: #f59e0b; color: white; }
 }
 .gradient-btn-blue {
-  background: linear-gradient(90deg, #2196f3, #00bcd4); color: white; border: none;
+  background: #1976D2; color: white; border: none;
   border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
   transition: opacity 0.2s; &:hover { opacity: 0.9; }
 }
@@ -79,7 +79,7 @@
   .student-card .action-buttons { width: 100%; }
 }
 .progress { height: 6px; background: var(--border-color); border-radius: 10px; overflow: hidden; }
-.bg-purple { background: linear-gradient(90deg, #9b2fff, #673ab7) !important; }
+.bg-purple { background: var(--nx-brand-deep, #5B21B6) !important; }
 
 /* As 4 métricas ficam lado a lado (o d-flex do template) enquanto houver
    largura. Abaixo disso cada uma encolhia até o texto quebrar no meio

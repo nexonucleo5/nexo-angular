@@ -13,7 +13,7 @@ import com.nexo.domain.Turma;
 import com.nexo.repository.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,11 +38,20 @@ public class RelatorioService {
     private final AlunoRepository alunos;
     private final TurmaRepository turmas;
     private final AgregadosAcademicos agregados;
+    private final NotaRepository notas;
 
-    public RelatorioService(AlunoRepository alunos, TurmaRepository turmas, AgregadosAcademicos agregados) {
+    public RelatorioService(AlunoRepository alunos, TurmaRepository turmas, AgregadosAcademicos agregados,
+                            NotaRepository notas) {
         this.alunos = alunos;
         this.turmas = turmas;
         this.agregados = agregados;
+        this.notas = notas;
+    }
+
+    /** Períodos disponíveis para o filtro da tela (só os que têm nota lançada). */
+    @Transactional(readOnly = true)
+    public List<String> periodosDisponiveis() {
+        return notas.listarPeriodos();
     }
 
     /**
@@ -50,7 +59,7 @@ public class RelatorioService {
      * com N = alunos — o que fazia esta tela levar segundos em produção).
      */
     @Transactional(readOnly = true)
-    public Desempenho desempenho(String periodo, String visao) {
+    public Desempenho desempenho(String periodo) {
         var indices = agregados.carregar(periodo);
         var todosAlunos = alunos.findAllComTurma();
         long total = todosAlunos.size();
@@ -108,8 +117,8 @@ public class RelatorioService {
     }
 
     @Transactional(readOnly = true)
-    public byte[] exportar(String formato, String periodo, String visao) {
-        Desempenho dados = desempenho(periodo, visao);
+    public byte[] exportar(String formato, String periodo) {
+        Desempenho dados = desempenho(periodo);
         return switch (formato == null ? "" : formato.toLowerCase()) {
             case "pdf" -> exportarPdf(dados);
             case "xlsx" -> exportarXlsx(dados);
@@ -153,7 +162,7 @@ public class RelatorioService {
     }
 
     private byte[] exportarXlsx(Desempenho dados) {
-        try (XSSFWorkbook wb = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        try (SXSSFWorkbook wb = new SXSSFWorkbook(100); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet kpis = wb.createSheet("KPIs");
             String[][] linhasKpi = {
                     {"Taxa de aprovação (%)", String.valueOf(dados.taxaAprovacao())},
@@ -182,6 +191,7 @@ public class RelatorioService {
             }
 
             wb.write(out);
+            wb.dispose();
             return out.toByteArray();
         } catch (Exception e) {
             throw new IllegalStateException("Falha ao gerar Excel", e);

@@ -20,7 +20,17 @@ public interface ConteudoMateriaRepository extends JpaRepository<ConteudoMateria
     List<ConteudoMateria> publicadosDaMateria(
             @org.springframework.data.repository.query.Param("materiaId") Long materiaId);
 
+    /** Sem uso em produção desde o group by de contarPorPublicado(): fica como referência independente no AgregadosEContagensTest. */
     long countByPublicado(Boolean publicado);
+
+    /**
+     * (publicado, total) numa consulta só — o painel do administrador mostra o total e
+     * os despublicados lado a lado, e eram dois {@code count(*)} sobre a mesma tabela.
+     * O {@code publicado} nulo (registro anterior à coluna) vem como chave própria e
+     * conta como publicado, igual ao resto do sistema.
+     */
+    @org.springframework.data.jpa.repository.Query("select c.publicado, count(c) from ConteudoMateria c group by c.publicado")
+    java.util.List<Object[]> contarPorPublicado();
     boolean existsByMateriaId(Long materiaId);
 
     /**

@@ -4,7 +4,7 @@
 $color-green:  #06d25e;
 $color-blue:   #2196f3;
 $color-orange: #f59e0b;
-$color-purple: #9b2fff;
+$color-purple: var(--nx-brand, #6D28D9);
 $color-red:    #ef4444;
 
 .text-green  { color: $color-green  !important; }
@@ -17,18 +17,18 @@ $color-red:    #ef4444;
   width: 48px; height: 48px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center; color: white;
 
-  &.blue   { background: linear-gradient(135deg, #2196f3, #00bcd4); }
-  &.green  { background: linear-gradient(135deg, #06d25e, #00c853); }
-  &.orange { background: linear-gradient(135deg, #ff9800, #ff5722); }
-  &.purple { background: linear-gradient(135deg, #9b2fff, #673ab7); }
-  &.red    { background: linear-gradient(135deg, #ff3d00, #ff1744); }
+  &.blue   { background: #1976D2; }
+  &.green  { background: #15803D; }
+  &.orange { background: #0E7490; }
+  &.purple { background: var(--nx-brand-deep, #5B21B6); }
+  &.red    { background: #DC2626; }
 }
 
 /* Cards */
 .main-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 20px;
+  border-radius: var(--nx-radius-card, 14px);
 }
 
 /* Caixa de horário da aula */
@@ -74,7 +74,7 @@ $color-red:    #ef4444;
 
 /* Risk tags */
 .risk-tag {
-  font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: var(--nx-radius-card, 14px);
   &.critico { background: rgba(239, 68, 68, 0.12); color: $color-red;    }
   &.atencao { background: rgba(245, 158, 11, 0.12); color: $color-orange; }
 }
@@ -91,10 +91,10 @@ $color-red:    #ef4444;
 .subject-line-fill {
   height: 100%; border-radius: 10px;
   transition: width 0.8s ease;
-  &.blue-fill   { background: linear-gradient(135deg, #2e73f6, #10c6df); }
-  &.green-fill  { background: linear-gradient(135deg, #0fcd5c, #08d6a2); }
-  &.orange-fill { background: linear-gradient(135deg, #ff6a00, #ff5f79); }
-  &.purple-fill { background: #9b2fff; }
+  &.blue-fill   { background: #2E73F6; }
+  &.green-fill  { background: #15803D; }
+  &.orange-fill { background: var(--nx-accent, #0FA3C2); }
+  &.purple-fill { background: var(--nx-brand-deep, #5B21B6); }
 }
 
 /* Atividades recentes — ícone circular */
@@ -113,3 +113,11 @@ $color-red:    #ef4444;
   border-radius: 50%; object-fit: cover;
   border: 2px solid var(--border-color);
 }
+
+/* Barras preenchem ao carregar (nx-draw); desligado sem animações */
+.subject-line-fill {
+  transform-origin: left center;
+  animation: nx-draw 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both;
+}
+:host-context(.sem-animacoes) :is(.subject-line-fill) { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { :is(.subject-line-fill) { animation: none !important; } }

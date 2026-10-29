@@ -106,6 +106,22 @@ class AdminPainelTest extends TesteApiBase {
         assertThat(loginHttp("professor", SENHA_PADRAO).getStatus())
                 .as("a senha antiga para de valer").isEqualTo(401);
         assertThat(loginHttp("professor", nova).getStatus()).isEqualTo(200);
+
+        // A provisória passou pela mão do administrador: o login avisa o cliente que ela
+        // precisa ser trocada, e o aviso só some quando o próprio usuário define outra.
+        JsonNode sessao = autenticar("professor", nova);
+        assertThat(sessao.get("usuario").get("precisaTrocarSenha").asBoolean())
+                .as("senha provisória exige troca").isTrue();
+
+        mvc.perform(post("/api/usuarios/me/senha")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"senhaAtual\":\"" + nova + "\",\"novaSenha\":\"Horizonte#Azul2026\"}")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + sessao.get("token").asText()))
+                .andExpect(status().isNoContent());
+
+        assertThat(autenticar("professor", "Horizonte#Azul2026").get("usuario")
+                .get("precisaTrocarSenha").asBoolean())
+                .as("depois da troca o login segue normal").isFalse();
     }
 
     // ── Catálogo ─────────────────────────────────────────────────────────────

@@ -1,0 +1,153 @@
+/* Só o que é desta aba; cartão, tabela, chips e paginação vêm de ../auditoria/logs-tabela.scss. */
+
+/* ── Cartões de estado ─────────────────────────────────────────────────── */
+.kpis {
+  display: grid;
+  /* 175px: cinco cartões cabem numa linha na área útil de uma tela de 1400px. */
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* A cor do ícone é o resumo: verde = nada a fazer, âmbar = olhar, vermelho = agir. */
+.icon-box {
+  &.st-ok { background: #15803d; }
+  &.st-aviso { background: #b45309; }
+  &.st-erro { background: #b91c1c; }
+}
+
+.barra {
+  height: 6px;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--neutro-bg);
+
+  > span { display: block; height: 100%; border-radius: 3px; background: #15803d; }
+  &.st-aviso > span { background: #d97706; }
+  &.st-erro > span { background: #dc2626; }
+}
+
+/* ── Faixas de aviso (só quando pedem ação) ────────────────────────────── */
+.faixa {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-main);
+  border-radius: 14px;
+
+  .ic { flex: none; margin-top: 2px; }
+  code { font-size: 12px; color: inherit; }
+}
+.faixa-aviso { background: var(--aviso-bg); .ic { color: var(--aviso); } }
+.faixa-erro { background: var(--erro-bg); font-weight: 600; .ic { color: var(--erro); } }
+
+/* ── Gráfico das últimas 24 horas ──────────────────────────────────────── */
+.legenda {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text-soft);
+
+  span { display: inline-flex; align-items: center; gap: 6px; }
+}
+.ponto { width: 9px; height: 9px; border-radius: 50%; }
+.ponto-erro { background: #dc2626; }
+.ponto-aviso { background: #d97706; }
+
+.grafico-corpo { padding: 4px 20px 16px; }
+
+.grafico {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  height: 150px;
+}
+
+.col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+
+  &:hover { background: var(--neutro-bg); }
+}
+
+.pilha {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 0 2px;
+  min-height: 0;
+}
+
+.seg { display: block; flex: none; border-radius: 3px; }
+.seg-erro { background: #dc2626; }
+.seg-aviso { background: #d97706; }
+.seg-vazio { height: 3px; background: var(--neutro-bg); }
+
+.rotulo {
+  padding-top: 6px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.grafico-vazio {
+  position: absolute;
+  inset: 0 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-soft);
+  pointer-events: none;
+}
+
+/* ── Stack trace dentro da tabela ──────────────────────────────────────── */
+.detalhe {
+  background: var(--codigo-bg);
+
+  .detalhe-cab {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-soft);
+  }
+
+  pre {
+    margin: 0;
+    max-height: 260px;
+    overflow: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: var(--text-main);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .kpis { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  /* Cinco cartões em duas colunas: o último ocupa a linha inteira em vez de ficar sozinho. */
+  .kpis > :last-child { grid-column: 1 / -1; }
+  .grafico-corpo { padding: 4px 14px 14px; }
+  .grafico { gap: 2px; height: 120px; }
+  /* 24 rótulos não cabem: de 6 em 6 horas, contando da hora atual para trás. */
+  .rotulo { visibility: hidden; }
+  .col:nth-last-child(6n + 1) .rotulo { visibility: visible; }
+  .col:last-child .rotulo, .col:nth-last-child(6n + 1) .rotulo { overflow: visible; white-space: nowrap; }
+  .legenda { gap: 12px; }
+}

@@ -89,6 +89,7 @@ html, body {
   display: flex;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
   background-color: var(--bg-primary);
 
@@ -115,6 +116,7 @@ app-menu-admin,
 .sidebar {
   width: var(--largura-sidebar) !important;
   height: 100vh;
+  height: 100dvh;
   position: fixed;
   top: 0;
   left: 0;
@@ -163,6 +165,7 @@ app-menu-admin {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--bg-primary);
   margin-left: 0;
   width: 100%;
@@ -243,33 +246,20 @@ app-menu-admin {
    conteúdo, só marcar o fundo. */
 .main-content { position: relative; }
 
-.main-content::before {
-  content: '';
+.main-content > .marca-fundo {
   position: fixed;      /* não rola junto com a página */
-  inset: 0;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: min(560px, 58vw);
-  opacity: 0.04;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.06;
   pointer-events: none;
   z-index: 0;
-}
-
-html[data-theme='dark'] .main-content::before {
-  background-image: url('/assets/imagensProjeto/logo-nexo-dark.png');
-}
-html[data-theme='light'] .main-content::before {
-  background-image: url('/assets/imagensProjeto/logo-nexo-light.png');
 }
 
 /* Conteúdo sempre acima da marca d'água. O header fica de fora: ele tem
    position/z-index próprios e no mobile precisa passar por cima da sidebar
    para os 3 riscos continuarem clicáveis com a barra aberta. */
-.main-content > *:not(.top-header) { position: relative; z-index: 1; }
-
-/* No login quem manda é a logo grande do login.scss — duas marcas d'água
-   sobrepostas ficariam sujas. */
-.app-layout.tela-autenticacao .main-content::before { display: none; }
+.main-content > *:not(.top-header):not(.marca-fundo) { position: relative; z-index: 1; }
 
 /* Header fixo */
 .top-header {
@@ -312,7 +302,7 @@ html[data-theme='light'] .main-content::before {
     height: 3px;
     width: 100%;
     border-radius: 3px;
-    background: linear-gradient(90deg, #9b2fff, #06d25e);
+    background: var(--nx-brand-deep, #5B21B6);
     transition: transform 0.25s ease, opacity 0.2s ease;
   }
 
@@ -431,13 +421,13 @@ html[data-theme='light'] .main-content::before {
 .orange-text { color: #f59e0b !important; }
 .red-text    { color: #ef4444 !important; }
 
-.green-gradient  { background: linear-gradient(135deg, #0fcd5c, #08d6a2); }
-.blue-gradient   { background: linear-gradient(135deg, #2e73f6, #10c6df); }
-.orange-gradient { background: linear-gradient(135deg, #ff6a00, #ff5f79); }
-.pink-gradient   { background: linear-gradient(135deg, #8f24ff, #f2389d); }
+.green-gradient  { background: #15803D; }
+.blue-gradient   { background: #2E73F6; }
+.orange-gradient { background: var(--nx-accent, #0FA3C2); }
+.pink-gradient   { background: #DB2777; }
 
 .btn-gradient {
-  background: linear-gradient(90deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   color: white; border: none; border-radius: 12px;
   font-weight: 600; padding: 10px 20px; cursor: pointer;
   transition: opacity 0.2s;
@@ -493,7 +483,7 @@ input.form-control,
   padding: 8px 14px;
   transition: border-color 0.2s;
 
-  i { color: var(--text-muted); margin-right: 10px; }
+  :is(i, .ic) { color: var(--text-muted); margin-right: 10px; }
 
   input {
     background: transparent;
@@ -515,7 +505,7 @@ input.form-control,
   overflow: hidden;
 }
 .progress-bar {
-  background: linear-gradient(90deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   border-radius: 10px;
 }
 
@@ -531,11 +521,11 @@ input.form-control,
   .icon-square {
     width: 45px; height: 45px; border-radius: 12px;
     display: flex; align-items: center; justify-content: center; color: white;
-    &.blue   { background: linear-gradient(135deg, #2196f3, #00bcd4); }
-    &.green  { background: linear-gradient(135deg, #06d25e, #00c853); }
-    &.orange { background: linear-gradient(135deg, #ff9800, #ff5722); }
-    &.purple { background: linear-gradient(135deg, #9b2fff, #673ab7); }
-    &.red    { background: linear-gradient(135deg, #ff3d00, #ff1744); }
+    &.blue   { background: #1976D2; }
+    &.green  { background: #15803D; }
+    &.orange { background: #0E7490; }
+    &.purple { background: var(--nx-brand-deep, #5B21B6); }
+    &.red    { background: #DC2626; }
   }
 }
 
@@ -584,7 +574,7 @@ body.modo-foco-ativo {
   }
 
   /* Menos ruído enquanto estuda. */
-  .main-content::before { display: none; }
+  .main-content > .marca-fundo { display: none; }
 }
 
 .sem-animacoes {
@@ -647,7 +637,7 @@ html.alto-contraste {
 }
 
 /* As regras de .brand-logo saíram junto com as <img> das sidebars e do login.
-   A logo agora é fundo: marca d'água em .main-content::before (seção 3) e a
+   A logo agora é o <app-logo-nexo>: marca d'água .marca-fundo (seção 3), header e a
    logo grande da tela de login (login.scss). */
 
 /* ==========================================================================
@@ -674,10 +664,10 @@ html.alto-contraste {
 .icon-box {
   width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; color: white;
-  &.blue-gradient   { background: linear-gradient(135deg, #2196f3, #00bcd4); }
-  &.green           { background: linear-gradient(135deg, #06d25e, #00c853); }
-  &.orange          { background: linear-gradient(135deg, #ff9800, #ff5722); }
-  &.purple-gradient { background: linear-gradient(135deg, #9b2fff, #673ab7); }
+  &.blue-gradient   { background: #1976D2; }
+  &.green           { background: #15803D; }
+  &.orange          { background: #0E7490; }
+  &.purple-gradient { background: var(--nx-brand-deep, #5B21B6); }
 }
 
 .search-box {
@@ -685,7 +675,7 @@ html.alto-contraste {
   background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 14px;
   transition: border-color 0.2s;
   &:focus-within { border-color: #9b2fff; }
-  i     { color: var(--text-muted); margin-right: 8px; }
+  :is(i, .ic)     { color: var(--text-muted); margin-right: 8px; }
   input { background: transparent; border: none; color: var(--text-main); width: 100%;
     &::placeholder { color: var(--text-muted); }
     &:focus { outline: none; }
@@ -708,7 +698,7 @@ html.alto-contraste {
 }
 
 .gradient-btn {
-  background: linear-gradient(90deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   color: white; border: none; border-radius: 10px;
   font-weight: 600; cursor: pointer; transition: opacity 0.2s;
   &:hover { opacity: 0.9; }
@@ -734,7 +724,7 @@ html.alto-contraste {
 
 .avatar-placeholder-circle {
   width: 44px; height: 44px; border-radius: 50%;
-  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   display: flex; align-items: center; justify-content: center;
   color: white; font-weight: 700; font-size: 14px; flex-shrink: 0;
 }
@@ -767,4 +757,96 @@ html.alto-contraste {
   }
 
   .stat-card { padding: 16px; }
+}
+/* ==========================================================================
+   9. CELULAR — acabamento de toque
+   ==========================================================================
+   Nada aqui muda o desktop: tudo que depende de dedo fica atrás de
+   (pointer: coarse) ou de max-width, e o que é global só tira atrito
+   (flash de toque, zoom de duplo toque, texto que o iOS reescala). */
+html {
+  /* O iOS aumenta o texto ao girar a tela; o layout já é fluido e não precisa. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  /* Rolar a lista de uma gaveta/modal não puxa a página atrás junto. */
+  overscroll-behavior-y: none;
+}
+
+/* Sem o atraso e o zoom de duplo toque nos controles: tocar duas vezes num
+   botão (ex.: "Responder" duas vezes seguidas) virava zoom da página. */
+button, a, select, label, summary, [role="button"], input:not([type="text"]):not([type="password"]):not([type="search"]):not([type="email"]) {
+  touch-action: manipulation;
+}
+
+/* Telas com notch/barra de gestos (precisa de viewport-fit=cover no index).
+   O padding do header mora no app.scss, junto da regra base dele. */
+.main-content {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* A gaveta de navegação cobre a tela toda: a lista rola por dentro e o último
+   link não pode ficar sob a barra de gestos do iPhone. */
+.app-layout .sidebar .sidebar-menu {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 767.98px) {
+  /* iOS dá zoom na página ao focar campo com fonte menor que 16px — e não
+     desfaz sozinho. !important porque os campos têm 14px em CSS de componente. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea,
+  .form-control,
+  .form-select {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* Tabela que rola na horizontal: o campo dentro da célula tem width: 100%, e
+     percentual não conta para a largura mínima da coluna — então a tabela
+     espremia as colunas de nota até sobrar uma tira de ~15px onde não dá para
+     digitar. O min-width devolve ao campo um tamanho de uso; quem sobra rola. */
+  .table-responsive .form-control,
+  .table-responsive .form-select,
+  .table-responsive select,
+  .table-responsive-custom .form-control,
+  .table-responsive-custom select {
+    min-width: 72px;
+  }
+
+  /* Rolagem horizontal com inércia no iOS, sem "puxar" a página ao chegar no fim. */
+  .table-responsive,
+  .table-responsive-custom {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+}
+
+@media (pointer: coarse) {
+  /* Alvo mínimo de toque de 44px (Apple HIG / WCAG 2.5.5) nos controles que a
+     auditoria achou com 26–39px: abas, filtros, selects, botões de ação. */
+  button:not(.btn-close):not(.btn-hamburguer):not(.seta),
+  .btn,
+  select,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]) {
+    min-height: 44px;
+  }
+
+  /* Setinhas e ícones soltos: a área de toque cresce sem o desenho crescer. */
+  .btn-hamburguer, .seta, .btn-presence {
+    position: relative;
+  }
+  .btn-hamburguer::after, .seta::after, .btn-presence::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+  }
+
+  /* O 'Mostrar senha' e as chaves eram clicáveis só no quadradinho. */
+  .form-check-input { width: 1.4em; height: 1.4em; }
 }

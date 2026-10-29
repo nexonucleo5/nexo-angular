@@ -2,11 +2,24 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService, RoleCliente } from '../services/auth.service';
 
-/** Bloqueia acesso a rotas privadas sem sessão ativa. */
-export const authGuard: CanActivateFn = () => {
+/** Única tela liberada enquanto a senha provisória não for trocada. */
+export const ROTA_TROCAR_SENHA = '/trocar-senha';
+
+/**
+ * Bloqueia acesso a rotas privadas sem sessão ativa — e, com a senha provisória ainda
+ * em uso, a qualquer rota que não seja a troca de senha. Sem isso o desvio feito no
+ * login era só uma sugestão: bastava clicar no menu ou digitar outra URL para seguir
+ * usando a senha que o administrador viu e repassou.
+ */
+export const authGuard: CanActivateFn = (_rota, estado) => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  return auth.usuarioLogado() ? true : router.createUrlTree(['/login']);
+  const usuario = auth.usuarioLogado();
+  if (!usuario) return router.createUrlTree(['/login']);
+  if (usuario.precisaTrocarSenha && !estado?.url?.startsWith(ROTA_TROCAR_SENHA)) {
+    return router.createUrlTree([ROTA_TROCAR_SENHA]);
+  }
+  return true;
 };
 
 /**
@@ -22,7 +35,9 @@ export const authGuard: CanActivateFn = () => {
 export const visitanteGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  return auth.usuarioLogado() ? router.createUrlTree(['/dashboards']) : true;
+  const usuario = auth.usuarioLogado();
+  if (!usuario) return true;
+  return router.createUrlTree([usuario.precisaTrocarSenha ? ROTA_TROCAR_SENHA : '/dashboards']);
 };
 
 /**

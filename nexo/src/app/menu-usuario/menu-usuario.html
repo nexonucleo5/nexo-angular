@@ -9,36 +9,52 @@
       <img [src]="userPhoto()" [alt]="userName()" class="avatar-img">
     </div>
     
-    <i class="bi bi-chevron-down chevron" [class.open]="menuOpen()"></i>
+    <svg class="ic chevron" [class.open]="menuOpen()" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-chev"></use></svg>
   </button>
 
   @if (menuOpen()) {
     <div class="dropdown-panel">
+      <div class="seletor-tema" role="radiogroup" aria-label="Tema"
+           (keydown.arrowleft)="escolherTema(false)" (keydown.arrowright)="escolherTema(true)">
+        <button type="button" role="radio" class="opcao-tema"
+                [attr.aria-checked]="!temaEscuro()" [attr.tabindex]="temaEscuro() ? -1 : 0"
+                (click)="escolherTema(false)">
+          <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-sun"></use></svg>
+          Claro
+        </button>
+        <button type="button" role="radio" class="opcao-tema"
+                [attr.aria-checked]="temaEscuro()" [attr.tabindex]="temaEscuro() ? 0 : -1"
+                (click)="escolherTema(true)">
+          <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-moon"></use></svg>
+          Escuro
+        </button>
+      </div>
+
       <a routerLink="/perfil" class="dropdown-item">
-        <i class="bi bi-person"></i> Perfil
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg> Perfil
       </a>
       <a routerLink="/configuracoes" class="dropdown-item">
-        <i class="bi bi-gear"></i> Configurações
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-sliders"></use></svg> Configurações
       </a>
       @if (authService.usuarioLogado()?.role === 'aluno') {
         <a routerLink="/meus-niveis-notas" class="dropdown-item">
-          <i class="bi bi-graph-up-arrow"></i> Notas
+          <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trend"></use></svg> Notas
         </a>
       }
 
       <div class="dropdown-divider"></div>
 
       <a routerLink="/suporte" class="dropdown-item">
-        <i class="bi bi-life-preserver"></i> Suporte
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-help"></use></svg> Suporte
       </a>
       <a routerLink="/sobre" class="dropdown-item">
-        <i class="bi bi-info-circle"></i> Sobre o Nexo
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-info"></use></svg> Sobre o Nexo
       </a>
 
       <div class="dropdown-divider"></div>
 
       <button (click)="signOut()" class="dropdown-item danger">
-        <i class="bi bi-box-arrow-right"></i> Sair
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-logout"></use></svg> Sair
       </button>
     </div>
   }

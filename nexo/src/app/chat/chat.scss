@@ -4,7 +4,7 @@
 .chat-window {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 18px;
+  border-radius: var(--nx-radius-card, 14px);
 }
 
 .chat-window { min-height: 520px; }
@@ -22,7 +22,7 @@
   border-radius: 14px; cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
   &:hover { background: var(--hover-overlay); }
-  &.active { border-color: #9b2fff; background: var(--hover-overlay); }
+  &.active { border-color: var(--nx-brand, #6D28D9); background: var(--hover-overlay); }
 }
 
 .extra-small { font-size: 11px; }
@@ -46,19 +46,19 @@
     background: var(--border-color);
     border-radius: 8px;
   }
-  &::-webkit-scrollbar-thumb:hover { background: #9b2fff; }
+  &::-webkit-scrollbar-thumb:hover { background: var(--nx-brand-deep, #5B21B6); }
 }
 
 .bolha {
   max-width: 75%;
   padding: 10px 14px;
-  border-radius: 16px;
+  border-radius: var(--nx-radius-card, 14px);
   background: var(--bg-primary);
   color: var(--text-main);
   border: 1px solid var(--border-color);
 
   &.minha {
-    background: linear-gradient(135deg, #9b2fff, #06d25e);
+    background: var(--nx-brand-deep, #5B21B6);
     color: #fff;
     border: none;
   }
@@ -69,13 +69,26 @@
   border: 1px solid var(--border-color);
   border-radius: 12px;
   color: var(--text-main);
-  &:focus { border-color: #9b2fff; box-shadow: none; background: var(--bg-primary); color: var(--text-main); }
+  &:focus { border-color: var(--nx-brand, #6D28D9); box-shadow: none; background: var(--bg-primary); color: var(--text-main); }
   &::placeholder { color: var(--text-muted); }
 }
 
 .btn-enviar {
-  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   color: #fff; border: none; border-radius: 12px;
   &:hover { opacity: 0.9; color: #fff; }
   &:disabled { opacity: 0.5; }
+}
+
+/* Botão primário do redesign: marca profunda, texto branco, hover mais escuro */
+.btn-enviar {
+  min-height: 44px;
+  color: #FFFFFF;
+  border-radius: var(--nx-radius-control, 10px);
+  opacity: 1;
+  &:hover:not(:disabled) {
+    opacity: 1;
+    color: #FFFFFF;
+    background: color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 85%, #000000);
+  }
 }

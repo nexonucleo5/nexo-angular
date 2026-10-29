@@ -7,6 +7,7 @@ import { MenuUsuario } from './menu-usuario/menu-usuario';
 import { MenuDiretor } from './menu-diretor/menu-diretor';
 import { MenuProfessor } from './menu-professor/menu-professor';
 import { MenuAdmin } from './menu-admin/menu-admin';
+import { LogoNexo } from './logo-nexo/logo-nexo';
 import { AuthService, RoleCliente } from './services/auth.service';
 import { aplicarTema, temaSalvoEscuro } from './configuracoes/settings-store';
 import { ConfiguracaoAlunoService } from './configuracao-aluno/configuracao-aluno.service';
@@ -32,6 +33,7 @@ interface PerfilSettings {
     MenuDiretor,
     MenuProfessor,
     MenuAdmin,
+    LogoNexo,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',

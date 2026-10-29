@@ -1,0 +1,284 @@
+/* ==========================================================================
+   Tokens do redesign (prefixo --nx-). Claro em :root, escuro em
+   html[data-theme='dark'] — quem troca o atributo é aplicarTema()
+   (settings-store.ts).
+   ========================================================================== */
+:root {
+  --nx-font-display: 'Bricolage Grotesque Variable', 'Segoe UI', system-ui, sans-serif;
+  --nx-font-text: 'Figtree Variable', 'Segoe UI', system-ui, sans-serif;
+  --nx-radius-card: 14px;
+  --nx-radius-control: 10px;
+  --nx-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --nx-bg: #E9E6F1;
+  --nx-card: #FFFFFF;
+  --nx-soft: #DDD7EA;
+  --nx-line: #B2A8CC;
+  --nx-border-strong: #6F6492;
+  --nx-text: #1A1030;
+  --nx-muted: #4B4566;
+  --nx-primary: #6D28D9;
+  --nx-on-primary: #FFFFFF;
+  --nx-primary-soft: #DCCBFA;
+  --nx-primary-text: #4C1D95;
+  --nx-brand: #6D28D9;
+  --nx-brand-deep: #5B21B6;
+  --nx-field: #FFFFFF;
+  --nx-accent: #0FA3C2;
+  --nx-on-accent: #00141A;
+  --nx-danger: #B3261E;
+  --nx-danger-bg: #F8D9D6;
+  --nx-ok: #14663F;
+  --nx-ok-bg: #D5EFE0;
+  --nx-shadow: rgba(26, 16, 48, 0.14);
+  --nx-shadow-soft: rgba(26, 16, 48, 0.08);
+}
+
+html[data-theme='dark'] {
+  --nx-bg: #0B0716;
+  --nx-card: #171128;
+  --nx-soft: #2A2048;
+  --nx-line: #5A4A8F;
+  --nx-border-strong: #8C80BA;
+  --nx-text: #F4F1FF;
+  --nx-muted: #C9C1E6;
+  --nx-primary: #A78BFA;
+  --nx-on-primary: #1A0B3B;
+  --nx-primary-soft: #3B2A72;
+  --nx-primary-text: #D9CBFF;
+  --nx-brand: #A78BFA;
+  --nx-brand-deep: #7C3AED;
+  --nx-field: #221A3A;
+  --nx-accent: #5EE0F2;
+  --nx-on-accent: #021B22;
+  --nx-danger: #FF8A80;
+  --nx-danger-bg: #3A1C22;
+  --nx-ok: #7BE0A8;
+  --nx-ok-bg: #12301F;
+  --nx-shadow: rgba(0, 0, 0, 0.5);
+  --nx-shadow-soft: rgba(0, 0, 0, 0.32);
+}
+
+/* Ícones do sprite (assets/icones/nexo-icons.svg):
+   <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-NOME"></use></svg>
+   O traço herda o color do texto ao redor. */
+.ic {
+  width: var(--ic, 20px);
+  height: var(--ic, 20px);
+  flex: none;
+  display: inline-block;
+  vertical-align: -0.2em;
+  overflow: visible;
+}
+
+/* Tamanhos: os utilitários fs-* do Bootstrap, que antes escalavam o <i>, agora
+   escalam o ícone; o traço e o preenchimento vêm de cada <symbol> do sprite. */
+.ic.fs-1 { --ic: 36px; }
+.ic.fs-2 { --ic: 30px; }
+.ic.fs-3 { --ic: 26px; }
+.ic.fs-4 { --ic: 22px; }
+.ic.fs-5 { --ic: 19px; }
+.ic.fs-6, .ic.small { --ic: 16px; }
+
+/* Um só chevron no sprite (aponta para baixo); a direção vem da rotação */
+.ic-rot-90  { transform: rotate(90deg); }
+.ic-rot-180 { transform: rotate(180deg); }
+.ic-rot-270 { transform: rotate(270deg); }
+.ic-rot-315 { transform: rotate(-45deg); }
+
+/* "Desligado" (ex.: olho riscado): traço diagonal por cima do ícone */
+.ic-off {
+  position: relative;
+  display: inline-flex;
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 2px;
+    height: 125%;
+    border-radius: 2px;
+    background: currentColor;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    pointer-events: none;
+  }
+}
+
+/* ==========================================================================
+   Escopo do redesign: Aluno, Professor e Admin.
+   O Diretor fica de fora (o layout dele tem <app-menu-diretor>), então nada
+   aqui muda as telas dele. O :where() zera a especificidade do escopo: estas
+   regras vencem as globais de styles.scss (vêm depois) mas continuam
+   perdendo para o SCSS de cada componente.
+   ========================================================================== */
+$nx-escopo: ':where(.app-layout:not(:has(app-menu-diretor)))';
+$nx-cards: '.card-custom, .content-card, .main-card, .metric-card, .stat-card, .quick-card, .student-row-card';
+$nx-anel: 0 0 0 3px color-mix(in srgb, var(--nx-brand, #6D28D9) 35%, transparent);
+
+/* As variáveis antigas passam a apontar para a paleta nova. Todas as telas
+   que já usam --bg-card, --text-main etc. trocam de cor sem mudar uma linha. */
+#{$nx-escopo} {
+  --bg-primary: var(--nx-bg, #E9E6F1);
+  --bg-body: var(--nx-bg, #E9E6F1);
+  --bg-card: var(--nx-card, #FFFFFF);
+  --bg-input: var(--nx-field, #FFFFFF);
+  --text-main: var(--nx-text, #1A1030);
+  --text-muted: var(--nx-muted, #4B4566);
+  --text-soft: var(--nx-muted, #4B4566);
+  --border-color: var(--nx-line, #B2A8CC);
+  --shadow-color: var(--nx-shadow-soft, rgba(26, 16, 48, 0.08));
+  --hover-overlay: color-mix(in srgb, var(--nx-brand, #6D28D9) 6%, transparent);
+  --dropdown-hover: color-mix(in srgb, var(--nx-brand, #6D28D9) 10%, transparent);
+
+  font-family: var(--nx-font-text, 'Segoe UI', system-ui, sans-serif);
+}
+
+/* Tipografia: títulos em Bricolage, texto em Figtree */
+#{$nx-escopo} :is(h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5) {
+  font-family: var(--nx-font-display, 'Segoe UI', system-ui, sans-serif);
+  letter-spacing: -0.01em;
+}
+#{$nx-escopo} :is(h1, .h1) { font-weight: 800; letter-spacing: -0.02em; }
+
+/* Foco visível em todo elemento interativo */
+#{$nx-escopo} :is(a, button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: none;
+  box-shadow: $nx-anel;
+}
+
+/* Campos */
+#{$nx-escopo} :is(input.form-control, .form-control, .form-select, .form-control-custom, .form-select-custom, .filter-select) {
+  border-radius: var(--nx-radius-control, 10px);
+}
+#{$nx-escopo} :is(input.form-control, .form-control, .form-select, .form-control-custom, .form-select-custom, .filter-select):focus {
+  border-color: var(--nx-brand, #6D28D9);
+  box-shadow: $nx-anel;
+  outline: none;
+}
+#{$nx-escopo} .form-check-input:checked {
+  background-color: var(--nx-brand-deep, #5B21B6);
+  border-color: var(--nx-brand-deep, #5B21B6);
+}
+#{$nx-escopo} .search-box {
+  border-radius: var(--nx-radius-control, 10px);
+  &:focus-within { border-color: var(--nx-brand, #6D28D9); box-shadow: $nx-anel; }
+}
+
+/* Cards: borda de linha, raio 14px, sombra suave; hover só eleva */
+#{$nx-escopo} :is(#{$nx-cards}) {
+  border: 1px solid var(--nx-line, #B2A8CC);
+  border-radius: var(--nx-radius-card, 14px);
+  box-shadow: 0 6px 20px var(--nx-shadow-soft, rgba(26, 16, 48, 0.08));
+  transition: transform 0.25s var(--nx-ease, ease), box-shadow 0.25s var(--nx-ease, ease), border-color 0.2s;
+}
+#{$nx-escopo} :is(.metric-card, .stat-card, .quick-card, .student-row-card):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px var(--nx-shadow-soft, rgba(26, 16, 48, 0.08));
+}
+#{$nx-escopo} .quick-card:hover { border-color: var(--nx-brand, #6D28D9); }
+
+/* Botão primário */
+#{$nx-escopo} :is(.btn-gradient, .gradient-btn) {
+  min-height: 44px;
+  background: var(--nx-brand-deep, #5B21B6);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--nx-radius-control, 10px);
+  opacity: 1;
+  transition: background-color 0.2s, transform 0.2s;
+
+  &:hover:not(:disabled) {
+    opacity: 1;
+    color: #FFFFFF;
+    background: color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 85%, #000000);
+  }
+  &:disabled { opacity: 0.6; }
+}
+#{$nx-escopo} .btn-dark-custom {
+  border-radius: var(--nx-radius-control, 10px);
+  &:hover:not(:disabled) { border-color: var(--nx-brand, #6D28D9); }
+}
+
+/* Utilitários de cor: roxo antigo vira a marca; laranja vira ciano */
+#{$nx-escopo} .purple-text { color: var(--nx-brand, #6D28D9) !important; }
+#{$nx-escopo} .orange-gradient {
+  background: #0E7490;
+}
+#{$nx-escopo} :is(.icon-square, .icon-box) {
+  border-radius: 12px;
+  &.orange { background: #0E7490; color: #FFFFFF; }
+  &:is(.purple, .purple-gradient) { background: var(--nx-brand-deep, #5B21B6); color: #FFFFFF; }
+}
+
+/* Header, hambúrguer, avatar e barras de progresso */
+#{$nx-escopo} .btn-hamburguer {
+  span { background: var(--nx-brand-deep, #5B21B6); }
+  &:hover { background: color-mix(in srgb, var(--nx-brand, #6D28D9) 10%, transparent); }
+}
+html[data-theme='dark'] #{$nx-escopo} .btn-hamburguer span { background: var(--nx-brand, #A78BFA); }
+#{$nx-escopo} .profile-image { border-color: var(--nx-brand, #6D28D9); }
+#{$nx-escopo} .avatar-placeholder-circle { background: var(--nx-brand-deep, #5B21B6); }
+#{$nx-escopo} .progress { background-color: color-mix(in srgb, var(--nx-line, #B2A8CC) 55%, transparent); }
+#{$nx-escopo} .progress-bar {
+  background: var(--nx-accent, #0FA3C2);
+  animation: nx-draw 0.6s var(--nx-ease, ease) both;
+  transform-origin: left center;
+}
+
+/* Menu do Admin: o componente usa o SCSS do menu do Diretor (que fica fora do
+   redesign), então o visual novo entra por aqui, só para <app-menu-admin>.
+   O .sidebar .sidebar-list a mais é para vencer o seletor do componente. */
+app-menu-admin .sidebar .sidebar-list .sidebar-link {
+  border-radius: var(--nx-radius-card, 14px);
+
+  &:hover {
+    background: color-mix(in srgb, var(--nx-brand, #6D28D9) 10%, transparent);
+    :is(i, .ic) { color: var(--nx-brand, #6D28D9); }
+  }
+
+  &.active {
+    background: var(--nx-brand-deep, #5B21B6);
+    color: #FFFFFF !important;
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 30%, transparent);
+    :is(i, .ic) { color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF; }
+  }
+}
+
+/* ==========================================================================
+   Animações do redesign
+   ========================================================================== */
+@keyframes nx-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes nx-pop {
+  0%   { opacity: 0; transform: scale(0.6); }
+  60%  { transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes nx-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Entrada dos cards: colunas da grade sobem em sequência (70ms entre itens) */
+#{$nx-escopo} .main-content .row > [class*='col'] {
+  animation: nx-rise 0.5s var(--nx-ease, ease) both;
+}
+@for $i from 2 through 8 {
+  #{$nx-escopo} .main-content .row > [class*='col']:nth-child(#{$i}) {
+    animation-delay: #{($i - 1) * 70}ms;
+  }
+}
+/* Dentro de modais e formulários a grade é layout, não lista de cards */
+#{$nx-escopo} :is(.modal, form) .row > [class*='col'] { animation: none; }
+
+/* Destaque dos ícones dos cards */
+#{$nx-escopo} :is(.icon-square, .icon-box) {
+  animation: nx-pop 0.4s var(--nx-ease, ease) 0.15s both;
+}
+
+/* "Animações da interface" desligada ou sistema com movimento reduzido:
+   nada anima e tudo já nasce no estado final. */
+:is(html, body).sem-animacoes #{$nx-escopo} :is(.row > [class*='col'], .icon-square, .icon-box, .progress-bar) {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  #{$nx-escopo} :is(.row > [class*='col'], .icon-square, .icon-box, .progress-bar) {
+    animation: none !important;
+  }
+}

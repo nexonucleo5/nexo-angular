@@ -12,7 +12,7 @@
     <!-- NOTIFICAÇÕES -->
     <div class="content-card settings-card">
       <h2 class="section-card-title">
-        <i class="bi bi-bell title-icon purple-text"></i>
+        <svg class="ic title-icon purple-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bell"></use></svg>
         Notificações
       </h2>
 
@@ -56,7 +56,7 @@
     <!-- AVALIAÇÃO -->
     <div class="content-card settings-card">
       <h2 class="section-card-title">
-        <i class="bi bi-pencil-square title-icon pink-text"></i>
+        <svg class="ic title-icon pink-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-pencil"></use></svg>
         Avaliação
       </h2>
 
@@ -91,7 +91,7 @@
     <!-- DISPONIBILIDADE -->
     <div class="content-card settings-card">
       <h2 class="section-card-title">
-        <i class="bi bi-clock title-icon green-text"></i>
+        <svg class="ic title-icon green-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-clock"></use></svg>
         Disponibilidade
       </h2>
 
@@ -130,7 +130,7 @@
     <!-- APARÊNCIA -->
     <div class="content-card settings-card">
       <h2 class="section-card-title">
-        <i class="bi bi-palette title-icon blue-text"></i>
+        <svg class="ic title-icon blue-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-palette"></use></svg>
         Aparência
       </h2>
 
@@ -156,33 +156,24 @@
     <!-- PRIVACIDADE -->
     <div class="content-card settings-card">
       <h2 class="section-card-title">
-        <i class="bi bi-eye-slash title-icon orange-text"></i>
+        <span class="ic-off"><svg class="ic title-icon orange-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-eye"></use></svg></span>
         Privacidade
       </h2>
 
       <div class="settings-item toggle-item">
         <div>
           <span>Perfil visível para alunos</span>
-          <small>Alunos podem ver seu perfil e disciplinas</small>
+          <small>Alunos veem sua foto no chat. Desligado, aparece o avatar padrão</small>
         </div>
         <input type="checkbox" class="custom-switch" [checked]="privacidade().perfilVisivelAlunos"
           (change)="onPrivacidadeChange('perfilVisivelAlunos', $any($event.target).checked)">
-      </div>
-
-      <div class="settings-item toggle-item">
-        <div>
-          <span>Exibir contato para responsáveis</span>
-          <small>Responsáveis podem ver seu e-mail institucional</small>
-        </div>
-        <input type="checkbox" class="custom-switch" [checked]="privacidade().exibirContatoResponsaveis"
-          (change)="onPrivacidadeChange('exibirContatoResponsaveis', $any($event.target).checked)">
       </div>
     </div>
 
     <!-- CONTA -->
     <div class="content-card settings-card">
       <h2 class="section-card-title">
-        <i class="bi bi-person title-icon purple-text"></i>
+        <svg class="ic title-icon purple-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg>
         Conta
       </h2>
 

@@ -12,7 +12,7 @@
     <!-- NOTIFICAÇÕES -->
     <div class="content-card settings-card">
       <h2 class="section-card-title">
-        <i class="bi bi-bell title-icon purple-text"></i>
+        <svg class="ic title-icon purple-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bell"></use></svg>
         Notificações
       </h2>
 
@@ -81,7 +81,7 @@
       <div class="settings-item toggle-item">
         <div>
           <span>Ranking da turma</span>
-          <small>Exibir sua posição no ranking</small>
+          <small>Mostrar o quadro de ranking no seu painel</small>
         </div>
         <input type="checkbox" class="custom-switch" [checked]="gamificacao().rankingTurma"
           (change)="onGamificacaoChange('rankingTurma', $any($event.target).checked)">
@@ -91,7 +91,7 @@
     <!-- ESTUDOS -->
     <div class="content-card settings-card">
       <h2 class="section-card-title">
-        <i class="bi bi-book title-icon green-text"></i>
+        <svg class="ic title-icon green-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg>
         Estudos
       </h2>
 
@@ -126,7 +126,7 @@
     <!-- APARÊNCIA -->
     <div class="content-card settings-card">
       <h2 class="section-card-title">
-        <i class="bi bi-palette title-icon blue-text"></i>
+        <svg class="ic title-icon blue-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-palette"></use></svg>
         Aparência
       </h2>
 
@@ -177,24 +177,46 @@
       <div class="settings-item toggle-item">
         <div>
           <span>Leitura em voz alta</span>
-          <small>Permite ouvir enunciados e conteúdos</small>
+          <small>Mostra um botão "Ouvir" nos conteúdos e nas perguntas dos desafios</small>
+          @if (leituraVoz.semVozNoAparelho()) {
+            <small class="text-warning d-block mt-1">
+              Este aparelho não tem voz em português instalada, então o botão não vai aparecer.
+              Instale uma voz em português nas configurações de idioma ou de acessibilidade do sistema.
+            </small>
+          }
         </div>
         <input type="checkbox" class="custom-switch" [checked]="acessibilidade().leituraVozAlta"
           (change)="onAcessibilidadeChange('leituraVozAlta', $any($event.target).checked)">
       </div>
+
+      @if (acessibilidade().leituraVozAlta && leituraVoz.suportado()) {
+        <div class="settings-item toggle-item">
+          <div>
+            <span id="rotulo-velocidade-voz">Velocidade da leitura</span>
+            <small>Vale nas próximas leituras e fica salva só neste aparelho</small>
+          </div>
+          <select class="form-select-custom velocidade-voz" aria-labelledby="rotulo-velocidade-voz"
+            [value]="leituraVoz.velocidade()"
+            (change)="onVelocidadeVozChange($any($event.target).value)">
+            @for (v of velocidadesVoz; track v) {
+              <option [value]="v" [selected]="v === leituraVoz.velocidade()">{{ rotuloVelocidade(v) }}</option>
+            }
+          </select>
+        </div>
+      }
     </div>
 
     <!-- PRIVACIDADE -->
     <div class="content-card settings-card">
       <h2 class="section-card-title">
-        <i class="bi bi-eye-slash title-icon orange-text"></i>
+        <span class="ic-off"><svg class="ic title-icon orange-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-eye"></use></svg></span>
         Privacidade
       </h2>
 
       <div class="settings-item toggle-item">
         <div>
           <span>Perfil público</span>
-          <small>Permitir que outros alunos vejam seu perfil</small>
+          <small>Outros alunos veem sua foto no ranking. Desligado, aparece o avatar padrão</small>
         </div>
         <input type="checkbox" class="custom-switch" [checked]="privacidade().perfilPublico"
           (change)="onPrivacidadeChange('perfilPublico', $any($event.target).checked)">
@@ -203,26 +225,17 @@
       <div class="settings-item toggle-item">
         <div>
           <span>Exibir no ranking</span>
-          <small>Mostrar seu nome nos rankings</small>
+          <small>Seu nome e seu XP aparecem para os outros alunos. Desligado, você sai do ranking e fica sem posição</small>
         </div>
         <input type="checkbox" class="custom-switch" [checked]="privacidade().exibirNoRanking"
           (change)="onPrivacidadeChange('exibirNoRanking', $any($event.target).checked)">
-      </div>
-
-      <div class="settings-item toggle-item">
-        <div>
-          <span>Visível para responsáveis</span>
-          <small>Responsáveis podem acompanhar seu desempenho</small>
-        </div>
-        <input type="checkbox" class="custom-switch" [checked]="privacidade().visivelResponsaveis"
-          (change)="onPrivacidadeChange('visivelResponsaveis', $any($event.target).checked)">
       </div>
     </div>
 
     <!-- CONTA -->
     <div class="content-card settings-card">
       <h2 class="section-card-title">
-        <i class="bi bi-person title-icon purple-text"></i>
+        <svg class="ic title-icon purple-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg>
         Conta
       </h2>
 

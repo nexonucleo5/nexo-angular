@@ -4,21 +4,24 @@
 .text-soft    { color: var(--text-muted) !important; }
 .title-adaptive { color: var(--text-main) !important; }
 
-/* Banner de nível */
+/* Banner de nível: roxo sólido; o único gradiente aprovado é o dos blocos de XP */
 .borda {
-  background: linear-gradient(135deg, #7b3fe4, #00c853);
-  border-radius: 24px; padding: 30px; color: white;
+  background-color: #7A2BFF;
+  border-radius: var(--nx-radius-card, 14px); padding: 30px; color: #FFFFFF;
+  box-shadow: 0 10px 28px rgba(26, 5, 70, 0.28);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  &:hover { transform: scale(1.005); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
-  h1 { font-size: 44px; margin: 5px 0; }
+  animation: nx-rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  &:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(26, 5, 70, 0.34); }
+  h1 { font-size: 44px; margin: 5px 0; color: #FFFFFF; }
 }
 
 .topo-nivel { display: flex; justify-content: space-between; align-items: center; }
-.nivel-label { font-size: 14px; opacity: 0.85; font-weight: 500; }
-.nivel-sub   { opacity: 0.9; font-weight: 500; }
+.nivel-label { font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.92); }
+.nivel-sub   { font-weight: 600; color: rgba(255, 255, 255, 0.95); }
 
 .box-icone {
-  background: rgba(255,255,255,0.2); padding: 16px; border-radius: 18px;
+  background: rgba(255,255,255,0.2); padding: 16px; border-radius: 14px;
+  animation: nx-pop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both;
   display: flex; align-items: center; justify-content: center;
   .img { width: 38px; height: auto; }
 }
@@ -29,18 +32,46 @@
   .xp { font-weight: 700; }
 }
 
-.barra-progresso {
-  height: 12px; background: rgba(255,255,255,0.25); border-radius: 10px; overflow: hidden;
-  .fill { height: 100%; background: rgba(255,255,255,0.5); border-radius: 10px; }
+/* Barra de XP: 25 blocos em linha */
+.barra-blocos {
+  display: flex;
+  gap: 4px;
+  height: 14px;
+}
+.bloco {
+  flex: 1 1 0;
+  min-width: 0;
+  border-radius: 3px;
+  background: rgba(26, 5, 70, 0.45);
+
+  &.cheio {
+    background: linear-gradient(90deg, #9A5BFF 0%, #22D3EE 50%, #9A5BFF 100%);
+    transform-origin: left center;
+    animation: nx-draw 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--i, 0) * 25ms + 0.2s) both;
+  }
 }
 
-.faltam { margin-top: 8px; font-size: 13px; opacity: 0.85; }
+@keyframes nx-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes nx-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes nx-pop {
+  0%   { opacity: 0; transform: scale(0.6); }
+  60%  { transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Animações desligadas: tudo no estado final */
+:host-context(.sem-animacoes) :is(.borda, .box-icone, .bloco.cheio) { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .borda, .box-icone, .bloco.cheio { animation: none !important; }
+}
+
+.faltam { margin-top: 8px; font-size: 13px; color: rgba(255, 255, 255, 0.92); }
 
 /* Stats */
 .stat-inner-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 16px; padding: 20px;
+  border-radius: var(--nx-radius-card, 14px); padding: 20px;
   display: flex; flex-direction: column;
   align-items: center; text-align: center; height: 100%; justify-content: center;
   h2 { font-size: 24px; margin: 4px 0 0 0; color: var(--text-main); }
@@ -50,21 +81,21 @@
   width: 46px; height: 46px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   font-size: 20px; margin-bottom: 12px; color: white;
-  &.roxo   { background: linear-gradient(135deg, #7b3fe4, #5b21b6); }
-  &.verde  { background: linear-gradient(135deg, #06d25e, #059669); }
-  &.azul   { background: linear-gradient(135deg, #2196f3, #1e40af); }
-  &.laranja { background: linear-gradient(135deg, #f59e0b, #9a3412); }
+  &.roxo   { background: var(--nx-brand-deep, #5B21B6); }
+  &.verde  { background: #059669; }
+  &.azul   { background: #1D4ED8; }
+  &.laranja { background: #0E7490; }
 }
 
 /* Gráficos SVG */
 .chart-card {
-  background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px;
+  background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--nx-radius-card, 14px);
 }
 .chart { width: 100%; height: auto; max-height: 220px; svg { width: 100%; height: 100%; } }
 
 .grid line { stroke: var(--border-color); stroke-width: 1; }
 .line { fill: none; stroke-width: 3.5; stroke-linecap: round; }
-.point { fill: #7b3fe4; stroke: var(--bg-card); stroke-width: 2; }
+.point { fill: var(--nx-brand, #6D28D9); stroke: var(--bg-card); stroke-width: 2; }
 
 /* Matérias — usa bg-card para suportar os 2 temas */
 .materias-grid {
@@ -76,7 +107,7 @@
 .materia-card {
   background: var(--bg-card);            /* ← corrigido: era #1f1f24 hardcoded */
   border: 1px solid var(--border-color);
-  border-radius: 18px; padding: 18px;
+  border-radius: var(--nx-radius-card, 14px); padding: 18px;
   transition: transform 0.3s ease;
   &:hover { transform: translateY(-2px); }
 }
@@ -89,7 +120,7 @@
   height: 100%; border-radius: 10px;
   &.bio { width: 75%; background: #00e676; }
   &.mat { width: 60%; background: #26c6da; }
-  &.his { width: 85%; background: #ff9100; }
+  &.his { width: 85%; background: var(--nx-accent, #0FA3C2); }
   &.ing { width: 70%; background: #b388ff; }
 }
 
@@ -100,14 +131,18 @@
   display: flex; justify-content: space-between; align-items: center;
   background: var(--bg-card);           /* ← corrigido: era #1f1f24 hardcoded */
   border: 1px solid var(--border-color);
-  padding: 16px 20px; border-radius: 16px;
+  padding: 16px 20px; border-radius: var(--nx-radius-card, 14px);
   transition: transform 0.2s ease;
   &:hover { transform: translateX(4px); }
   .info h4 { font-size: 16px; margin: 0; color: var(--text-main); }
 }
 
 .meta { display: flex; align-items: center; gap: 16px; }
+
+/* Cards claros no tema claro: o .text-white do Bootstrap sumia no fundo branco */
+:is(.materia-card, .atividade) .text-white { color: var(--nx-text, #1A1030) !important; }
+.atividade .nota.text-white { color: var(--nx-accent, #0FA3C2) !important; }
 .status { padding: 4px 10px; border-radius: 999px; font-size: 13px; }
 .status.bom    { background: rgba(0, 230, 118, 0.15); }
 .status.medio  { background: rgba(38, 198, 218, 0.15); }
-.status.alerta { background: rgba(255, 145, 0, 0.15); }
+.status.alerta { background: color-mix(in srgb, var(--nx-accent, #0FA3C2) 15%, transparent); }

@@ -26,14 +26,16 @@ import java.util.Set;
 @Component
 public class PoliticaSenha {
 
-    private static final int MINIMO = 8;
+    public static final int MINIMO = 8;
 
     /**
-     * O BCrypt trunca a entrada em 72 bytes e ignora o resto em silêncio: sem este teto
-     * explícito, duas senhas longas com o mesmo começo passariam a ser a mesma senha, e
-     * o usuário nunca saberia por quê.
+     * Teto de bytes (UTF-8) da senha nova. O BCrypt trunca a entrada em 72 bytes e ignora
+     * o resto em silêncio, então o teto <i>técnico</i> é 72; o de política é 50 porque
+     * ninguém digita 72 bytes de verdade, e um teto menor deixa folga para o BCrypt e corta
+     * o custo de hashear entrada gigante. O login continua aceitando até 72 para não
+     * trancar quem definiu uma senha maior quando o limite era esse.
      */
-    private static final int MAXIMO_BYTES = 72;
+    public static final int MAXIMO_BYTES = 50;
 
     /**
      * Lista curta de propósito. Não substitui uma base de senhas vazadas — cobre o que
@@ -46,17 +48,32 @@ public class PoliticaSenha {
             "escola123", "aluno123", "aluno1234", "professor", "professor1", "professor123",
             "diretor123", "nexo1234", "nexo12345", "mudar123", "trocar123", "primeiroacesso");
 
+    /** Por que uma senha foi recusada: o código que a tela usa e o texto para o usuário. */
+    public record Recusa(String codigo, String motivo) {}
+
+    /** Lança {@link ApiException} 400 se a senha for recusada; não faz nada se for válida. */
     public void validar(String senha, String login, String nome) {
+        Recusa recusa = avaliar(senha, login, nome);
+        if (recusa != null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, recusa.codigo(), recusa.motivo(),
+                    Map.of("novaSenha", recusa.motivo()));
+        }
+    }
+
+    /**
+     * Mesmas regras de {@link #validar}, mas devolvendo a recusa em vez de lançá-la
+     * ({@code null} = senha válida). Serve à checagem prévia da tela, que precisa do
+     * veredito sem gravar nada.
+     */
+    public Recusa avaliar(String senha, String login, String nome) {
         if (senha == null || senha.isBlank()) {
-            recusar("SENHA_AUSENTE", "Informe a nova senha.");
+            return recusa("SENHA_AUSENTE", "Informe a nova senha.");
         }
         if (senha.length() < MINIMO) {
-            recusar("SENHA_CURTA",
-                    "A nova senha precisa ter pelo menos " + MINIMO + " caracteres.");
+            return recusa("SENHA_CURTA", "A nova senha precisa ter pelo menos " + MINIMO + " caracteres.");
         }
         if (senha.getBytes(StandardCharsets.UTF_8).length > MAXIMO_BYTES) {
-            recusar("SENHA_LONGA",
-                    "A nova senha é longa demais: o limite é " + MAXIMO_BYTES + " bytes. "
+            return recusa("SENHA_LONGA", "A nova senha é longa demais: o limite é " + MAXIMO_BYTES + " bytes. "
                     + "Acentos e emojis contam como mais de um caractere.");
         }
 
@@ -66,40 +83,31 @@ public class PoliticaSenha {
         // cai nas duas, e dizer que é uma sequência já diz o que fazer a respeito, o que
         // "está na lista das mais tentadas" não diz.
         if (umCaractereSo(senha)) {
-            recusar("SENHA_REPETITIVA",
-                    "A nova senha repete o mesmo caractere do começo ao fim. "
+            return recusa("SENHA_REPETITIVA", "A nova senha repete o mesmo caractere do começo ao fim. "
                     + "Misture letras, números e símbolos.");
         }
         if (sequenciaDeDigitos(senha)) {
-            recusar("SENHA_SEQUENCIAL",
-                    "A nova senha é uma sequência numérica direta, como 12345678. "
+            return recusa("SENHA_SEQUENCIAL", "A nova senha é uma sequência numérica direta, como 12345678. "
                     + "Escolha algo sem ordem previsível.");
         }
         if (COMUNS.contains(simplificada)) {
-            recusar("SENHA_COMUM",
-                    "Essa senha está entre as primeiras que um ataque automatizado tenta. "
+            return recusa("SENHA_COMUM", "Essa senha está entre as primeiras que um ataque automatizado tenta. "
                     + "Escolha uma que não seja palavra de dicionário.");
         }
         if (pareceComDadoDoUsuario(simplificada, login)) {
-            recusar("SENHA_COM_LOGIN",
-                    "A nova senha não pode conter o seu login. Ele aparece na lista de "
+            return recusa("SENHA_COM_LOGIN", "A nova senha não pode conter o seu login. Ele aparece na lista de "
                     + "turma e no e-mail institucional, então quem o conhece já teria "
                     + "metade da senha.");
         }
         if (pareceComDadoDoUsuario(simplificada, primeiroNome(nome))) {
-            recusar("SENHA_COM_NOME",
-                    "A nova senha não pode conter o seu nome — é o primeiro palpite de "
+            return recusa("SENHA_COM_NOME", "A nova senha não pode conter o seu nome — é o primeiro palpite de "
                     + "quem tenta adivinhar.");
         }
+        return null;
     }
 
-    /**
-     * O campo vai no envelope de erro para que o formulário destaque exatamente o
-     * controle de nova senha, em vez de exibir só uma mensagem solta no topo. O código
-     * acompanha a mensagem para que a tela não precise comparar texto.
-     */
-    private static void recusar(String codigo, String motivo) {
-        throw new ApiException(HttpStatus.BAD_REQUEST, codigo, motivo, Map.of("novaSenha", motivo));
+    private static Recusa recusa(String codigo, String motivo) {
+        return new Recusa(codigo, motivo);
     }
 
     /** Minúsculas e sem acento: "Ana" e "ána" não devem escapar da comparação. */

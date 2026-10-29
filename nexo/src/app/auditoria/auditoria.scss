@@ -1,0 +1,31 @@
+/* Só o que é da página; cartão, tabela e rótulos vêm de logs-tabela.scss. */
+
+/* Abas como controle segmentado: o ativo usa o roxo do sistema (o mesmo do item de menu). */
+.abas {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 20px;
+  max-width: 100%;
+  overflow-x: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+
+  button {
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+
+    &:hover { color: var(--text-main); }
+    &.ativa { background: #7c3aed; color: #fff; }
+  }
+}

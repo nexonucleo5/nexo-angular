@@ -1,0 +1,27 @@
+/* Logo v2: lockup símbolo + NEXO (213.2 x 64).
+   Tema claro mostra a tinta escura (logo-nexo-v2-light.svg); tema escuro mostra a
+   tinta clara (logo-nexo-v2-dark.svg). Quem decide é o data-theme do <html>
+   (aplicarTema, settings-store.ts), só por CSS. */
+
+:host {
+  position: relative;
+  display: inline-block;
+  aspect-ratio: 213.2 / 64;
+  line-height: 0;
+  user-select: none;
+}
+
+.logo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.logo-tinta-clara { visibility: hidden; }
+
+:host-context(html[data-theme='dark']) {
+  .logo-tinta-escura { visibility: hidden; }
+  .logo-tinta-clara  { visibility: visible; }
+}

@@ -1,12 +1,22 @@
 <section class="page-content">
   <div class="senha-wrapper">
-    <button class="voltar-link" (click)="voltar()">
-      <i class="bi bi-arrow-left"></i> Voltar para Configurações
-    </button>
+    @if (!obrigatoria()) {
+      <button class="voltar-link" (click)="voltar()">
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-arrowl"></use></svg> Voltar para Configurações
+      </button>
+    }
 
     <div class="senha-card">
-      <h1 class="senha-title">Alterar Senha</h1>
-      <p class="senha-subtitle">Para sua segurança, informe a senha atual antes de definir uma nova.</p>
+      @if (obrigatoria()) {
+        <h1 class="senha-title">Defina sua senha</h1>
+        <p class="senha-subtitle">
+          Você entrou com uma senha provisória. Antes de continuar, troque-a por uma senha
+          que só você conheça.
+        </p>
+      } @else {
+        <h1 class="senha-title">Alterar Senha</h1>
+        <p class="senha-subtitle">Para sua segurança, informe a senha atual antes de definir uma nova.</p>
+      }
 
       <!-- Só o que não pertence a um campo: falha de rede, sessão expirada, erro do servidor.
            O que o backend atribui a um campo aparece embaixo dele, mais perto do problema. -->
@@ -19,9 +29,9 @@
 
       <form [formGroup]="form" (ngSubmit)="salvar()">
         <div class="campo" [class.com-erro]="erroSenhaAtual()">
-          <label for="senhaAtual">Senha atual</label>
+          <label for="senhaAtual">{{ obrigatoria() ? 'Senha provisória' : 'Senha atual' }}</label>
           <input id="senhaAtual" type="password" formControlName="senhaAtual"
-                 placeholder="Digite sua senha atual"
+                 [placeholder]="obrigatoria() ? 'A senha que você recebeu' : 'Digite sua senha atual'"
                  [attr.aria-invalid]="erroSenhaAtual() ? 'true' : null"
                  [attr.aria-describedby]="erroSenhaAtual() ? 'erro-senhaAtual' : null">
           @if (erroSenhaAtual()) {
@@ -32,11 +42,13 @@
         <div class="campo" [class.com-erro]="erroNovaSenha()">
           <label for="novaSenha">Nova senha</label>
           <input id="novaSenha" type="password" formControlName="novaSenha"
-                 placeholder="Mínimo 8 caracteres"
+                 placeholder="Entre 8 e 50 caracteres" [attr.maxlength]="maxSenha" autocomplete="new-password"
                  [attr.aria-invalid]="erroNovaSenha() ? 'true' : null"
                  [attr.aria-describedby]="erroNovaSenha() ? 'erro-novaSenha' : null">
           @if (erroNovaSenha()) {
             <small class="erro-campo" id="erro-novaSenha" role="alert">{{ erroNovaSenha() }}</small>
+          } @else if (senhaValida()) {
+            <small class="ok-campo" role="status">✓ Senha aceita.</small>
           }
         </div>
 

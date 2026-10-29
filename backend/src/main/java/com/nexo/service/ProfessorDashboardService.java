@@ -70,7 +70,10 @@ public class ProfessorDashboardService {
 
         // Alunos de todas as turmas e agregados de nota/frequência carregados de uma vez —
         // antes eram uma query por turma mais seis por aluno (evasao.avaliar era chamado duas vezes).
-        var indices = agregados.carregar(null);
+        // O recorte por turma importa tanto quanto a contagem de queries: com carregar(null)
+        // as duas eram varreduras das tabelas de nota e frequência da escola inteira, para
+        // depois usar só as linhas das turmas deste professor.
+        var indices = agregados.carregarDeTurmas(idsTurmas, null);
         Map<Long, List<Aluno>> alunosPorTurma = minhasTurmas.isEmpty() ? Map.of()
                 : alunos.findByTurmaIdInComTurma(idsTurmas).stream()
                         .collect(Collectors.groupingBy(a -> a.getTurma().getId()));

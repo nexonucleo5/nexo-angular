@@ -1,6 +1,7 @@
 package com.nexo.config;
 
 import com.nexo.security.JwtAuthFilter;
+import com.nexo.service.RequisicaoLogFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -44,16 +45,22 @@ public class SecurityConfig {
     @Value("${spring.h2.console.enabled:false}")
     private boolean h2ConsoleHabilitado;
 
+    /** Resposta acima disso vira WARN no log do sistema; 0 desliga. */
+    @Value("${nexo.logs.requisicao-lenta-ms:2000}")
+    private long requisicaoLentaMs;
+
     /**
-     * O index.html carrega Bootstrap/Bootstrap Icons via CDN (ver index.html) e Angular
-     * injeta &lt;style&gt; por componente sem nonce — daí o 'unsafe-inline' em style-src
-     * e o host do jsdelivr. Fora isso, tudo (JS, fotos, API, WebSocket) é same-origin.
+     * Angular injeta &lt;style&gt; por componente sem nonce — daí o 'unsafe-inline' em
+     * style-src. Bootstrap e Bootstrap Icons saem do próprio bundle, então tudo (JS, CSS,
+     * fontes, fotos, API, WebSocket e service worker) é same-origin.
      */
     private static final String CSP = String.join("; ",
             "default-src 'self'",
             "script-src 'self'",
-            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
-            "font-src 'self' https://cdn.jsdelivr.net",
+            "style-src 'self' 'unsafe-inline'",
+            "font-src 'self'",
+            "manifest-src 'self'",
+            "worker-src 'self'",
             "img-src 'self' data:",
             "connect-src 'self'",
             "object-src 'none'",
@@ -97,6 +104,8 @@ public class SecurityConfig {
 
                     auth.requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                             .requestMatchers("/error").permitAll()
+                            // Sonda de monitor externo: só UP/DOWN, sem detalhe (ver SaudeController).
+                            .requestMatchers(HttpMethod.GET, "/api/saude").permitAll()
                             .requestMatchers("/ws/**").permitAll() // handshake autenticado por ticket de uso único na query
                             // <img src> não envia header Authorization; o id da foto é um UUID
                             // aleatório, então não dá para enumerar as fotos dos usuários.
@@ -107,7 +116,10 @@ public class SecurityConfig {
                             .requestMatchers("/api/**").authenticated()
                             .anyRequest().permitAll();
                 })
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                // Depois do JWT, para já conhecer o usuário. Instanciado aqui e não como
+                // @Component: como bean o Boot o registraria também fora desta cadeia.
+                .addFilterAfter(new RequisicaoLogFilter(requisicaoLentaMs), JwtAuthFilter.class);
 
         return http.build();
     }
@@ -121,7 +133,7 @@ public class SecurityConfig {
         // allowCredentials=true daria a qualquer origem permitida preflight para
         // headers arbitrários — superfície à toa.
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
-        config.setExposedHeaders(List.of("Content-Disposition"));
+        config.setExposedHeaders(List.of("Content-Disposition", RequisicaoLogFilter.CABECALHO));
         config.setAllowCredentials(true); // Garante o tráfego do cookie do Refresh Token
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

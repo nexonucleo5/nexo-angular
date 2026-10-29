@@ -5,7 +5,6 @@ import {
   DiretorNotificacoesConfig,
   GestaoConfig,
   IntegracoesConfig,
-  DiretorPrivacidadeConfig,
 } from './configuracao-diretor.model';
 import { AparenciaConfig } from '../configuracoes/settings-store';
 import { AuthService } from '../services/auth.service';
@@ -27,7 +26,6 @@ export class ConfiguracaoDiretor {
   readonly gestao = computed(() => this.settings().gestao);
   readonly integracoes = computed(() => this.settings().integracoes);
   readonly aparencia = computed(() => this.settings().aparencia);
-  readonly privacidade = computed(() => this.settings().privacidade);
 
   readonly anosLetivos = [2024, 2025, 2026, 2027];
 
@@ -55,10 +53,6 @@ export class ConfiguracaoDiretor {
 
   onAparenciaChange(key: keyof AparenciaConfig, checked: boolean): void {
     this.configService.updateSection('aparencia', { [key]: checked } as Partial<AparenciaConfig>);
-  }
-
-  onPrivacidadeChange(key: keyof DiretorPrivacidadeConfig, checked: boolean): void {
-    this.configService.updateSection('privacidade', { [key]: checked } as Partial<DiretorPrivacidadeConfig>);
   }
 
   // Ações da conta

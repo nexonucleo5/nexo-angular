@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ConfiguracaoAlunoService } from './configuracao-aluno.service';
+import { LeituraVozService, VELOCIDADES_VOZ } from '../core/leitura-voz.service';
 import {
   AlunoNotificacoesConfig,
   GamificacaoConfig,
@@ -20,6 +21,7 @@ export class ConfiguracaoAluno {
   private readonly configService = inject(ConfiguracaoAlunoService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  protected readonly leituraVoz = inject(LeituraVozService);
 
   readonly settings = this.configService.settings;
 
@@ -54,6 +56,16 @@ export class ConfiguracaoAluno {
 
   onAcessibilidadeChange(key: keyof AcessibilidadeConfig, checked: boolean): void {
     this.configService.updateSection('acessibilidade', { [key]: checked } as Partial<AcessibilidadeConfig>);
+  }
+
+  protected readonly velocidadesVoz = VELOCIDADES_VOZ;
+
+  rotuloVelocidade(v: number): string {
+    return v < 1 ? 'Devagar' : v > 1 ? 'Rápida' : 'Normal';
+  }
+
+  onVelocidadeVozChange(valor: string): void {
+    this.leituraVoz.definirVelocidade(Number(valor));
   }
 
   onPrivacidadeChange(key: keyof AlunoPrivacidadeConfig, checked: boolean): void {

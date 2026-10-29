@@ -7,6 +7,7 @@
   width: 300px;
   min-width: 300px;
   height: 100vh;
+  height: 100dvh;
 
   background-color: var(--bg-card);
   border-right: 1px solid var(--border-color);
@@ -49,7 +50,7 @@
   align-items: center;
   gap: 16px;
   padding: 18px 22px;
-  border-radius: 20px;
+  border-radius: var(--nx-radius-card, 14px);
   color: var(--text-main);
   font-size: 17px;
   font-weight: 600;
@@ -58,7 +59,7 @@
   pointer-events: auto;      /* garante que o link responde a cliques */
   transition: background 0.2s, color 0.2s;
 
-  i {
+  :is(i, .ic) {
     font-size: 22px;
     color: var(--text-muted);
     transition: color 0.2s;
@@ -74,18 +75,18 @@
   }
 
   &:hover {
-    background-color: rgba(155, 47, 255, 0.1);
+    background-color: color-mix(in srgb, var(--nx-brand, #6D28D9) 10%, transparent);
     color: var(--text-main);
-    i { color: #9b2fff; }
+    :is(i, .ic) { color: var(--nx-brand, #6D28D9); }
   }
 
-  /* Item ativo — gradiente roxo → verde */
+  /* Item ativo — marca profunda sólida */
   &.active {
-    background: linear-gradient(90deg, #9b2fff 0%, #8b64d9 45%, #06d25e 100%);
+    background: var(--nx-brand-deep, #5B21B6);
     color: #ffffff !important;
-    box-shadow: 0 8px 20px rgba(102, 65, 190, 0.25);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 30%, transparent);
 
-    i {
+    :is(i, .ic) {
       color: #ffffff !important;
       background: none;
       -webkit-text-fill-color: #ffffff;
@@ -94,7 +95,7 @@
     span { color: #ffffff; }
 
     &:hover {
-      background: linear-gradient(90deg, #8825e8 0%, #7a58c9 45%, #05bb54 100%);
+      background: color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 85%, #000000);
     }
   }
 }
@@ -106,19 +107,3 @@
   p { margin: 0; font-size: 13px; color: var(--text-muted); }
 }
 
-.sidebar-footer-logo {
-  display: inline-block;
-  width: 64px;
-  aspect-ratio: 1 / 1;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  flex-shrink: 0;
-}
-
-:host-context(html[data-theme='dark']) .sidebar-footer-logo {
-  background-image: url('/assets/imagensProjeto/logo-nexo-dark.png');
-}
-:host-context(html[data-theme='light']) .sidebar-footer-logo {
-  background-image: url('/assets/imagensProjeto/logo-nexo-light.png');
-}
