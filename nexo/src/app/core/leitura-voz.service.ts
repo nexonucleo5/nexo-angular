@@ -8,6 +8,20 @@ import { ConfiguracaoAlunoService } from '../configuracao-aluno/configuracao-alu
  */
 const TAMANHO_MAX_TRECHO = 180;
 
+/** Velocidades oferecidas na tela de configuração (1 = normal). */
+export const VELOCIDADES_VOZ = [0.75, 1, 1.25] as const;
+const CHAVE_VELOCIDADE = 'nexo.leituraVoz.velocidade';
+
+/** Lê a velocidade guardada neste aparelho; qualquer valor fora da lista volta ao normal. */
+function lerVelocidadeSalva(): number {
+  try {
+    const salva = Number(localStorage.getItem(CHAVE_VELOCIDADE));
+    return (VELOCIDADES_VOZ as readonly number[]).includes(salva) ? salva : 1;
+  } catch {
+    return 1; // storage bloqueado (modo privado, política do navegador): segue no normal
+  }
+}
+
 /**
  * Prepara o texto da tela para ser falado. Emoji e ícone viram "carinha sorrindo" na voz
  * sintética, e quebra de linha vira pausa: sem ponto final, o fim de um parágrafo
@@ -98,6 +112,13 @@ export class LeituraVozService {
   /** Quem está falando agora (o id do botão), ou null. */
   readonly falandoId = signal<string | null>(null);
 
+  /**
+   * Velocidade da fala. Fica só neste aparelho (localStorage), não no backend: a voz e o
+   * quanto ela é rápida dependem do aparelho, e o ritmo bom num celular não é o do notebook.
+   * Vale a partir da próxima leitura — a síntese não aceita mudar a fala em andamento.
+   */
+  readonly velocidade = signal<number>(lerVelocidadeSalva());
+
   readonly vozPt = computed(() => escolherVozPt(this.vozes()));
   /** O aparelho consegue ler em português. */
   readonly suportado = computed(() => this.sintese !== null && this.vozPt() !== null);
@@ -116,7 +137,13 @@ export class LeituraVozService {
     const carregar = () => this.vozes.set(this.sintese!.getVoices());
     carregar();
     // As vozes chegam de forma assíncrona (a primeira chamada costuma voltar vazia).
-    this.sintese.addEventListener?.('voiceschanged', carregar);
+    // Safari antigo não tem addEventListener na síntese e só avisa por onvoiceschanged;
+    // sem isso a lista ficaria vazia para sempre e o botão nunca apareceria.
+    if (typeof this.sintese.addEventListener === 'function') {
+      this.sintese.addEventListener('voiceschanged', carregar);
+    } else {
+      this.sintese.onvoiceschanged = carregar;
+    }
 
     // Desligar o recurso cala quem estiver falando.
     effect(() => {
@@ -144,6 +171,7 @@ export class LeituraVozService {
 
     const minha = ++this.geracao;
     const voz = this.vozPt()!;
+    const velocidade = this.velocidade();
     this.falandoId.set(id);
 
     // Todos os trechos entram na fila do navegador de uma vez: ele já sintetiza o próximo
@@ -152,6 +180,7 @@ export class LeituraVozService {
       const fala = new SpeechSynthesisUtterance(trecho);
       fala.voice = voz;
       fala.lang = voz.lang;
+      fala.rate = velocidade;
       fala.onend = () => {
         if (minha === this.geracao && i === trechos.length - 1) this.falandoId.set(null);
       };
@@ -163,6 +192,17 @@ export class LeituraVozService {
       return fala;
     });
     this.fila.forEach((fala) => this.sintese!.speak(fala));
+  }
+
+  /** Troca a velocidade das próximas leituras e lembra a escolha neste aparelho. */
+  definirVelocidade(valor: number): void {
+    if (!(VELOCIDADES_VOZ as readonly number[]).includes(valor)) return;
+    this.velocidade.set(valor);
+    try {
+      localStorage.setItem(CHAVE_VELOCIDADE, String(valor));
+    } catch {
+      // sem storage a escolha vale só até recarregar a página
+    }
   }
 
   parar(): void {
