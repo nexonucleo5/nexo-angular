@@ -32,6 +32,13 @@ spring:
     console:
       enabled: false          # console H2 desligado em produção
 
+# Console em JSON, uma linha por evento, com os campos do MDC (requisicaoId, caminho, usuario):
+# o painel do Render e qualquer coletor filtram por campo em vez de procurar texto.
+logging:
+  structured:
+    format:
+      console: logstash
+
 nexo:
   jwt:
     secret: ${NEXO_JWT_SECRET}          # OBRIGATÓRIO — sem default em produção

@@ -1,6 +1,7 @@
 package com.nexo.config;
 
 import com.nexo.security.JwtAuthFilter;
+import com.nexo.service.RequisicaoLogFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +44,10 @@ public class SecurityConfig {
      */
     @Value("${spring.h2.console.enabled:false}")
     private boolean h2ConsoleHabilitado;
+
+    /** Resposta acima disso vira WARN no log do sistema; 0 desliga. */
+    @Value("${nexo.logs.requisicao-lenta-ms:2000}")
+    private long requisicaoLentaMs;
 
     /**
      * Angular injeta &lt;style&gt; por componente sem nonce — daí o 'unsafe-inline' em
@@ -99,6 +104,8 @@ public class SecurityConfig {
 
                     auth.requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                             .requestMatchers("/error").permitAll()
+                            // Sonda de monitor externo: só UP/DOWN, sem detalhe (ver SaudeController).
+                            .requestMatchers(HttpMethod.GET, "/api/saude").permitAll()
                             .requestMatchers("/ws/**").permitAll() // handshake autenticado por ticket de uso único na query
                             // <img src> não envia header Authorization; o id da foto é um UUID
                             // aleatório, então não dá para enumerar as fotos dos usuários.
@@ -109,7 +116,10 @@ public class SecurityConfig {
                             .requestMatchers("/api/**").authenticated()
                             .anyRequest().permitAll();
                 })
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                // Depois do JWT, para já conhecer o usuário. Instanciado aqui e não como
+                // @Component: como bean o Boot o registraria também fora desta cadeia.
+                .addFilterAfter(new RequisicaoLogFilter(requisicaoLentaMs), JwtAuthFilter.class);
 
         return http.build();
     }
@@ -123,7 +133,7 @@ public class SecurityConfig {
         // allowCredentials=true daria a qualquer origem permitida preflight para
         // headers arbitrários — superfície à toa.
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
-        config.setExposedHeaders(List.of("Content-Disposition"));
+        config.setExposedHeaders(List.of("Content-Disposition", RequisicaoLogFilter.CABECALHO));
         config.setAllowCredentials(true); // Garante o tráfego do cookie do Refresh Token
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
