@@ -1,5 +1,5 @@
 .sidebar {
-  width: 300px; min-width: 300px; height: 100vh;
+  width: 300px; min-width: 300px; height: 100vh; height: 100dvh;
   position: fixed; top: 0; left: 0; z-index: 1000;
   background-color: var(--bg-card);
   border-right: 1px solid var(--border-color);
@@ -18,15 +18,15 @@
   color: var(--text-main); font-size: 16px; font-weight: 600;
   text-decoration: none; transition: background 0.2s; cursor: pointer;
 
-  i { font-size: 20px; color: var(--text-muted); transition: color 0.2s; background: none; -webkit-text-fill-color: unset; }
+  :is(i, .ic) { font-size: 20px; color: var(--text-muted); transition: color 0.2s; background: none; -webkit-text-fill-color: unset; }
 
-  &:hover { background: rgba(155, 47, 255, 0.08); i { color: #9b2fff; } }
+  &:hover { background: rgba(155, 47, 255, 0.08); :is(i, .ic) { color: #9b2fff; } }
 
   &.active {
-    background: linear-gradient(90deg, #9b2fff, #06d25e);
+    background: var(--nx-brand-deep, #5B21B6);
     color: #fff !important;
     box-shadow: 0 8px 24px rgba(102, 65, 190, 0.25);
-    i { color: #fff !important; -webkit-text-fill-color: #fff; background: none; }
+    :is(i, .ic) { color: #fff !important; -webkit-text-fill-color: #fff; background: none; }
   }
 }
 
@@ -36,19 +36,3 @@
   p { margin: 0; font-size: 13px; color: var(--text-muted); }
 }
 
-.sidebar-footer-logo {
-  display: inline-block;
-  width: 100px;
-  aspect-ratio: 1 / 1;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  flex-shrink: 0;
-}
-
-:host-context(html[data-theme='dark']) .sidebar-footer-logo {
-  background-image: url('/assets/imagensProjeto/logo-nexo-dark.png');
-}
-:host-context(html[data-theme='light']) .sidebar-footer-logo {
-  background-image: url('/assets/imagensProjeto/logo-nexo-light.png');
-}

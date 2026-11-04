@@ -7,7 +7,7 @@
       <p class="text-soft m-0">Registro oficial de aulas e acompanhamento acadêmico</p>
     </div>
     <button class="btn btn-export" (click)="exportarDiario()">
-      <i class="bi bi-download"></i> Exportar Diário
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-download"></use></svg> Exportar Diário
     </button>
   </section>
 
@@ -17,7 +17,7 @@
 
   <!-- ── Filtros ───────────────────────────────────── -->
   <div class="main-card p-4 mb-4">
-    <h5 class="text-main fw-bold mb-3"><i class="bi bi-funnel"></i> Filtros</h5>
+    <h5 class="text-main fw-bold mb-3"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-filter"></use></svg> Filtros</h5>
     <div class="row g-3">
       <div class="col-12 col-md-3">
         <label class="text-soft small mb-1">Turma</label>
@@ -59,7 +59,7 @@
       <div class="main-card p-4">
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <h4 class="text-main fw-bold m-0 d-flex align-items-center gap-2">
-            <i class="bi bi-check2-circle text-success"></i> Registro de Frequência
+            <svg class="ic text-success" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg> Registro de Frequência
           </h4>
           <div class="d-flex gap-2">
             <button class="btn btn-light-custom" (click)="marcarTodosPresentes()">
@@ -88,7 +88,7 @@
                 <tr *ngFor="let aluno of alunos()">
                   <td style="width:45%;">
                     <div class="d-flex align-items-center gap-3">
-                      <img [src]="aluno.foto" class="avatar-student" alt="Aluno">
+                      <img loading="lazy" decoding="async" [src]="aluno.foto" class="avatar-student" alt="Aluno">
                       <span class="text-main fw-semibold">{{ aluno.nome }}</span>
                     </div>
                   </td>
@@ -98,12 +98,12 @@
                       <button class="btn-presence correct"
                               [class.active]="aluno.presente === true"
                               (click)="marcarPresenca(aluno, true)">
-                        <i class="bi bi-check-lg"></i>
+                        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg>
                       </button>
                       <button class="btn-presence wrong"
                               [class.active]="aluno.presente === false"
                               (click)="marcarPresenca(aluno, false)">
-                        <i class="bi bi-x-lg"></i>
+                        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-x"></use></svg>
                       </button>
                     </div>
                   </td>
@@ -123,7 +123,7 @@
         <div class="col-12">
           <div class="main-card p-4">
             <h4 class="text-main fw-bold mb-4 d-flex align-items-center gap-2">
-              <i class="bi bi-book text-success"></i> Conteúdo Ministrado Hoje
+              <svg class="ic text-success" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg> Conteúdo Ministrado Hoje
             </h4>
 
             <div class="mb-3">
@@ -152,7 +152,7 @@
             </div>
 
             <button class="btn btn-gradient w-100" (click)="registrarConteudo()">
-              <i class="bi bi-file-earmark-plus"></i> Registrar Conteúdo
+              <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-file"></use></svg> Registrar Conteúdo
             </button>
           </div>
         </div>
@@ -161,7 +161,7 @@
         <div class="col-12">
           <div class="main-card p-4">
             <h4 class="text-main fw-bold mb-3 d-flex align-items-center gap-2">
-              <i class="bi bi-calendar3 text-primary"></i> Histórico de Aulas
+              <svg class="ic text-primary" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-calendar"></use></svg> Histórico de Aulas
             </h4>
             <div class="history-list">
               @if (historico().length === 0) {
@@ -172,7 +172,7 @@
                   <h6 class="text-main fw-bold m-0 class-title">{{ aula.titulo }}</h6>
                 </div>
                 <div class="d-flex gap-3 text-soft small flex-wrap mb-1">
-                  <span><i class="bi bi-clock"></i> {{ aula.data }}</span>
+                  <span><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-clock"></use></svg> {{ aula.data }}</span>
                 </div>
                 <p class="text-soft small m-0" *ngIf="aula.descricao">{{ aula.descricao }}</p>
               </div>

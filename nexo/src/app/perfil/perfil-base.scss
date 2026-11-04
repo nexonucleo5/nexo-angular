@@ -166,11 +166,11 @@
   padding: 40px 20px;
   color: var(--text-muted) !important;
 
-  i { font-size: 34px; display: block; margin-bottom: 12px; opacity: 0.6; }
+  :is(i, .ic) { font-size: 34px; display: block; margin-bottom: 12px; opacity: 0.6; }
 }
 
 .btn-tentar {
-  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -192,8 +192,8 @@
 .red-text    { color: #ef4444 !important; }
 
 /* Preenchimentos de barra */
-.green-fill  { background: linear-gradient(135deg, #0fcd5c, #08d6a2) !important; }
-.blue-fill   { background: linear-gradient(135deg, #2e73f6, #10c6df) !important; }
-.orange-fill { background: linear-gradient(135deg, #ff6a00, #ff5f79) !important; }
-.pink-fill   { background: linear-gradient(135deg, #8f24ff, #f2389d) !important; }
-.red-fill    { background: linear-gradient(135deg, #ef4444, #f2389d) !important; }
+.green-fill  { background: #15803D !important; }
+.blue-fill   { background: #2E73F6 !important; }
+.orange-fill { background: var(--nx-accent, #0FA3C2) !important; }
+.pink-fill   { background: #DB2777 !important; }
+.red-fill    { background: #EF4444 !important; }

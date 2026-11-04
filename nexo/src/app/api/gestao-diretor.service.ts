@@ -23,18 +23,21 @@ export class GestaoDiretorService {
     return this.http.get<AlunoRiscoDTO[]>(`${this.api}/evasao/risco`, { params });
   }
 
-  desempenho(periodo?: string, visao?: string): Observable<DesempenhoDTO> {
+  desempenho(periodo?: string): Observable<DesempenhoDTO> {
     let params = new HttpParams();
     if (periodo) params = params.set('periodo', periodo);
-    if (visao) params = params.set('visao', visao);
     return this.http.get<DesempenhoDTO>(`${this.api}/relatorios/desempenho`, { params });
   }
 
+  /** Períodos letivos com nota lançada (ex.: "2026-1"), usados no filtro de Relatórios. */
+  periodosRelatorio(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.api}/relatorios/periodos`);
+  }
+
   /** Exportação real de relatório (antes: botão decorativo). Dispara o download no browser. */
-  exportarDesempenho(formato: 'pdf' | 'xlsx', periodo?: string, visao?: string): Observable<Blob> {
+  exportarDesempenho(formato: 'pdf' | 'xlsx', periodo?: string): Observable<Blob> {
     let params = new HttpParams().set('formato', formato);
     if (periodo) params = params.set('periodo', periodo);
-    if (visao) params = params.set('visao', visao);
     return this.http.get(`${this.api}/relatorios/desempenho/export`, { params, responseType: 'blob' });
   }
 

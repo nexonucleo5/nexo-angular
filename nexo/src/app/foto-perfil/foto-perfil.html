@@ -16,7 +16,7 @@
       <div class="previa-wrap">
         <img [src]="imagemExibida()" class="previa-img" alt="Foto de perfil">
         @if (enviando()) {
-          <div class="previa-carregando"><i class="bi bi-arrow-repeat"></i></div>
+          <div class="previa-carregando"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-refresh"></use></svg></div>
         }
       </div>
 
@@ -29,7 +29,7 @@
         </button>
         @if (temFoto()) {
           <button type="button" class="btn-foto remover" (click)="remover()" [disabled]="enviando()">
-            <i class="bi bi-trash me-2"></i>Remover foto
+            <svg class="ic me-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trash"></use></svg>Remover foto
           </button>
         }
       </div>

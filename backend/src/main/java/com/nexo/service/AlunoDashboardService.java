@@ -25,7 +25,8 @@ public class AlunoDashboardService {
     public record AlunoDashboardDTO(String nome, int xpSemana, int metaSemanalXp, int ofensivaDias,
                                     int posicao, int totalAlunos, String turmaNome,
                                     int tarefasFeitasHoje, int tarefasHoje, int xpTotal, int nivel,
-                                    List<AtividadeDTO> atividades, List<RankingItemDTO> ranking) {}
+                                    List<AtividadeDTO> atividades, List<RankingItemDTO> ranking,
+                                    boolean foraDoRanking) {}
 
     public record NotaAlunoDTO(String disciplina, Double media, Double p1, Double p2, Double t1, Double participacao) {}
 
@@ -59,15 +60,22 @@ public class AlunoDashboardService {
         Aluno aluno = alunos.findByUsuarioId(usuarioId)
                 .orElseThrow(() -> ApiException.notFound("Aluno não encontrado para o usuário logado."));
 
-        // Projeção ordenada pelo banco: traz 4 colunas por aluno em vez da entidade
-        // inteira gerenciada, e dispensa o sort em memória.
+        // Projeção ordenada pelo banco: traz poucas colunas por aluno em vez da entidade
+        // inteira gerenciada, e dispensa o sort em memória. Já vem sem quem desligou
+        // "Exibir no ranking" (ver AlunoRepository.rankingPorXp).
         List<AlunoRepository.RankingXp> ranking = alunos.rankingPorXp();
 
-        int posicao = 1;
-        for (int i = 0; i < ranking.size(); i++) {
-            if (ranking.get(i).getId().equals(aluno.getId())) {
-                posicao = i + 1;
-                break;
+        // Quem se tirou do ranking não tem posição nele: 0 + o sinal explícito, que a tela
+        // usa para explicar em vez de mostrar "#0".
+        boolean foraDoRanking = !aluno.isExibirNoRanking();
+        int posicao = 0;
+        if (!foraDoRanking) {
+            posicao = 1;
+            for (int i = 0; i < ranking.size(); i++) {
+                if (ranking.get(i).getId().equals(aluno.getId())) {
+                    posicao = i + 1;
+                    break;
+                }
             }
         }
 
@@ -75,11 +83,12 @@ public class AlunoDashboardService {
         List<RankingItemDTO> topRanking = new ArrayList<>(topN + 1);
         for (int i = 0; i < topN; i++) {
             AlunoRepository.RankingXp a = ranking.get(i);
-            topRanking.add(new RankingItemDTO(i + 1, a.getNome(), a.getXpTotal(), a.getFoto(),
-                    a.getId().equals(aluno.getId())));
+            boolean sou = a.getId().equals(aluno.getId());
+            topRanking.add(new RankingItemDTO(i + 1, a.getNome(), a.getXpTotal(), fotoVisivel(a, sou), sou));
         }
-        // Garante que o aluno logado apareça mesmo fora do top 5
-        if (topRanking.stream().noneMatch(RankingItemDTO::isMe)) {
+        // Garante que o aluno logado apareça mesmo fora do top 5 — a menos que tenha
+        // escolhido não aparecer.
+        if (!foraDoRanking && topRanking.stream().noneMatch(RankingItemDTO::isMe)) {
             topRanking.add(new RankingItemDTO(posicao, aluno.getNome(), aluno.getXpTotal(), aluno.getFoto(), true));
         }
 
@@ -92,6 +101,15 @@ public class AlunoDashboardService {
                 aluno.getOfensivaDias(), posicao, ranking.size(),
                 aluno.getTurma() != null ? aluno.getTurma().getNome() : null,
                 aluno.getTarefasFeitasHoje(), aluno.getTarefasHoje(),
-                aluno.getXpTotal(), nivelDe(aluno.getXpTotal()), feed, topRanking);
+                aluno.getXpTotal(), nivelDe(aluno.getXpTotal()), feed, topRanking, foraDoRanking);
+    }
+
+    /**
+     * A foto de um colega só sai se ele deixou o perfil público; a própria foto, sempre.
+     * Sem a foto a tela cai no avatar padrão — o nome continua, porque quem está no
+     * ranking aceitou aparecer nele.
+     */
+    private static String fotoVisivel(AlunoRepository.RankingXp a, boolean souEu) {
+        return souEu || a.isPerfilPublico() ? a.getFoto() : null;
     }
 }

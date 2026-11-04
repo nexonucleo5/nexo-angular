@@ -2,12 +2,18 @@ package com.nexo.domain;
 
 import jakarta.persistence.*;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Conteúdo/documento de uma matéria (texto estruturado, sem upload de arquivo
  * nesta etapa). Substitui gradualmente os tópicos hardcoded de materias.data.ts.
  */
 @Entity
 @Table(name = "conteudos_materia")
+@Getter
+@Setter
 public class ConteudoMateria {
 
     @Id
@@ -57,25 +63,12 @@ public class ConteudoMateria {
      * — que é o estado em que ela já estava.
      */
     @Column(name = "publicado")
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private Boolean publicado = Boolean.TRUE;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Materia getMateria() { return materia; }
-    public void setMateria(Materia materia) { this.materia = materia; }
-    public String getTitulo() { return titulo; }
-    public void setTitulo(String titulo) { this.titulo = titulo; }
-    public String getResumo() { return resumo; }
-    public void setResumo(String resumo) { this.resumo = resumo; }
-    public String getTexto() { return texto; }
-    public void setTexto(String texto) { this.texto = texto; }
-    public String getExemplo() { return exemplo; }
-    public void setExemplo(String exemplo) { this.exemplo = exemplo; }
-    public Integer getMinutos() { return minutos; }
-    public void setMinutos(Integer minutos) { this.minutos = minutos; }
-    public int getOrdem() { return ordem; }
-    public void setOrdem(int ordem) { this.ordem = ordem; }
     /** Nunca nulo: conteúdo gravado antes da coluna existir já estava no ar. */
     public boolean isPublicado() { return publicado == null || publicado; }
+    /** Primitivo de propósito: o campo é wrapper só por causa de linha legada nula. */
     public void setPublicado(boolean publicado) { this.publicado = publicado; }
 }

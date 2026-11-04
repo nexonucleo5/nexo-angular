@@ -62,6 +62,7 @@ export class Sobre {
         'Redefine senha provisória de quem perdeu a dela',
         'Publica, despublica e reordena conteúdos e desafios',
         'Inscreve alunos nas turmas e os transfere entre elas',
+        'Consulta os logs: logins, erros e tudo que foi alterado',
       ],
     },
     {
@@ -72,7 +73,6 @@ export class Sobre {
         'Enxerga a escola inteira, sem restrição de turma ou matéria',
         'Acompanha evasão, desempenho e monitoramento docente',
         'Cadastra professores e supervisiona a administração do sistema',
-        'Consulta a auditoria de tudo que foi alterado',
       ],
     },
   ];

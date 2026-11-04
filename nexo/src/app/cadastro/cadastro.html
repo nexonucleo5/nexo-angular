@@ -19,7 +19,7 @@
   <div *ngIf="mensagemErro()" class="alert alert-danger">{{ mensagemErro() }}</div>
 
   <div *ngIf="acesso() as a" class="alert alert-info d-flex align-items-center gap-3 mb-4 flex-wrap">
-    <i class="bi bi-key-fill fs-4"></i>
+    <svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-key"></use></svg>
     <div class="flex-grow-1">
       <strong>Acesso gerado com sucesso!</strong><br>
       <small>
@@ -31,9 +31,9 @@
     </div>
     <button type="button" class="btn btn-sm btn-copiar" (click)="copiarAcesso()">
       @if (copiado()) {
-        <i class="bi bi-check-lg"></i> Copiado!
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg> Copiado!
       } @else {
-        <i class="bi bi-clipboard"></i> Copiar acesso
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-file"></use></svg> Copiar acesso
       }
     </button>
   </div>
@@ -69,12 +69,12 @@
          aprendizado e retenção, e a ficha pessoal do aluno pertence ao sistema
          de aula da escola. Menos dado guardado é menos coisa a vazar. -->
     <p class="nota-privacidade">
-      <i class="bi bi-shield-check"></i>
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-shield"></use></svg>
       Só pedimos nome e turma. Dados pessoais do aluno ficam no sistema de aula da escola.
     </p>
 
     <button type="submit" class="btn btn-cadastro w-100 mt-2" [disabled]="enviando()">
-      <i class="bi bi-check-circle me-2"></i>{{ enviando() ? 'Enviando...' : 'Cadastrar aluno' }}
+      <svg class="ic me-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg>{{ enviando() ? 'Enviando...' : 'Cadastrar aluno' }}
     </button>
   </form>
 
@@ -129,7 +129,7 @@
                 [class.selecionada]="materiaSelecionada(m.id)"
                 [disabled]="materiaBloqueada(m.id)"
                 (click)="alternarMateria(m.id)">
-          <i class="bi" [ngClass]="materiaSelecionada(m.id) ? 'bi-check-circle-fill' : 'bi-circle'"></i>
+          <svg class="ic" aria-hidden="true"><use [attr.href]="'assets/icones/nexo-icons.svg#ic-' + (materiaSelecionada(m.id) ? 'check' : 'circ')"></use></svg>
           {{ m.nome }}
         </button>
       </div>
@@ -139,7 +139,7 @@
     </div>
 
     <button type="submit" class="btn btn-cadastro w-100 mt-2" [disabled]="enviando()">
-      <i class="bi bi-check-circle me-2"></i>{{ enviando() ? 'Enviando...' : 'Cadastrar professor' }}
+      <svg class="ic me-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg>{{ enviando() ? 'Enviando...' : 'Cadastrar professor' }}
     </button>
   </form>
 

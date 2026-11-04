@@ -37,10 +37,9 @@ interface Gargalo {
 export class RelatoriosDiretor {
   private readonly gestao = inject(GestaoDiretorService);
 
-  readonly periodoSelecionado = signal('Este Bimestre');
-  readonly visaoSelecionada = signal('Visão Geral');
-  readonly periodos = ['Este Bimestre', 'Este Semestre', 'Geral'];
-  readonly visoes = ['Visão Geral', 'Pedagógico', 'Financeiro'];
+  /** Vazio = todos os períodos. Os demais valores são os de Nota.periodo (ex.: "2026-1"). */
+  readonly periodoSelecionado = signal('');
+  readonly periodos = signal<string[]>([]);
 
   readonly carregando = signal(true);
   readonly erro = signal(false);
@@ -118,13 +117,20 @@ export class RelatoriosDiretor {
   };
 
   constructor() {
+    // Se a lista de períodos falhar, o filtro fica só com "Todos os períodos".
+    this.gestao.periodosRelatorio().subscribe({ next: (p) => this.periodos.set(p), error: () => {} });
+    this.carregar();
+  }
+
+  selecionarPeriodo(periodo: string): void {
+    this.periodoSelecionado.set(periodo);
     this.carregar();
   }
 
   carregar(): void {
     this.carregando.set(true);
     this.erro.set(false);
-    this.gestao.desempenho().subscribe({
+    this.gestao.desempenho(this.periodoSelecionado() || undefined).subscribe({
       next: (dados) => {
         this.desempenho.set(dados);
         this.carregando.set(false);
@@ -140,10 +146,7 @@ export class RelatoriosDiretor {
   exportar(formato: 'pdf' | 'xlsx'): void {
     if (this.exportando()) return;
     this.exportando.set(true);
-    // Não repassa periodo/visao: os rótulos da tela ("Este Bimestre"…) não correspondem
-    // aos valores gravados em Nota.periodo ("2026-1"), e enviá-los zera todas as médias
-    // do relatório. Ligar o filtro exige antes definir o vocabulário de período.
-    this.gestao.exportarDesempenho(formato).subscribe({
+    this.gestao.exportarDesempenho(formato, this.periodoSelecionado() || undefined).subscribe({
       next: (blob) => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');

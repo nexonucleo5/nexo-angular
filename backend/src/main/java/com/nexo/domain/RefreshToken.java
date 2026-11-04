@@ -4,8 +4,16 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
-@Table(name = "refresh_tokens")
+@Table(name = "refresh_tokens",
+       // revogarTodosDoUsuario/revogarOutrasSessoes: um UPDATE por usuário a cada
+       // logout e a cada conta desativada.
+       indexes = @Index(name = "idx_refresh_tokens_usuario", columnList = "usuario_id"))
+@Getter
+@Setter
 public class RefreshToken {
 
     @Id
@@ -27,15 +35,4 @@ public class RefreshToken {
     private Instant expiraEm;
 
     private boolean revogado = false;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getTokenHash() { return tokenHash; }
-    public void setTokenHash(String tokenHash) { this.tokenHash = tokenHash; }
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
-    public Instant getExpiraEm() { return expiraEm; }
-    public void setExpiraEm(Instant expiraEm) { this.expiraEm = expiraEm; }
-    public boolean isRevogado() { return revogado; }
-    public void setRevogado(boolean revogado) { this.revogado = revogado; }
 }

@@ -66,12 +66,32 @@ class PoliticaSenhaTest {
     }
 
     @Test
-    @DisplayName("acima de 72 bytes o BCrypt truncaria em silêncio")
+    @DisplayName("acima de 50 bytes a senha é recusada")
     void senhaLongaDemaisRecusada() {
         ApiException erro = recusaDe("Chuva#Azul42".repeat(10)); // 120 caracteres
 
         assertThat(erro.getError()).isEqualTo("SENHA_LONGA");
-        assertThat(erro.getMessage()).contains("72");
+        assertThat(erro.getMessage()).contains("50");
+    }
+
+    @Test
+    @DisplayName("o teto é de bytes: 50 passa, 51 não, e acento conta em dobro")
+    void tetoContaBytes() {
+        String exatos50 = ("Chuva#Azul4".repeat(5)).substring(0, 49) + "Z"; // 50 ASCII
+        assertThat(exatos50.length()).isEqualTo(50);
+        assertThatCode(() -> politica.validar(exatos50, LOGIN, NOME)).doesNotThrowAnyException();
+
+        assertThat(recusaDe(exatos50 + "a").getError()).isEqualTo("SENHA_LONGA");
+        // 26 letras "é" = 26 caracteres, mas 52 bytes
+        assertThat(recusaDe("Ç#" + "é".repeat(25) + "9").getError()).isEqualTo("SENHA_LONGA");
+    }
+
+    @Test
+    @DisplayName("avaliar devolve a recusa sem lançar e null quando a senha é válida")
+    void avaliarNaoLanca() {
+        assertThat(politica.avaliar("Chuva#Azul42", LOGIN, NOME)).isNull();
+        assertThat(politica.avaliar("12345678", LOGIN, NOME).codigo()).isEqualTo("SENHA_SEQUENCIAL");
+        assertThat(politica.avaliar(null, LOGIN, NOME).codigo()).isEqualTo("SENHA_AUSENTE");
     }
 
     @Test

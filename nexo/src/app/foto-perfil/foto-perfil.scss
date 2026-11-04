@@ -27,7 +27,7 @@
   color: #fff;
   font-size: 26px;
 
-  i { animation: girar 1s linear infinite; }
+  :is(i, .ic) { animation: girar 1s linear infinite; }
 }
 
 @keyframes girar {
@@ -50,7 +50,7 @@
   &:disabled { opacity: 0.6; cursor: default; }
 
   &.principal {
-    background: linear-gradient(135deg, #9b2fff, #06d25e);
+    background: var(--nx-brand-deep, #5B21B6);
     color: #fff;
     border: none;
     &:hover:not(:disabled) { opacity: 0.9; }

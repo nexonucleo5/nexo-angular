@@ -7,6 +7,7 @@ import {
   QuizPerguntaDTO,
   QuizResultadoDTO,
 } from '../api/desafios.service';
+import { BotaoOuvir } from '../botao-ouvir/botao-ouvir';
 
 const NIVEL_LABEL: Record<string, string> = { FACIL: 'Fácil', MEDIO: 'Médio', DIFICIL: 'Difícil' };
 
@@ -23,7 +24,7 @@ const NIVEL_LABEL: Record<string, string> = { FACIL: 'Fácil', MEDIO: 'Médio', 
 @Component({
   selector: 'app-quiz-desafio',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, BotaoOuvir],
   templateUrl: './quiz-desafio.html',
   styleUrl: './quiz-desafio.scss',
 })
@@ -49,6 +50,35 @@ export class QuizDesafio implements OnInit {
 
   /** perguntaId -> índice da alternativa escolhida */
   readonly respostas = signal<Record<number, number>>({});
+
+  /** A pergunta como a voz a lê: enunciado e as alternativas com a letra, na ordem da tela. */
+  falaDaPergunta(p: QuizPerguntaDTO, indice: number): string {
+    const letras = 'ABCDEFGH';
+    const rotulo = (i: number) => `Alternativa ${letras[i] ?? i + 1}`;
+    const alternativas = p.alternativas.map((alt, i) => `${rotulo(i)}: ${alt}`);
+    // respostaCorreta só vem do servidor para quem já gabaritou (modo revisão); antes disso
+    // a voz não pode entregar o gabarito.
+    const gabarito =
+      p.respostaCorreta !== null && p.respostaCorreta !== undefined
+        ? [`Resposta correta: ${rotulo(p.respostaCorreta)}.`]
+        : [];
+    return [`Pergunta ${indice + 1}. ${p.enunciado}`, ...alternativas, ...gabarito].join('\n');
+  }
+
+  /** O banner de sucesso como a voz o lê: parabéns, placar e XP. */
+  falaDoPlacar(p: { acertos: number; total: number; xpGanho: number }): string {
+    const xp = p.xpGanho > 0 ? `Mais ${p.xpGanho} XP creditado no seu perfil.` : 'Desafio já concluído anteriormente.';
+    return [`Parabéns, você acertou tudo! ${p.acertos} de ${p.total} corretas.`, xp].join('\n');
+  }
+
+  /** O aviso de tentativa reprovada: só o que a tela mostra, sem revelar o que errou. */
+  falaDaTentativa(): string {
+    return [
+      'Ainda não foi dessa vez.',
+      'É preciso acertar todas as perguntas para concluir o desafio. Revise o conteúdo e responda de novo. Nenhum XP foi creditado.',
+      `${this.textoTentativas()} até agora.`,
+    ].join('\n');
+  }
 
   readonly nivelLabel = computed(() => {
     const d = this.desafio();

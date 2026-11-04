@@ -83,7 +83,7 @@
   }
 
   &:checked {
-    background: linear-gradient(135deg, #9b2fff, #06d25e);
+    background: var(--nx-brand-deep, #5B21B6);
     &::before { transform: translateX(22px); }
   }
 }
@@ -115,7 +115,7 @@
 
 /* Botões de conta */
 .btn-gradient {
-  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   color: white; border: none; border-radius: 12px;
   padding: 12px 20px; font-weight: 600; cursor: pointer;
   transition: opacity 0.2s; width: 100%;

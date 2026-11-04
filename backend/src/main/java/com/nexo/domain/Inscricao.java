@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Inscrição de um aluno numa turma do sistema de aprendizado.
  *
@@ -18,7 +21,11 @@ import java.time.Instant;
  * conteúdo da turma sem apagar o histórico de progresso do aluno.
  */
 @Entity
-@Table(name = "inscricoes")
+@Table(name = "inscricoes",
+       // InscricaoRepository.buscar filtra por turma quando a tela escolhe uma.
+       indexes = @Index(name = "idx_inscricoes_turma", columnList = "turma_id"))
+@Getter
+@Setter
 public class Inscricao {
 
     @Id
@@ -36,15 +43,4 @@ public class Inscricao {
     private boolean ativo = true;
 
     private Instant criadaEm = Instant.now();
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Aluno getAluno() { return aluno; }
-    public void setAluno(Aluno aluno) { this.aluno = aluno; }
-    public Turma getTurma() { return turma; }
-    public void setTurma(Turma turma) { this.turma = turma; }
-    public boolean isAtivo() { return ativo; }
-    public void setAtivo(boolean ativo) { this.ativo = ativo; }
-    public Instant getCriadaEm() { return criadaEm; }
-    public void setCriadaEm(Instant criadaEm) { this.criadaEm = criadaEm; }
 }

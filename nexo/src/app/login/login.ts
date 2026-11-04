@@ -1,9 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { ApiErro } from '../core/api.models';
+import { aplicarTema, temaSalvoEscuro } from '../configuracoes/settings-store';
 
 @Component({
   selector: 'app-login',
@@ -23,11 +24,19 @@ export class Login {
   public mensagemErro    = '';
   public mensagemSucesso = '';
 
+  /** Tema antes do login: mesma chave de cache que o App e o SettingsStore usam. */
+  public temaEscuro = signal(temaSalvoEscuro());
+
   constructor() {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
+  }
+
+  public alternarTema(): void {
+    this.temaEscuro.update((escuro) => !escuro);
+    aplicarTema(this.temaEscuro());
   }
 
   public realizarLogin(): void {
@@ -42,10 +51,14 @@ export class Login {
     const { username, password } = this.loginForm.value;
 
     this.authService.login(username, password).subscribe({
-      next: () => {
+      next: (resposta) => {
         this.carregando = false;
-        this.mensagemSucesso = '✅ Login realizado com sucesso! Redirecionando...';
-        setTimeout(() => this.router.navigate(['/dashboards']), 120);
+        // Senha provisória: o primeiro passo é trocá-la, antes de qualquer outra tela.
+        const destino = resposta.usuario.precisaTrocarSenha ? '/trocar-senha' : '/dashboards';
+        this.mensagemSucesso = resposta.usuario.precisaTrocarSenha
+          ? '✅ Login realizado! Defina uma senha nova para continuar...'
+          : '✅ Login realizado com sucesso! Redirecionando...';
+        setTimeout(() => this.router.navigate([destino]), 120);
       },
       error: (erro: ApiErro) => {
         this.carregando = false;

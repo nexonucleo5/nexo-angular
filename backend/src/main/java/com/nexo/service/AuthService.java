@@ -116,7 +116,10 @@ public class AuthService {
         if (usuario == null || !usuario.isAtivo() || !senhaConfere) {
             porLogin.registrarFalha(chave);
             porOrigem.registrarFalha(ip);
-            auditoria.registrar(chave, EventoAuditoria.Tipo.ERRO, "Tentativa de login inválida", null, ip);
+            // Para login inexistente grava só um rastro do que foi digitado: quem erra de campo
+            // costuma colar a SENHA no lugar do login, e ela ficaria legível na trilha.
+            String registrado = usuario != null ? usuario.getLogin() : rastroDeLoginDesconhecido(chave);
+            auditoria.registrar(registrado, EventoAuditoria.Tipo.ERRO, "Tentativa de login inválida", null, ip);
             throw ApiException.unauthorized("Credenciais inválidas.");
         }
 
@@ -126,6 +129,12 @@ public class AuthService {
         porLogin.limpar(chave);
         auditoria.registrar(usuario.getNome(), EventoAuditoria.Tipo.LOGIN, "Login realizado", null, ip);
         return gerarTokens(usuario);
+    }
+
+    /** "maria.silva" → "ma***(11)": dá para reconhecer um ataque por dicionário, não para ler uma senha. */
+    static String rastroDeLoginDesconhecido(String digitado) {
+        String d = digitado == null ? "" : digitado;
+        return (d.length() <= 2 ? "" : d.substring(0, 2)) + "***(" + d.length() + ")";
     }
 
     /** Renovação sem origem conhecida (usada em teste); o caminho HTTP usa a sobrecarga. */

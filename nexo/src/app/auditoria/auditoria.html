@@ -1,0 +1,105 @@
+<section class="page-content">
+
+  <!-- ── Cabeçalho ────────────────────────────────────────── -->
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+      <h1 class="page-title fw-bold">Logs</h1>
+      <p class="text-soft m-0">Saúde do sistema e atividade dos usuários</p>
+    </div>
+    <button class="btn btn-dark-custom" [disabled]="aba() === 'atividade' && carregando()" (click)="atualizar()">
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-refresh"></use></svg> Atualizar
+    </button>
+  </div>
+
+  <div class="abas" role="tablist">
+    <button role="tab" [attr.aria-selected]="aba() === 'sistema'" [class.ativa]="aba() === 'sistema'"
+            (click)="aba.set('sistema')">Sistema</button>
+    <button role="tab" [attr.aria-selected]="aba() === 'atividade'" [class.ativa]="aba() === 'atividade'"
+            (click)="aba.set('atividade')">Atividade dos usuários</button>
+  </div>
+
+  @if (aba() === 'sistema') {
+    <app-logs-sistema />
+  } @else {
+
+    <div class="cartao">
+      <div class="cartao-cab">
+        <div>
+          <h2>Atividade dos usuários</h2>
+          <p>Quem entrou, o que alterou e as tentativas de acesso que falharam</p>
+        </div>
+      </div>
+
+      <div class="cartao-barra">
+        <div class="search-box busca">
+          <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
+          <input type="text" placeholder="Buscar usuário, ação ou IP"
+                 aria-label="Buscar na atividade"
+                 [ngModel]="busca()" (ngModelChange)="aoDigitar($event)">
+        </div>
+        <select class="filter-select" aria-label="Tipo de evento"
+                [ngModel]="tipo()" (ngModelChange)="tipo.set($event); aplicarFiltro()">
+          <option value="">Todos os tipos</option>
+          @for (t of tipoOpcoes; track t) {
+            <option [value]="t">{{ tipoLabel(t) }}</option>
+          }
+        </select>
+        <select class="filter-select" aria-label="Período"
+                [ngModel]="periodo()" (ngModelChange)="periodo.set(+$event); aplicarFiltro()">
+          @for (p of periodoOpcoes; track p.dias) {
+            <option [value]="p.dias">{{ p.label }}</option>
+          }
+        </select>
+      </div>
+
+      @if (erro()) {
+        <p class="vazio">Não foi possível carregar. <button class="link" (click)="carregar()">Tentar de novo</button></p>
+      } @else if (carregando() && eventos().length === 0) {
+        <p class="vazio">Carregando…</p>
+      } @else if (eventos().length === 0) {
+        <p class="vazio">Nenhum evento com esses filtros.</p>
+      } @else {
+        <div class="tabela-wrap" [style.opacity]="carregando() ? 0.6 : 1">
+          <table class="tabela">
+            <thead>
+              <tr>
+                <th>Quando</th>
+                <th>Tipo</th>
+                <th>Usuário</th>
+                <th>Ação</th>
+                <th class="col-extra">IP</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of eventos(); track e.id) {
+                <tr [class.com-erro]="e.tipo === 'ERRO'">
+                  <td class="hora" [title]="e.criadoEm | date:'dd/MM/yyyy HH:mm:ss'">
+                    <span class="data">{{ e.criadoEm | date:'dd/MM' }}</span>{{ e.criadoEm | date:'HH:mm:ss' }}
+                  </td>
+                  <td><span class="chip" [ngClass]="tipoClasse(e.tipo)">{{ tipoLabel(e.tipo) }}</span></td>
+                  <td class="quebra">{{ e.usuario || '—' }}</td>
+                  <td class="quebra">
+                    {{ e.acao }}
+                    @if (e.detalhe) { <span class="sub">{{ e.detalhe }}</span> }
+                  </td>
+                  <td class="mono col-extra">{{ ipLegivel(e.ip) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="rodape">
+          <span aria-live="polite">{{ intervalo() }} de {{ totalEventos() }}</span>
+          @if (totalPaginas() > 1) {
+            <span class="paginas">
+              <button class="btn btn-dark-custom btn-sm" [disabled]="pagina() === 0 || carregando()" (click)="irParaPagina(pagina() - 1)">Anterior</button>
+              Página {{ pagina() + 1 }} de {{ totalPaginas() }}
+              <button class="btn btn-dark-custom btn-sm" [disabled]="pagina() >= totalPaginas() - 1 || carregando()" (click)="irParaPagina(pagina() + 1)">Próxima</button>
+            </span>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

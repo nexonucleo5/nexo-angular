@@ -7,10 +7,15 @@ import {
   ConteudoAdminDTO,
   DashboardAdminDTO,
   DesafioAdminDTO,
+  EventoAuditoriaDTO,
+  LogAplicacaoDTO,
   MateriaCatalogoDTO,
+  NivelLog,
   PageEnvelope,
   PapelConta,
+  ResumoSistemaDTO,
   SenhaRedefinidaDTO,
+  TipoEvento,
 } from '../core/api.models';
 
 /**
@@ -75,5 +80,35 @@ export class AdminService {
 
   publicarDesafio(id: number, publicado: boolean): Observable<DesafioAdminDTO> {
     return this.http.patch<DesafioAdminDTO>(`${this.api}/catalogo/desafios/${id}/publicado`, { publicado });
+  }
+
+  // ── Logs ───────────────────────────────────────────────────────────────────
+
+  /** Só o administrador lê: o diretor, que alcança o resto de /admin, recebe 403 aqui. */
+  eventos(filtro: { tipo?: TipoEvento; busca?: string; periodo?: number; page?: number; size?: number } = {}):
+    Observable<PageEnvelope<EventoAuditoriaDTO>> {
+    let params = new HttpParams();
+    if (filtro.tipo) params = params.set('tipo', filtro.tipo);
+    if (filtro.busca) params = params.set('busca', filtro.busca);
+    if (filtro.periodo) params = params.set('periodo', filtro.periodo);
+    if (filtro.page != null) params = params.set('page', filtro.page);
+    if (filtro.size != null) params = params.set('size', filtro.size);
+    return this.http.get<PageEnvelope<EventoAuditoriaDTO>>(`${environment.apiUrl}/auditoria/eventos`, { params });
+  }
+
+  /** Log da aplicação (WARN/ERROR). Mesmo recorte de acesso da auditoria: só o administrador. */
+  logsSistema(filtro: { nivel?: NivelLog; busca?: string; periodo?: number; page?: number; size?: number } = {}):
+    Observable<PageEnvelope<LogAplicacaoDTO>> {
+    let params = new HttpParams();
+    if (filtro.nivel) params = params.set('nivel', filtro.nivel);
+    if (filtro.busca) params = params.set('busca', filtro.busca);
+    if (filtro.periodo) params = params.set('periodo', filtro.periodo);
+    if (filtro.page != null) params = params.set('page', filtro.page);
+    if (filtro.size != null) params = params.set('size', filtro.size);
+    return this.http.get<PageEnvelope<LogAplicacaoDTO>>(`${environment.apiUrl}/auditoria/sistema/logs`, { params });
+  }
+
+  resumoSistema(): Observable<ResumoSistemaDTO> {
+    return this.http.get<ResumoSistemaDTO>(`${environment.apiUrl}/auditoria/sistema/resumo`);
   }
 }

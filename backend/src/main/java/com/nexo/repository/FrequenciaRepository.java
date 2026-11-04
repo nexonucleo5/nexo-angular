@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,4 +38,21 @@ public interface FrequenciaRepository extends JpaRepository<Frequencia, Long> {
            group by f.aluno.id
            """)
     List<FrequenciaResumo> resumoPorAluno();
+
+    /**
+     * O mesmo resumo, restrito aos alunos das turmas indicadas.
+     *
+     * <p>Par de {@code NotaRepository.projetarPorTurmas}: {@link #resumoPorAluno()}
+     * agrega a tabela de frequência inteira, o que é desperdício quando o pedido é de
+     * um professor que só enxerga as próprias turmas.
+     */
+    @Query("""
+           select f.aluno.id as alunoId, count(f) as total,
+                  sum(case when f.presente = false then 1L else 0L end) as faltas
+           from Frequencia f
+           where f.aluno.turma.id in :turmaIds
+           group by f.aluno.id
+           """)
+    List<FrequenciaResumo> resumoPorTurmas(
+            @org.springframework.data.repository.query.Param("turmaIds") Collection<Long> turmaIds);
 }

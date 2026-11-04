@@ -13,7 +13,12 @@
             <h2 class="fw-bold mb-0 text-main">{{stat.value}}</h2>
           </div>
           <div class="icon-square" [ngClass]="stat.color">
-            <i [class]="'bi ' + stat.icon"></i>
+            @switch (stat.icon) {
+              @case ('bi-bullseye') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-target"></use></svg> }
+              @case ('bi-fire') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-flame"></use></svg> }
+              @case ('bi-trophy') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trophy"></use></svg> }
+              @default { <i [class]="'bi ' + stat.icon"></i> }
+            }
           </div>
         </div>
       </div>
@@ -24,7 +29,7 @@
     <div class="row g-2 align-items-center">
       <div class="col-lg-6">
         <div class="search-box">
-          <i class="bi bi-search"></i>
+          <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
           <input type="text" class="form-control-custom" placeholder="Buscar por título..."
                  aria-label="Buscar desafio por título"
                  [ngModel]="buscaDeTermos()" (ngModelChange)="buscaDeTermos.set($event)">
@@ -55,7 +60,7 @@
       }
       @if (temFiltro()) {
         <button type="button" class="status-aba limpar" (click)="limparFiltros()">
-          <i class="bi bi-x-lg"></i> Limpar
+          <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-x"></use></svg> Limpar
         </button>
       }
     </div>
@@ -63,7 +68,7 @@
 
   @if (!carregando() && desafiosFiltrados().length === 0) {
     <div class="main-card p-4 text-center mb-4">
-      <i class="bi bi-search fs-3 text-soft"></i>
+      <svg class="ic fs-3 text-soft" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
       <p class="text-soft mt-2 mb-0">
         {{ temFiltro() ? 'Nenhum desafio encontrado com esses filtros.' : 'Nenhum desafio disponível para a sua etapa ainda.' }}
       </p>
@@ -80,8 +85,8 @@
         <h3 class="h5 text-main fw-bold mb-1">{{desafio.titulo}}</h3>
         <p class="text-soft small mb-3">{{desafio.materia}}</p>
         <div class="d-flex gap-3 mb-4 mt-auto">
-          <span class="text-soft small"><i class="bi bi-lightning-fill text-warning"></i> {{desafio.xp}} XP</span>
-          <span class="text-soft small"><i class="bi bi-clock"></i> {{desafio.tempo}}</span>
+          <span class="text-soft small"><svg class="ic text-warning" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bolt"></use></svg> {{desafio.xp}} XP</span>
+          <span class="text-soft small"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-clock"></use></svg> {{desafio.tempo}}</span>
         </div>
         <div class="progress mb-3" *ngIf="desafio.status === 'progresso'">
           <div class="progress-bar" [style.width]="desafio.progresso + '%'"></div>

@@ -106,6 +106,13 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard('admin', 'diretor')],
     loadComponent: () => import('./catalogo/catalogo').then((m) => m.Catalogo),
   },
+  {
+    // Só o administrador: a trilha tem nome e IP de quem entrou. O diretor,
+    // que lê o resto do painel, não passa — o backend aplica a mesma regra.
+    path: 'auditoria',
+    canActivate: [authGuard, roleGuard('admin')],
+    loadComponent: () => import('./auditoria/auditoria').then((m) => m.Auditoria),
+  },
   // Path antigo do painel da secretaria: mantido para não quebrar link já
   // compartilhado ou favorito de quem usava a tela.
   { path: 'secretaria-dashboard', redirectTo: '/admin-dashboard', pathMatch: 'full' },

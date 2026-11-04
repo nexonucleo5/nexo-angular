@@ -8,7 +8,7 @@
       <p class="text-soft m-0">Contas de acesso e catálogo de conteúdo</p>
     </div>
     <a routerLink="/cadastro" class="gradient-btn px-4 py-2 d-inline-flex align-items-center gap-2 text-decoration-none">
-      <i class="bi bi-person-plus"></i> Nova conta
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg> Nova conta
     </a>
   </div>
 
@@ -31,7 +31,7 @@
           <small class="text-soft">{{ d.contasInativas }} inativa(s)</small>
         </div>
         <div class="icon-box blue-gradient">
-          <i class="bi bi-shield-lock-fill fs-4"></i>
+          <svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-shield"></use></svg>
         </div>
       </div>
     </div>
@@ -43,7 +43,7 @@
           <small class="text-soft">{{ d.professores }} professor(es) • {{ d.turmas }} turma(s)</small>
         </div>
         <div class="icon-box green">
-          <i class="bi bi-people-fill fs-4"></i>
+          <svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-users"></use></svg>
         </div>
       </div>
     </div>
@@ -55,7 +55,7 @@
           <small class="text-soft">em {{ d.materias }} matéria(s)</small>
         </div>
         <div class="icon-box purple-gradient">
-          <i class="bi bi-journal-text fs-4"></i>
+          <svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg>
         </div>
       </div>
     </div>
@@ -67,7 +67,7 @@
           <small class="text-soft">{{ d.desafios }} desafio(s) no catálogo</small>
         </div>
         <div class="icon-box orange">
-          <i class="bi bi-eye-slash-fill fs-4"></i>
+          <span class="ic-off"><svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-eye"></use></svg></span>
         </div>
       </div>
     </div>
@@ -81,7 +81,7 @@
         <h5 class="text-main fw-bold m-0">Cobertura por matéria</h5>
         @if (materiasFracas().length > 0) {
           <span class="badge-compliance status-warn">
-            <i class="bi bi-exclamation-triangle-fill"></i>
+            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg>
             {{ materiasFracas().length }} com pouco conteúdo
           </span>
         }
@@ -95,7 +95,7 @@
             <a class="materia-row p-3 d-flex align-items-center gap-3 flex-wrap text-decoration-none"
                routerLink="/catalogo" [queryParams]="{ materia: m.id }">
               <div class="icon-box purple-gradient">
-                <i class="bi bi-journal-x"></i>
+                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg>
               </div>
               <div class="flex-grow-1">
                 <h6 class="text-main fw-bold mb-1">{{ m.nome }}</h6>
@@ -105,7 +105,7 @@
               </div>
               <span class="badge-compliance"
                     [ngClass]="m.conteudosPublicados === 0 ? 'status-danger' : 'status-warn'">
-                <i class="bi bi-plus-circle"></i>
+                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-plus"></use></svg>
                 {{ m.conteudosPublicados === 0 ? 'Sem conteúdo' : 'Pouco conteúdo' }}
               </span>
             </a>
@@ -160,7 +160,7 @@
 
       <div class="d-flex flex-column gap-2">
         <a routerLink="/contas" class="quick-card p-3 d-flex align-items-center gap-3 text-decoration-none">
-          <div class="icon-box blue-gradient"><i class="bi bi-shield-lock"></i></div>
+          <div class="icon-box blue-gradient"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-shield"></use></svg></div>
           <div>
             <h6 class="text-main fw-bold mb-1">Gerir contas</h6>
             <small class="text-soft">Ativar, desativar e redefinir senha provisória</small>
@@ -170,7 +170,7 @@
         @if (d.contasInativas > 0) {
           <a routerLink="/contas" [queryParams]="{ inativas: true }"
              class="quick-card p-3 d-flex align-items-center gap-3 text-decoration-none">
-            <div class="icon-box orange"><i class="bi bi-person-slash"></i></div>
+            <div class="icon-box orange"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg></div>
             <div>
               <h6 class="text-main fw-bold mb-1">{{ d.contasInativas }} conta(s) inativa(s)</h6>
               <small class="text-soft">Sem acesso ao sistema até serem reativadas</small>
@@ -179,7 +179,7 @@
         }
 
         <a routerLink="/catalogo" class="quick-card p-3 d-flex align-items-center gap-3 text-decoration-none">
-          <div class="icon-box purple-gradient"><i class="bi bi-collection"></i></div>
+          <div class="icon-box purple-gradient"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-grid"></use></svg></div>
           <div>
             <h6 class="text-main fw-bold mb-1">Catálogo de conteúdo</h6>
             <small class="text-soft">
@@ -193,7 +193,7 @@
         </a>
 
         <a routerLink="/inscricoes" class="quick-card p-3 d-flex align-items-center gap-3 text-decoration-none">
-          <div class="icon-box green"><i class="bi bi-people"></i></div>
+          <div class="icon-box green"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-users"></use></svg></div>
           <div>
             <h6 class="text-main fw-bold mb-1">Inscrições nas turmas</h6>
             <small class="text-soft">De qual turma cada aluno vê o conteúdo</small>

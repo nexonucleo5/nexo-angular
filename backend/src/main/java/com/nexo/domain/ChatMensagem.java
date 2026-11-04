@@ -4,12 +4,15 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import lombok.Getter;
+
 /** Mensagem direta em tempo real entre dois usuários (chat professor ↔ diretor). */
 @Entity
 @Table(name = "chat_mensagens", indexes = {
         @Index(name = "idx_chat_remetente_destinatario", columnList = "remetente_id, destinatario_id"),
         @Index(name = "idx_chat_destinatario_remetente", columnList = "destinatario_id, remetente_id")
 })
+@Getter
 public class ChatMensagem {
 
     @Id
@@ -38,11 +41,4 @@ public class ChatMensagem {
         this.texto = texto;
         this.criadaEm = criadaEm;
     }
-
-    public Long getId() { return id; }
-    public Long getRemetenteId() { return remetenteId; }
-    public String getRemetenteNome() { return remetenteNome; }
-    public Long getDestinatarioId() { return destinatarioId; }
-    public String getTexto() { return texto; }
-    public Instant getCriadaEm() { return criadaEm; }
 }

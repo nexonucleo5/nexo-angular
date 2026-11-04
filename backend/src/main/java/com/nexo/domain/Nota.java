@@ -2,10 +2,15 @@ package com.nexo.domain;
 
 import jakarta.persistence.*;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
 @Table(name = "notas",
        uniqueConstraints = @UniqueConstraint(columnNames = {"aluno_id", "disciplina", "periodo"}),
        indexes = @Index(name = "idx_notas_turma", columnList = "turma_id"))
+@Getter
+@Setter
 public class Nota {
 
     @Id
@@ -52,23 +57,4 @@ public class Nota {
         if (pesos == 0) return null;
         return Math.round((soma / pesos) * 10.0) / 10.0;
     }
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Aluno getAluno() { return aluno; }
-    public void setAluno(Aluno aluno) { this.aluno = aluno; }
-    public Turma getTurma() { return turma; }
-    public void setTurma(Turma turma) { this.turma = turma; }
-    public String getDisciplina() { return disciplina; }
-    public void setDisciplina(String disciplina) { this.disciplina = disciplina; }
-    public String getPeriodo() { return periodo; }
-    public void setPeriodo(String periodo) { this.periodo = periodo; }
-    public Double getP1() { return p1; }
-    public void setP1(Double p1) { this.p1 = p1; }
-    public Double getP2() { return p2; }
-    public void setP2(Double p2) { this.p2 = p2; }
-    public Double getT1() { return t1; }
-    public void setT1(Double t1) { this.t1 = t1; }
-    public Double getParticipacao() { return participacao; }
-    public void setParticipacao(Double participacao) { this.participacao = participacao; }
 }

@@ -6,8 +6,8 @@
   font-size: 13px; cursor: pointer; transition: opacity 0.2s;
   display: inline-flex; align-items: center; gap: 8px; color: white;
   &:hover { opacity: 0.9; }
-  &.pdf   { background: linear-gradient(135deg, #ef4444, #dc2626); }
-  &.excel { background: linear-gradient(135deg, #06d25e, #059669); }
+  &.pdf   { background: #DC2626; }
+  &.excel { background: #059669; }
 }
 
 /* Filtros */
@@ -19,7 +19,7 @@
 
 .filter-group {
   display: flex; align-items: center; gap: 8px;
-  i { color: var(--text-muted); }
+  :is(i, .ic) { color: var(--text-muted); }
 }
 
 .custom-select {
@@ -87,8 +87,8 @@
 .icon-mini {
   width: 38px; height: 38px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;
-  &.bg-purple { background: linear-gradient(135deg, #9b2fff, #673ab7); }
-  &.bg-green  { background: linear-gradient(135deg, #06d25e, #059669); }
+  &.bg-purple { background: var(--nx-brand-deep, #5B21B6); }
+  &.bg-green  { background: #059669; }
 }
 
 .integration-item {
@@ -107,7 +107,7 @@
 
 .avatar-tag {
   width: 40px; height: 40px; border-radius: 10px;
-  background: linear-gradient(135deg, #9b2fff, #06d25e);
+  background: var(--nx-brand-deep, #5B21B6);
   display: flex; align-items: center; justify-content: center;
   color: white; font-weight: 700; font-size: 12px;
 }

@@ -80,6 +80,35 @@ describe('guards de rota', () => {
   });
 
 
+  describe('authGuard com senha provisória', () => {
+    function rodarEm(url: string) {
+      return TestBed.runInInjectionContext(() =>
+        authGuard(ROTA, { url } as RouterStateSnapshot),
+      );
+    }
+
+    beforeEach(() => sessao.set({ ...usuarioCom('aluno'), precisaTrocarSenha: true }));
+
+    it('prende o usuário na troca de senha', () => {
+      expect(destinoDe(rodarEm('/dashboards'))).toBe('/trocar-senha');
+      expect(destinoDe(rodarEm('/materias'))).toBe('/trocar-senha');
+    });
+
+    it('libera a própria tela de troca', () => {
+      expect(rodarEm('/trocar-senha')).toBe(true);
+    });
+
+    it('solta o usuário depois da troca', () => {
+      sessao.set({ ...usuarioCom('aluno'), precisaTrocarSenha: false });
+
+      expect(rodarEm('/dashboards')).toBe(true);
+    });
+
+    it('o visitanteGuard manda para a troca, não para o painel', () => {
+      expect(destinoDe(rodar(visitanteGuard))).toBe('/trocar-senha');
+    });
+  });
+
   describe('visitanteGuard', () => {
     it('libera a tela de login para quem não tem sessão', () => {
       expect(rodar(visitanteGuard)).toBe(true);

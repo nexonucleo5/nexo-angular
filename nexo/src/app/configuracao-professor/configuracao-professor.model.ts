@@ -22,7 +22,6 @@ export interface DisponibilidadeConfig {
 
 export interface ProfessorPrivacidadeConfig {
     perfilVisivelAlunos: boolean;
-    exibirContatoResponsaveis: boolean;
 }
 
 export interface ProfessorSettings {
@@ -57,6 +56,5 @@ export const PROFESSOR_DEFAULTS: ProfessorSettings = {
     },
     privacidade: {
         perfilVisivelAlunos: true,
-        exibirContatoResponsaveis: false,
     },
 };

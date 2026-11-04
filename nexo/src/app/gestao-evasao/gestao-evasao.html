@@ -46,7 +46,7 @@
         <div class="row g-3 align-items-center">
             <div class="col-lg-5">
                 <div class="search-box d-flex align-items-center p-2">
-                    <i class="bi bi-search px-2 text-secondary"></i>
+                    <svg class="ic px-2 text-secondary" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
                     <input type="text" [ngModel]="buscaNome()" (ngModelChange)="buscaNome.set($event)"
                         class="form-control border-0 bg-transparent shadow-none"
                         placeholder="Buscar por nome, matrícula ou turma...">
@@ -66,7 +66,7 @@
             </div>
             <div class="col-lg-1">
                 <button class="btn gradient-btn w-100 d-flex align-items-center justify-content-center gap-1">
-                    <i class="bi bi-funnel-fill"></i> Filtrar
+                    <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-filter"></use></svg> Filtrar
                 </button>
             </div>
         </div>
@@ -94,9 +94,9 @@
             <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
                 <div class="d-flex gap-3 align-items-center">
                     <div class="avatar-container position-relative">
-                        <img [src]="aluno.foto" [alt]="aluno.nome" class="rounded-circle student-avatar">
+                        <img loading="lazy" decoding="async" [src]="aluno.foto" [alt]="aluno.nome" class="rounded-circle student-avatar">
                         <span class="status-badge-icon position-absolute" [ngClass]="getClasseRisco(aluno.risco)">
-                            <i class="bi" [ngClass]="aluno.risco === 'Alto' ? 'bi-exclamation-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
+                            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg>
                         </span>
                     </div>
                     <div>

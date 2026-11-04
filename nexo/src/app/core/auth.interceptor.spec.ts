@@ -22,7 +22,7 @@ function erro401() {
 function tokens(token: string): TokenResponse {
   return {
     token,
-    usuario: { id: 1, nome: 'Ana', cargo: 'Aluno', foto: '', role: 'ALUNO' },
+    usuario: { id: 1, nome: 'Ana', cargo: 'Aluno', foto: '', role: 'ALUNO', precisaTrocarSenha: false },
   };
 }
 

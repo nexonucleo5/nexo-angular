@@ -8,7 +8,7 @@
   <!-- ── O que é ────────────────────────────────────────────── -->
   <div class="sobre-destaque mb-4">
     <div class="d-flex align-items-start gap-3 flex-wrap">
-      <div class="icon-box purple-gradient"><i class="bi bi-mortarboard-fill fs-4"></i></div>
+      <div class="icon-box purple-gradient"><svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-cap"></use></svg></div>
       <div class="flex-grow-1">
         <h2 class="h5 fw-bold text-main mb-2">Uma escola inteira num lugar só</h2>
         <p class="text-soft mb-0">
@@ -27,7 +27,12 @@
     @for (r of recursos; track r.titulo) {
       <div class="col-12 col-md-6">
         <div class="recurso-card h-100 d-flex gap-3 p-3">
-          <i class="bi {{ r.icone }} recurso-icone"></i>
+          @switch (r.icone) {
+            @case ('bi-shield-lock') { <svg class="ic recurso-icone" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-shield"></use></svg> }
+            @case ('bi-clock-history') { <svg class="ic recurso-icone" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-clock"></use></svg> }
+            @case ('bi-file-earmark-pdf') { <svg class="ic recurso-icone" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-file"></use></svg> }
+            @default { <i class="bi {{ r.icone }} recurso-icone"></i> }
+          }
           <div>
             <h3 class="h6 fw-bold text-main mb-1">{{ r.titulo }}</h3>
             <p class="text-soft small mb-0">{{ r.texto }}</p>
@@ -49,7 +54,11 @@
         <div class="perfil-card h-100 p-3"
              [class.perfil-atual]="perfilAtual() === p.perfil.toLowerCase()">
           <div class="d-flex align-items-center gap-3 mb-2">
-            <div class="icon-box {{ p.cor }}"><i class="bi {{ p.icone }} fs-5"></i></div>
+            <div class="icon-box {{ p.cor }}">@switch (p.icone) {
+              @case ('bi-mortarboard') { <svg class="ic fs-5" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-cap"></use></svg> }
+              @case ('bi-shield-lock') { <svg class="ic fs-5" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-shield"></use></svg> }
+              @default { <i class="bi {{ p.icone }} fs-5"></i> }
+            }</div>
             <h3 class="h6 fw-bold text-main m-0">{{ p.perfil }}</h3>
             @if (perfilAtual() === p.perfil.toLowerCase()) {
               <span class="badge-compliance status-ok">você</span>
@@ -71,7 +80,7 @@
       Precisa de ajuda ou encontrou algo errado?
     </p>
     <a routerLink="/suporte" class="gradient-btn px-4 py-2 text-decoration-none">
-      <i class="bi bi-life-preserver"></i> Ir para o suporte
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-help"></use></svg> Ir para o suporte
     </a>
   </div>
 

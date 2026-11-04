@@ -5,9 +5,14 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /** Pergunta de múltipla escolha do quiz de um desafio. */
 @Entity
 @Table(name = "quiz_perguntas")
+@Getter
+@Setter
 public class QuizPergunta {
 
     @Id
@@ -29,15 +34,4 @@ public class QuizPergunta {
     /** Índice (0-based) da alternativa correta na lista acima. */
     @Column(nullable = false)
     private int respostaCorreta;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Desafio getDesafio() { return desafio; }
-    public void setDesafio(Desafio desafio) { this.desafio = desafio; }
-    public String getEnunciado() { return enunciado; }
-    public void setEnunciado(String enunciado) { this.enunciado = enunciado; }
-    public List<String> getAlternativas() { return alternativas; }
-    public void setAlternativas(List<String> alternativas) { this.alternativas = alternativas; }
-    public int getRespostaCorreta() { return respostaCorreta; }
-    public void setRespostaCorreta(int respostaCorreta) { this.respostaCorreta = respostaCorreta; }
 }

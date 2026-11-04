@@ -15,7 +15,7 @@
     padding: 8px 16px;
     font-weight: 600;
     font-size: 14px;
-    border-radius: 20px;
+    border-radius: var(--nx-radius-card, 14px);
     transition: all 0.2s ease;
     cursor: pointer;
 
@@ -45,7 +45,7 @@
 
 .badge-tag {
   font-size: 11px; padding: 4px 10px; border-radius: 6px; font-weight: 500;
-  &.type    { background: rgba(155, 47, 255, 0.1); color: #9b2fff; }
+  &.type    { background: color-mix(in srgb, var(--nx-brand, #6D28D9) 10%, transparent); color: var(--nx-brand, #6D28D9); }
   &.facil   { background: rgba(6, 210, 94, 0.1);  color: #06d25e; }
   &.medio   { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
   &.dificil { background: rgba(255, 61, 0, 0.1);  color: #ff3d00; }
@@ -82,7 +82,7 @@
   border: 1px solid var(--border-color); color: var(--text-main);
   font-weight: 600; border-radius: 12px; padding: 10px 20px;
   background: transparent; cursor: pointer;
-  &:hover { border-color: #9b2fff; color: #9b2fff; }
+  &:hover { border-color: var(--nx-brand, #6D28D9); color: var(--nx-brand, #6D28D9); }
 }
 /* Rótulo, barra e contagem dividem uma linha só. Os dois textos têm text-nowrap
    e a barra tem w-100: juntos eles nunca cabiam num celular e a contagem saía

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Risco de evasão calculado no servidor a partir de dados reais
@@ -32,25 +31,27 @@ public class EvasaoService {
 
     @Transactional(readOnly = true)
     public List<AlunoRiscoDTO> calcularRisco(Risco filtroRisco, Long turmaId, String busca) {
-        var indices = agregados.carregar(null);
+        // Com filtro de turma, tanto os alunos quanto os agregados saem recortados do
+        // banco. Antes o filtro era só de memória: a escola inteira vinha em três
+        // varreduras (alunos, notas, frequência) e a turma pedida era selecionada
+        // depois — o custo no banco era o mesmo com ou sem filtro na tela.
+        List<Aluno> lista = turmaId == null
+                ? alunos.findAllComTurma()
+                : alunos.findByTurmaIdComTurma(turmaId);
+        var indices = turmaId == null
+                ? agregados.carregar(null)
+                : agregados.carregarDeTurmas(List.of(turmaId), null);
+
         // Normaliza o termo uma única vez: dentro do filtro ele era reprocessado
         // (trim + toLowerCase, duas Strings novas) para cada aluno da escola.
         String termo = (busca == null || busca.isBlank()) ? null : busca.trim().toLowerCase();
 
-        return alunos.findAllComTurma().stream()
-                .filter(a -> turmaId == null || (a.getTurma() != null && Objects.equals(a.getTurma().getId(), turmaId)))
+        return lista.stream()
                 .filter(a -> termo == null || a.getNome().toLowerCase().contains(termo))
                 .map(a -> avaliar(a, indices))
                 .filter(dto -> filtroRisco == null || dto.risco() == filtroRisco)
                 .sorted((a, b) -> b.risco().compareTo(a.risco()))
                 .toList();
-    }
-
-    /** Avalia vários alunos reaproveitando um único carregamento de agregados (2 queries no total). */
-    @Transactional(readOnly = true)
-    public List<AlunoRiscoDTO> avaliarTodos(List<Aluno> lista) {
-        var indices = agregados.carregar(null);
-        return lista.stream().map(a -> avaliar(a, indices)).toList();
     }
 
     /** Classificação pura: não toca no banco, só consulta os agregados já carregados. */

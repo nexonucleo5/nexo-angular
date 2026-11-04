@@ -32,6 +32,13 @@ spring:
     console:
       enabled: false          # console H2 desligado em produção
 
+# Console em JSON, uma linha por evento, com os campos do MDC (requisicaoId, caminho, usuario):
+# o painel do Render e qualquer coletor filtram por campo em vez de procurar texto.
+logging:
+  structured:
+    format:
+      console: logstash
+
 nexo:
   jwt:
     secret: ${NEXO_JWT_SECRET}          # OBRIGATÓRIO — sem default em produção
@@ -47,5 +54,11 @@ nexo:
     # cliente ao fim do X-Forwarded-For. Ajuste se entrar outra camada (CDN, WAF) na
     # frente: cada salto a mais é +1 aqui, senão o IP registrado vira o do intermediário.
     saltos-confiaveis: ${PROXY_SALTOS_CONFIAVEIS:1}
+  auditoria:
+    # Dias de eventos de auditoria mantidos; o que for mais antigo é apagado às 03:30.
+    # Era a única tabela sem teto de crescimento — login e logout gravam um evento cada.
+    # Folgado de propósito: a tela consulta por ?periodo=<dias> e um corte curto faria a
+    # resposta parecer "sem eventos" onde na verdade foram removidos. 0 desliga.
+    retencao-dias: ${AUDITORIA_RETENCAO_DIAS:365}
   seed:
     enabled: ${SEED_ENABLED:false}      # não semear dados de exemplo em produção

@@ -21,7 +21,13 @@
       <div class="metric-card">
         <div class="d-flex justify-content-between align-items-start mb-3">
           <div class="icon-square" [ngClass]="stat.color">
-            <i [class]="'bi ' + stat.icon + ' fs-4'"></i>
+            @switch (stat.icon) {
+              @case ('bi-people-fill') { <svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-users"></use></svg> }
+              @case ('bi-person-check-fill') { <svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg> }
+              @case ('bi-clock-history') { <svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-clock"></use></svg> }
+              @case ('bi-journal-check') { <svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg> }
+              @default { <i [class]="'bi ' + stat.icon + ' fs-4'"></i> }
+            }
           </div>
         </div>
         <p class="text-soft small mb-1 fw-semibold">{{ stat.label }}</p>
@@ -37,7 +43,7 @@
     <div class="col-xl-5">
       <div class="main-card p-4 h-100">
         <h3 class="h5 text-main fw-bold mb-4 d-flex align-items-center gap-2">
-          <i class="bi bi-calendar3 text-blue"></i> Próximas Aulas
+          <svg class="ic text-blue" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-calendar"></use></svg> Próximas Aulas
         </h3>
         <div class="d-flex flex-column gap-3">
           <div class="border-custom p-3 rounded-12 d-flex justify-content-between align-items-center"
@@ -64,13 +70,13 @@
     <div class="col-xl-7">
       <div class="main-card p-4 h-100">
         <h3 class="h5 text-main fw-bold mb-4 d-flex align-items-center gap-2">
-          <i class="bi bi-exclamation-triangle text-warning"></i> Alunos que Precisam de Atenção
+          <svg class="ic text-warning" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg> Alunos que Precisam de Atenção
         </h3>
         <div class="d-flex flex-column gap-3">
           <div class="student-row d-flex align-items-center justify-content-between p-3 border-custom rounded-12"
                *ngFor="let aluno of alunosAtencao()">
             <div class="d-flex align-items-center gap-3">
-              <img [src]="aluno.foto" class="avatar-img rounded-circle" alt="Foto">
+              <img loading="lazy" decoding="async" [src]="aluno.foto" class="avatar-img rounded-circle" alt="Foto">
               <div>
                 <h6 class="text-main fw-bold mb-0">{{ aluno.nome }}</h6>
                 <small class="text-soft">{{ aluno.turma }} • Último acesso: {{ aluno.ultimaAtividade }}</small>
@@ -105,7 +111,7 @@
     <div class="col-xl-7">
       <div class="main-card p-4">
         <h3 class="h5 text-main fw-bold mb-4 d-flex align-items-center gap-2">
-          <i class="bi bi-people-fill text-green"></i> Minhas Turmas
+          <svg class="ic text-green" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-users"></use></svg> Minhas Turmas
         </h3>
         <div class="subject-progress-list d-flex flex-column gap-3">
           <div class="d-flex align-items-center gap-3" *ngFor="let turma of turmas()">
@@ -134,13 +140,19 @@
     <div class="col-xl-5">
       <div class="main-card p-4">
         <h3 class="h5 text-main fw-bold mb-4 d-flex align-items-center gap-2">
-          <i class="bi bi-clock-history text-purple"></i> Atividades Recentes
+          <svg class="ic text-purple" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-clock"></use></svg> Atividades Recentes
         </h3>
         <div class="d-flex flex-column gap-3">
           <div class="d-flex align-items-center gap-3 p-2 border-custom rounded-12"
                *ngFor="let atividade of atividadesRecentes()">
             <div class="icon-mini-circle">
-              <i [class]="'bi ' + atividade.icone + ' ' + atividade.corIcone"></i>
+              @switch (atividade.icone) {
+                @case ('bi-file-earmark-plus') { <svg [class]="'ic ' + atividade.corIcone" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-file"></use></svg> }
+                @case ('bi-journal-check') { <svg [class]="'ic ' + atividade.corIcone" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg> }
+                @case ('bi-megaphone') { <svg [class]="'ic ' + atividade.corIcone" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-megaphone"></use></svg> }
+                @case ('bi-pencil-square') { <svg [class]="'ic ' + atividade.corIcone" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-pencil"></use></svg> }
+                @default { <i [class]="'bi ' + atividade.icone + ' ' + atividade.corIcone"></i> }
+              }
             </div>
             <div class="flex-grow-1">
               <p class="text-main small fw-semibold mb-0">{{ atividade.descricao }}</p>

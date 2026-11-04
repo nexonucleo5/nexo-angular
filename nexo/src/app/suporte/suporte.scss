@@ -17,7 +17,7 @@
   color: var(--text-main);
   font-weight: 600; font-size: 15px; text-align: left;
   cursor: pointer;
-  i { color: var(--text-muted); flex-shrink: 0; }
+  :is(i, .ic) { color: var(--text-muted); flex-shrink: 0; }
   &:hover { background: var(--hover-overlay); }
 }
 
@@ -58,7 +58,7 @@
   font-size: 12px; font-weight: 600;
   cursor: pointer; white-space: nowrap;
   &:hover { border-color: #9b2fff; }
-  .bi-check-lg { color: #06d25e; }
+  .ic { color: #06d25e; }
 }
 
 .link-sobre { color: #9b2fff; font-weight: 600; text-decoration: none;

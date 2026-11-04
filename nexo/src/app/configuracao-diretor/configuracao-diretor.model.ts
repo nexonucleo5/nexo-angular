@@ -22,17 +22,12 @@ export interface IntegracoesConfig {
     sincronizarCalendarioInstitucional: boolean;
 }
 
-export interface DiretorPrivacidadeConfig {
-    exibirDadosInstituicaoPublicamente: boolean;
-}
-
 export interface DiretorSettings {
     notificacoes: DiretorNotificacoesConfig;
     institucional: InstitucionalConfig;
     gestao: GestaoConfig;
     integracoes: IntegracoesConfig;
     aparencia: AparenciaConfig;
-    privacidade: DiretorPrivacidadeConfig;
 }
 
 /** Defaults idênticos aos do backend (ConfiguracaoService.defaultsPara(DIRETOR)). */
@@ -58,8 +53,5 @@ export const DIRETOR_DEFAULTS: DiretorSettings = {
     aparencia: {
         temaEscuro: true,
         animacoesInterface: true,
-    },
-    privacidade: {
-        exibirDadosInstituicaoPublicamente: false,
     },
 };

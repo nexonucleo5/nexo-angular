@@ -64,7 +64,7 @@ export class Catalogo {
         this.materias.set(lista);
         this.carregando.set(false);
         const alvo = lista.find((m) => m.id === this.materiaPedida) ?? lista[0];
-        if (alvo) this.selecionarMateria(alvo.id);
+        if (alvo) this.selecionarMateria(alvo.id, true);
       },
       error: () => {
         this.erro.set(true);
@@ -73,7 +73,21 @@ export class Catalogo {
     });
   }
 
-  selecionarMateria(id: number): void {
+  /**
+   * Abre a matéria e carrega os conteúdos dela.
+   *
+   * <p>Clicar de novo na matéria que já está aberta não vai ao servidor: a lista na tela
+   * é a mesma que voltaria. Sem a guarda, cada clique repetido na barra lateral era um
+   * GET e uma consulta ao banco para redesenhar conteúdo idêntico.
+   *
+   * @param forcar recarrega mesmo já estando selecionada — usado depois de reordenar e
+   *   ao recarregar o catálogo, quando o que está na tela pode estar desatualizado.
+   */
+  selecionarMateria(id: number, forcar = false): void {
+    if (!forcar && this.materiaSelecionadaId() === id && !this.carregandoConteudos()) {
+      this.limparFeedback();
+      return;
+    }
     this.materiaSelecionadaId.set(id);
     this.limparFeedback();
     this.carregandoConteudos.set(true);
@@ -181,7 +195,7 @@ export class Catalogo {
       next: (ordenados) => this.conteudos.set(ordenados),
       error: (erro) => {
         this.acaoErro.set(erro?.error?.message ?? 'Não foi possível salvar a nova ordem.');
-        this.selecionarMateria(materiaId); // recarrega a ordem que o servidor tem
+        this.selecionarMateria(materiaId, true); // recarrega a ordem que o servidor tem
       },
     });
   }

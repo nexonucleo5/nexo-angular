@@ -44,7 +44,7 @@ $color-purple:    #8b5cf6;
   &:focus {
     background-color: var(--bg-input);
     color: var(--text-main);
-    border-color: #9b2fff;
+    border-color: var(--nx-brand, #6D28D9);
     box-shadow: none;
   }
 }
@@ -65,7 +65,7 @@ $color-purple:    #8b5cf6;
 
 .badge-trend {
   font-size: 0.85rem; font-weight: 600;
-  padding: 0.35rem 0.65rem; border-radius: 20px;
+  padding: 0.35rem 0.65rem; border-radius: var(--nx-radius-card, 14px);
 }
 
 /* ── Utilitários de cor (acento — não dependem de tema) ── */
@@ -200,12 +200,12 @@ $color-purple:    #8b5cf6;
   background-color: var(--bg-input);   /* era $bg-inner-item hardcoded */
   border: 1px solid var(--border-color);
   transition: transform 0.2s ease;
-  &:hover { transform: translateX(4px); border-color: #9b2fff; }
+  &:hover { transform: translateX(4px); border-color: var(--nx-brand, #6D28D9); }
 }
 
 .badge-status {
   font-size: 0.75rem; font-weight: 700;
-  padding: 0.4rem 0.75rem; border-radius: 20px;
+  padding: 0.4rem 0.75rem; border-radius: var(--nx-radius-card, 14px);
 }
 
 /* ── Tabela de notas ──────────────────────────────────── */
@@ -256,7 +256,7 @@ $color-purple:    #8b5cf6;
   &:focus {
     background-color: var(--bg-input);
     color: var(--text-main);
-    border-color: #9b2fff;
+    border-color: var(--nx-brand, #6D28D9);
     box-shadow: none;
   }
 }

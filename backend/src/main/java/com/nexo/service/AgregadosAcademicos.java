@@ -6,6 +6,7 @@ import com.nexo.repository.NotaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,13 +75,43 @@ public class AgregadosAcademicos {
     }
 
     /**
-     * Carrega os agregados em duas queries.
+     * Carrega os agregados de TODA a escola em duas queries.
+     *
+     * <p>Prefira {@link #carregarDeTurmas} quando o pedido já tem um recorte: este aqui
+     * varre as tabelas de nota e frequência inteiras, e é o caminho certo só para as
+     * visões institucionais (relatórios do diretor, evasão sem filtro).
      *
      * @param periodo período letivo a considerar nas notas; {@code null}/vazio usa todas.
      */
     @Transactional(readOnly = true)
     public Indices carregar(String periodo) {
-        return new Indices(mediasPorAluno(periodo), presencasPorAluno());
+        return new Indices(medias(notasBrutas(periodo)), presencas(frequencias.resumoPorAluno()));
+    }
+
+    /**
+     * Os mesmos agregados, restritos aos alunos das turmas indicadas — também em duas
+     * queries, mas lendo apenas as linhas que a resposta vai usar.
+     *
+     * <p>É o caminho do dashboard do professor e da evasão filtrada por turma. O
+     * {@link #carregar} equivalente devolvia os índices da escola inteira e o chamador
+     * descartava tudo que não fosse das suas turmas: numa escola com 40 turmas, ~97% das
+     * linhas lidas do banco iam para o lixo a cada abertura de tela.
+     *
+     * <p>Lista vazia não vai ao banco: {@code in ()} não é SQL válido, e um professor
+     * sem turma não tem agregado nenhum a carregar.
+     */
+    @Transactional(readOnly = true)
+    public Indices carregarDeTurmas(Collection<Long> turmaIds, String periodo) {
+        if (turmaIds == null || turmaIds.isEmpty()) return new Indices(Map.of(), Map.of());
+        String filtro = (periodo == null || periodo.isBlank()) ? null : periodo;
+        return new Indices(medias(notas.projetarPorTurmas(turmaIds, filtro)),
+                presencas(frequencias.resumoPorTurmas(turmaIds)));
+    }
+
+    private List<NotaRepository.NotaBruta> notasBrutas(String periodo) {
+        return (periodo == null || periodo.isBlank())
+                ? notas.projetarTodas()
+                : notas.projetarPorPeriodo(periodo);
     }
 
     /**
@@ -89,11 +120,7 @@ public class AgregadosAcademicos {
      * {@code Double} boxed por nota só para tirar a média depois — lixo proporcional
      * ao total de notas da escola, gerado a cada request de relatório/evasão/dashboard.
      */
-    private Map<Long, Double> mediasPorAluno(String periodo) {
-        List<NotaRepository.NotaBruta> brutas = (periodo == null || periodo.isBlank())
-                ? notas.projetarTodas()
-                : notas.projetarPorPeriodo(periodo);
-
+    private Map<Long, Double> medias(List<NotaRepository.NotaBruta> brutas) {
         Map<Long, double[]> acumulado = new HashMap<>(capacidadePara(brutas.size()));
         for (NotaRepository.NotaBruta n : brutas) {
             Double media = Nota.calcularMedia(n.getP1(), n.getP2(), n.getT1(), n.getParticipacao());
@@ -108,8 +135,7 @@ public class AgregadosAcademicos {
         return medias;
     }
 
-    private Map<Long, Presenca> presencasPorAluno() {
-        List<FrequenciaRepository.FrequenciaResumo> resumos = frequencias.resumoPorAluno();
+    private Map<Long, Presenca> presencas(List<FrequenciaRepository.FrequenciaResumo> resumos) {
         Map<Long, Presenca> presencas = new HashMap<>(capacidadePara(resumos.size()));
         for (FrequenciaRepository.FrequenciaResumo r : resumos) {
             presencas.put(r.getAlunoId(), new Presenca(r.getTotal(), r.getFaltas()));

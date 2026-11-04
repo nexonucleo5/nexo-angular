@@ -2,9 +2,14 @@ package com.nexo.domain;
 
 import jakarta.persistence.*;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 /** Catálogo de desafios (gamificação do aluno). */
 @Entity
 @Table(name = "desafios")
+@Getter
 public class Desafio {
 
     @Id
@@ -29,6 +34,8 @@ public class Desafio {
      * coluna nasce nula em banco já existente, e nulo lá vale como publicado.
      */
     @Column(name = "publicado")
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private Boolean publicado = Boolean.TRUE;
 
     public Desafio() {}
@@ -41,13 +48,8 @@ public class Desafio {
         this.tempoMin = tempoMin;
     }
 
-    public Long getId() { return id; }
-    public String getTitulo() { return titulo; }
-    public String getMateria() { return materia; }
-    public String getNivel() { return nivel; }
-    public int getXp() { return xp; }
-    public int getTempoMin() { return tempoMin; }
     /** Nunca nulo: desafio gravado antes da coluna existir já estava no ar. */
     public boolean isPublicado() { return publicado == null || publicado; }
+    /** Primitivo de propósito: o campo é wrapper só por causa de linha legada nula. */
     public void setPublicado(boolean publicado) { this.publicado = publicado; }
 }

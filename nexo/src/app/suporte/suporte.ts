@@ -91,9 +91,9 @@ export class Suporte {
     {
       pergunta: 'Onde vejo o que já foi alterado no sistema?',
       resposta:
-        'Em Auditoria. Login, alteração de notas, mudança de matrícula e emissão de documento ' +
-        'ficam registrados com autor, data e detalhe.',
-      perfis: ['diretor'],
+        'Em Logs, no menu do administrador. Login, tentativas de acesso inválidas e alterações ' +
+        'ficam registrados com autor, IP, data e detalhe. Só o administrador tem acesso.',
+      perfis: ['admin'],
     },
   ];
 

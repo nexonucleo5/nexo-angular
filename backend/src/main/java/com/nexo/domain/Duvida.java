@@ -4,8 +4,13 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
 @Table(name = "duvidas")
+@Getter
+@Setter
 public class Duvida {
 
     public enum Status { ABERTA, RESPONDIDA }
@@ -32,21 +37,4 @@ public class Duvida {
     private Instant criadaEm = Instant.now();
 
     private Instant respondidaEm;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Aluno getAluno() { return aluno; }
-    public void setAluno(Aluno aluno) { this.aluno = aluno; }
-    public String getDisciplina() { return disciplina; }
-    public void setDisciplina(String disciplina) { this.disciplina = disciplina; }
-    public String getPergunta() { return pergunta; }
-    public void setPergunta(String pergunta) { this.pergunta = pergunta; }
-    public String getResposta() { return resposta; }
-    public void setResposta(String resposta) { this.resposta = resposta; }
-    public Status getStatus() { return status; }
-    public void setStatus(Status status) { this.status = status; }
-    public Instant getCriadaEm() { return criadaEm; }
-    public void setCriadaEm(Instant criadaEm) { this.criadaEm = criadaEm; }
-    public Instant getRespondidaEm() { return respondidaEm; }
-    public void setRespondidaEm(Instant respondidaEm) { this.respondidaEm = respondidaEm; }
 }
