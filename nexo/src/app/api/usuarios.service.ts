@@ -61,6 +61,11 @@ export class UsuariosService {
     return this.http.post<ValidacaoSenha>(`${this.api}/me/senha/validar`, { novaSenha });
   }
 
+  /** Define (ou, com e-mail vazio, remove) o e-mail que recebe o link de "esqueci minha senha". */
+  definirEmailRecuperacao(dados: { senhaAtual: string; email: string }): Observable<void> {
+    return this.http.put<void>(`${this.api}/me/email-recuperacao`, dados);
+  }
+
   /** Troca de senha exige a senha atual (validada no backend). */
   trocarSenha(dados: { senhaAtual: string; novaSenha: string }): Observable<void> {
     return this.http.post<void>(`${this.api}/me/senha`, dados);

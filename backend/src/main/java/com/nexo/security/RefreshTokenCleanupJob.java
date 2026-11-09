@@ -1,5 +1,6 @@
 package com.nexo.security;
 
+import com.nexo.repository.RedefinicaoSenhaRepository;
 import com.nexo.repository.RefreshTokenRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -21,13 +22,19 @@ public class RefreshTokenCleanupJob {
 
     private final RefreshTokenRepository refreshTokens;
 
-    public RefreshTokenCleanupJob(RefreshTokenRepository refreshTokens) {
+    private final RedefinicaoSenhaRepository redefinicoes;
+
+    public RefreshTokenCleanupJob(RefreshTokenRepository refreshTokens, RedefinicaoSenhaRepository redefinicoes) {
         this.refreshTokens = refreshTokens;
+        this.redefinicoes = redefinicoes;
     }
 
     @Scheduled(cron = "0 0 3 * * *") // 03:00 — fora do horário de uso da escola
     @Transactional
     public void limpar() {
-        refreshTokens.removerExpirados(Instant.now());
+        Instant agora = Instant.now();
+        refreshTokens.removerExpirados(agora);
+        // Links de redefinição: vivem minutos, então depois de vencidos não servem nem de rastro.
+        redefinicoes.removerExpirados(agora);
     }
 }

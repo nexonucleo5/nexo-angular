@@ -80,6 +80,16 @@ export class AuthService {
       .pipe(tap((resposta) => this.guardarSessao(resposta)));
   }
 
+  /** Pede o link de redefinição. A resposta é a mesma exista a conta ou não. */
+  public esqueciSenha(login: string): Observable<void> {
+    return this.http.post<void>(`${this.api}/esqueci-senha`, { login });
+  }
+
+  /** Conclui a redefinição com o valor recebido por e-mail. Não abre sessão. */
+  public redefinirSenha(token: string, novaSenha: string): Observable<void> {
+    return this.http.post<void>(`${this.api}/redefinir-senha`, { token, novaSenha });
+  }
+
   /**
    * Retoma a sessão no arranque da aplicação.
    *

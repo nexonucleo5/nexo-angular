@@ -50,5 +50,13 @@ public class Usuario {
     @Column(nullable = false)
     private boolean precisaTrocarSenha = false;
 
+    /**
+     * Caixa de entrada real para onde vai o link de "esqueci minha senha". Opcional: o
+     * e-mail institucional é só o login e não recebe correspondência. Sem este campo a
+     * conta não tem recuperação automática e depende do administrador.
+     */
+    @Column(name = "email_recuperacao")
+    private String emailRecuperacao;
+
     private Instant criadoEm = Instant.now();
 }

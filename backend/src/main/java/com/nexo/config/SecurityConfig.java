@@ -102,7 +102,8 @@ public class SecurityConfig {
                         auth.requestMatchers("/h2-console/**").denyAll();
                     }
 
-                    auth.requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                    auth.requestMatchers("/api/auth/login", "/api/auth/refresh",
+                            "/api/auth/esqueci-senha", "/api/auth/redefinir-senha").permitAll()
                             .requestMatchers("/error").permitAll()
                             // Sonda de monitor externo: só UP/DOWN, sem detalhe (ver SaudeController).
                             .requestMatchers(HttpMethod.GET, "/api/saude").permitAll()
