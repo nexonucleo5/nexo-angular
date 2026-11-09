@@ -39,6 +39,9 @@ public class AccessTokensRevogados {
     private final Duration janela;
     private final Map<String, Instant> revogadoEm = new ConcurrentHashMap<>();
 
+    /** uid → instante a partir do qual os tokens emitidos antes dele deixam de valer. */
+    private final Map<Long, Instant> usuarioRevogadoEm = new ConcurrentHashMap<>();
+
     public AccessTokensRevogados(@Value("${nexo.jwt.access-token-minutes}") long accessTokenMinutes) {
         this.janela = Duration.ofMinutes(accessTokenMinutes);
     }
@@ -50,6 +53,37 @@ public class AccessTokensRevogados {
             podarVencidos();
         }
         revogadoEm.put(jti, Instant.now());
+    }
+
+    /**
+     * Derruba <b>todos</b> os access tokens já emitidos para o usuário, de qualquer sessão.
+     * Usado quando o que o token afirma deixa de ser verdade — troca de papel e desativação
+     * da conta —, casos em que esperar os 15 minutos do TTL deixaria um rebaixado agindo com
+     * o papel antigo. Quem entra de novo depois recebe um token emitido após este instante e
+     * não é afetado.
+     */
+    public void revogarUsuario(Long usuarioId) {
+        if (usuarioId == null) return;
+        if (usuarioRevogadoEm.size() >= LIMITE_PODA) {
+            Instant limite = Instant.now().minus(janela);
+            usuarioRevogadoEm.values().removeIf(quando -> quando.isBefore(limite));
+        }
+        usuarioRevogadoEm.put(usuarioId, Instant.now());
+    }
+
+    /**
+     * O {@code iat} do JWT tem precisão de segundos, então a comparação é por segundo e
+     * inclusiva: um token emitido no mesmo segundo da revogação também cai. Errar para esse
+     * lado só custa um novo login; o outro lado deixaria passar um token anterior à troca.
+     */
+    public boolean usuarioRevogado(Long usuarioId, Instant emitidoEm) {
+        Instant quando = usuarioRevogadoEm.get(usuarioId);
+        if (quando == null) return false;
+        if (quando.plus(janela).isBefore(Instant.now())) {
+            usuarioRevogadoEm.remove(usuarioId);
+            return false;
+        }
+        return emitidoEm == null || emitidoEm.getEpochSecond() <= quando.getEpochSecond();
     }
 
     public boolean revogado(String jti) {

@@ -14,9 +14,12 @@ import com.nexo.repository.MateriaRepository;
 import com.nexo.repository.RefreshTokenRepository;
 import com.nexo.repository.TurmaRepository;
 import com.nexo.repository.UsuarioRepository;
+import com.nexo.security.AccessTokensRevogados;
+import com.nexo.security.ClienteIp;
 import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AuditoriaService;
 import com.nexo.service.CredenciaisService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,8 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -53,11 +58,16 @@ public class AdminController {
     private final RefreshTokenRepository refreshTokens;
     private final CredenciaisService credenciais;
     private final AuditoriaService auditoria;
+    private final AccessTokensRevogados accessTokensRevogados;
+    private final ClienteIp clienteIp;
 
     public AdminController(UsuarioRepository usuarios, TurmaRepository turmas, MateriaRepository materias,
                            ConteudoMateriaRepository conteudos, DesafioRepository desafios,
                            RefreshTokenRepository refreshTokens, CredenciaisService credenciais,
-                           AuditoriaService auditoria) {
+                           AuditoriaService auditoria, AccessTokensRevogados accessTokensRevogados,
+                           ClienteIp clienteIp) {
+        this.accessTokensRevogados = accessTokensRevogados;
+        this.clienteIp = clienteIp;
         this.usuarios = usuarios;
         this.turmas = turmas;
         this.materias = materias;
@@ -171,14 +181,15 @@ public class AdminController {
      * isso o refresh token na mão de quem foi desligado renovaria o acesso por
      * dias, e "conta desativada" seria só um rótulo na tela.
      *
-     * <p>O access token já emitido sobrevive até expirar (15 minutos, ver
-     * {@code nexo.jwt.access-token-minutes}) — a revogação por jti é por sessão e
-     * não alcança a de outro usuário.
+     * <p>Os access tokens já emitidos também caem na hora ({@link
+     * AccessTokensRevogados#revogarUsuario}), e o evento de auditoria registra quem agiu,
+     * sobre qual conta e de que rede.
      */
     @PatchMapping("/contas/{id}/ativo")
     public ContaDTO atualizarAtivo(@PathVariable Long id,
                                    @RequestBody AtualizarAtivoRequest request,
-                                   @AuthenticationPrincipal UsuarioAutenticado operador) {
+                                   @AuthenticationPrincipal UsuarioAutenticado operador,
+                                   HttpServletRequest http) {
         if (request == null || request.ativo() == null) {
             throw ApiException.badRequest("Informe se a conta fica ativa.");
         }
@@ -195,10 +206,63 @@ public class AdminController {
         usuarios.save(usuario);
         if (!request.ativo()) {
             refreshTokens.revogarTodosDoUsuario(usuario.getId());
+            accessTokensRevogados.revogarUsuario(usuario.getId());
         }
         auditoria.registrar(operador.nome(), EventoAuditoria.Tipo.ALTERACAO,
                 request.ativo() ? "Conta reativada" : "Conta desativada",
-                "Conta: " + usuario.getLogin(), null);
+                "Conta: " + usuario.getLogin() + " (" + usuario.getRole().name() + ")",
+                clienteIp.de(http));
+        return ContaDTO.of(usuario);
+    }
+
+    public record AtualizarPapelRequest(Role papel) {}
+
+    /**
+     * Papéis entre os quais a troca é permitida. ALUNO e PROFESSOR ficam de fora porque a
+     * conta deles tem um registro próprio (turma, matérias, notas): mudar só o papel deixaria
+     * um aluno-diretor com histórico escolar pendurado, ou um professor sem cadastro docente.
+     */
+    private static final Set<Role> PAPEIS_ALTERNAVEIS = EnumSet.of(Role.DIRETOR, Role.ADMIN);
+
+    /**
+     * Promove ou rebaixa entre Diretor e Administrador. Só o ADMIN faz isso: quem pode
+     * conceder o papel mais alto não pode ser quem está abaixo dele.
+     *
+     * <p>A conta perde todas as sessões na hora — refresh e access token —, porque o papel
+     * viaja dentro do JWT: sem derrubar, um rebaixado seguiria agindo com o papel antigo
+     * pelo resto do TTL. O evento guarda papel anterior e novo, quem fez e de que rede,
+     * que é o que permite responder depois "quem promoveu quem".
+     */
+    @PatchMapping("/contas/{id}/papel")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ContaDTO atualizarPapel(@PathVariable Long id,
+                                   @RequestBody AtualizarPapelRequest request,
+                                   @AuthenticationPrincipal UsuarioAutenticado operador,
+                                   HttpServletRequest http) {
+        if (request == null || request.papel() == null) {
+            throw ApiException.badRequest("Informe o novo papel da conta.");
+        }
+        // Mudar o próprio papel permitiria o último administrador se rebaixar e trancar a
+        // administração do lado de fora; e uma auto-promoção não teria quem a conferisse.
+        if (id.equals(operador.id())) {
+            throw ApiException.badRequest("Você não pode alterar o próprio papel.");
+        }
+        Usuario usuario = exigirConta(id);
+        Role anterior = usuario.getRole();
+        if (anterior == request.papel()) {
+            return ContaDTO.of(usuario); // idempotente
+        }
+        if (!PAPEIS_ALTERNAVEIS.contains(anterior) || !PAPEIS_ALTERNAVEIS.contains(request.papel())) {
+            throw ApiException.badRequest("Só é possível alternar entre Diretor e Administrador. "
+                    + "Contas de aluno e professor têm cadastro próprio e mantêm o papel.");
+        }
+        usuario.setRole(request.papel());
+        usuarios.save(usuario);
+        refreshTokens.revogarTodosDoUsuario(usuario.getId());
+        accessTokensRevogados.revogarUsuario(usuario.getId());
+        auditoria.registrar(operador.nome(), EventoAuditoria.Tipo.ALTERACAO, "Papel da conta alterado",
+                "Conta: " + usuario.getLogin() + " — " + anterior.name() + " → " + request.papel().name(),
+                clienteIp.de(http));
         return ContaDTO.of(usuario);
     }
 
@@ -212,13 +276,14 @@ public class AdminController {
      */
     @PostMapping("/contas/{id}/senha-provisoria")
     public SenhaRedefinidaDTO redefinirSenha(@PathVariable Long id,
-                                             @AuthenticationPrincipal UsuarioAutenticado operador) {
+                                             @AuthenticationPrincipal UsuarioAutenticado operador,
+                                             HttpServletRequest http) {
         Usuario usuario = exigirConta(id);
         String senha = credenciais.redefinirSenhaProvisoria(usuario);
         usuarios.save(usuario);
         refreshTokens.revogarTodosDoUsuario(usuario.getId());
         auditoria.registrar(operador.nome(), EventoAuditoria.Tipo.ALTERACAO,
-                "Senha provisória redefinida", "Conta: " + usuario.getLogin(), null);
+                "Senha provisória redefinida", "Conta: " + usuario.getLogin(), clienteIp.de(http));
         return new SenhaRedefinidaDTO(usuario.getLogin(), senha);
     }
 
