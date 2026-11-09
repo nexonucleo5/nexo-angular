@@ -73,6 +73,8 @@ export interface CadastroAlunoRequest {
   nome: string;
   /** Turma cujo conteúdo o aluno vai estudar. */
   turmaId: number | null;
+  /** Opcional: para onde vai o link de "esqueci minha senha". Sem ele a conta não se recupera sozinha. */
+  emailRecuperacao?: string;
 }
 
 // ── Matérias / Professores ───────────────────────────────────────────────────
@@ -102,6 +104,7 @@ export interface CadastroProfessorRequest {
   dataNascimento: string;
   sexo: string;
   materiaIds: number[];
+  emailRecuperacao?: string;
 }
 
 export interface ProfessorCriado {

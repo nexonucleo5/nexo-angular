@@ -44,6 +44,21 @@ public final class AuthDtos {
                                     @NotBlank @Size(min = 8, message = "A nova senha deve ter ao menos 8 caracteres")
                                     String novaSenha) {}
 
+    /** Só o login: a resposta é a mesma exista a conta ou não (ver RecuperacaoSenhaService). */
+    public record EsqueciSenhaRequest(@NotBlank @Size(max = 254) String login) {}
+
+    /** {@code token} é o valor que chegou por e-mail; {@code novaSenha} passa pela PoliticaSenha. */
+    public record RedefinirSenhaRequest(@NotBlank @Size(max = 200) String token,
+                                        @NotBlank @Size(max = 128) String novaSenha) {}
+
+    /**
+     * {@code senhaAtual} é exigida de propósito: quem controla o e-mail de recuperação controla
+     * a conta, então uma sessão aberta e esquecida não deve poder trocá-lo sozinha.
+     * {@code email} vazio remove a recuperação por e-mail.
+     */
+    public record EmailRecuperacaoRequest(@NotBlank @Size(max = 128) String senhaAtual,
+                                          @Size(max = 254) String email) {}
+
     /** Pergunta "essa senha seria aceita?" — nada é gravado. */
     public record ValidarSenhaRequest(@Size(max = 128) String novaSenha) {}
 

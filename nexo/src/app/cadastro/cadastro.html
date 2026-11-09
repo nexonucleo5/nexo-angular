@@ -65,12 +65,22 @@
       </div>
     </div>
 
+
+    <div class="mb-3">
+      <label class="form-label" for="aluno-email">E-mail de recuperação <span class="text-muted">(opcional)</span>:</label>
+      <input type="email" id="aluno-email" formControlName="emailRecuperacao" class="form-control"
+             [class.is-invalid]="fa['emailRecuperacao'].invalid && fa['emailRecuperacao'].touched"
+             placeholder="pessoa@exemplo.com" autocomplete="off">
+      <div class="invalid-feedback">Informe um e-mail válido.</div>
+      <small class="form-text">Para onde vai o link de "esqueci minha senha". Sem ele, só o diretor consegue redefinir.</small>
+    </div>
+
     <!-- Nascimento, sexo e endereço saíram daqui: este sistema cuida de
          aprendizado e retenção, e a ficha pessoal do aluno pertence ao sistema
          de aula da escola. Menos dado guardado é menos coisa a vazar. -->
     <p class="nota-privacidade">
       <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-shield"></use></svg>
-      Só pedimos nome e turma. Dados pessoais do aluno ficam no sistema de aula da escola.
+      Pedimos nome e turma — e, se quiser, um e-mail só para recuperar a senha. Os demais dados pessoais do aluno ficam no sistema de aula da escola.
     </p>
 
     <button type="submit" class="btn btn-cadastro w-100 mt-2" [disabled]="enviando()">
@@ -136,6 +146,16 @@
       <div *ngIf="fp['materiaIds'].invalid && fp['materiaIds'].touched" class="erro-materias">
         Selecione ao menos uma matéria.
       </div>
+    </div>
+
+
+    <div class="mb-3">
+      <label class="form-label" for="prof-email">E-mail de recuperação <span class="text-muted">(opcional)</span>:</label>
+      <input type="email" id="prof-email" formControlName="emailRecuperacao" class="form-control"
+             [class.is-invalid]="fp['emailRecuperacao'].invalid && fp['emailRecuperacao'].touched"
+             placeholder="pessoa@exemplo.com" autocomplete="off">
+      <div class="invalid-feedback">Informe um e-mail válido.</div>
+      <small class="form-text">Para onde vai o link de "esqueci minha senha". Sem ele, só o diretor consegue redefinir.</small>
     </div>
 
     <button type="submit" class="btn btn-cadastro w-100 mt-2" [disabled]="enviando()">

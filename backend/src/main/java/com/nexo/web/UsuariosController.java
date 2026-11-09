@@ -2,6 +2,7 @@ package com.nexo.web;
 
 import com.nexo.api.ApiException;
 import com.nexo.api.dto.AuthDtos.AtualizarPerfilRequest;
+import com.nexo.api.dto.AuthDtos.EmailRecuperacaoRequest;
 import com.nexo.api.dto.AuthDtos.TrocaSenhaRequest;
 import com.nexo.api.dto.AuthDtos.UsuarioDTO;
 import com.nexo.api.dto.AuthDtos.ValidacaoSenhaResponse;
@@ -18,6 +19,7 @@ import com.nexo.security.RefreshTokenCookie;
 import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AuditoriaService;
 import com.nexo.service.AuthService;
+import com.nexo.service.RecuperacaoSenhaService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -227,6 +229,30 @@ public class UsuariosController {
         int encerradas = authService.encerrarOutrasSessoes(usuario.getId(), refreshToken);
         String detalhe = encerradas > 0 ? encerradas + " outra(s) sessão(ões) encerrada(s)" : null;
         auditoria.registrar(usuario.getNome(), EventoAuditoria.Tipo.ALTERACAO, "Senha alterada", detalhe, null);
+    }
+
+    /**
+     * Define (ou remove, com e-mail vazio) o e-mail para onde vai o link de "esqueci minha
+     * senha". Exige a senha atual: sem ela, uma sessão aberta e esquecida bastaria para
+     * apontar a recuperação para a caixa de outra pessoa e tomar a conta de forma permanente.
+     */
+    @PutMapping("/me/email-recuperacao")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Transactional
+    public void definirEmailRecuperacao(@AuthenticationPrincipal UsuarioAutenticado principal,
+                                        @Valid @RequestBody EmailRecuperacaoRequest request) {
+        Usuario usuario = carregar(principal);
+        if (!passwordEncoder.matches(request.senhaAtual(), usuario.getSenhaHash())) {
+            final String motivo = "A senha atual não confere. Digite a senha com que você entrou no sistema.";
+            throw new ApiException(HttpStatus.BAD_REQUEST, "SENHA_ATUAL_INCORRETA", motivo,
+                    Map.of("senhaAtual", motivo));
+        }
+        usuario.setEmailRecuperacao(RecuperacaoSenhaService.normalizarEmail(request.email()));
+        usuarios.save(usuario);
+        // O endereço fica fora da trilha: é dado pessoal e a ação já diz o que importa.
+        auditoria.registrar(usuario.getNome(), EventoAuditoria.Tipo.ALTERACAO,
+                usuario.getEmailRecuperacao() == null ? "E-mail de recuperação removido"
+                                                      : "E-mail de recuperação definido", null, null);
     }
 
     /**

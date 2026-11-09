@@ -63,6 +63,17 @@
           }
         </div>
 
+        <div class="campo">
+          <label for="email-recuperacao">E-mail de recuperação (opcional)</label>
+          <input id="email-recuperacao" type="email" formControlName="emailRecuperacao"
+                 placeholder="pessoa@exemplo.com" autocomplete="email">
+          @if (erroEmail()) {
+            <small class="erro-campo" role="alert">{{ erroEmail() }}</small>
+          } @else {
+            <small>Se esquecer a senha, o link para criar outra chega aqui.</small>
+          }
+        </div>
+
         <button type="submit" class="btn-salvar" [disabled]="enviando()">
           {{ enviando() ? 'Salvando…' : 'Salvar nova senha' }}
         </button>

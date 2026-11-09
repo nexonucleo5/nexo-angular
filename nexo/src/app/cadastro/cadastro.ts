@@ -74,6 +74,7 @@ export class Cadastro {
     this.alunoForm = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(3)]],
       turmaId: [null, Validators.required],
+      emailRecuperacao: ['', [Validators.email, Validators.maxLength(254)]],
     });
 
     this.professorForm = this.fb.group({
@@ -81,6 +82,7 @@ export class Cadastro {
       dataNascimento: ['', Validators.required],
       sexo: ['', Validators.required],
       materiaIds: [[] as number[], Validators.required],
+      emailRecuperacao: ['', [Validators.email, Validators.maxLength(254)]],
     });
 
     this.turmasService.listar().subscribe({ next: (t) => this.turmas.set(t) });
@@ -137,7 +139,7 @@ export class Cadastro {
         this.enviando.set(false);
         this.acesso.set({ login: criado.emailInstitucional, senha: criado.senhaProvisoria });
         this.mensagemSucesso.set(`Aluno ${criado.nome} cadastrado com sucesso.`);
-        this.alunoForm.reset({ nome: '', turmaId: null });
+        this.alunoForm.reset({ nome: '', turmaId: null, emailRecuperacao: '' });
       },
       error: (erro: ApiErro) => this.falhar(erro),
     });
@@ -152,7 +154,7 @@ export class Cadastro {
         this.enviando.set(false);
         this.acesso.set({ login: criado.emailInstitucional, senha: criado.senhaProvisoria });
         this.mensagemSucesso.set(`Professor ${criado.nome} cadastrado em ${criado.disciplinas}.`);
-        this.professorForm.reset({ nome: '', dataNascimento: '', sexo: '', materiaIds: [] });
+        this.professorForm.reset({ nome: '', dataNascimento: '', sexo: '', materiaIds: [], emailRecuperacao: '' });
       },
       error: (erro: ApiErro) => this.falhar(erro),
     });

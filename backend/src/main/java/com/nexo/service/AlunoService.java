@@ -38,7 +38,8 @@ public class AlunoService {
         this.auditoria = auditoria;
     }
 
-    public record CadastroAluno(String nome, Long turmaId) {}
+    /** {@code emailRecuperacao} é opcional: sem ele a conta não recebe o link de "esqueci minha senha". */
+    public record CadastroAluno(String nome, Long turmaId, String emailRecuperacao) {}
 
     public record AlunoCriado(Long id, String nome, String emailInstitucional, String senhaProvisoria,
                               Long inscricaoId) {}
@@ -57,6 +58,8 @@ public class AlunoService {
             throw ApiException.validation("Dados de cadastro inválidos.", erros);
         }
 
+        String emailRecuperacao = RecuperacaoSenhaService.normalizarEmail(dados.emailRecuperacao());
+
         Turma turma = turmas.findById(dados.turmaId())
                 .orElseThrow(() -> ApiException.badRequest("Turma inexistente."));
 
@@ -66,7 +69,8 @@ public class AlunoService {
 
         var acesso = credenciais.gerar(aluno.getNome());
         aluno.setEmailInstitucional(acesso.login());
-        aluno.setUsuario(credenciais.criarUsuario(aluno.getNome(), turma.getNome(), Role.ALUNO, acesso));
+        aluno.setUsuario(credenciais.criarUsuario(aluno.getNome(), turma.getNome(), Role.ALUNO, acesso,
+                emailRecuperacao));
         alunos.save(aluno);
 
         Inscricao inscricao = new Inscricao();

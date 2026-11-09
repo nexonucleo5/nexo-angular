@@ -1,6 +1,18 @@
 # Perfil de PRODUÇÃO — ativar com SPRING_PROFILES_ACTIVE=prod
 # Todos os segredos vêm de variáveis de ambiente (nada de valor default sensível).
 spring:
+  mail:
+    # Defina SMTP_HOST (e as demais) para ativar o envio; sem host o JavaMailSender nem é criado.
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
   datasource:
     url: ${DB_URL}            # ex.: jdbc:postgresql://localhost:5432/nexo
     username: ${DB_USER}
@@ -60,5 +72,9 @@ nexo:
     # Folgado de propósito: a tela consulta por ?periodo=<dias> e um corte curto faria a
     # resposta parecer "sem eventos" onde na verdade foram removidos. 0 desliga.
     retencao-dias: ${AUDITORIA_RETENCAO_DIAS:365}
+  recuperacao:
+    # Em produção o link é uma credencial por 30 min: nunca vai para o log, e a base é o domínio público.
+    log-link: false
+    url-base: ${APP_URL_BASE:https://nexo-gestao-escolar.com.br}
   seed:
     enabled: ${SEED_ENABLED:false}      # não semear dados de exemplo em produção

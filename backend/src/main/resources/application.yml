@@ -150,5 +150,16 @@ nexo:
     # Vai só a mensagem já mascarada, sem stack trace. O mesmo erro avisa uma vez por janela.
     alerta-webhook-url: ${LOGS_ALERTA_WEBHOOK_URL:}
     alerta-intervalo-min: ${LOGS_ALERTA_INTERVALO_MIN:10}
+  recuperacao:
+    # "Esqueci minha senha": o link vai para o e-mail de recuperação da conta e vale uma vez.
+    ttl-minutos: ${RECUPERACAO_TTL_MINUTOS:30}
+    # Endereço do frontend usado para montar o link do e-mail.
+    url-base: ${APP_URL_BASE:http://localhost:4200}
+    # Sem SMTP (spring.mail.host), loga o e-mail com o link no console — só para desenvolvimento.
+    log-link: true
+    max-pedidos-por-ip: ${RECUPERACAO_MAX_PEDIDOS_IP:10}
+    max-pedidos-por-login: ${RECUPERACAO_MAX_PEDIDOS_LOGIN:3}
+  email:
+    remetente: ${EMAIL_REMETENTE:nexo@localhost}
   seed:
     enabled: true

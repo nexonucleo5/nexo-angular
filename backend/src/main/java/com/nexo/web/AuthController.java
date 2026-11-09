@@ -1,7 +1,9 @@
 package com.nexo.web;
 
 import com.nexo.api.ApiException;
+import com.nexo.api.dto.AuthDtos.EsqueciSenhaRequest;
 import com.nexo.api.dto.AuthDtos.LoginRequest;
+import com.nexo.api.dto.AuthDtos.RedefinirSenhaRequest;
 import com.nexo.api.dto.AuthDtos.SessaoEmitida;
 import com.nexo.api.dto.AuthDtos.TokenResponse;
 import com.nexo.api.dto.AuthDtos.UsuarioDTO;
@@ -9,9 +11,11 @@ import com.nexo.security.ClienteIp;
 import com.nexo.security.RefreshTokenCookie;
 import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AuthService;
+import com.nexo.service.RecuperacaoSenhaService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +27,12 @@ public class AuthController {
     private final AuthService authService;
     private final RefreshTokenCookie refreshCookie;
     private final ClienteIp clienteIp;
+    private final RecuperacaoSenhaService recuperacao;
 
-    public AuthController(AuthService authService, RefreshTokenCookie refreshCookie, ClienteIp clienteIp) {
+    public AuthController(AuthService authService, RefreshTokenCookie refreshCookie, ClienteIp clienteIp,
+                          RecuperacaoSenhaService recuperacao) {
         this.authService = authService;
+        this.recuperacao = recuperacao;
         this.refreshCookie = refreshCookie;
         this.clienteIp = clienteIp;
     }
@@ -64,6 +71,23 @@ public class AuthController {
         return ResponseEntity.noContent()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.limpar(http.isSecure()))
                 .build();
+    }
+
+    /**
+     * Sempre 202, exista a conta ou não (ver {@link RecuperacaoSenhaService#solicitar}).
+     * Público por necessidade: quem esqueceu a senha não tem sessão.
+     */
+    @PostMapping("/esqueci-senha")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void esqueciSenha(@Valid @RequestBody EsqueciSenhaRequest request, HttpServletRequest http) {
+        recuperacao.solicitar(request.login(), clienteIp.de(http));
+    }
+
+    /** Conclui a redefinição; não devolve sessão — o usuário entra de novo com a senha nova. */
+    @PostMapping("/redefinir-senha")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void redefinirSenha(@Valid @RequestBody RedefinirSenhaRequest request, HttpServletRequest http) {
+        recuperacao.redefinir(request.token(), request.novaSenha(), clienteIp.de(http));
     }
 
     @GetMapping("/me")
