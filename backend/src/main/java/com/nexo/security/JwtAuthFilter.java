@@ -58,6 +58,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // Assinatura boa e prazo em dia não bastam: o logout invalida a emissão na hora.
         if (revogados.revogado(jti)) return;
+        // Troca de papel ou desativação: nada emitido antes disso vale, qualquer que seja a sessão.
+        var emitidoEm = claims.getIssuedAt();
+        if (revogados.usuarioRevogado(uid, emitidoEm == null ? null : emitidoEm.toInstant())) return;
 
         var principal = new UsuarioAutenticado(uid, login, claims.get("nome", String.class), role, jti);
         var auth = new UsernamePasswordAuthenticationToken(
