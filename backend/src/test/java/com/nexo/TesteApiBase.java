@@ -14,7 +14,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Base dos testes de API: sobe a aplicação inteira contra um H2 em memória e
@@ -54,6 +56,19 @@ public abstract class TesteApiBase {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"login\":\"diretor\",\"senha\":\"" + SENHA_PADRAO + "\"}"))
                 .andReturn();
+    }
+
+    /**
+     * Liga ou desliga "Exigir aprovação manual de cadastro de aluno" na configuração do
+     * diretor. Vem ligado de fábrica, e ligado o cadastro só deixa um pedido na fila — os
+     * testes que precisam de um aluno pronto desligam antes de cadastrar.
+     */
+    protected void exigirAprovacaoDeAluno(String bearerDiretor, boolean exigir) throws Exception {
+        mvc.perform(patch("/api/configuracoes/gestao")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"exigirAprovacaoManualAluno\":" + exigir + "}")
+                        .header(HttpHeaders.AUTHORIZATION, bearerDiretor))
+                .andExpect(status().isOk());
     }
 
     /** Faz login e devolve a resposta HTTP inteira — corpo e o Set-Cookie do refresh. */

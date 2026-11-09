@@ -11,6 +11,52 @@
     </button>
   </div>
 
+  <!-- ── Cadastros aguardando aprovação ───────────────────── -->
+  @if (acessoAprovado(); as a) {
+    <div class="alert alert-info d-flex align-items-center gap-3 mb-4 flex-wrap">
+      <div class="flex-grow-1">
+        <strong>Cadastro aprovado — acesso de {{ a.nome }}</strong><br>
+        <small>
+          Login: <strong>{{ a.emailInstitucional }}</strong>
+          &nbsp;|&nbsp;
+          Senha provisória: <strong>{{ a.senhaProvisoria }}</strong>
+          <span class="d-block">A senha aparece só esta vez — copie e repasse agora.</span>
+        </small>
+      </div>
+      <button class="btn btn-dark-custom btn-sm" (click)="copiarAcessoAprovado()">
+        {{ acessoCopiado() ? 'Copiado' : 'Copiar acesso' }}
+      </button>
+      <button class="btn btn-dark-custom btn-sm" (click)="fecharAcessoAprovado()">Fechar</button>
+    </div>
+  }
+
+  @if (pedidos().length > 0) {
+    <div class="mb-4">
+      <h2 class="h5 fw-bold text-main mb-1">Aguardando aprovação ({{ pedidos().length }})</h2>
+      <p class="text-soft small mb-3">
+        A conta do aluno só é criada quando o cadastro é aprovado; rejeitar encerra o pedido
+        sem criar nada.
+      </p>
+      @if (pedidoErro(); as msg) {
+        <p class="text-danger small">{{ msg }}</p>
+      }
+      <div class="d-flex flex-column gap-2">
+        @for (p of pedidos(); track p.id) {
+          <div class="student-row-card p-3 d-flex align-items-center gap-3 flex-wrap">
+            <div class="flex-grow-1">
+              <h6 class="text-main fw-bold mb-1">{{ p.nome }}</h6>
+              <small class="text-soft">{{ p.turma }} • pedido de {{ p.solicitadoPor }}</small>
+            </div>
+            <button class="btn btn-dark-custom btn-sm" [disabled]="pedidoEmCurso() === p.id"
+                    (click)="rejeitarPedido(p)">Rejeitar</button>
+            <button class="gradient-btn px-3 py-2" [disabled]="pedidoEmCurso() === p.id"
+                    (click)="aprovarPedido(p)">Aprovar</button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   @if (carregando()) {
     <p class="text-soft">Carregando as inscrições…</p>
   } @else if (erro()) {

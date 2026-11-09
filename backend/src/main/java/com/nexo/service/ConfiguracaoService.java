@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -90,6 +91,22 @@ public class ConfiguracaoService {
     }
 
     static final String SECAO_PRIVACIDADE = "privacidade";
+    static final String SECAO_GESTAO = "gestao";
+    static final String CHAVE_APROVACAO_ALUNO = "exigirAprovacaoManualAluno";
+
+    /**
+     * O diretor exige aprovação manual para os alunos que cadastra? Lido do JSON sem
+     * criar a configuração padrão (uma consulta de leitura não grava), e na ausência da
+     * chave vale o padrão da tela: ligado. Só {@code false} de verdade desliga — qualquer
+     * outro valor cai para o lado seguro, que é pedir aprovação.
+     */
+    @Transactional(readOnly = true)
+    public boolean exigeAprovacaoManualDeAluno(Long diretorId) {
+        return configuracoes.findByUsuarioId(diretorId)
+                .map(c -> ler(c.getJson()).get(SECAO_GESTAO))
+                .map(gestao -> !Boolean.FALSE.equals(gestao.get(CHAVE_APROVACAO_ALUNO)))
+                .orElse(true);
+    }
 
     /** Chaves de privacidade que o servidor faz valer, por perfil. */
     private static final Map<Role, List<String>> PRIVACIDADE_APLICADA = Map.of(
@@ -133,11 +150,16 @@ public class ConfiguracaoService {
     @Transactional
     public int sincronizarPrivacidadeDosAlunos() {
         int ajustados = 0;
-        for (var aluno : alunos.findAll()) {
-            if (aluno.getUsuario() == null) continue;
-            var json = configuracoes.findByUsuarioId(aluno.getUsuario().getId());
-            if (json.isEmpty()) continue;
-            Map<String, Object> priv = ler(json.get().getJson()).get(SECAO_PRIVACIDADE);
+        // Duas consultas no total: antes eram duas por aluno (a conta lazy e a configuração),
+        // a cada arranque do servidor.
+        Map<Long, ConfiguracaoUsuario> porUsuario = new HashMap<>();
+        for (ConfiguracaoUsuario c : configuracoes.findAllDeAlunos()) {
+            porUsuario.put(c.getUsuario().getId(), c);
+        }
+        for (var aluno : alunos.findAllComUsuario()) {
+            var config = porUsuario.get(aluno.getUsuario().getId());
+            if (config == null) continue;
+            Map<String, Object> priv = ler(config.getJson()).get(SECAO_PRIVACIDADE);
             if (priv == null) continue;
             boolean ranking = !Boolean.FALSE.equals(priv.get("exibirNoRanking"));
             boolean publico = !Boolean.FALSE.equals(priv.get("perfilPublico"));
@@ -159,6 +181,15 @@ public class ConfiguracaoService {
                 if (campos.containsKey(chave) && !(campos.get(chave) instanceof Boolean)) {
                     throw ApiException.validation("Valor inválido.",
                             Map.of(chave, "Use verdadeiro ou falso."));
+                }
+            }
+        }
+        // As chaves de gestão são lidas com Boolean.FALSE.equals: um "false" em texto
+        // seria tratado como ligado, e o diretor veria o botão desligado com a regra ativa.
+        if (SECAO_GESTAO.equals(secao)) {
+            for (String chave : List.of("aprovarProfessoresAutomaticamente", CHAVE_APROVACAO_ALUNO)) {
+                if (campos.containsKey(chave) && !(campos.get(chave) instanceof Boolean)) {
+                    throw ApiException.validation("Valor inválido.", Map.of(chave, "Use verdadeiro ou falso."));
                 }
             }
         }
@@ -235,8 +266,8 @@ public class ConfiguracaoService {
                 institucional.put("nomeInstituicao", "Colégio Nexo");
                 institucional.put("anoLetivoAtivo", 2026);
                 m.put("institucional", institucional);
-                m.put("gestao", secao("aprovarProfessoresAutomaticamente", false,
-                        "exigirAprovacaoManualAluno", true));
+                m.put(SECAO_GESTAO, secao("aprovarProfessoresAutomaticamente", false,
+                        CHAVE_APROVACAO_ALUNO, true));
                 m.put("integracoes", secao("exportarRelatoriosAutomaticamente", false,
                         "sincronizarCalendarioInstitucional", true));
                 m.put("aparencia", secao("temaEscuro", true, "animacoesInterface", true));

@@ -152,11 +152,16 @@ public class AlunosController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('DIRETOR','ADMIN')")
-    public ResponseEntity<AlunoService.AlunoCriado> cadastrar(
+    public ResponseEntity<AlunoService.ResultadoCadastro> cadastrar(
             @RequestBody AlunoService.CadastroAluno request,
             @AuthenticationPrincipal UsuarioAutenticado operador) {
-        AlunoService.AlunoCriado criado = alunoService.cadastrar(request, operador.nome());
-        return ResponseEntity.created(uriDoItem(criado.id())).body(criado);
+        AlunoService.ResultadoCadastro resultado = alunoService.cadastrar(request, operador);
+        // 201 quando a conta foi criada; 202 quando o pedido ficou aguardando aprovação —
+        // nada foi criado ainda, então não há Location de aluno para apontar.
+        if (resultado instanceof AlunoService.AlunoCriado criado) {
+            return ResponseEntity.created(uriDoItem(criado.id())).body(criado);
+        }
+        return ResponseEntity.accepted().body(resultado);
     }
 
     /** URI do recurso recém-criado, a partir do caminho da própria requisição. */

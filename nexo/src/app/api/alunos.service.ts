@@ -6,6 +6,7 @@ import {
   AlunoCriado,
   AlunoResumoDTO,
   CadastroAlunoRequest,
+  CadastroSolicitado,
   NotaDTO,
   ObservacaoDTO,
 } from '../core/api.models';
@@ -28,9 +29,13 @@ export class AlunosService {
     return this.http.get<AlunoResumoDTO[]>(this.api);
   }
 
-  /** Cadastro de aluno — e-mail institucional e senha provisória são gerados no backend. */
-  cadastrar(dados: CadastroAlunoRequest): Observable<AlunoCriado> {
-    return this.http.post<AlunoCriado>(this.api, dados);
+  /**
+   * Cadastro de aluno — e-mail institucional e senha provisória são gerados no backend.
+   * Com a aprovação manual ligada nada é criado: a resposta é um {@link CadastroSolicitado}
+   * (`pendente: true`), e o acesso só nasce quando o pedido é aprovado.
+   */
+  cadastrar(dados: CadastroAlunoRequest): Observable<AlunoCriado | CadastroSolicitado> {
+    return this.http.post<AlunoCriado | CadastroSolicitado>(this.api, dados);
   }
 
   editarNotas(

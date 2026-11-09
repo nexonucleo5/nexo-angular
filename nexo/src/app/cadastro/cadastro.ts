@@ -133,10 +133,17 @@ export class Cadastro {
 
     this.enviando.set(true);
     this.alunosService.cadastrar(this.alunoForm.value).subscribe({
-      next: (criado) => {
+      next: (resposta) => {
         this.enviando.set(false);
-        this.acesso.set({ login: criado.emailInstitucional, senha: criado.senhaProvisoria });
-        this.mensagemSucesso.set(`Aluno ${criado.nome} cadastrado com sucesso.`);
+        if ('pendente' in resposta) {
+          // Aprovação manual ligada: não há conta nem senha para exibir ainda.
+          this.mensagemSucesso.set(
+            `Cadastro de ${resposta.nome} enviado para aprovação. O acesso é gerado quando ` +
+            'um diretor aprovar o pedido em Inscrições.');
+        } else {
+          this.acesso.set({ login: resposta.emailInstitucional, senha: resposta.senhaProvisoria });
+          this.mensagemSucesso.set(`Aluno ${resposta.nome} cadastrado com sucesso.`);
+        }
         this.alunoForm.reset({ nome: '', turmaId: null });
       },
       error: (erro: ApiErro) => this.falhar(erro),
