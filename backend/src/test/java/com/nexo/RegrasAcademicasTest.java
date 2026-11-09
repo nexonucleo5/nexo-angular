@@ -155,6 +155,7 @@ class RegrasAcademicasTest extends TesteApiBase {
     @DisplayName("cadastro de aluno pede só nome e turma, e ignora dado pessoal enviado")
     void cadastroDeAlunoNaoGuardaDadoPessoal() throws Exception {
         String diretor = bearer("diretor");
+        exigirAprovacaoDeAluno(diretor, false);
         long turmaId = primeiraTurma(diretor);
 
         // Nome e turma bastam: nascimento, sexo e endereço saíram do cadastro.

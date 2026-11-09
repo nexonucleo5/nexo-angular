@@ -11,7 +11,9 @@ import lombok.Setter;
  * nesta etapa). Substitui gradualmente os tópicos hardcoded de materias.data.ts.
  */
 @Entity
-@Table(name = "conteudos_materia")
+@Table(name = "conteudos_materia",
+       // Toda listagem de conteúdo filtra por matéria (e o Postgres não indexa FK sozinho).
+       indexes = @Index(name = "idx_conteudos_materia_materia", columnList = "materia_id"))
 @Getter
 @Setter
 public class ConteudoMateria {

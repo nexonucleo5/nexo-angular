@@ -65,6 +65,29 @@ export interface AlunoCriado {
 }
 
 /**
+ * Resposta do cadastro quando "Exigir aprovação manual de cadastro de aluno" está ligada:
+ * a conta ainda não existe, então não há login nem senha — só o pedido na fila.
+ */
+export interface CadastroSolicitado {
+  id: number;
+  nome: string;
+  turmaId: number;
+  turma: string;
+  pendente: true;
+}
+
+/** GET /api/cadastros-pendentes — pedido de cadastro aguardando decisão. */
+export interface PedidoCadastroDTO {
+  id: number;
+  nome: string;
+  turmaId: number;
+  turma: string | null;
+  solicitadoPor: string;
+  situacao: 'PENDENTE' | 'APROVADO' | 'REJEITADO';
+  criadoEm: string;
+}
+
+/**
  * O cadastro pede duas coisas, e é assim de propósito: nascimento, sexo e
  * endereço saíram porque este sistema não guarda dado pessoal de aluno — a ficha
  * dele vive no sistema de aula da escola.
