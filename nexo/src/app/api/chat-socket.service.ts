@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../services/auth.service';
-import { ChatMensagem, ChatService } from './chat.service';
+import { ChatMensagem, ChatMensagemApagada, ChatService } from './chat.service';
 
 /**
  * Cliente WebSocket nativo do chat em tempo real. O navegador não envia header
@@ -26,6 +26,8 @@ export class ChatSocketService {
   readonly conectado = signal(false);
   /** Emite cada mensagem recebida (enviadas por mim ou pelo outro). */
   readonly mensagens$ = new Subject<ChatMensagem>();
+  /** Emite quando uma mensagem sai da conversa (apagada para todos ou só para mim). */
+  readonly apagadas$ = new Subject<ChatMensagemApagada>();
 
   conectar(): void {
     const usuario = this.auth.usuarioLogado();
@@ -75,7 +77,9 @@ export class ChatSocketService {
     ws.onopen = () => this.conectado.set(true);
     ws.onmessage = (ev) => {
       try {
-        this.mensagens$.next(JSON.parse(ev.data) as ChatMensagem);
+        const dado = JSON.parse(ev.data);
+        if (dado?.tipo === 'APAGADA' || dado?.tipo === 'OCULTADA') this.apagadas$.next(dado as ChatMensagemApagada);
+        else this.mensagens$.next(dado as ChatMensagem);
       } catch {
         /* payload inesperado: ignora */
       }

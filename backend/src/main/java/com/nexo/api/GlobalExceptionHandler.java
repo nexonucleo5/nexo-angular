@@ -95,12 +95,12 @@ public class GlobalExceptionHandler {
 
     /**
      * O limite do multipart corta antes de chegar ao controller, então a checagem de
-     * 2 MB de lá nem chega a rodar — sem este handler, o usuário recebia 500.
+     * tamanho de lá nem chega a rodar — sem este handler, o usuário recebia 500.
      */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErroPadrao> handleUploadGrande(MaxUploadSizeExceededException ex) {
         return erro(HttpStatus.PAYLOAD_TOO_LARGE, "PAYLOAD_TOO_LARGE",
-                "A imagem deve ter no máximo 2 MB.", null);
+                "O arquivo enviado é maior que o permitido.", null);
     }
 
     /** O 405 obriga o cabeçalho Allow com os métodos aceitos (RFC 9110, 15.5.6). */

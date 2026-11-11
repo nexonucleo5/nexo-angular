@@ -41,23 +41,144 @@
           @if (mensagens().length === 0) {
             <p class="text-soft small text-center mt-4">Nenhuma mensagem ainda. Diga olá! 👋</p>
           }
-          <div *ngFor="let m of mensagens()" class="bolha-wrap mb-2 d-flex"
+          <div *ngFor="let m of mensagens()" class="bolha-wrap mb-2 d-flex align-items-center gap-1"
                [class.justify-content-end]="minha(m)">
-            <div class="bolha" [class.minha]="minha(m)">
-              <p class="m-0 small">{{ m.texto }}</p>
-              <span class="extra-small d-block text-end mt-1 opacity-75">{{ m.criadaEm | date:'dd/MM HH:mm' }}</span>
+            @if (minha(m) && m.id != null) {
+              <button type="button" class="btn-apagar" (click)="abrirApagar(m)"
+                      title="Apagar mensagem" aria-label="Apagar mensagem">
+                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trash"></use></svg>
+              </button>
+            }
+            <div class="bolha" [class.minha]="minha(m)" [class.com-anexo]="m.anexos?.length">
+              @if (m.anexos?.length) {
+                <div class="anexos">
+                  @for (a of m.anexos ?? []; track a.id) {
+                    @if (ehImagem(a)) {
+                      @if (urlsAnexo()[a.id]; as url) {
+                        <img [src]="url" class="anexo-img" [alt]="a.nome" (click)="baixar(a)" title="Baixar imagem">
+                      } @else {
+                        <div class="anexo-carregando">Carregando imagem…</div>
+                      }
+                    } @else if (ehAudio(a)) {
+                      @if (urlsAnexo()[a.id]; as url) {
+                        <app-chat-audio [src]="url"></app-chat-audio>
+                      } @else {
+                        <div class="anexo-carregando">Carregando áudio…</div>
+                      }
+                    } @else {
+                      <button type="button" class="anexo-arquivo" (click)="baixar(a)" [title]="'Baixar ' + a.nome">
+                        <span class="anexo-ext">{{ extensao(a.nome) }}</span>
+                        <span class="anexo-info">
+                          <span class="anexo-nome">{{ a.nome }}</span>
+                          <span class="anexo-tamanho">{{ tamanhoLegivel(a.tamanho) }}</span>
+                        </span>
+                        <span class="anexo-baixar" aria-hidden="true">
+                          <svg viewBox="0 0 24 24"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></svg>
+                        </span>
+                      </button>
+                    }
+                  }
+                </div>
+              }
+              @if (m.texto) {
+                <p class="m-0 small texto-msg">{{ m.texto }}</p>
+              }
+              <span class="hora">{{ m.criadaEm | date:'dd/MM HH:mm' }}</span>
             </div>
+            @if (!minha(m) && m.id != null) {
+              <button type="button" class="btn-apagar" (click)="abrirApagar(m)"
+                      title="Apagar mensagem" aria-label="Apagar mensagem">
+                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trash"></use></svg>
+              </button>
+            }
           </div>
         </div>
 
-        <div class="chat-input d-flex gap-2">
-          <input type="text" class="form-control chat-field" [(ngModel)]="novoTexto"
-                 placeholder="Digite sua mensagem..." (keyup.enter)="enviar()">
-          <button class="btn btn-enviar px-3" (click)="enviar()" [disabled]="!conectado()">
-            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-send"></use></svg>
-          </button>
+        @if (erro(); as e) {
+          <div class="chat-erro small mb-2" role="alert">{{ e }}</div>
+        }
+
+        <!-- Anexos aguardando envio -->
+        @if (pendentes().length) {
+          <div class="pendentes d-flex flex-wrap gap-2 mb-2">
+            @for (p of pendentes(); track $index) {
+              <span class="pendente">
+                @if (ehAudio(p)) {
+                  <svg class="ic ic-inline" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg>
+                } @else {
+                  <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-file"></use></svg>
+                }
+                <span class="anexo-nome">{{ p.nome }}</span>
+                <span class="extra-small opacity-75">{{ tamanhoLegivel(p.tamanho) }}</span>
+                <button type="button" class="btn-remover" (click)="removerPendente($index)"
+                        [attr.aria-label]="'Remover ' + p.nome">
+                  <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-x"></use></svg>
+                </button>
+              </span>
+            }
+            <span class="extra-small text-soft align-self-center">{{ pendentes().length }}/{{ maxAnexos }}</span>
+          </div>
+        }
+
+        @if (gravando()) {
+          <div class="chat-input gravando d-flex align-items-center gap-2">
+            <span class="rec-dot"></span>
+            <span class="small text-main flex-grow-1">Gravando… {{ tempoGravado() }}</span>
+            <button type="button" class="btn btn-secundario px-3" (click)="cancelarGravacao()" title="Descartar áudio">
+              <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trash"></use></svg>
+            </button>
+            <button type="button" class="btn btn-enviar px-3" (click)="pararGravacao()" title="Parar e enviar áudio">
+              <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-send"></use></svg>
+            </button>
+          </div>
+        } @else {
+          <div class="chat-input d-flex gap-2">
+            <input #seletorArquivo type="file" multiple class="d-none" (change)="arquivosEscolhidos($event)">
+            <button type="button" class="btn btn-secundario px-3" (click)="abrirSeletor()"
+                    [disabled]="pendentes().length >= maxAnexos || enviando()"
+                    title="Anexar arquivos (até 3, 5 MB cada)" aria-label="Anexar arquivos">
+              <svg class="ic ic-inline" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/></svg>
+            </button>
+            <input type="text" class="form-control chat-field" [(ngModel)]="novoTexto"
+                   placeholder="Digite sua mensagem..." (keyup.enter)="enviar()">
+            @if (podeGravar && !novoTexto.trim() && !pendentes().length) {
+              <button type="button" class="btn btn-enviar px-3" (click)="iniciarGravacao()"
+                      [disabled]="enviando()" title="Gravar áudio" aria-label="Gravar áudio">
+                <svg class="ic ic-inline" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg>
+              </button>
+            } @else {
+              <button type="button" class="btn btn-enviar px-3" (click)="enviar()"
+                      [disabled]="enviando() || (!pendentes().length && !conectado())"
+                      title="Enviar" aria-label="Enviar">
+                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-send"></use></svg>
+              </button>
+            }
+          </div>
+        }
+      }
+
+      @if (aApagar(); as alvo) {
+        <div class="apagar-fundo" (click)="fecharApagar()"></div>
+        <div class="apagar-janela" role="dialog" aria-modal="true" aria-labelledby="apagar-titulo">
+          <h4 id="apagar-titulo" class="h6 fw-bold text-main mb-1">Apagar mensagem?</h4>
+          <p class="small text-soft mb-3">
+            @if (minha(alvo)) {
+              "Para todos" remove a mensagem da conversa dos dois. "Para mim" tira só da sua tela.
+            } @else {
+              A mensagem sai só da sua tela; {{ contatoSelecionado()?.nome }} continua vendo.
+            }
+          </p>
+          <div class="d-flex flex-column gap-2">
+            @if (minha(alvo)) {
+              <button type="button" class="btn btn-perigo" (click)="apagarParaTodos()">Apagar para todos</button>
+            }
+            <button type="button" class="btn btn-secundario" (click)="apagarParaMim()">Apagar para mim</button>
+            <button type="button" class="btn btn-link-cancelar" (click)="fecharApagar()">Cancelar</button>
+          </div>
         </div>
-      } @else {
+      }
+
+      @if (!contatoSelecionado()) {
         <div class="d-flex flex-column align-items-center justify-content-center m-auto text-center">
           <svg class="ic text-soft display-4 mb-3" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-chat"></use></svg>
           <p class="text-soft">Selecione um contato para conversar</p>
