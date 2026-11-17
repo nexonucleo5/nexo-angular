@@ -4,8 +4,10 @@ import com.nexo.api.ApiException;
 import com.nexo.domain.*;
 import com.nexo.repository.*;
 import com.nexo.security.UsuarioAutenticado;
+import com.nexo.service.EscopoAvisos;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Mensagens, avisos e dúvidas — contrato "Comunicação" do arquitetura_java.md. */
@@ -27,13 +30,16 @@ public class ComunicacaoController {
     private final MensagemRepository mensagens;
     private final AvisoRepository avisos;
     private final DuvidaRepository duvidas;
+    private final EscopoAvisos escopoAvisos;
 
     public ComunicacaoController(ConversaRepository conversas, MensagemRepository mensagens,
-                                 AvisoRepository avisos, DuvidaRepository duvidas) {
+                                 AvisoRepository avisos, DuvidaRepository duvidas,
+                                 EscopoAvisos escopoAvisos) {
         this.conversas = conversas;
         this.mensagens = mensagens;
         this.avisos = avisos;
         this.duvidas = duvidas;
+        this.escopoAvisos = escopoAvisos;
     }
 
     // ── Mensagens ────────────────────────────────────────────────────────────
@@ -81,7 +87,9 @@ public class ComunicacaoController {
                         .map(MensagemDTO::of).toList());
     }
 
-    public record ResponderRequest(@NotBlank(message = "A mensagem não pode ser vazia.") String texto) {}
+    public record ResponderRequest(
+            @NotBlank(message = "A mensagem não pode ser vazia.")
+            @Size(max = 4000, message = "A mensagem deve ter no máximo 4000 caracteres.") String texto) {}
 
     /**
      * Sem Location de propósito: a mensagem criada aqui não tem recurso próprio
@@ -116,20 +124,36 @@ public class ComunicacaoController {
         }
     }
 
+    /** Só os avisos endereçados ao operador — ver {@link EscopoAvisos}. */
     @GetMapping("/api/avisos")
-    public List<AvisoDTO> listarAvisos() {
-        return avisos.findAllByOrderByCriadoEmDesc().stream().map(AvisoDTO::of).toList();
+    public List<AvisoDTO> listarAvisos(@AuthenticationPrincipal UsuarioAutenticado operador) {
+        Set<String> destinos = escopoAvisos.destinosVisiveis(operador);
+        List<Aviso> lista = destinos == null
+                ? avisos.findAllByOrderByCriadoEmDesc()
+                : avisos.findVisiveis(destinos);
+        return lista.stream().map(AvisoDTO::of).toList();
     }
 
     @GetMapping("/api/avisos/{id}")
-    public AvisoDTO detalharAviso(@PathVariable Long id) {
-        return avisos.findById(id).map(AvisoDTO::of)
+    public AvisoDTO detalharAviso(@PathVariable Long id,
+                                  @AuthenticationPrincipal UsuarioAutenticado operador) {
+        Set<String> destinos = escopoAvisos.destinosVisiveis(operador);
+        // 404 — e não 403 — para o aviso de outra turma: o id sequencial não deve servir
+        // para descobrir quais avisos existem fora do alcance de quem pergunta.
+        return avisos.findById(id)
+                .filter(a -> escopoAvisos.visivel(a, destinos))
+                .map(AvisoDTO::of)
                 .orElseThrow(() -> ApiException.notFound("Aviso não encontrado."));
     }
 
-    public record NovoAvisoRequest(@NotBlank(message = "Informe o título do aviso.") String titulo,
-                                   @NotBlank(message = "Informe o conteúdo do aviso.") String conteudo,
-                                   String destino) {}
+    // Os tetos acompanham as colunas (titulo: 255, conteudo: 4000); sem eles o excesso só
+    // aparecia como erro de banco, devolvido ao cliente como 500.
+    public record NovoAvisoRequest(
+            @NotBlank(message = "Informe o título do aviso.")
+            @Size(max = 255, message = "O título deve ter no máximo 255 caracteres.") String titulo,
+            @NotBlank(message = "Informe o conteúdo do aviso.")
+            @Size(max = 4000, message = "O conteúdo deve ter no máximo 4000 caracteres.") String conteudo,
+            String destino) {}
 
     @PostMapping("/api/avisos")
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")
@@ -138,7 +162,7 @@ public class ComunicacaoController {
         Aviso aviso = new Aviso();
         aviso.setTitulo(request.titulo().trim());
         aviso.setConteudo(request.conteudo().trim());
-        aviso.setDestino(request.destino() != null ? request.destino() : "Todos");
+        aviso.setDestino(escopoAvisos.destinoParaPublicar(request.destino(), usuario));
         aviso.setAutorNome(usuario.nome());
         AvisoDTO dto = AvisoDTO.of(avisos.save(aviso));
         return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest()
@@ -164,7 +188,9 @@ public class ComunicacaoController {
         return lista.stream().map(DuvidaDTO::of).toList();
     }
 
-    public record ResponderDuvidaRequest(@NotBlank(message = "A resposta não pode ser vazia.") String texto) {}
+    public record ResponderDuvidaRequest(
+            @NotBlank(message = "A resposta não pode ser vazia.")
+            @Size(max = 4000, message = "A resposta deve ter no máximo 4000 caracteres.") String texto) {}
 
     @PostMapping("/api/duvidas/{id}/responder")
     @PreAuthorize("hasAnyRole('PROFESSOR','DIRETOR')")

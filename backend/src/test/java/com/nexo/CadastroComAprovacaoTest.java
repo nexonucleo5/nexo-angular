@@ -51,8 +51,9 @@ class CadastroComAprovacaoTest extends TesteApiBase {
         exigirAprovacaoDeAluno(diretor, true);
         long id = pedidoId(cadastrar("Ana Aprovada Costa", diretor), diretor);
 
+        // Quem pediu não aprova: quem decide aqui é o administrador, que nunca passa pela fila.
         JsonNode criado = json.readTree(mvc.perform(post("/api/cadastros-pendentes/" + id + "/aprovar")
-                        .header(HttpHeaders.AUTHORIZATION, diretor))
+                        .header(HttpHeaders.AUTHORIZATION, bearer("admin")))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString());
 

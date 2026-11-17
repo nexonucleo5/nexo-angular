@@ -20,7 +20,18 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) =>
             ? 'Não foi possível conectar ao servidor. Verifique se o backend está no ar.'
             : 'Erro inesperado ao comunicar com o servidor.'),
         fields: corpo?.fields,
+        retryAfterSegundos: lerRetryAfter(erro),
       };
       return throwError(() => normalizado);
     }),
   );
+
+/**
+ * O 429 traz {@code Retry-After} em segundos (o backend nunca usa a forma de data). Valor
+ * ausente, não numérico ou não positivo é ignorado: a tela cai na mensagem genérica.
+ */
+function lerRetryAfter(erro: HttpErrorResponse): number | undefined {
+  if (erro.status !== 429) return undefined;
+  const segundos = Number(erro.headers?.get('Retry-After'));
+  return Number.isFinite(segundos) && segundos > 0 ? Math.ceil(segundos) : undefined;
+}

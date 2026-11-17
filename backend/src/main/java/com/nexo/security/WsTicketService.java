@@ -16,6 +16,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * colocar o access token completo na query string — onde pode acabar em logs de
  * proxy ou de acesso — o cliente troca o token por um ticket descartável só para
  * abrir a conexão.
+ *
+ * <p><b>Limite conhecido</b>: os tickets vivem em memória. Um reinício invalida os que
+ * estavam em voo — o cliente já trata isso, porque cada reconexão pede um ticket novo, e a
+ * janela é de 30 s. Com mais de uma instância o ticket emitido numa não existiria na outra:
+ * ao escalar, mova este mapa para um armazenamento compartilhado com TTL (Redis) ou fixe a
+ * afinidade de sessão do balanceador no {@code /ws/chat}.
  */
 @Service
 public class WsTicketService {
@@ -23,16 +29,17 @@ public class WsTicketService {
     private static final Duration TTL = Duration.ofSeconds(30);
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    public record Titular(Long uid, String nome) {}
+    /** {@code jti} é o do access token que pediu o ticket: liga o socket à sessão que o abriu. */
+    public record Titular(Long uid, String nome, String jti) {}
 
     private record Ticket(Titular titular, Instant expiraEm) {}
 
     private final Map<String, Ticket> tickets = new ConcurrentHashMap<>();
 
-    public String emitir(Long uid, String nome) {
+    public String emitir(Long uid, String nome, String jti) {
         limparExpirados();
         String valor = gerarValor();
-        tickets.put(valor, new Ticket(new Titular(uid, nome), Instant.now().plus(TTL)));
+        tickets.put(valor, new Ticket(new Titular(uid, nome, jti), Instant.now().plus(TTL)));
         return valor;
     }
 

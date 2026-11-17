@@ -14,6 +14,7 @@ import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AlunoService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -204,7 +205,7 @@ public class AlunosController {
         String disciplina = request.disciplina() != null && !request.disciplina().isBlank()
                 ? request.disciplina().trim()
                 : "Geral";
-        String periodo = request.periodo() != null ? request.periodo() : "2026-1";
+        String periodo = periodoDaRequisicao(request.periodo());
 
         Nota nota = notas.findByAlunoIdAndDisciplinaAndPeriodo(alunoId, disciplina, periodo)
                 .orElseGet(() -> {
@@ -223,6 +224,25 @@ public class AlunosController {
         return NotaDTO.of(notas.save(nota));
     }
 
+    /**
+     * Formato do período letivo: ano e número do período, de "2026-1" a "2026-4" (semestre,
+     * trimestre ou bimestre). Antes era texto livre: cada valor inventado ("hack", "2099-99")
+     * criava uma linha de nota própria, que aparecia no filtro de períodos dos relatórios e
+     * entrava nas médias do aluno.
+     */
+    private static final java.util.regex.Pattern PERIODO_VALIDO =
+            java.util.regex.Pattern.compile("^20\\d{2}-[1-4]$");
+
+    private static String periodoDaRequisicao(String informado) {
+        if (informado == null) return "2026-1";
+        String periodo = informado.trim();
+        if (!PERIODO_VALIDO.matcher(periodo).matches()) {
+            throw ApiException.validation("Período inválido.",
+                    java.util.Map.of("periodo", "Use o formato ano-período, por exemplo 2026-1."));
+        }
+        return periodo;
+    }
+
     private void validarNota(String campo, Double valor) {
         if (valor != null && (valor < 0 || valor > 10)) {
             throw ApiException.validation("Nota fora do intervalo permitido.",
@@ -232,7 +252,9 @@ public class AlunosController {
 
     // ── Observações pedagógicas ──────────────────────────────────────────────
 
-    public record NovaObservacaoRequest(@NotBlank(message = "Escreva a observação.") String texto) {}
+    public record NovaObservacaoRequest(
+            @NotBlank(message = "Escreva a observação.")
+            @Size(max = 4000, message = "A observação deve ter no máximo 4000 caracteres.") String texto) {}
 
     public record ObservacaoDTO(Long id, Long alunoId, String autor, String texto, Instant criadaEm) {
         static ObservacaoDTO of(ObservacaoPedagogica o) {

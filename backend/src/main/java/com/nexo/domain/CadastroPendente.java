@@ -47,6 +47,13 @@ public class CadastroPendente {
     @Column(nullable = false)
     private String solicitadoPor;
 
+    /**
+     * Id de quem pediu. É o que a regra "quem pede não aprova" compara: o nome não serve, porque
+     * não é único e o próprio usuário pode alterá-lo. Nulo só em pedido de antes desta coluna.
+     */
+    @Column(name = "solicitado_por_id")
+    private Long solicitadoPorId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 12)
     private Situacao situacao = Situacao.PENDENTE;
@@ -56,4 +63,13 @@ public class CadastroPendente {
     private String decididoPor;
 
     private Instant decididoEm;
+
+    /**
+     * O pedido é desta pessoa? Pelo id; em pedido antigo, sem id gravado, cai para o nome —
+     * errar para o lado de recusar a aprovação é o seguro, e o administrador sempre pode decidir.
+     */
+    public boolean foiPedidoPor(Long usuarioId, String usuarioNome) {
+        if (solicitadoPorId != null) return solicitadoPorId.equals(usuarioId);
+        return solicitadoPor != null && solicitadoPor.equalsIgnoreCase(usuarioNome);
+    }
 }

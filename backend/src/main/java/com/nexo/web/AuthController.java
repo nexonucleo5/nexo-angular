@@ -61,6 +61,11 @@ public class AuthController {
     /**
      * Encerra só esta sessão. O cookie identifica qual delas — daí ele ser lido aqui
      * também, e não apenas em {@link #refresh}.
+     *
+     * <p>Público (ver SecurityConfig) de propósito: o {@code usuario} chega {@code null}
+     * quando o access token expirou ou ainda não foi restaurado, e mesmo assim o cookie
+     * precisa ser revogado — ver {@code AuthService#logout}. Responde sempre 204 e sempre
+     * manda o Set-Cookie que apaga o cookie no navegador.
      */
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(

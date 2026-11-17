@@ -282,6 +282,9 @@ public class AdminController {
         String senha = credenciais.redefinirSenhaProvisoria(usuario);
         usuarios.save(usuario);
         refreshTokens.revogarTodosDoUsuario(usuario.getId());
+        // O refresh token cai acima; o access token já emitido continuaria aberto por até
+        // 15 min — o mesmo que a desativação e a troca de papel já fecham.
+        accessTokensRevogados.revogarUsuario(usuario.getId());
         auditoria.registrar(operador.nome(), EventoAuditoria.Tipo.ALTERACAO,
                 "Senha provisória redefinida", "Conta: " + usuario.getLogin(), clienteIp.de(http));
         return new SenhaRedefinidaDTO(usuario.getLogin(), senha);

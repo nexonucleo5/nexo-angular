@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 
 @Component
@@ -58,14 +59,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // Assinatura boa e prazo em dia não bastam: o logout invalida a emissão na hora.
         if (revogados.revogado(jti)) return;
-        // Troca de papel ou desativação: nada emitido antes disso vale, qualquer que seja a sessão.
-        var emitidoEm = claims.getIssuedAt();
-        if (revogados.usuarioRevogado(uid, emitidoEm == null ? null : emitidoEm.toInstant())) return;
+
+        // Troca de papel, desativação, senha redefinida ou sessão roubada: o refresh token
+        // morre na hora, e isto faz o access token já emitido morrer junto, qualquer que
+        // seja a sessão, em vez de seguir aberto pelo resto dos 15 minutos.
+        if (revogados.usuarioRevogado(uid, instanteDeEmissao(claims))) return;
 
         var principal = new UsuarioAutenticado(uid, login, claims.get("nome", String.class), role, jti);
         var auth = new UsernamePasswordAuthenticationToken(
                 principal, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
         SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    /**
+     * Quando o token foi emitido, na melhor precisão que ele carrega: o claim em
+     * milissegundos; na falta dele (token de antes desta versão) o {@code iat}, que fica no
+     * início do segundo e portanto cai do lado conservador da comparação. {@code null} se
+     * nenhum dos dois existir.
+     */
+    private static Instant instanteDeEmissao(Claims claims) {
+        Long ms = claims.get(JwtService.CLAIM_EMITIDO_EM_MS, Long.class);
+        if (ms != null) return Instant.ofEpochMilli(ms);
+        return claims.getIssuedAt() != null ? claims.getIssuedAt().toInstant() : null;
     }
 
     /** A role precisa ser uma das do enum — não basta ser uma string qualquer. */

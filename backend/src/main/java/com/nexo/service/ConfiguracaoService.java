@@ -3,10 +3,13 @@ package com.nexo.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexo.api.ApiException;
+import com.nexo.domain.ConfiguracaoEscola;
 import com.nexo.domain.ConfiguracaoUsuario;
+import com.nexo.domain.EventoAuditoria;
 import com.nexo.domain.Role;
 import com.nexo.domain.Usuario;
 import com.nexo.repository.AlunoRepository;
+import com.nexo.repository.ConfiguracaoEscolaRepository;
 import com.nexo.repository.ConfiguracaoUsuarioRepository;
 import com.nexo.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -29,15 +32,24 @@ import java.util.Set;
 @Service
 public class ConfiguracaoService {
 
+    private static final org.slf4j.Logger log =
+            org.slf4j.LoggerFactory.getLogger(ConfiguracaoService.class);
+
     private final ConfiguracaoUsuarioRepository configuracoes;
     private final UsuarioRepository usuarios;
     private final AlunoRepository alunos;
     private final ObjectMapper mapper;
+    private final ConfiguracaoEscolaRepository regrasDaEscola;
+    private final AuditoriaService auditoria;
 
     public ConfiguracaoService(ConfiguracaoUsuarioRepository configuracoes,
                                UsuarioRepository usuarios,
                                AlunoRepository alunos,
-                               ObjectMapper mapper) {
+                               ObjectMapper mapper,
+                               ConfiguracaoEscolaRepository regrasDaEscola,
+                               AuditoriaService auditoria) {
+        this.regrasDaEscola = regrasDaEscola;
+        this.auditoria = auditoria;
         this.configuracoes = configuracoes;
         this.usuarios = usuarios;
         this.alunos = alunos;
@@ -54,11 +66,17 @@ public class ConfiguracaoService {
 
         // Merge com defaults para garantir seções/campos novos em versões futuras
         Map<String, Map<String, Object>> defaults = defaultsPara(usuario.getRole());
-        Map<String, Map<String, Object>> salvas = ler(config.getJson());
+        Map<String, Map<String, Object>> salvas = ler(config.getJson(), usuarioId);
         salvas.forEach((secao, campos) -> defaults.merge(secao, campos, (d, s) -> {
             d.putAll(s);
             return d;
         }));
+        // A regra da escola vale igual para todo diretor: o que estiver na conta dele (de
+        // antes de a regra ser única, ou de qualquer outra origem) não decide nada, e a tela
+        // nunca mostra um interruptor diferente do que o servidor aplica.
+        if (usuario.getRole() == Role.DIRETOR && defaults.containsKey(SECAO_GESTAO)) {
+            defaults.get(SECAO_GESTAO).put(CHAVE_APROVACAO_ALUNO, exigeAprovacaoManualDeAluno());
+        }
         return defaults;
     }
 
@@ -75,11 +93,17 @@ public class ConfiguracaoService {
         ConfiguracaoUsuario config = configuracoes.findByUsuarioId(usuarioId)
                 .orElseGet(() -> criarPadrao(usuario));
 
-        Map<String, Map<String, Object>> atual = ler(config.getJson());
+        Map<String, Map<String, Object>> atual = ler(config.getJson(), usuarioId);
         Map<String, Object> campos = atual.computeIfAbsent(secao, s -> new LinkedHashMap<>(defaults.get(secao)));
         campos.putAll(patch);
 
         validar(usuario.getRole(), secao, campos);
+
+        if (SECAO_GESTAO.equals(secao) && patch.containsKey(CHAVE_APROVACAO_ALUNO)) {
+            definirAprovacaoManualDeAluno((Boolean) patch.get(CHAVE_APROVACAO_ALUNO), usuario.getNome());
+        }
+        // A cópia na conta do diretor deixa de existir: a fonte é a regra da escola.
+        if (SECAO_GESTAO.equals(secao)) campos.remove(CHAVE_APROVACAO_ALUNO);
 
         config.setJson(escrever(atual));
         config.setAtualizadaEm(Instant.now());
@@ -94,18 +118,42 @@ public class ConfiguracaoService {
     static final String SECAO_GESTAO = "gestao";
     static final String CHAVE_APROVACAO_ALUNO = "exigirAprovacaoManualAluno";
 
+    static final String REGRA_APROVACAO_ALUNO = "aprovacao-manual-cadastro-aluno";
+
     /**
-     * O diretor exige aprovação manual para os alunos que cadastra? Lido do JSON sem
-     * criar a configuração padrão (uma consulta de leitura não grava), e na ausência da
-     * chave vale o padrão da tela: ligado. Só {@code false} de verdade desliga — qualquer
-     * outro valor cai para o lado seguro, que é pedir aprovação.
+     * A escola exige aprovação manual para cadastrar aluno? É <b>uma regra só</b>, a mesma
+     * para qualquer diretor que cadastre — antes era a opção de cada diretor, então um
+     * segundo diretor com a opção desligada cadastrava direto e o controle não valia.
+     *
+     * <p>Na ausência de registro vale o padrão da tela: ligado. Só {@code "false"} de verdade
+     * desliga — qualquer outro valor cai para o lado seguro, que é pedir aprovação. Leitura
+     * pura: não grava nada.
      */
     @Transactional(readOnly = true)
-    public boolean exigeAprovacaoManualDeAluno(Long diretorId) {
-        return configuracoes.findByUsuarioId(diretorId)
-                .map(c -> ler(c.getJson()).get(SECAO_GESTAO))
-                .map(gestao -> !Boolean.FALSE.equals(gestao.get(CHAVE_APROVACAO_ALUNO)))
+    public boolean exigeAprovacaoManualDeAluno() {
+        return regrasDaEscola.findById(REGRA_APROVACAO_ALUNO)
+                .map(r -> !"false".equals(r.getValor()))
                 .orElse(true);
+    }
+
+    /**
+     * Liga ou desliga a regra para a escola toda. Quem mudou e o novo valor ficam na
+     * auditoria: desligar o controle de cadastro é uma decisão que precisa ter dono.
+     */
+    private void definirAprovacaoManualDeAluno(boolean exigir, String quem) {
+        boolean atual = exigeAprovacaoManualDeAluno();
+        ConfiguracaoEscola regra = regrasDaEscola.findById(REGRA_APROVACAO_ALUNO)
+                .orElseGet(() -> new ConfiguracaoEscola(REGRA_APROVACAO_ALUNO, "true", quem));
+        regra.setValor(String.valueOf(exigir));
+        regra.setAtualizadoPor(quem);
+        regra.setAtualizadoEm(Instant.now());
+        regrasDaEscola.save(regra);
+        if (atual != exigir) {
+            auditoria.registrar(quem, EventoAuditoria.Tipo.ALTERACAO,
+                    exigir ? "Aprovação de cadastro de aluno passou a ser exigida"
+                           : "Aprovação de cadastro de aluno deixou de ser exigida",
+                    "Regra da escola", null);
+        }
     }
 
     /** Chaves de privacidade que o servidor faz valer, por perfil. */
@@ -123,7 +171,7 @@ public class ConfiguracaoService {
         if (usuarioIds.isEmpty()) return Set.of();
         Set<Long> ocultos = new HashSet<>();
         for (ConfiguracaoUsuario c : configuracoes.findByUsuarioIdIn(usuarioIds)) {
-            Map<String, Object> priv = ler(c.getJson()).get(SECAO_PRIVACIDADE);
+            Map<String, Object> priv = ler(c.getJson(), c.getUsuario().getId()).get(SECAO_PRIVACIDADE);
             if (priv != null && Boolean.FALSE.equals(priv.get("perfilVisivelAlunos"))) {
                 ocultos.add(c.getUsuario().getId());
             }
@@ -159,7 +207,7 @@ public class ConfiguracaoService {
         for (var aluno : alunos.findAllComUsuario()) {
             var config = porUsuario.get(aluno.getUsuario().getId());
             if (config == null) continue;
-            Map<String, Object> priv = ler(config.getJson()).get(SECAO_PRIVACIDADE);
+            Map<String, Object> priv = ler(config.getJson(), aluno.getUsuario().getId()).get(SECAO_PRIVACIDADE);
             if (priv == null) continue;
             boolean ranking = !Boolean.FALSE.equals(priv.get("exibirNoRanking"));
             boolean publico = !Boolean.FALSE.equals(priv.get("perfilPublico"));
@@ -210,10 +258,18 @@ public class ConfiguracaoService {
         return configuracoes.save(config);
     }
 
-    private Map<String, Map<String, Object>> ler(String json) {
+    /**
+     * JSON ilegível vira configuração vazia — e então os defaults — em vez de derrubar a
+     * tela, mas deixa rastro: o usuário perde as preferências sem aviso, e sem o log não
+     * havia como saber que aconteceu nem de quem. Só o id e a classe da exceção vão para o
+     * log; a mensagem do Jackson cita trechos do documento.
+     */
+    private Map<String, Map<String, Object>> ler(String json, Long usuarioId) {
         try {
             return mapper.readValue(json, new TypeReference<LinkedHashMap<String, Map<String, Object>>>() {});
         } catch (Exception e) {
+            log.warn("JSON de configuração ilegível para usuario_id={} ({}); usando os padrões.",
+                    usuarioId, e.getClass().getSimpleName());
             return new LinkedHashMap<>();
         }
     }

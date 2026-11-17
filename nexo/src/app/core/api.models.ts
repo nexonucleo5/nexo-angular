@@ -19,6 +19,8 @@ export interface ApiErro {
   error: string;
   message: string;
   fields?: Record<string, string>;
+  /** Segundos de espera pedidos pelo servidor (cabeçalho Retry-After do 429), quando houver. */
+  retryAfterSegundos?: number;
 }
 
 /**
@@ -85,6 +87,8 @@ export interface PedidoCadastroDTO {
   solicitadoPor: string;
   situacao: 'PENDENTE' | 'APROVADO' | 'REJEITADO';
   criadoEm: string;
+  /** O pedido é de quem está olhando: quem pede não aprova (o servidor também recusa). */
+  proprio: boolean;
 }
 
 /**

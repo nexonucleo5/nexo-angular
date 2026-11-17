@@ -36,6 +36,12 @@ public class FotosController {
                 // O id nunca é reaproveitado, então a imagem pode ser cacheada por muito tempo.
                 .cacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic().immutable())
                 .contentType(MediaType.parseMediaType(foto.getTipoConteudo()))
+                // Defesa em profundidade para o upload: o tipo é conferido pelos primeiros
+                // bytes, então um arquivo com cabeçalho de imagem e o resto arbitrário passa.
+                // Servido como imagem ele é inofensivo; este CSP garante que, mesmo aberto
+                // direto numa aba, nada nele execute ou carregue recurso. O nosniff já vem do
+                // Spring Security, e impede o navegador de "adivinhar" outro tipo.
+                .header("Content-Security-Policy", "default-src 'none'; sandbox")
                 .body(foto.getDados());
     }
 }

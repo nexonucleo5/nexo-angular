@@ -1,5 +1,6 @@
 package com.nexo.service;
 
+import com.nexo.api.ApiException;
 import com.nexo.domain.ChatMensagem;
 import com.nexo.domain.Role;
 import com.nexo.domain.Usuario;
@@ -22,6 +23,13 @@ public class ChatService {
 
     /** Teto de mensagens devolvidas por conversa — ver {@link #historico}. */
     private static final int LIMITE_HISTORICO = 200;
+
+    /**
+     * Tamanho máximo do texto de uma mensagem — o mesmo de {@code ChatMensagem.texto}
+     * ({@code @Column(length = 2000)}). Sem o teto aqui, uma mensagem maior que a coluna
+     * estourava no banco, a exceção saía do handler do WebSocket e a conexão do usuário caía.
+     */
+    public static final int TAMANHO_MAXIMO_MENSAGEM = 2000;
 
     public record ContatoDTO(Long id, String nome, String papel, String foto) {}
 
@@ -66,7 +74,7 @@ public class ChatService {
     @Transactional(readOnly = true)
     public List<ContatoDTO> contatos(Long usuarioId) {
         Role meuPapel = usuarios.findRoleById(usuarioId).orElse(null);
-        if (meuPapel == null) return List.of();
+        if (meuPapel == null || !INTERLOCUTORES.containsKey(meuPapel)) return List.of();
         List<Usuario> lista = usuarios.findByRoleInOrderByNome(INTERLOCUTORES.get(meuPapel)).stream()
                 .filter(u -> !u.getId().equals(usuarioId))
                 .toList();
@@ -93,7 +101,8 @@ public class ChatService {
         Role de = usuarios.findRoleById(remetenteId).orElse(null);
         Role para = usuarios.findRoleById(destinatarioId).orElse(null);
         if (de == null || para == null) return false;
-        return INTERLOCUTORES.get(de).contains(para);
+        // getOrDefault: papéis fora da tabela (ADMIN) não conversam — e não podem virar NPE.
+        return INTERLOCUTORES.getOrDefault(de, List.of()).contains(para);
     }
 
     /**
@@ -104,6 +113,13 @@ public class ChatService {
      */
     @Transactional(readOnly = true)
     public List<ChatMensagemDTO> historico(Long usuarioId, Long outroId) {
+        // A mesma regra do envio vale para a leitura: sem ela, GET /api/chat/{id} devolvia
+        // a conversa com qualquer id informado — inclusive a de pares que o WebSocket
+        // jamais deixaria trocar mensagem. Id inexistente cai aqui também (403, e não 404),
+        // para a resposta não servir de oráculo de quais usuários existem.
+        if (!podeConversar(usuarioId, outroId)) {
+            throw ApiException.forbidden("Você não pode acessar esta conversa.");
+        }
         List<ChatMensagem> recentes =
                 mensagens.conversaRecente(usuarioId, outroId, PageRequest.of(0, LIMITE_HISTORICO));
 
