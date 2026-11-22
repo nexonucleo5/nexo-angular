@@ -166,7 +166,7 @@
   <div class="cartao-barra">
     <div class="search-box busca">
       <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
-      <input type="text" placeholder="Buscar mensagem, rota, usuário ou id"
+      <input type="text" placeholder="Buscar mensagem, rota, usuário, id ou detalhes"
              aria-label="Buscar nos registros"
              [ngModel]="busca()" (ngModelChange)="aoDigitar($event)">
     </div>
@@ -175,6 +175,13 @@
       <option value="">Todos os níveis</option>
       @for (n of nivelOpcoes; track n) {
         <option [value]="n">{{ nivelLabel(n) }}</option>
+      }
+    </select>
+    <select class="filter-select" aria-label="Categoria"
+            [ngModel]="categoria()" (ngModelChange)="categoria.set($event); aplicarFiltro()">
+      <option value="">Todas as categorias</option>
+      @for (c of categoriaOpcoes; track c) {
+        <option [value]="c">{{ categoriaLabel(c) }}</option>
       }
     </select>
     <select class="filter-select" aria-label="Período"
@@ -195,7 +202,7 @@
     <div class="tabela-wrap" [style.opacity]="carregando() ? 0.6 : 1">
       <table class="tabela">
         <thead>
-          <tr><th>Quando</th><th>Nível</th><th>Mensagem</th><th class="col-extra">Requisição</th></tr>
+          <tr><th>Quando</th><th>Nível</th><th>Categoria</th><th>Mensagem</th><th class="col-extra">Requisição</th></tr>
         </thead>
         <tbody>
           @for (l of logs(); track l.id) {
@@ -204,6 +211,7 @@
                 <span class="data">{{ l.criadoEm | date:'dd/MM' }}</span>{{ l.criadoEm | date:'HH:mm:ss' }}
               </td>
               <td><span class="chip" [ngClass]="nivelClasse(l.nivel)">{{ nivelLabel(l.nivel) }}</span></td>
+              <td><span class="chip" [ngClass]="categoriaClasse(l.categoria)">{{ categoriaLabel(l.categoria) }}</span></td>
               <td class="quebra">
                 {{ l.mensagem }}
                 @if (l.excecao) {
@@ -216,13 +224,14 @@
                   @if (l.duracaoMs !== null) { · {{ l.duracaoMs }} ms }
                   @if (l.usuario) { · {{ l.usuario }} }
                   @if (mostrarOrigem(l.origem)) { · {{ origemCurta(l.origem) }} }
+                  @if (l.detalhes) { · {{ l.detalhes }} }
                 </span>
               </td>
               <td class="mono col-extra">{{ l.requisicaoId || '—' }}</td>
             </tr>
             @if (l.excecao && abertos().has(l.id)) {
               <tr>
-                <td colspan="4" class="detalhe">
+                <td colspan="5" class="detalhe">
                   <div class="detalhe-cab">
                     <span>Stack trace</span>
                     <button class="link" (click)="copiar(l)">{{ copiadoId() === l.id ? 'Copiado' : 'Copiar' }}</button>

@@ -11,6 +11,7 @@ import {
   LogAplicacaoDTO,
   MateriaCatalogoDTO,
   NivelLog,
+  CategoriaLog,
   PageEnvelope,
   PapelConta,
   ResumoSistemaDTO,
@@ -97,10 +98,11 @@ export class AdminService {
   }
 
   /** Log da aplicação (WARN/ERROR). Mesmo recorte de acesso da auditoria: só o administrador. */
-  logsSistema(filtro: { nivel?: NivelLog; busca?: string; periodo?: number; page?: number; size?: number } = {}):
+  logsSistema(filtro: { nivel?: NivelLog; categoria?: CategoriaLog; busca?: string; periodo?: number; page?: number; size?: number } = {}):
     Observable<PageEnvelope<LogAplicacaoDTO>> {
     let params = new HttpParams();
     if (filtro.nivel) params = params.set('nivel', filtro.nivel);
+    if (filtro.categoria) params = params.set('categoria', filtro.categoria);
     if (filtro.busca) params = params.set('busca', filtro.busca);
     if (filtro.periodo) params = params.set('periodo', filtro.periodo);
     if (filtro.page != null) params = params.set('page', filtro.page);

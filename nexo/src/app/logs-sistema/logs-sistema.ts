@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../api/admin.service';
-import { HoraDTO, LogAplicacaoDTO, NivelLog, ProblemaDTO, ResumoSistemaDTO } from '../core/api.models';
+import { CategoriaLog, HoraDTO, LogAplicacaoDTO, NivelLog, ProblemaDTO, ResumoSistemaDTO } from '../core/api.models';
 
 const NIVEL_LABEL: Record<NivelLog, string> = { INFO: 'INFO', WARN: 'AVISO', ERROR: 'ERRO' };
 const NIVEL_CLASSE: Record<NivelLog, string> = {
@@ -10,14 +10,27 @@ const NIVEL_CLASSE: Record<NivelLog, string> = {
   WARN: 'chip-aviso',
   ERROR: 'chip-erro',
 };
+const CATEGORIA_LABEL: Record<CategoriaLog, string> = {
+  SISTEMA: 'Sistema',
+  DESAFIO: 'Desafio',
+  ACESSO: 'Acesso',
+  CONTEUDO: 'Conteúdo',
+};
+const CATEGORIA_CLASSE: Record<CategoriaLog, string> = {
+  SISTEMA: 'chip-sistema',
+  DESAFIO: 'chip-desafio',
+  ACESSO: 'chip-acesso',
+  CONTEUDO: 'chip-conteudo',
+};
 
 /**
- * Saúde do sistema: o log da aplicação (ERROR/WARN) e um resumo do que olhar primeiro.
+ * Saúde do sistema: o log da aplicação (ERROR/WARN/INFO) e um resumo do que olhar primeiro.
  *
  * <p>É o complemento da aba de atividade. Aquela conta o que as pessoas fizeram; esta,
- * o que o sistema viveu — exceção não tratada, acesso negado, requisição lenta. Cada
- * linha traz o id da requisição, o mesmo do cabeçalho X-Request-Id da resposta, para
- * ligar um relato ("deu erro às 14h") ao registro certo.
+ * o que o sistema viveu — exceção não tratada, acesso negado, requisição lenta, e também
+ * eventos pedagógicos detalhados (aluno iniciou/errou/concluiu desafio). Cada linha traz
+ * o id da requisição, o mesmo do cabeçalho X-Request-Id da resposta, para ligar um relato
+ * ("deu erro às 14h") ao registro certo.
  */
 @Component({
   selector: 'app-logs-sistema',
@@ -43,12 +56,14 @@ export class LogsSistema {
 
   readonly busca = signal('');
   readonly nivel = signal<'' | NivelLog>('');
+  readonly categoria = signal<'' | CategoriaLog>('');
   readonly periodo = signal(1);
 
   /** Ids com o stack trace aberto. */
   readonly abertos = signal<ReadonlySet<number>>(new Set());
 
   readonly nivelOpcoes: NivelLog[] = ['ERROR', 'WARN', 'INFO'];
+  readonly categoriaOpcoes: CategoriaLog[] = ['SISTEMA', 'DESAFIO', 'ACESSO', 'CONTEUDO'];
   readonly periodoOpcoes: ReadonlyArray<{ dias: number; label: string }> = [
     { dias: 1, label: 'Últimas 24 horas' },
     { dias: 7, label: 'Últimos 7 dias' },
@@ -112,6 +127,7 @@ export class LogsSistema {
     this.admin
       .logsSistema({
         nivel: this.nivel() || undefined,
+        categoria: this.categoria() || undefined,
         busca: this.busca().trim() || undefined,
         periodo: this.periodo() || undefined,
         page: this.pagina(),
@@ -156,6 +172,7 @@ export class LogsSistema {
   filtrarPor(p: ProblemaDTO): void {
     this.busca.set(p.caminho ?? p.mensagem);
     this.nivel.set(p.nivel);
+    this.categoria.set('');
     this.periodo.set(1);
     this.aplicarFiltro();
   }
@@ -204,7 +221,15 @@ export class LogsSistema {
   }
 
   nivelClasse(n: NivelLog): string {
-    return NIVEL_CLASSE[n] ?? 'status-ok';
+    return NIVEL_CLASSE[n] ?? 'chip-info';
+  }
+
+  categoriaLabel(c: CategoriaLog): string {
+    return CATEGORIA_LABEL[c] ?? c;
+  }
+
+  categoriaClasse(c: CategoriaLog): string {
+    return CATEGORIA_CLASSE[c] ?? 'chip-sistema';
   }
 
   /**
