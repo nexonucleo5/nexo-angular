@@ -131,10 +131,28 @@ public class LogAplicacaoAppender extends AppenderBase<ILoggingEvent> {
         log.setMetodo(truncar(mdc.get(RequisicaoLogFilter.MDC_METODO), 10));
         log.setCaminho(truncar(mdc.get(RequisicaoLogFilter.MDC_CAMINHO), 300));
         log.setUsuario(truncar(mdc.get(RequisicaoLogFilter.MDC_USUARIO), 255));
-        // Campos pedagógicos opcionais — presentes apenas em logs de desafio/conteúdo
+        lerMdcPedagogico(mdc, log);
+        log.setCriadoEm(Instant.ofEpochMilli(e.getTimeStamp()));
+        return log;
+    }
+
+    /**
+     * Lê os campos MDC pedagógicos (categoria, alunoId, desafioId, detalhes) e os aplica
+     * ao log. Extraído de {@link #converter} para reduzir a complexidade ciclomática.
+     * Categoria inválida no MDC é contabilizada em {@link #descartados} em vez de usar
+     * {@code System.err} — que dentro de um appender poderia gerar loop de log.
+     */
+    private void lerMdcPedagogico(Map<String, String> mdc, LogAplicacao log) {
         String cat = mdc.get(RequisicaoLogFilter.MDC_CATEGORIA);
         if (cat != null) {
-            try { log.setCategoria(LogAplicacao.Categoria.valueOf(cat)); } catch (IllegalArgumentException ignored) {}
+            try {
+                log.setCategoria(LogAplicacao.Categoria.valueOf(cat));
+            } catch (IllegalArgumentException ex) {
+                // Valor desconhecido: registra como SISTEMA e conta como descartado parcial
+                // para aparecer no resumo sem gerar novo evento de log (evita loop).
+                log.setCategoria(LogAplicacao.Categoria.SISTEMA);
+                descartados.incrementAndGet();
+            }
         } else {
             log.setCategoria(LogAplicacao.Categoria.SISTEMA);
         }
@@ -143,8 +161,6 @@ public class LogAplicacaoAppender extends AppenderBase<ILoggingEvent> {
         String desafioId = mdc.get(RequisicaoLogFilter.MDC_DESAFIO_ID);
         if (desafioId != null && desafioId.matches("\\d{1,18}")) log.setDesafioId(Long.parseLong(desafioId));
         log.setDetalhes(truncar(mdc.get(RequisicaoLogFilter.MDC_DETALHES), 500));
-        log.setCriadoEm(Instant.ofEpochMilli(e.getTimeStamp()));
-        return log;
     }
 
     private boolean dentroDaCota(LogAplicacao log) {

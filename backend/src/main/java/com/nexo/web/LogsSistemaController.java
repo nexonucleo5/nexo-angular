@@ -45,9 +45,10 @@ import java.util.Map;
 public class LogsSistemaController {
 
     private static final int TAMANHO_MAXIMO = 100;
-
-    /** Uma consulta por usuário a cada 10 minutos entra na auditoria (ver registrarConsulta). */
     private static final java.time.Duration JANELA_DE_CONSULTA = java.time.Duration.ofMinutes(10);
+
+    private static final org.slf4j.Logger logger =
+            org.slf4j.LoggerFactory.getLogger(LogsSistemaController.class);
 
     private final LogAplicacaoRepository logs;
     private final LogAplicacaoAppender appender;
@@ -107,7 +108,8 @@ public class LogsSistemaController {
         auditoria.registrarConsulta(operador.nome(), "Logs do sistema consultados",
                 clienteIp.de(http), JANELA_DE_CONSULTA);
 
-        String filtro = (busca == null || busca.isBlank()) ? null : "%" + busca.trim().toLowerCase() + "%";
+        String filtro = (busca == null || busca.isBlank()) ? null
+                : "%" + busca.trim().toLowerCase(java.util.Locale.ROOT) + "%";
         Instant desde = (periodo == null || periodo <= 0)
                 ? Instant.EPOCH
                 : Instant.now().minus(periodo, ChronoUnit.DAYS);
@@ -164,6 +166,7 @@ public class LogsSistemaController {
             jdbc.queryForObject("select 1", Integer.class);
         } catch (RuntimeException e) {
             bancoOk = false;
+            logger.warn("Verificação de saúde do banco falhou", e);
         }
         long bancoMs = (System.nanoTime() - inicio) / 1_000_000;
 
