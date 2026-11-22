@@ -9,6 +9,10 @@ import com.nexo.repository.AlunoRepository;
 import com.nexo.repository.DesafioAlunoRepository;
 import com.nexo.repository.DesafioRepository;
 import com.nexo.repository.QuizPerguntaRepository;
+import com.nexo.service.RequisicaoLogFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +56,8 @@ public class DesafioService {
     private final AlunoRepository alunos;
     private final QuizPerguntaRepository perguntas;
     private final com.nexo.repository.MateriaRepository materias;
+
+    private static final Logger log = LoggerFactory.getLogger(DesafioService.class);
 
     public DesafioService(DesafioRepository desafios, DesafioAlunoRepository progresso, AlunoRepository alunos,
                           QuizPerguntaRepository perguntas,
@@ -114,6 +120,8 @@ public class DesafioService {
             da.setProgresso(Math.max(da.getProgresso(), 10));
             progresso.save(da);
         }
+        logDesafio(aluno, d, "Desafio iniciado",
+                "status=" + da.getStatus() + " progresso=" + da.getProgresso() + "%");
         return paraDTO(d, da);
     }
 
@@ -128,6 +136,8 @@ public class DesafioService {
         progresso.save(da);
         if (!jaConcluido) {
             creditarXp(aluno, d.getXp());
+            logDesafio(aluno, d, "Desafio concluído",
+                    "xp_ganho=" + d.getXp() + " xp_total=" + aluno.getXpTotal());
         }
         return paraDTO(d, da);
     }
@@ -201,10 +211,19 @@ public class DesafioService {
                 xpGanho = d.getXp();
                 creditarXp(aluno, xpGanho);
             }
+            logDesafio(aluno, d, "Quiz concluído com sucesso",
+                    "acertos=" + acertos + "/" + lista.size()
+                    + " tentativa=" + da.getTentativas()
+                    + " xp_ganho=" + xpGanho
+                    + " xp_total=" + aluno.getXpTotal()
+                    + " nivel=" + d.getNivel());
         } else if (!jaConcluido) {
-            // Reprovado: segue em PROGRESSO, sem XP e sem placar gravado.
             da.setStatus("PROGRESSO");
             da.setProgresso(Math.max(da.getProgresso(), 50));
+            logDesafio(aluno, d, "Quiz respondido com erros",
+                    "acertos=" + acertos + "/" + lista.size()
+                    + " tentativa=" + da.getTentativas()
+                    + " nivel=" + d.getNivel());
         }
         progresso.save(da);
 
@@ -229,6 +248,27 @@ public class DesafioService {
         aluno.setXpTotal(aluno.getXpTotal() + xp);
         aluno.setXpSemana(aluno.getXpSemana() + xp);
         alunos.save(aluno);
+    }
+
+    /**
+     * Emite um log INFO de categoria DESAFIO com os campos MDC preenchidos.
+     * O appender lê esses campos e os persiste nos campos estruturados do {@link com.nexo.domain.LogAplicacao}.
+     */
+    private void logDesafio(Aluno aluno, Desafio desafio, String mensagem, String detalhes) {
+        MDC.put(RequisicaoLogFilter.MDC_CATEGORIA, "DESAFIO");
+        MDC.put(RequisicaoLogFilter.MDC_ALUNO_ID, String.valueOf(aluno.getId()));
+        MDC.put(RequisicaoLogFilter.MDC_DESAFIO_ID, String.valueOf(desafio.getId()));
+        MDC.put(RequisicaoLogFilter.MDC_DETALHES,
+                "desafio=\"" + desafio.getTitulo() + "\" materia=" + desafio.getMateria() + " " + detalhes);
+        try {
+            log.info("{} — aluno=\"{}\" desafio=\"{}\" ({})",
+                    mensagem, aluno.getNome(), desafio.getTitulo(), desafio.getNivel());
+        } finally {
+            MDC.remove(RequisicaoLogFilter.MDC_CATEGORIA);
+            MDC.remove(RequisicaoLogFilter.MDC_ALUNO_ID);
+            MDC.remove(RequisicaoLogFilter.MDC_DESAFIO_ID);
+            MDC.remove(RequisicaoLogFilter.MDC_DETALHES);
+        }
     }
 
     private static DesafioDTO paraDTO(Desafio d, DesafioAluno da) {
