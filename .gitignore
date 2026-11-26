@@ -55,6 +55,9 @@ backend/data/
 
 # Ignora todos os arquivos Markdown (documentação) em todo o repositório
 *.md
+# Exceção: os READMEs são parte da entrega (como subir o ambiente com Docker)
+!README.md
+!docker/README.md
 
 # Documentos de trabalho não entram no repo. Dentro de src/assets eles ainda
 # seriam copiados para o build e ficariam baixáveis pela URL do site.
@@ -65,3 +68,5 @@ backend/data/
 data/*.db
 data/*.lock.db
 data/*.mv.db
+# logs de execução
+*.log
