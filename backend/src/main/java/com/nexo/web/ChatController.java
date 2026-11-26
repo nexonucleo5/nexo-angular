@@ -112,6 +112,6 @@ public class ChatController {
     /** Ticket de uso único (30s) para o handshake do WebSocket — ver WsTicketService. */
     @GetMapping("/ws-ticket")
     public Map<String, String> wsTicket(@AuthenticationPrincipal UsuarioAutenticado principal) {
-        return Map.of("ticket", wsTickets.emitir(principal.id(), principal.nome()));
+        return Map.of("ticket", wsTickets.emitir(principal.id(), principal.nome(), principal.jti()));
     }
 }

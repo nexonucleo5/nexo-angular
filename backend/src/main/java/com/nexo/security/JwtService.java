@@ -22,6 +22,9 @@ public class JwtService {
     /** HMAC-SHA256 exige chave de pelo menos 256 bits — 32 caracteres ASCII. */
     private static final int TAMANHO_MINIMO_SEGREDO = 32;
 
+    /** Instante de emissão em milissegundos — o {@code iat} do JWT só chega aos segundos. */
+    public static final String CLAIM_EMITIDO_EM_MS = "iatMs";
+
     private final SecretKey key;
     private final Duration accessTokenTtl;
 
@@ -49,6 +52,11 @@ public class JwtService {
                 .claim("uid", usuario.getId())
                 .claim("role", usuario.getRole().name())
                 .claim("nome", usuario.getNome())
+                // O iat padrão tem precisão de segundos. Para a revogação por usuário isso
+                // é pouco: quem recebe uma senha provisória e entra no mesmo segundo da
+                // redefinição teria o token recusado. Este claim (assinado, não forjável)
+                // guarda o instante exato — ver AccessTokensRevogados#usuarioRevogado.
+                .claim(CLAIM_EMITIDO_EM_MS, agora.toEpochMilli())
                 .issuedAt(Date.from(agora))
                 .expiration(Date.from(agora.plus(accessTokenTtl)))
                 .signWith(key)

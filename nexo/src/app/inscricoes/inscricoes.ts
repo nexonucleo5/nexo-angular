@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
+import { CadastrosPendentesService } from '../api/cadastros-pendentes.service';
 import { InscricoesService } from '../api/inscricoes.service';
 import { TurmasService } from '../api/turmas.service';
-import { InscricaoDTO, TurmaDTO } from '../core/api.models';
+import { AlunoCriado, InscricaoDTO, PedidoCadastroDTO, TurmaDTO } from '../core/api.models';
 import { exportarCsv } from '../core/csv.util';
 
 interface InscricaoView {
@@ -40,6 +41,7 @@ interface InscricaoView {
 export class Inscricoes {
   private readonly api = inject(InscricoesService);
   private readonly turmasApi = inject(TurmasService);
+  private readonly pendentesApi = inject(CadastrosPendentesService);
   private readonly route = inject(ActivatedRoute);
 
   /** Turmas para o seletor de transferência — carregadas uma vez, junto da lista. */
@@ -81,7 +83,70 @@ export class Inscricoes {
   readonly ativas = computed(() => this.inscricoes().filter((i) => i.ativo).length);
   readonly inativas = computed(() => this.inscricoes().filter((i) => !i.ativo).length);
 
+  // ── Cadastros aguardando aprovação ────────────────────────────────────────
+  // Com "Exigir aprovação manual de cadastro de aluno" ligada, o cadastro só deixa um
+  // pedido aqui; a conta (e a senha provisória) nasce quando ele é aprovado.
+
+  readonly pedidos = signal<PedidoCadastroDTO[]>([]);
+  readonly pedidoEmCurso = signal<number | null>(null);
+  readonly pedidoErro = signal<string | null>(null);
+  /** Acesso recém-criado por uma aprovação: a senha só aparece desta vez. */
+  readonly acessoAprovado = signal<AlunoCriado | null>(null);
+  readonly acessoCopiado = signal(false);
+
+  private carregarPedidos(): void {
+    this.pendentesApi.listar().subscribe({
+      next: (lista) => this.pedidos.set(lista),
+      // Sem a fila a tela segue útil — só a seção de aprovação não aparece.
+      error: () => this.pedidos.set([]),
+    });
+  }
+
+  aprovarPedido(p: PedidoCadastroDTO): void {
+    this.decidirPedido(p, this.pendentesApi.aprovar(p.id), (criado) => {
+      this.acessoAprovado.set(criado);
+      this.acessoCopiado.set(false);
+      this.carregar(); // o aluno aprovado passa a existir na lista de inscrições
+    });
+  }
+
+  rejeitarPedido(p: PedidoCadastroDTO): void {
+    this.decidirPedido(p, this.pendentesApi.rejeitar(p.id), () => this.acessoAprovado.set(null));
+  }
+
+  private decidirPedido<T>(p: PedidoCadastroDTO, chamada: Observable<T>, aoConcluir: (r: T) => void): void {
+    this.pedidoEmCurso.set(p.id);
+    this.pedidoErro.set(null);
+    chamada.subscribe({
+      next: (resposta) => {
+        this.pedidos.update((lista) => lista.filter((x) => x.id !== p.id));
+        this.pedidoEmCurso.set(null);
+        aoConcluir(resposta);
+      },
+      error: (erro) => {
+        this.pedidoEmCurso.set(null);
+        this.pedidoErro.set(erro?.error?.message ?? 'Não foi possível decidir o pedido.');
+        // 409: outra pessoa já decidiu — a linha some ao recarregar a fila.
+        if (erro?.status === 409) this.carregarPedidos();
+      },
+    });
+  }
+
+  copiarAcessoAprovado(): void {
+    const a = this.acessoAprovado();
+    if (!a) return;
+    navigator.clipboard
+      .writeText(`Login: ${a.emailInstitucional}
+Senha provisória: ${a.senhaProvisoria}`)
+      .then(() => this.acessoCopiado.set(true));
+  }
+
+  fecharAcessoAprovado(): void {
+    this.acessoAprovado.set(null);
+  }
+
   constructor() {
+    this.carregarPedidos();
     this.pendenteTurmaId = Number(this.route.snapshot.queryParamMap.get('turma')) || null;
 
     this.carregar();

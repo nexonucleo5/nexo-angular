@@ -36,7 +36,12 @@ public class ChatService {
     public static final int MAX_ANEXOS = 3;
     /** Tamanho máximo de cada anexo. O teto do multipart no application.yml acompanha este valor. */
     public static final long TAMANHO_MAXIMO_ANEXO = 5L * 1024 * 1024; // 5 MB
-    private static final int LIMITE_TEXTO = 2000;
+    /**
+     * Tamanho máximo do texto de uma mensagem — o mesmo de {@code ChatMensagem.texto}
+     * ({@code @Column(length = 2000)}). Sem o teto aqui, uma mensagem maior que a coluna
+     * estourava no banco, a exceção saía do handler do WebSocket e a conexão do usuário caía.
+     */
+    public static final int TAMANHO_MAXIMO_MENSAGEM = 2000;
 
     public record ContatoDTO(Long id, String nome, String papel, String foto) {}
 
@@ -117,7 +122,7 @@ public class ChatService {
     @Transactional(readOnly = true)
     public List<ContatoDTO> contatos(Long usuarioId) {
         Role meuPapel = usuarios.findRoleById(usuarioId).orElse(null);
-        if (meuPapel == null) return List.of();
+        if (meuPapel == null || !INTERLOCUTORES.containsKey(meuPapel)) return List.of();
         List<Usuario> lista = usuarios.findByRoleInOrderByNome(INTERLOCUTORES.get(meuPapel)).stream()
                 .filter(u -> !u.getId().equals(usuarioId))
                 .toList();
@@ -144,7 +149,8 @@ public class ChatService {
         Role de = usuarios.findRoleById(remetenteId).orElse(null);
         Role para = usuarios.findRoleById(destinatarioId).orElse(null);
         if (de == null || para == null) return false;
-        return INTERLOCUTORES.get(de).contains(para);
+        // getOrDefault: papéis fora da tabela (ADMIN) não conversam — e não podem virar NPE.
+        return INTERLOCUTORES.getOrDefault(de, List.of()).contains(para);
     }
 
     /**
@@ -155,6 +161,13 @@ public class ChatService {
      */
     @Transactional(readOnly = true)
     public List<ChatMensagemDTO> historico(Long usuarioId, Long outroId) {
+        // A mesma regra do envio vale para a leitura: sem ela, GET /api/chat/{id} devolvia
+        // a conversa com qualquer id informado — inclusive a de pares que o WebSocket
+        // jamais deixaria trocar mensagem. Id inexistente cai aqui também (403, e não 404),
+        // para a resposta não servir de oráculo de quais usuários existem.
+        if (!podeConversar(usuarioId, outroId)) {
+            throw ApiException.forbidden("Você não pode acessar esta conversa.");
+        }
         List<ChatMensagem> recentes =
                 mensagens.conversaRecente(usuarioId, outroId, PageRequest.of(0, LIMITE_HISTORICO));
 
@@ -180,7 +193,7 @@ public class ChatService {
     @Transactional
     public ChatMensagemDTO salvar(Long remetenteId, String remetenteNome, Long destinatarioId, String texto) {
         String limpo = texto.trim();
-        if (limpo.length() > LIMITE_TEXTO) limpo = limpo.substring(0, LIMITE_TEXTO);
+        if (limpo.length() > TAMANHO_MAXIMO_MENSAGEM) limpo = limpo.substring(0, TAMANHO_MAXIMO_MENSAGEM);
         ChatMensagem m = new ChatMensagem(remetenteId, remetenteNome, destinatarioId, limpo, Instant.now());
         return ChatMensagemDTO.of(mensagens.save(m), List.of());
     }
@@ -205,8 +218,8 @@ public class ChatService {
         if (validos.size() > MAX_ANEXOS) {
             throw ApiException.badRequest("Envie no máximo " + MAX_ANEXOS + " arquivos por mensagem.");
         }
-        if (limpo.length() > LIMITE_TEXTO) {
-            throw ApiException.badRequest("A mensagem deve ter no máximo " + LIMITE_TEXTO + " caracteres.");
+        if (limpo.length() > TAMANHO_MAXIMO_MENSAGEM) {
+            throw ApiException.badRequest("A mensagem deve ter no máximo " + TAMANHO_MAXIMO_MENSAGEM + " caracteres.");
         }
         for (MultipartFile a : validos) {
             if (a.getSize() > TAMANHO_MAXIMO_ANEXO) {

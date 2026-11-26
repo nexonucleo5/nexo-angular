@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions, ChartType } from 'chart.js';
 import { forkJoin } from 'rxjs';
+import { CadastrosPendentesService } from '../api/cadastros-pendentes.service';
 import { GestaoDiretorService } from '../api/gestao-diretor.service';
+import { ConfiguracaoDiretorService } from '../configuracao-diretor/configuracao-diretor.service';
 import { AlunoRiscoDTO, DesempenhoDTO, ProfessorMonitorDTO } from '../core/api.models';
 import { resolverFoto } from '../core/avatar';
 
@@ -41,6 +43,8 @@ interface AlertaView {
 })
 export class DashboardDiretor {
   private readonly gestao = inject(GestaoDiretorService);
+  private readonly cadastrosPendentes = inject(CadastrosPendentesService);
+  private readonly configuracao = inject(ConfiguracaoDiretorService);
 
   readonly carregando = signal(true);
   readonly erro = signal(false);
@@ -48,6 +52,8 @@ export class DashboardDiretor {
   private readonly desempenho = signal<DesempenhoDTO | null>(null);
   private readonly risco = signal<AlunoRiscoDTO[]>([]);
   private readonly docentes = signal<ProfessorMonitorDTO[]>([]);
+  /** Cadastros de aluno aguardando aprovação (Inscrições). */
+  private readonly cadastrosAguardando = signal(0);
 
   readonly metrics = computed<MetricView[]>(() => {
     const d = this.desempenho();
@@ -84,6 +90,16 @@ export class DashboardDiretor {
     const baixaFreq = lista.filter((a) => a.percentualFaltas > 40).length;
     const pendentes = this.docentes().reduce((s, p) => s + p.correcoesPendentes, 0);
     const alertas: AlertaView[] = [];
+    // "Novos cadastros pendentes" em Configurações → Notificações liga/desliga este aviso.
+    const aguardando = this.cadastrosAguardando();
+    if (aguardando > 0 && this.configuracao.settings().notificacoes.novosCadastrosPendentes) {
+      alertas.push({
+        titulo: 'Cadastros Pendentes',
+        desc: `${aguardando} cadastro(s) de aluno aguardando aprovação em Inscrições`,
+        tempo: 'Agora',
+        nivel: 'media',
+      });
+    }
     if (alto > 0) {
       alertas.push({
         titulo: 'Risco de Evasão',
@@ -118,6 +134,11 @@ export class DashboardDiretor {
   carregar(): void {
     this.carregando.set(true);
     this.erro.set(false);
+    // Fora do forkJoin: o contador é um aviso a mais, e a falha dele não derruba o painel.
+    this.cadastrosPendentes.contagem().subscribe({
+      next: (c) => this.cadastrosAguardando.set(c.pendentes),
+      error: () => this.cadastrosAguardando.set(0),
+    });
     forkJoin({
       desempenho: this.gestao.desempenho(),
       risco: this.gestao.riscoEvasao(),

@@ -55,7 +55,9 @@ export class TrocarSenha {
     senhaAtual: ['', [Validators.required]],
     novaSenha: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(this.maxSenha)]],
     confirmar: ['', [Validators.required]],
+    emailRecuperacao: ['', [Validators.email, Validators.maxLength(254)]],
   });
+  readonly erroEmail = signal('');
 
   constructor() {
     // O servidor é a única fonte das regras (lista de comuns, login, nome): a tela só
@@ -103,7 +105,7 @@ export class TrocarSenha {
       return;
     }
 
-    const { senhaAtual, novaSenha, confirmar } = this.form.value;
+    const { senhaAtual, novaSenha, confirmar, emailRecuperacao } = this.form.value;
     if (novaSenha !== confirmar) {
       this.erroConfirmar.set('A confirmação não corresponde à nova senha.');
       return;
@@ -112,19 +114,33 @@ export class TrocarSenha {
     this.enviando.set(true);
     this.usuarios.trocarSenha({ senhaAtual: senhaAtual!, novaSenha: novaSenha! }).subscribe({
       next: () => {
-        this.enviando.set(false);
-        const destino = this.obrigatoria() ? '/dashboards' : '/configuracoes';
-        // O backend já desligou a flag; a sessão local acompanha para o guard liberar o resto.
-        this.auth.atualizarUsuarioLocal({ precisaTrocarSenha: false });
-        this.mensagemSucesso.set('✅ Senha alterada com sucesso! As outras sessões foram encerradas.');
-        this.form.reset();
-        setTimeout(() => this.router.navigate([destino]), 1500);
+        const email = (emailRecuperacao ?? '').trim();
+        if (!email) return this.concluir();
+        // A senha acabou de mudar: é a nova que autoriza gravar o e-mail.
+        this.usuarios.definirEmailRecuperacao({ senhaAtual: novaSenha!, email }).subscribe({
+          next: () => this.concluir(),
+          error: (erro: ApiErro) => {
+            this.enviando.set(false);
+            this.auth.atualizarUsuarioLocal({ precisaTrocarSenha: false });
+            this.erroEmail.set(erro?.fields?.['emailRecuperacao'] ?? 'A senha foi alterada, mas o e-mail não pôde ser salvo. Confira o endereço e tente novamente.');
+          },
+        });
       },
       error: (erro: ApiErro) => {
         this.enviando.set(false);
         this.aplicarErro(erro);
       },
     });
+  }
+
+  private concluir(): void {
+    this.enviando.set(false);
+    const destino = this.obrigatoria() ? '/dashboards' : '/configuracoes';
+    // O backend já desligou a flag; a sessão local acompanha para o guard liberar o resto.
+    this.auth.atualizarUsuarioLocal({ precisaTrocarSenha: false });
+    this.mensagemSucesso.set('✅ Senha alterada com sucesso! As outras sessões foram encerradas.');
+    this.form.reset();
+    setTimeout(() => this.router.navigate([destino]), 1500);
   }
 
   /**
@@ -145,6 +161,7 @@ export class TrocarSenha {
 
   private limparErros(): void {
     this.mensagemErro.set('');
+    this.erroEmail.set('');
     this.mensagemSucesso.set('');
     this.erroSenhaAtual.set('');
     this.erroNovaSenha.set('');

@@ -2,6 +2,7 @@ package com.nexo.web;
 
 import com.nexo.api.ApiException;
 import com.nexo.api.dto.AuthDtos.AtualizarPerfilRequest;
+import com.nexo.api.dto.AuthDtos.EmailRecuperacaoRequest;
 import com.nexo.api.dto.AuthDtos.TrocaSenhaRequest;
 import com.nexo.api.dto.AuthDtos.UsuarioDTO;
 import com.nexo.api.dto.AuthDtos.ValidacaoSenhaResponse;
@@ -12,12 +13,15 @@ import com.nexo.domain.Usuario;
 import com.nexo.repository.AlunoRepository;
 import com.nexo.repository.FotoPerfilRepository;
 import com.nexo.repository.ProfessorRepository;
+import com.nexo.repository.RedefinicaoSenhaRepository;
 import com.nexo.repository.UsuarioRepository;
+import com.nexo.security.JanelaDeTentativas;
 import com.nexo.security.PoliticaSenha;
 import com.nexo.security.RefreshTokenCookie;
 import com.nexo.security.UsuarioAutenticado;
 import com.nexo.service.AuditoriaService;
 import com.nexo.service.AuthService;
+import com.nexo.service.RecuperacaoSenhaService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
@@ -61,6 +66,9 @@ public class UsuariosController {
         return null;
     }
 
+    /** Erros de "senha atual" por usuário na troca de senha — ver {@link #trocarSenha}. */
+    private final JanelaDeTentativas senhaAtualIncorreta = new JanelaDeTentativas(5, Duration.ofMinutes(15));
+
     private final UsuarioRepository usuarios;
     private final FotoPerfilRepository fotos;
     private final AlunoRepository alunos;
@@ -69,10 +77,12 @@ public class UsuariosController {
     private final AuditoriaService auditoria;
     private final PoliticaSenha politicaSenha;
     private final AuthService authService;
+    private final RedefinicaoSenhaRepository redefinicoes;
 
     public UsuariosController(UsuarioRepository usuarios, FotoPerfilRepository fotos, AlunoRepository alunos,
                               ProfessorRepository professores, PasswordEncoder passwordEncoder,
-                              AuditoriaService auditoria, PoliticaSenha politicaSenha, AuthService authService) {
+                              AuditoriaService auditoria, PoliticaSenha politicaSenha, AuthService authService,
+                              RedefinicaoSenhaRepository redefinicoes) {
         this.usuarios = usuarios;
         this.fotos = fotos;
         this.alunos = alunos;
@@ -81,6 +91,7 @@ public class UsuariosController {
         this.auditoria = auditoria;
         this.politicaSenha = politicaSenha;
         this.authService = authService;
+        this.redefinicoes = redefinicoes;
     }
 
     @GetMapping("/me")
@@ -92,7 +103,15 @@ public class UsuariosController {
     public UsuarioDTO atualizarPerfil(@AuthenticationPrincipal UsuarioAutenticado principal,
                                       @RequestBody AtualizarPerfilRequest request) {
         Usuario usuario = carregar(principal);
-        if (request.nome() != null && !request.nome().isBlank()) usuario.setNome(request.nome().trim());
+        if (request.nome() != null && !request.nome().isBlank()) {
+            String nome = request.nome().trim();
+            // A coluna é varchar(255): acima disso o banco recusava e o cliente via 500.
+            if (nome.length() > 120) {
+                throw ApiException.validation("Dados inválidos.",
+                        Map.of("nome", "O nome deve ter no máximo 120 caracteres."));
+            }
+            usuario.setNome(nome);
+        }
         // A foto não é mais aceita aqui: ela entra por POST /me/foto, como arquivo.
         // Antes, o cliente mandava um caminho arbitrário e o servidor apenas guardava.
         usuarios.save(usuario);
@@ -204,14 +223,26 @@ public class UsuariosController {
                             @Valid @RequestBody TrocaSenhaRequest request) {
         Usuario usuario = carregar(principal);
 
+        // Este endpoint confere a senha atual — logo é um oráculo de senha para quem tem
+        // um access token roubado (15 min) e nenhum outro limite o contava: o do login só
+        // vigora em /api/auth/login. Cinco erros e a troca trava para esta conta.
+        String chaveLimite = String.valueOf(usuario.getId());
+        long faltam = senhaAtualIncorreta.segundosDeBloqueio(chaveLimite);
+        if (faltam > 0) {
+            throw ApiException.tooManyRequests("TROCA_SENHA_BLOQUEADA",
+                    "Muitas tentativas com a senha atual incorreta. Tente novamente em alguns minutos.", faltam);
+        }
+
         // Código e campo próprios: sem eles a tela não distingue "errou a senha atual" de
         // "a nova senha foi recusada" — os dois eram 400 — e acusava sempre o primeiro
         // campo, mandando o usuário corrigir algo que estava certo.
         if (!passwordEncoder.matches(request.senhaAtual(), usuario.getSenhaHash())) {
+            senhaAtualIncorreta.registrarFalha(chaveLimite);
             final String motivo = "A senha atual não confere. Digite a senha com que você entrou no sistema.";
             throw new ApiException(HttpStatus.BAD_REQUEST, "SENHA_ATUAL_INCORRETA", motivo,
                     Map.of("senhaAtual", motivo));
         }
+        senhaAtualIncorreta.limpar(chaveLimite);
         if (passwordEncoder.matches(request.novaSenha(), usuario.getSenhaHash())) {
             final String motivo = "A nova senha é igual à atual. Escolha uma diferente.";
             throw new ApiException(HttpStatus.BAD_REQUEST, "SENHA_IGUAL_A_ATUAL", motivo,
@@ -227,6 +258,44 @@ public class UsuariosController {
         int encerradas = authService.encerrarOutrasSessoes(usuario.getId(), refreshToken);
         String detalhe = encerradas > 0 ? encerradas + " outra(s) sessão(ões) encerrada(s)" : null;
         auditoria.registrar(usuario.getNome(), EventoAuditoria.Tipo.ALTERACAO, "Senha alterada", detalhe, null);
+    }
+
+    /**
+     * Define (ou remove, com e-mail vazio) o e-mail para onde vai o link de "esqueci minha
+     * senha". Exige a senha atual: sem ela, uma sessão aberta e esquecida bastaria para
+     * apontar a recuperação para a caixa de outra pessoa e tomar a conta de forma permanente.
+     */
+    @PutMapping("/me/email-recuperacao")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Transactional
+    public void definirEmailRecuperacao(@AuthenticationPrincipal UsuarioAutenticado principal,
+                                        @Valid @RequestBody EmailRecuperacaoRequest request) {
+        Usuario usuario = carregar(principal);
+        // Mesmo oráculo de senha da troca de senha, e pior: quem acerta a senha com um token
+        // roubado aponta a recuperação para a própria caixa e fica com a conta para sempre.
+        // Por isso o contador é o mesmo — errar aqui ou lá conta para o mesmo limite.
+        String chaveLimite = String.valueOf(usuario.getId());
+        long faltam = senhaAtualIncorreta.segundosDeBloqueio(chaveLimite);
+        if (faltam > 0) {
+            throw ApiException.tooManyRequests("TROCA_SENHA_BLOQUEADA",
+                    "Muitas tentativas com a senha atual incorreta. Tente novamente em alguns minutos.", faltam);
+        }
+        if (!passwordEncoder.matches(request.senhaAtual(), usuario.getSenhaHash())) {
+            senhaAtualIncorreta.registrarFalha(chaveLimite);
+            final String motivo = "A senha atual não confere. Digite a senha com que você entrou no sistema.";
+            throw new ApiException(HttpStatus.BAD_REQUEST, "SENHA_ATUAL_INCORRETA", motivo,
+                    Map.of("senhaAtual", motivo));
+        }
+        senhaAtualIncorreta.limpar(chaveLimite);
+        // Links já enviados ao endereço antigo deixam de valer: quem troca o e-mail porque a
+        // caixa antiga foi comprometida não pode deixar um link aberto lá por mais 30 minutos.
+        redefinicoes.invalidarPendentes(usuario.getId());
+        usuario.setEmailRecuperacao(RecuperacaoSenhaService.normalizarEmail(request.email()));
+        usuarios.save(usuario);
+        // O endereço fica fora da trilha: é dado pessoal e a ação já diz o que importa.
+        auditoria.registrar(usuario.getNome(), EventoAuditoria.Tipo.ALTERACAO,
+                usuario.getEmailRecuperacao() == null ? "E-mail de recuperação removido"
+                                                      : "E-mail de recuperação definido", null, null);
     }
 
     /**

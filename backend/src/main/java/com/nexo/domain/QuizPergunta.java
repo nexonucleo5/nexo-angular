@@ -10,7 +10,9 @@ import lombok.Setter;
 
 /** Pergunta de múltipla escolha do quiz de um desafio. */
 @Entity
-@Table(name = "quiz_perguntas")
+@Table(name = "quiz_perguntas",
+       // O quiz carrega as perguntas de um desafio por desafio_id.
+       indexes = @Index(name = "idx_quiz_perguntas_desafio", columnList = "desafio_id"))
 @Getter
 @Setter
 public class QuizPergunta {

@@ -19,6 +19,8 @@ export interface ApiErro {
   error: string;
   message: string;
   fields?: Record<string, string>;
+  /** Segundos de espera pedidos pelo servidor (cabeçalho Retry-After do 429), quando houver. */
+  retryAfterSegundos?: number;
 }
 
 /**
@@ -65,6 +67,31 @@ export interface AlunoCriado {
 }
 
 /**
+ * Resposta do cadastro quando "Exigir aprovação manual de cadastro de aluno" está ligada:
+ * a conta ainda não existe, então não há login nem senha — só o pedido na fila.
+ */
+export interface CadastroSolicitado {
+  id: number;
+  nome: string;
+  turmaId: number;
+  turma: string;
+  pendente: true;
+}
+
+/** GET /api/cadastros-pendentes — pedido de cadastro aguardando decisão. */
+export interface PedidoCadastroDTO {
+  id: number;
+  nome: string;
+  turmaId: number;
+  turma: string | null;
+  solicitadoPor: string;
+  situacao: 'PENDENTE' | 'APROVADO' | 'REJEITADO';
+  criadoEm: string;
+  /** O pedido é de quem está olhando: quem pede não aprova (o servidor também recusa). */
+  proprio: boolean;
+}
+
+/**
  * O cadastro pede duas coisas, e é assim de propósito: nascimento, sexo e
  * endereço saíram porque este sistema não guarda dado pessoal de aluno — a ficha
  * dele vive no sistema de aula da escola.
@@ -73,6 +100,8 @@ export interface CadastroAlunoRequest {
   nome: string;
   /** Turma cujo conteúdo o aluno vai estudar. */
   turmaId: number | null;
+  /** Opcional: para onde vai o link de "esqueci minha senha". Sem ele a conta não se recupera sozinha. */
+  emailRecuperacao?: string;
 }
 
 // ── Matérias / Professores ───────────────────────────────────────────────────
@@ -102,6 +131,7 @@ export interface CadastroProfessorRequest {
   dataNascimento: string;
   sexo: string;
   materiaIds: number[];
+  emailRecuperacao?: string;
 }
 
 export interface ProfessorCriado {
@@ -190,11 +220,13 @@ export interface EventoAuditoriaDTO {
 }
 
 export type NivelLog = 'INFO' | 'WARN' | 'ERROR';
+export type CategoriaLog = 'SISTEMA' | 'DESAFIO' | 'ACESSO' | 'CONTEUDO';
 
 /** GET /api/auditoria/sistema/logs — log da aplicação (o que o sistema viveu, não o que as pessoas fizeram). */
 export interface LogAplicacaoDTO {
   id: number;
   nivel: NivelLog;
+  categoria: CategoriaLog;
   origem: string;
   mensagem: string;
   excecao: string | null;
@@ -204,6 +236,12 @@ export interface LogAplicacaoDTO {
   usuario: string | null;
   /** Só nos avisos de lentidão. */
   duracaoMs: number | null;
+  /** ID do aluno envolvido — presente em logs de categoria DESAFIO. */
+  alunoId: number | null;
+  /** ID do desafio envolvido — presente em logs de categoria DESAFIO. */
+  desafioId: number | null;
+  /** Detalhes extras estruturados (ex.: "acertos=3/5 tentativa=2 xp_ganho=50"). */
+  detalhes: string | null;
   criadoEm: string;
 }
 

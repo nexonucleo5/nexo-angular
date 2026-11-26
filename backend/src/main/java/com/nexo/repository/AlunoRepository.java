@@ -21,6 +21,10 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     @Query("select a from Aluno a left join fetch a.turma order by a.id")
     List<Aluno> findAllComTurma();
 
+    /** Alunos com a conta já carregada — para varrer a escola sem uma consulta lazy por aluno. */
+    @Query("select a from Aluno a join fetch a.usuario")
+    List<Aluno> findAllComUsuario();
+
     /** Alunos de várias turmas de uma vez — evita uma query por turma dentro de laços. */
     @Query("select a from Aluno a left join fetch a.turma t where t.id in :turmaIds order by a.nome")
     List<Aluno> findByTurmaIdInComTurma(Collection<Long> turmaIds);

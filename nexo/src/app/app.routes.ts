@@ -19,6 +19,20 @@ export const routes: Routes = [
     loadComponent: () => import('./login/login').then((m) => m.Login),
   },
 
+  {
+    // Mesmo componente do login: reaproveita o visual e evita duplicar o SCSS (budget de 4KB).
+    path: 'esqueci-senha',
+    canActivate: [visitanteGuard],
+    data: { modo: 'esqueci' },
+    loadComponent: () => import('./login/login').then((m) => m.Login),
+  },
+  {
+    path: 'redefinir-senha',
+    canActivate: [visitanteGuard],
+    data: { modo: 'redefinir' },
+    loadComponent: () => import('./login/login').then((m) => m.Login),
+  },
+
   // ── Compartilhadas (todos os roles) ─────────────────────────────────────────
   {
     path: 'perfil',

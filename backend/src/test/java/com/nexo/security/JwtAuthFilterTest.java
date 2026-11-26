@@ -36,7 +36,9 @@ class JwtAuthFilterTest {
     private static final String SEGREDO = "segredo-de-teste-com-mais-de-32-caracteres-abcdef";
 
     private final JwtService jwtService = new JwtService(SEGREDO, 15);
-    private final AccessTokensRevogados revogados = new AccessTokensRevogados(15);
+    private final AccessTokensRevogados revogados = new AccessTokensRevogados(
+            15, mock(com.nexo.repository.AccessTokenRevogadoRepository.class),
+            mock(org.springframework.context.ApplicationEventPublisher.class));
     private final JwtAuthFilter filtro = new JwtAuthFilter(jwtService, revogados);
 
     private MockHttpServletRequest request;
@@ -182,5 +184,75 @@ class JwtAuthFilterTest {
         comBearer(tokenAssinado("ana", 1L, "SUPERADMIN"));
 
         assertThat(executar()).isNull();
+    }
+
+    // ── Revogação por usuário ────────────────────────────────────────────────
+
+    private static String tokenEmitidoEm(Instant emitidoEm, long uid) {
+        SecretKey key = Keys.hmacShaKeyFor(SEGREDO.getBytes(StandardCharsets.UTF_8));
+        JwtBuilder builder = Jwts.builder()
+                .id(UUID.randomUUID().toString())
+                .subject("ana")
+                .issuedAt(Date.from(emitidoEm))
+                .expiration(Date.from(emitidoEm.plus(15, ChronoUnit.MINUTES)));
+        builder.claim("uid", uid);
+        builder.claim("role", "ALUNO");
+        return builder.signWith(key).compact();
+    }
+
+    @Test
+    void revogarUsuarioDerrubaOTokenEmitidoAntes() throws Exception {
+        comBearer(tokenEmitidoEm(Instant.now().minusSeconds(30), 5L));
+        revogados.revogarUsuario(5L);
+
+        assertThat(executar()).isNull();
+    }
+
+    @Test
+    void revogarUsuarioNaoAtingeTokenEmitidoDepois() throws Exception {
+        // Login novo / conta reativada depois da revogação precisa funcionar.
+        revogados.revogarUsuario(5L);
+        comBearer(tokenEmitidoEm(Instant.now().plusSeconds(5), 5L));
+
+        assertThat(executar()).isNotNull();
+    }
+
+    @Test
+    void revogarUsuarioNaoAtingeOutroUsuario() throws Exception {
+        revogados.revogarUsuario(5L);
+        comBearer(tokenEmitidoEm(Instant.now().minusSeconds(30), 6L));
+
+        assertThat(executar()).isNotNull();
+    }
+
+    @Test
+    void tokenEmitidoNoMesmoSegundoDaRevogacaoEhRecusado() {
+        // O iat tem precisão de segundos: na dúvida, recusa — fail-safe.
+        revogados.revogarUsuario(5L);
+
+        assertThat(revogados.usuarioRevogado(5L, Instant.now().truncatedTo(ChronoUnit.SECONDS))).isTrue();
+    }
+
+    @Test
+    void loginNoMesmoSegundoDaRevogacaoVale() throws Exception {
+        // Caso real: o admin redefine a senha e o usuário entra em seguida, no mesmo segundo.
+        // O claim em milissegundos separa os dois — o iat de segundos não separaria.
+        revogados.revogarUsuario(7L);
+        Thread.sleep(5);
+        Usuario u = new Usuario();
+        u.setId(7L);
+        u.setLogin("ana");
+        u.setNome("Ana");
+        u.setRole(Role.ALUNO);
+        comBearer(jwtService.gerarAccessToken(u));
+
+        assertThat(executar()).isNotNull();
+    }
+
+    @Test
+    void tokenSemIatNaoProvaSerPosteriorERecusado() {
+        revogados.revogarUsuario(5L);
+
+        assertThat(revogados.usuarioRevogado(5L, null)).isTrue();
     }
 }

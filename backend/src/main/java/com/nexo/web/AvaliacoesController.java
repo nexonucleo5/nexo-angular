@@ -10,6 +10,8 @@ import com.nexo.repository.ProfessorRepository;
 import com.nexo.repository.QuestaoRepository;
 import com.nexo.repository.TurmaRepository;
 import com.nexo.security.UsuarioAutenticado;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -164,9 +166,27 @@ public class AvaliacoesController {
         }
     }
 
+    /** Teto de itens por chamada de {@code GET /api/questoes} — ver {@link #listarQuestoes}. */
+    private static final int MAX_QUESTOES_POR_PAGINA = 200;
+
+    /**
+     * O banco de questões cresce com os anos, e a listagem carregava tudo em memória a cada
+     * chamada. Agora cada chamada devolve no máximo {@value #MAX_QUESTOES_POR_PAGINA}
+     * questões, da mais recente para a mais antiga; {@code page} avança, e o total sai no
+     * cabeçalho {@code X-Total-Count}. O corpo continua sendo uma lista simples, de modo que
+     * a tela atual segue funcionando sem mudança.
+     */
     @GetMapping("/api/questoes")
-    public List<QuestaoDTO> listarQuestoes() {
-        return questoes.findAll().stream().map(QuestaoDTO::of).toList();
+    public ResponseEntity<List<QuestaoDTO>> listarQuestoes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "" + MAX_QUESTOES_POR_PAGINA) int size) {
+        var pagina = questoes.findAll(PageRequest.of(
+                Math.max(page, 0),
+                Math.min(Math.max(size, 1), MAX_QUESTOES_POR_PAGINA),
+                Sort.by(Sort.Direction.DESC, "id")));
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(pagina.getTotalElements()))
+                .body(pagina.getContent().stream().map(QuestaoDTO::of).toList());
     }
 
     /** Faltava o GET do item: a questão tinha PUT e DELETE, mas não dava para lê-la. */
@@ -185,6 +205,7 @@ public class AvaliacoesController {
         if (request.enunciado() == null || request.enunciado().isBlank()) {
             throw ApiException.validation("Dados inválidos.", Map.of("enunciado", "Informe o enunciado."));
         }
+        validarTamanhoDoEnunciado(request.enunciado());
         // O banco de questões alimenta as avaliações, então segue a mesma regra
         // delas: o professor só cria questão da matéria que leciona. Sem isto,
         // bastava criar a questão de Química aqui para contornar o escopo.
@@ -198,6 +219,14 @@ public class AvaliacoesController {
         return ResponseEntity.created(uriDoItem(dto.id())).body(dto);
     }
 
+    /** Mesmo teto da coluna ({@code Questao.enunciado}, 4000): acima disso o banco recusa e o cliente via 500. */
+    private static void validarTamanhoDoEnunciado(String enunciado) {
+        if (enunciado.length() > 4000) {
+            throw ApiException.validation("Dados inválidos.",
+                    Map.of("enunciado", "O enunciado deve ter no máximo 4000 caracteres."));
+        }
+    }
+
     @PutMapping("/api/questoes/{id}")
     public QuestaoDTO atualizarQuestao(@PathVariable Long id, @RequestBody NovaQuestaoRequest request,
                                        @AuthenticationPrincipal UsuarioAutenticado operador) {
@@ -207,6 +236,7 @@ public class AvaliacoesController {
         // matéria alheia — tem que passar pelas duas pontas.
         escopoDocente.exigirMateria(q.getDisciplina(), operador);
         if (request.disciplina() != null) escopoDocente.exigirMateria(request.disciplina(), operador);
+        if (request.enunciado() != null) validarTamanhoDoEnunciado(request.enunciado());
         if (request.enunciado() != null && !request.enunciado().isBlank()) q.setEnunciado(request.enunciado().trim());
         if (request.disciplina() != null) q.setDisciplina(request.disciplina());
         if (request.tipo() != null) q.setTipo(request.tipo());

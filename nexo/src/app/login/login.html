@@ -9,6 +9,7 @@
             [attr.aria-label]="temaEscuro() ? 'Mudar para o tema claro' : 'Mudar para o tema escuro'">
             <svg class="ic" aria-hidden="true"><use [attr.href]="'assets/icones/nexo-icons.svg#ic-' + (temaEscuro() ? 'sun' : 'moon')"></use></svg>
         </button>
+        @if (modo === 'login') {
         <form class="login-form" [formGroup]="loginForm" (ngSubmit)="realizarLogin()">
             <h1 class="login-title">Entrar</h1>
             <p class="login-subtitle">Acesse sua conta para continuar</p>
@@ -52,6 +53,83 @@
             </div>
 
             <button type="submit" class="btn btn-login w-100" [disabled]="loginForm.invalid">Entrar</button>
+            <p class="text-center mt-3 mb-0"><a routerLink="/esqueci-senha" class="link-recuperar">Esqueci minha senha</a></p>
         </form>
+        }
+
+        @if (modo === 'esqueci') {
+        <form class="login-form" [formGroup]="esqueciForm" (ngSubmit)="pedirLink()">
+            <h1 class="login-title">Esqueci minha senha</h1>
+            <p class="login-subtitle">Informe o seu login e enviaremos um link para o e-mail de recuperação da conta</p>
+
+            @if (mensagemErro) {
+            <div class="alert alert-danger" role="alert">
+                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg>
+                <span>{{ mensagemErro }}</span>
+            </div>
+            }
+            @if (mensagemSucesso) {
+            <div class="alert alert-success" role="status">
+                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg>
+                <span>{{ mensagemSucesso }}</span>
+            </div>
+            }
+
+            <div class="mb-4">
+                <label for="login-recuperar" class="form-label">Login</label>
+                <input type="text" id="login-recuperar" formControlName="login" class="form-control"
+                    [class.is-invalid]="esqueciForm.get('login')?.invalid && esqueciForm.get('login')?.touched"
+                    placeholder="Digite seu login" autocomplete="username">
+                <div class="invalid-feedback">O login é obrigatório.</div>
+            </div>
+            <button type="submit" class="btn btn-login w-100" [disabled]="carregando || esqueciForm.invalid">
+                {{ carregando ? 'Enviando...' : 'Enviar link' }}
+            </button>
+            <p class="text-center mt-3 mb-0"><a routerLink="/login" class="link-recuperar">Voltar ao login</a></p>
+        </form>
+        }
+
+        @if (modo === 'redefinir') {
+        <form class="login-form" [formGroup]="redefinirForm" (ngSubmit)="definirNovaSenha()">
+            <h1 class="login-title">Nova senha</h1>
+            <p class="login-subtitle">Escolha uma senha nova para a sua conta</p>
+
+            @if (mensagemErro) {
+            <div class="alert alert-danger" role="alert">
+                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg>
+                <span>{{ mensagemErro }}</span>
+            </div>
+            }
+            @if (mensagemSucesso) {
+            <div class="alert alert-success" role="status">
+                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg>
+                <span>{{ mensagemSucesso }}</span>
+            </div>
+            }
+
+            <div class="mb-3">
+                <label for="nova-senha" class="form-label">Nova senha</label>
+                <input [type]="mostrarSenha ? 'text' : 'password'" id="nova-senha" formControlName="novaSenha"
+                    class="form-control" autocomplete="new-password"
+                    [class.is-invalid]="redefinirForm.get('novaSenha')?.invalid && redefinirForm.get('novaSenha')?.touched"
+                    placeholder="Mínimo de 8 caracteres">
+                <div class="invalid-feedback">Entre 8 e 50 caracteres.</div>
+            </div>
+            <div class="mb-3">
+                <label for="confirmar-senha" class="form-label">Repita a nova senha</label>
+                <input [type]="mostrarSenha ? 'text' : 'password'" id="confirmar-senha" formControlName="confirmar"
+                    class="form-control" autocomplete="new-password" placeholder="Repita a senha">
+            </div>
+            <div class="form-check mb-4">
+                <input type="checkbox" class="form-check-input" id="togglePassword2" (change)="mostrarSenha = !mostrarSenha">
+                <label class="form-check-label" for="togglePassword2">Mostrar senha</label>
+            </div>
+            <button type="submit" class="btn btn-login w-100" [disabled]="carregando || redefinirForm.invalid">
+                {{ carregando ? 'Salvando...' : 'Redefinir senha' }}
+            </button>
+            <p class="text-center mt-3 mb-0"><a routerLink="/esqueci-senha" class="link-recuperar">Pedir um novo link</a></p>
+        </form>
+        }
+
     </section>
 </div>

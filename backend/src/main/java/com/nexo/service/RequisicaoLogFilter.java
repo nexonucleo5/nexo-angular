@@ -50,6 +50,14 @@ public class RequisicaoLogFilter extends OncePerRequestFilter {
     public static final String MDC_CAMINHO = "caminho";
     public static final String MDC_USUARIO = "usuario";
     public static final String MDC_DURACAO = "duracaoMs";
+    /** Categoria semântica do evento (SISTEMA, DESAFIO, ACESSO, CONTEUDO). */
+    public static final String MDC_CATEGORIA = "categoria";
+    /** ID do aluno envolvido no evento pedagógico. */
+    public static final String MDC_ALUNO_ID = "alunoId";
+    /** ID do desafio envolvido no evento. */
+    public static final String MDC_DESAFIO_ID = "desafioId";
+    /** Detalhes extras em texto livre (ex.: "acertos=3/5 tentativa=2"). */
+    public static final String MDC_DETALHES = "detalhes";
 
     private static final Logger log = LoggerFactory.getLogger(RequisicaoLogFilter.class);
 

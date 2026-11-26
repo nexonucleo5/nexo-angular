@@ -37,6 +37,7 @@ class RecursosDeItemTest extends TesteApiBase {
     @DisplayName("cadastro de aluno devolve 201 com Location que resolve")
     void criarAluno() throws Exception {
         String diretor = bearer("diretor");
+        exigirAprovacaoDeAluno(diretor, false);
         JsonNode turmas = json.readTree(mvc.perform(get("/api/turmas")
                 .header(HttpHeaders.AUTHORIZATION, diretor)).andReturn().getResponse().getContentAsString());
         long turmaId = turmas.get(0).get("id").asLong();

@@ -9,6 +9,9 @@ import com.nexo.repository.AlunoRepository;
 import com.nexo.repository.DesafioAlunoRepository;
 import com.nexo.repository.DesafioRepository;
 import com.nexo.repository.QuizPerguntaRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +56,8 @@ public class DesafioService {
     private final QuizPerguntaRepository perguntas;
     private final com.nexo.repository.MateriaRepository materias;
 
+    private static final Logger log = LoggerFactory.getLogger(DesafioService.class);
+
     public DesafioService(DesafioRepository desafios, DesafioAlunoRepository progresso, AlunoRepository alunos,
                           QuizPerguntaRepository perguntas,
                           com.nexo.repository.MateriaRepository materias) {
@@ -77,14 +82,13 @@ public class DesafioService {
                 : aluno.getTurma().getSegmento();
         Map<String, com.nexo.domain.SegmentoEnsino> segmentoPorMateria = new HashMap<>();
         materias.findAll().forEach(m ->
-                segmentoPorMateria.put(m.getNome().toLowerCase(), m.getSegmento()));
+                segmentoPorMateria.put(m.getNome().toLowerCase(java.util.Locale.ROOT), m.getSegmento()));
 
         List<DesafioDTO> lista = desafios.findAll().stream()
-                // Despublicado sai do catálogo do aluno; quem já concluiu mantém o XP.
                 .filter(Desafio::isPublicado)
                 .filter(d -> {
                     var segmento = d.getMateria() == null ? null
-                            : segmentoPorMateria.get(d.getMateria().toLowerCase());
+                            : segmentoPorMateria.get(d.getMateria().toLowerCase(java.util.Locale.ROOT));
                     return segmento == null || segmento.atende(etapa);
                 })
                 .map(d -> paraDTO(d, porDesafio.get(d.getId())))
@@ -114,6 +118,8 @@ public class DesafioService {
             da.setProgresso(Math.max(da.getProgresso(), 10));
             progresso.save(da);
         }
+        logDesafio(aluno, d, "Desafio iniciado",
+                "status=" + da.getStatus() + " progresso=" + da.getProgresso() + "%");
         return paraDTO(d, da);
     }
 
@@ -128,6 +134,8 @@ public class DesafioService {
         progresso.save(da);
         if (!jaConcluido) {
             creditarXp(aluno, d.getXp());
+            logDesafio(aluno, d, "Desafio concluído",
+                    "xp_ganho=" + d.getXp() + " xp_total=" + aluno.getXpTotal());
         }
         return paraDTO(d, da);
     }
@@ -156,14 +164,6 @@ public class DesafioService {
                 .toList();
     }
 
-    /**
-     * Corrige as respostas de uma tentativa.
-     *
-     * <p>Regra: o desafio só é concluído (e o XP só é creditado) quando o aluno acerta
-     * <b>todas</b> as perguntas. Errou uma que seja, nada é persistido além do contador
-     * de tentativas — o status continua PROGRESSO, o que mantém o gabarito escondido em
-     * {@link #listarPerguntas} e permite refazer o quiz do zero.
-     */
     @Transactional
     public QuizResultadoDTO finalizarQuiz(Long usuarioId, Long desafioId, FinalizarQuizRequest request) {
         Aluno aluno = aluno(usuarioId);
@@ -175,9 +175,7 @@ public class DesafioService {
 
         Map<Long, Integer> escolhas = new HashMap<>();
         if (request.respostas() != null) {
-            for (RespostaItem r : request.respostas()) {
-                escolhas.put(r.perguntaId(), r.alternativaEscolhida());
-            }
+            for (RespostaItem r : request.respostas()) escolhas.put(r.perguntaId(), r.alternativaEscolhida());
         }
 
         int acertos = 0;
@@ -185,31 +183,51 @@ public class DesafioService {
             Integer escolhida = escolhas.get(p.getId());
             if (escolhida != null && escolhida == p.getRespostaCorreta()) acertos++;
         }
-        boolean aprovado = acertos == lista.size();
 
         DesafioAluno da = progressoOuNovo(aluno, d, desafioId);
-        boolean jaConcluido = "CONCLUIDO".equals(da.getStatus());
         da.setTentativas(da.getTentativas() + 1);
+        int xpGanho = aplicarResultadoQuiz(aluno, d, da, lista.size(), acertos);
+        progresso.save(da);
 
+        return new QuizResultadoDTO(acertos == lista.size(), acertos == lista.size() ? acertos : null,
+                lista.size(), xpGanho, da.getStatus(), da.getTentativas());
+    }
+
+    /**
+     * Aplica o resultado de uma tentativa ao {@link DesafioAluno}: atualiza status,
+     * credita XP se aprovado pela primeira vez e emite o log correspondente.
+     * Extraído de {@link #finalizarQuiz} para reduzir a complexidade ciclomática.
+     *
+     * @return XP ganho nesta tentativa (0 se reprovado ou já concluído antes)
+     */
+    private int aplicarResultadoQuiz(Aluno aluno, Desafio d, DesafioAluno da, int total, int acertos) {
+        boolean aprovado = acertos == total;
+        boolean jaConcluido = "CONCLUIDO".equals(da.getStatus());
         int xpGanho = 0;
         if (aprovado) {
             da.setStatus("CONCLUIDO");
             da.setProgresso(100);
             da.setAcertos(acertos);
-            da.setTotalPerguntas(lista.size());
+            da.setTotalPerguntas(total);
             if (!jaConcluido) {
                 xpGanho = d.getXp();
                 creditarXp(aluno, xpGanho);
             }
+            logDesafio(aluno, d, "Quiz concluído com sucesso",
+                    "acertos=" + acertos + "/" + total
+                    + " tentativa=" + da.getTentativas()
+                    + " xp_ganho=" + xpGanho
+                    + " xp_total=" + aluno.getXpTotal()
+                    + " nivel=" + d.getNivel());
         } else if (!jaConcluido) {
-            // Reprovado: segue em PROGRESSO, sem XP e sem placar gravado.
             da.setStatus("PROGRESSO");
             da.setProgresso(Math.max(da.getProgresso(), 50));
+            logDesafio(aluno, d, "Quiz respondido com erros",
+                    "acertos=" + acertos + "/" + total
+                    + " tentativa=" + da.getTentativas()
+                    + " nivel=" + d.getNivel());
         }
-        progresso.save(da);
-
-        return new QuizResultadoDTO(aprovado, aprovado ? acertos : null, lista.size(),
-                xpGanho, da.getStatus(), da.getTentativas());
+        return xpGanho;
     }
 
     private Map<Long, DesafioAluno> progressoDoAluno(Long alunoId) {
@@ -229,6 +247,27 @@ public class DesafioService {
         aluno.setXpTotal(aluno.getXpTotal() + xp);
         aluno.setXpSemana(aluno.getXpSemana() + xp);
         alunos.save(aluno);
+    }
+
+    /**
+     * Emite um log INFO de categoria DESAFIO com os campos MDC preenchidos.
+     * O appender lê esses campos e os persiste nos campos estruturados do {@link com.nexo.domain.LogAplicacao}.
+     */
+    private void logDesafio(Aluno aluno, Desafio desafio, String mensagem, String detalhes) {
+        MDC.put(RequisicaoLogFilter.MDC_CATEGORIA, "DESAFIO");
+        MDC.put(RequisicaoLogFilter.MDC_ALUNO_ID, String.valueOf(aluno.getId()));
+        MDC.put(RequisicaoLogFilter.MDC_DESAFIO_ID, String.valueOf(desafio.getId()));
+        MDC.put(RequisicaoLogFilter.MDC_DETALHES,
+                "desafio=\"" + desafio.getTitulo() + "\" materia=" + desafio.getMateria() + " " + detalhes);
+        try {
+            log.info("{} — aluno=\"{}\" desafio=\"{}\" ({})",
+                    mensagem, aluno.getNome(), desafio.getTitulo(), desafio.getNivel());
+        } finally {
+            MDC.remove(RequisicaoLogFilter.MDC_CATEGORIA);
+            MDC.remove(RequisicaoLogFilter.MDC_ALUNO_ID);
+            MDC.remove(RequisicaoLogFilter.MDC_DESAFIO_ID);
+            MDC.remove(RequisicaoLogFilter.MDC_DETALHES);
+        }
     }
 
     private static DesafioDTO paraDTO(Desafio d, DesafioAluno da) {

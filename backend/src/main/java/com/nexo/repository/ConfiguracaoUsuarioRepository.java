@@ -11,4 +11,9 @@ public interface ConfiguracaoUsuarioRepository extends JpaRepository<Configuraca
     Optional<ConfiguracaoUsuario> findByUsuarioId(Long usuarioId);
 
     List<ConfiguracaoUsuario> findByUsuarioIdIn(Collection<Long> usuarioIds);
+
+    /** A configuração de todos os alunos numa consulta só (uso: sincronização no arranque). */
+    @org.springframework.data.jpa.repository.Query(
+            "select c from ConfiguracaoUsuario c join fetch c.usuario u where u.role = com.nexo.domain.Role.ALUNO")
+    List<ConfiguracaoUsuario> findAllDeAlunos();
 }

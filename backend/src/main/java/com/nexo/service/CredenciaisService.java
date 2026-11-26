@@ -44,7 +44,13 @@ public class CredenciaisService {
 
     /** Cria e persiste o Usuario de login com as credenciais geradas. */
     public Usuario criarUsuario(String nome, String cargo, Role role, Acesso acesso) {
+        return criarUsuario(nome, cargo, role, acesso, null);
+    }
+
+    /** {@code emailRecuperacao} já normalizado (ou {@code null}): destino do link de "esqueci minha senha". */
+    public Usuario criarUsuario(String nome, String cargo, Role role, Acesso acesso, String emailRecuperacao) {
         Usuario usuario = new Usuario();
+        usuario.setEmailRecuperacao(emailRecuperacao);
         usuario.setLogin(acesso.login());
         usuario.setSenhaHash(passwordEncoder.encode(acesso.senhaProvisoria()));
         usuario.setPrecisaTrocarSenha(true);

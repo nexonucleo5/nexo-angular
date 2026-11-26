@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
-const ROTAS_PUBLICAS = ['/auth/login', '/auth/refresh'];
+const ROTAS_PUBLICAS = ['/auth/login', '/auth/refresh', '/auth/esqueci-senha', '/auth/redefinir-senha'];
 
 /**
  * Anexa o Bearer token a toda chamada da API e, em caso de 401,

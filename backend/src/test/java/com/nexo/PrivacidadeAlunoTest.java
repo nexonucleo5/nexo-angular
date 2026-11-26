@@ -48,6 +48,7 @@ class PrivacidadeAlunoTest extends TesteApiBase {
 
         if (observador == null) {
             String diretor = bearer("diretor");
+            exigirAprovacaoDeAluno(diretor, false);
             JsonNode turmas = json.readTree(mvc.perform(get("/api/turmas")
                     .header(HttpHeaders.AUTHORIZATION, diretor)).andReturn().getResponse().getContentAsString());
             JsonNode criado = json.readTree(mvc.perform(post("/api/alunos").contentType(MediaType.APPLICATION_JSON)

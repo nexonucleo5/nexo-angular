@@ -1,16 +1,22 @@
 package com.nexo.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nexo.security.AccessTokensRevogados;
+import com.nexo.security.JanelaDeTentativas;
 import com.nexo.security.WsTicketService;
 import com.nexo.service.ChatService;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -23,6 +29,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * token completo na query string o exporia em logs de proxy/acesso. Cada
  * mensagem é persistida e entregue ao vivo ao destinatário (se conectado) e
  * ecoada ao remetente.
+ *
+ * <p>A conexão é longa e o handshake só autentica uma vez, então o que muda depois dele
+ * precisa chegar aqui: quando o logout ou a derrubada da conta revoga a sessão que abriu o
+ * socket, ele é fechado na hora ({@link #aoRevogarSessao}, {@link #aoRevogarUsuario}).
+ * Sem isso o socket seguia entregando e aceitando mensagens depois de a pessoa ter saído.
  */
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
@@ -30,6 +41,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final WsTicketService tickets;
     private final ChatService chat;
     private final ObjectMapper mapper;
+
+    /**
+     * Teto de mensagens por usuário. A JanelaDeTentativas conta "falhas", aqui cada mensagem
+     * enviada: ao atingir o máximo dentro da janela, o resto é descartado até ela vencer.
+     * Um humano digitando não chega perto; um script em laço, sim. É em memória — mesmo
+     * limite conhecido do resto dos limitadores (ver JanelaDeTentativas).
+     */
+    private static final int MAX_MENSAGENS_POR_JANELA = 60;
+    private static final Duration JANELA_MENSAGENS = Duration.ofMinutes(1);
+    private final JanelaDeTentativas porUsuario =
+            new JanelaDeTentativas(MAX_MENSAGENS_POR_JANELA, JANELA_MENSAGENS);
 
     /** Sessões ativas por usuário (um usuário pode ter várias abas). */
     private final Map<Long, Set<WebSocketSession>> sessoes = new ConcurrentHashMap<>();
@@ -50,6 +72,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         Long uid = titular.get().uid();
         session.getAttributes().put("uid", uid);
         session.getAttributes().put("nome", titular.get().nome());
+        // O mapa de atributos não aceita null; o jti sempre existe para quem passou pelo
+        // JwtAuthFilter, mas o handler não precisa depender disso para não quebrar.
+        if (titular.get().jti() != null) session.getAttributes().put("jti", titular.get().jti());
         sessoes.computeIfAbsent(uid, k -> ConcurrentHashMap.newKeySet()).add(session);
     }
 
@@ -59,10 +84,25 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String deNome = (String) session.getAttributes().get("nome");
         if (de == null) return;
 
-        JsonNode node = mapper.readTree(message.getPayload());
+        JsonNode node;
+        try {
+            node = mapper.readTree(message.getPayload());
+        } catch (JsonProcessingException e) {
+            return; // quadro que não é JSON: descarta, como os demais inválidos
+        }
+        if (node == null) return;
         Long para = node.hasNonNull("para") ? node.get("para").asLong() : null;
         String texto = node.hasNonNull("texto") ? node.get("texto").asText() : null;
         if (para == null || texto == null || texto.isBlank()) return;
+
+        // Sem teto o texto ia direto para o banco: acima da coluna estourava e derrubava a
+        // conexão; abaixo dela, mensagens enormes eram persistidas e redistribuídas.
+        if (texto.length() > ChatService.TAMANHO_MAXIMO_MENSAGEM) return;
+
+        // Limite por usuário: um laço de envio não deve gravar e redistribuir sem freio.
+        String chaveLimite = String.valueOf(de);
+        if (porUsuario.segundosDeBloqueio(chaveLimite) > 0) return;
+        porUsuario.registrarFalha(chaveLimite);
 
         // O destinatário vem do cliente: confere no servidor se o par é permitido
         // (impede, por exemplo, aluno → aluno com um id forjado).
@@ -107,6 +147,36 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             enviarPara(usuarioId, mapper.writeValueAsString(evento));
         } catch (Exception ignored) {
             // falha de serialização: a tela se acerta no próximo carregamento do histórico
+        }
+    }
+
+    /** Logout de uma sessão: fecha os sockets abertos com o ticket pedido por aquele token. */
+    @EventListener
+    public void aoRevogarSessao(AccessTokensRevogados.SessaoRevogada evento) {
+        for (Set<WebSocketSession> doUsuario : sessoes.values()) {
+            for (WebSocketSession s : doUsuario) {
+                if (evento.jti() != null && evento.jti().equals(s.getAttributes().get("jti"))) {
+                    fechar(s);
+                }
+            }
+        }
+    }
+
+    /** Conta desativada, senha redefinida ou sessão roubada: nenhum socket do usuário sobrevive. */
+    @EventListener
+    public void aoRevogarUsuario(AccessTokensRevogados.UsuarioRevogado evento) {
+        Set<WebSocketSession> doUsuario = sessoes.get(evento.usuarioId());
+        if (doUsuario == null) return;
+        for (WebSocketSession s : doUsuario) {
+            fechar(s);
+        }
+    }
+
+    private static void fechar(WebSocketSession s) {
+        try {
+            s.close(CloseStatus.POLICY_VIOLATION);
+        } catch (IOException ignored) {
+            // já estava caindo; o afterConnectionClosed faz a limpeza
         }
     }
 

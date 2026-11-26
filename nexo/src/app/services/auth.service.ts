@@ -80,6 +80,16 @@ export class AuthService {
       .pipe(tap((resposta) => this.guardarSessao(resposta)));
   }
 
+  /** Pede o link de redefinição. A resposta é a mesma exista a conta ou não. */
+  public esqueciSenha(login: string): Observable<void> {
+    return this.http.post<void>(`${this.api}/esqueci-senha`, { login });
+  }
+
+  /** Conclui a redefinição com o valor recebido por e-mail. Não abre sessão. */
+  public redefinirSenha(token: string, novaSenha: string): Observable<void> {
+    return this.http.post<void>(`${this.api}/redefinir-senha`, { token, novaSenha });
+  }
+
   /**
    * Retoma a sessão no arranque da aplicação.
    *
@@ -152,12 +162,15 @@ export class AuthService {
   }
 
   public logout(): void {
-    if (this.accessToken) {
-      // Melhor esforço: revoga os refresh tokens no servidor e expira o cookie.
-      this.http
-        .post(`${this.api}/logout`, {}, { withCredentials: true })
-        .subscribe({ error: () => {} });
-    }
+    // Sempre avisa o servidor, mesmo sem access token em memória. O que precisa ser
+    // revogado é o refresh token, que vive no cookie HttpOnly e que o cliente não vê —
+    // e é justamente quando o access token falta (expirou com a aba parada, ou a página
+    // foi recarregada e a sessão ainda não voltou) que o cookie segue válido por até 7
+    // dias. O backend aceita o logout só com o cookie. Melhor esforço: falha de rede não
+    // impede de limpar o estado local.
+    this.http
+      .post(`${this.api}/logout`, {}, { withCredentials: true })
+      .subscribe({ error: () => {} });
     this.limparSessao();
   }
 

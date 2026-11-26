@@ -105,7 +105,10 @@ public class SecurityConfig {
                         auth.requestMatchers("/h2-console/**").denyAll();
                     }
 
-                    auth.requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                    // /logout é público: o cookie de refresh é a credencial, e o access token pode
+                    // já ter expirado — exigi-lo deixava o refresh token vivo no servidor.
+                    auth.requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/logout",
+                            "/api/auth/esqueci-senha", "/api/auth/redefinir-senha").permitAll()
                             .requestMatchers("/error").permitAll()
                             // Sonda de monitor externo: só UP/DOWN, sem detalhe (ver SaudeController).
                             .requestMatchers(HttpMethod.GET, "/api/saude").permitAll()
@@ -136,7 +139,9 @@ public class SecurityConfig {
         // allowCredentials=true daria a qualquer origem permitida preflight para
         // headers arbitrários — superfície à toa.
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
-        config.setExposedHeaders(List.of("Content-Disposition", RequisicaoLogFilter.CABECALHO));
+        // Retry-After: sem expô-lo, o cliente em outra origem (dev-server) não lê o tempo de
+        // espera do 429 e só consegue mostrar uma mensagem genérica.
+        config.setExposedHeaders(List.of("Content-Disposition", "Retry-After", RequisicaoLogFilter.CABECALHO));
         config.setAllowCredentials(true); // Garante o tráfego do cookie do Refresh Token
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -113,6 +113,12 @@
   pointer-events: none;
 }
 
+/* ── Chips de categoria ───────────────────────────────────────────────── */
+.chip-sistema  { background: #334155; color: #e2e8f0; }
+.chip-desafio  { background: #1e40af; color: #dbeafe; }
+.chip-acesso   { background: #065f46; color: #d1fae5; }
+.chip-conteudo { background: #6b21a8; color: #f3e8ff; }
+
 /* ── Stack trace dentro da tabela ──────────────────────────────────────── */
 .detalhe {
   background: var(--codigo-bg);

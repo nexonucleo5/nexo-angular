@@ -47,7 +47,8 @@ public class ProfessorService {
         this.auditoria = auditoria;
     }
 
-    public record CadastroProfessor(String nome, String dataNascimento, String sexo, List<Long> materiaIds) {}
+    public record CadastroProfessor(String nome, String dataNascimento, String sexo, List<Long> materiaIds,
+                                    String emailRecuperacao) {}
 
     public record ProfessorCriado(Long id, String nome, String disciplinas, String emailInstitucional,
                                   String senhaProvisoria) {}
@@ -80,6 +81,8 @@ public class ProfessorService {
             throw ApiException.validation("Dados de cadastro inválidos.", erros);
         }
 
+        String emailRecuperacao = RecuperacaoSenhaService.normalizarEmail(dados.emailRecuperacao());
+
         Professor professor = new Professor();
         professor.setNome(dados.nome().trim());
         professor.setDataNascimento(nascimento);
@@ -90,7 +93,8 @@ public class ProfessorService {
 
         var acesso = credenciais.gerar(professor.getNome());
         professor.setEmail(acesso.login());
-        professor.setUsuario(credenciais.criarUsuario(professor.getNome(), cargo(professor), Role.PROFESSOR, acesso));
+        professor.setUsuario(credenciais.criarUsuario(professor.getNome(), cargo(professor), Role.PROFESSOR, acesso,
+                emailRecuperacao));
         professores.save(professor);
 
         auditoria.registrar(operador, EventoAuditoria.Tipo.ALTERACAO,

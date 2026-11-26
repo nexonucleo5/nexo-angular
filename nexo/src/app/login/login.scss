@@ -214,3 +214,5 @@
   .login-lado { padding: 24px 16px 40px; align-items: flex-start; }
   .login-form { padding: 28px 22px; }
 }
+
+.link-recuperar { font-size: 14px; font-weight: 600; color: var(--nx-brand, #6D28D9); text-decoration: underline; &:hover { color: var(--nx-brand-deep, #5B21B6); } &:focus-visible { outline: 3px solid var(--nx-brand, #6D28D9); outline-offset: 2px; } }
