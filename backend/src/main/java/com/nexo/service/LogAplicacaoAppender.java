@@ -23,22 +23,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Leva o log da aplicação (WARN e ERROR, por padrão) para a tabela {@code logs_aplicacao},
- * onde o administrador o lê.
+ * Leva o log da aplicação para a tabela {@code logs_aplicacao}.
  *
- * <p>Quatro cuidados fazem dele seguro de manter ligado:
+ * <p>O nível mínimo padrão é INFO para que eventos pedagógicos (desafios, conteúdo)
+ * também sejam persistidos. Quatro cuidados fazem dele seguro de manter ligado:
  * <ul>
- *   <li><b>Nunca atrasa quem loga.</b> O evento só entra numa fila; quem grava no banco é
- *       uma thread própria. Uma requisição que loga um WARN não espera o INSERT, e um
- *       banco fora do ar não a derruba — a falha é engolida aqui.</li>
- *   <li><b>Não gera log sobre si mesmo.</b> Se o INSERT falhar, o Hibernate loga um erro,
- *       que viria para cá, falharia de novo e assim por diante. Eventos emitidos pela thread
- *       de gravação são ignorados.</li>
+ *   <li><b>Não atrasa quem loga.</b> O evento só entra numa fila; quem grava no banco é
+ *       uma thread própria.</li>
+ *   <li><b>Não gera log sobre si mesmo.</b> Eventos emitidos pela thread de gravação
+ *       são ignorados.</li>
  *   <li><b>Não grava segredo.</b> Mensagem e stack trace passam por {@link RedatorSegredos}
  *       antes de entrar na fila.</li>
  *   <li><b>Não deixa um loop encher a tabela.</b> A mesma mensagem, da mesma origem e no
- *       mesmo nível, entra no máximo {@code nexo.logs.max-por-minuto} vezes por minuto; o
- *       excedente é contado em {@link #descartados()} e aparece no resumo.</li>
+ *       mesmo nível, entra no máximo {@code nexo.logs.max-por-minuto} vezes por minuto.</li>
  * </ul>
  */
 @Component
@@ -64,7 +61,7 @@ public class LogAplicacaoAppender extends AppenderBase<ILoggingEvent> {
 
     public LogAplicacaoAppender(LogAplicacaoRepository repositorio, RedatorSegredos redator,
                                 AlertaErroService alerta,
-                                @Value("${nexo.logs.nivel-minimo:WARN}") String nivelMinimo,
+                                @Value("${nexo.logs.nivel-minimo:INFO}") String nivelMinimo,
                                 @Value("${nexo.logs.max-por-minuto:20}") int maxPorMinuto) {
         this.repositorio = repositorio;
         this.redator = redator;
@@ -123,7 +120,6 @@ public class LogAplicacaoAppender extends AppenderBase<ILoggingEvent> {
                 : e.getLevel().isGreaterOrEqual(Level.WARN) ? LogAplicacao.Nivel.WARN
                 : LogAplicacao.Nivel.INFO);
         log.setOrigem(truncar(e.getLoggerName(), 300));
-        // Mascara ANTES de gravar: o que não entra na tabela não vaza dela. A leitura mascara de novo.
         log.setMensagem(truncar(redator.mascarar(e.getFormattedMessage()), TETO_MENSAGEM));
         if (e.getThrowableProxy() != null) {
             log.setExcecao(truncar(redator.mascarar(ThrowableProxyUtil.asString(e.getThrowableProxy())), TETO_EXCECAO));
@@ -135,8 +131,36 @@ public class LogAplicacaoAppender extends AppenderBase<ILoggingEvent> {
         log.setMetodo(truncar(mdc.get(RequisicaoLogFilter.MDC_METODO), 10));
         log.setCaminho(truncar(mdc.get(RequisicaoLogFilter.MDC_CAMINHO), 300));
         log.setUsuario(truncar(mdc.get(RequisicaoLogFilter.MDC_USUARIO), 255));
+        lerMdcPedagogico(mdc, log);
         log.setCriadoEm(Instant.ofEpochMilli(e.getTimeStamp()));
         return log;
+    }
+
+    /**
+     * Lê os campos MDC pedagógicos (categoria, alunoId, desafioId, detalhes) e os aplica
+     * ao log. Extraído de {@link #converter} para reduzir a complexidade ciclomática.
+     * Categoria inválida no MDC é contabilizada em {@link #descartados} em vez de usar
+     * {@code System.err} — que dentro de um appender poderia gerar loop de log.
+     */
+    private void lerMdcPedagogico(Map<String, String> mdc, LogAplicacao log) {
+        String cat = mdc.get(RequisicaoLogFilter.MDC_CATEGORIA);
+        if (cat != null) {
+            try {
+                log.setCategoria(LogAplicacao.Categoria.valueOf(cat));
+            } catch (IllegalArgumentException ex) {
+                // Valor desconhecido: registra como SISTEMA e conta como descartado parcial
+                // para aparecer no resumo sem gerar novo evento de log (evita loop).
+                log.setCategoria(LogAplicacao.Categoria.SISTEMA);
+                descartados.incrementAndGet();
+            }
+        } else {
+            log.setCategoria(LogAplicacao.Categoria.SISTEMA);
+        }
+        String alunoId = mdc.get(RequisicaoLogFilter.MDC_ALUNO_ID);
+        if (alunoId != null && alunoId.matches("\\d{1,18}")) log.setAlunoId(Long.parseLong(alunoId));
+        String desafioId = mdc.get(RequisicaoLogFilter.MDC_DESAFIO_ID);
+        if (desafioId != null && desafioId.matches("\\d{1,18}")) log.setDesafioId(Long.parseLong(desafioId));
+        log.setDetalhes(truncar(mdc.get(RequisicaoLogFilter.MDC_DETALHES), 500));
     }
 
     private boolean dentroDaCota(LogAplicacao log) {

@@ -22,16 +22,19 @@ public interface LogAplicacaoRepository extends JpaRepository<LogAplicacao, Long
            select l from LogAplicacao l
            where l.criadoEm >= :desde
              and (:nivel is null or l.nivel = :nivel)
+             and (:categoria is null or l.categoria = :categoria)
              and (:busca is null
                   or lower(l.mensagem) like :busca
                   or lower(l.origem) like :busca
                   or lower(l.caminho) like :busca
                   or lower(l.usuario) like :busca
                   or lower(l.requisicaoId) like :busca
-                  or lower(l.excecao) like :busca)
+                  or lower(l.excecao) like :busca
+                  or lower(l.detalhes) like :busca)
            order by l.criadoEm desc, l.id desc
            """)
     Page<LogAplicacao> buscar(@Param("nivel") LogAplicacao.Nivel nivel,
+                              @Param("categoria") LogAplicacao.Categoria categoria,
                               @Param("busca") String busca,
                               @Param("desde") Instant desde,
                               Pageable pageable);

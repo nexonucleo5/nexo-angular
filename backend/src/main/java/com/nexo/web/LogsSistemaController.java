@@ -45,9 +45,10 @@ import java.util.Map;
 public class LogsSistemaController {
 
     private static final int TAMANHO_MAXIMO = 100;
-
-    /** Uma consulta por usuário a cada 10 minutos entra na auditoria (ver registrarConsulta). */
     private static final java.time.Duration JANELA_DE_CONSULTA = java.time.Duration.ofMinutes(10);
+
+    private static final org.slf4j.Logger logger =
+            org.slf4j.LoggerFactory.getLogger(LogsSistemaController.class);
 
     private final LogAplicacaoRepository logs;
     private final LogAplicacaoAppender appender;
@@ -72,49 +73,50 @@ public class LogsSistemaController {
         this.clienteIp = clienteIp;
     }
 
-    public record LogDTO(Long id, String nivel, String origem, String mensagem, String excecao,
-                         String requisicaoId, String metodo, String caminho, String usuario,
-                         Integer duracaoMs, Instant criadoEm) {
-        /**
-         * Mascara de novo na saída. O appender já o fez ao gravar, mas uma regra acrescentada
-         * depois não alcança o que já está na tabela — e a tela é o último lugar onde ainda
-         * dá para impedir que um segredo chegue a quem está olhando.
-         */
+    public record LogDTO(Long id, String nivel, String categoria, String origem, String mensagem,
+                         String excecao, String requisicaoId, String metodo, String caminho,
+                         String usuario, Integer duracaoMs, Long alunoId, Long desafioId,
+                         String detalhes, Instant criadoEm) {
         static LogDTO of(LogAplicacao l, RedatorSegredos redator) {
-            return new LogDTO(l.getId(), l.getNivel().name(), l.getOrigem(),
+            return new LogDTO(l.getId(), l.getNivel().name(),
+                    l.getCategoria() != null ? l.getCategoria().name() : "SISTEMA",
+                    l.getOrigem(),
                     redator.mascarar(l.getMensagem()), redator.mascarar(l.getExcecao()),
                     l.getRequisicaoId(), l.getMetodo(), l.getCaminho(),
-                    l.getUsuario(), l.getDuracaoMs(), l.getCriadoEm());
+                    l.getUsuario(), l.getDuracaoMs(),
+                    l.getAlunoId(), l.getDesafioId(), l.getDetalhes(),
+                    l.getCriadoEm());
         }
     }
 
     /**
-     * @param nivel   INFO, WARN ou ERROR; ausente traz todos
-     * @param busca   trecho da mensagem, origem, rota, usuário, id da requisição ou exceção
-     * @param periodo últimos N dias; ausente ou não positivo não limita
+     * @param nivel     INFO, WARN ou ERROR; ausente traz todos
+     * @param categoria SISTEMA, DESAFIO, ACESSO ou CONTEUDO; ausente traz todos
+     * @param busca     trecho da mensagem, origem, rota, usuário, id da requisição, exceção ou detalhes
+     * @param periodo   últimos N dias; ausente ou não positivo não limita
      */
     @GetMapping("/logs")
-    @Transactional // grava a própria consulta na auditoria; a classe é readOnly
+    @Transactional
     public PageEnvelope<LogDTO> listar(@RequestParam(required = false) LogAplicacao.Nivel nivel,
+                                       @RequestParam(required = false) LogAplicacao.Categoria categoria,
                                        @RequestParam(required = false) String busca,
                                        @RequestParam(required = false) Integer periodo,
                                        @RequestParam(defaultValue = "0") int page,
                                        @RequestParam(defaultValue = "25") int size,
                                        @AuthenticationPrincipal UsuarioAutenticado operador,
                                        HttpServletRequest http) {
-        // Quem leu os logs também fica registrado, uma vez por sessão de consulta. Se a conta
-        // de um admin for usada indevidamente, é este o rastro que sobra.
         auditoria.registrarConsulta(operador.nome(), "Logs do sistema consultados",
                 clienteIp.de(http), JANELA_DE_CONSULTA);
 
-        String filtro = (busca == null || busca.isBlank()) ? null : "%" + busca.trim().toLowerCase() + "%";
+        String filtro = (busca == null || busca.isBlank()) ? null
+                : "%" + busca.trim().toLowerCase(java.util.Locale.ROOT) + "%";
         // Teto de 100 anos: Instant.minus estoura (e a tela recebia 500) com um periodo
         // absurdo como 2147483647 dias.
         Instant desde = (periodo == null || periodo <= 0)
                 ? Instant.EPOCH
                 : Instant.now().minus(Math.min(periodo, 36_500), ChronoUnit.DAYS);
         var pagina = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), TAMANHO_MAXIMO));
-        return PageEnvelope.of(logs.buscar(nivel, filtro, desde, pagina), l -> LogDTO.of(l, redator));
+        return PageEnvelope.of(logs.buscar(nivel, categoria, filtro, desde, pagina), l -> LogDTO.of(l, redator));
     }
 
     public record ProblemaDTO(String nivel, String origem, String mensagem, String metodo, String caminho,
@@ -166,6 +168,7 @@ public class LogsSistemaController {
             jdbc.queryForObject("select 1", Integer.class);
         } catch (RuntimeException e) {
             bancoOk = false;
+            logger.warn("Verificação de saúde do banco falhou", e);
         }
         long bancoMs = (System.nanoTime() - inicio) / 1_000_000;
 

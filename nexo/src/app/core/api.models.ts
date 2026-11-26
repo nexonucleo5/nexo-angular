@@ -220,11 +220,13 @@ export interface EventoAuditoriaDTO {
 }
 
 export type NivelLog = 'INFO' | 'WARN' | 'ERROR';
+export type CategoriaLog = 'SISTEMA' | 'DESAFIO' | 'ACESSO' | 'CONTEUDO';
 
 /** GET /api/auditoria/sistema/logs — log da aplicação (o que o sistema viveu, não o que as pessoas fizeram). */
 export interface LogAplicacaoDTO {
   id: number;
   nivel: NivelLog;
+  categoria: CategoriaLog;
   origem: string;
   mensagem: string;
   excecao: string | null;
@@ -234,6 +236,12 @@ export interface LogAplicacaoDTO {
   usuario: string | null;
   /** Só nos avisos de lentidão. */
   duracaoMs: number | null;
+  /** ID do aluno envolvido — presente em logs de categoria DESAFIO. */
+  alunoId: number | null;
+  /** ID do desafio envolvido — presente em logs de categoria DESAFIO. */
+  desafioId: number | null;
+  /** Detalhes extras estruturados (ex.: "acertos=3/5 tentativa=2 xp_ganho=50"). */
+  detalhes: string | null;
   criadoEm: string;
 }
 
