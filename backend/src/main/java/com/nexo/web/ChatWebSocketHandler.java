@@ -126,6 +126,30 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    /**
+     * Entrega um evento ao vivo aos dois participantes da conversa (todas as abas).
+     * Usado pelos caminhos HTTP do chat — envio com anexos e mensagem apagada.
+     */
+    public void distribuir(Long umId, Long outroId, Object evento) {
+        String payload;
+        try {
+            payload = mapper.writeValueAsString(evento);
+        } catch (Exception e) {
+            return;
+        }
+        enviarPara(umId, payload);
+        enviarPara(outroId, payload);
+    }
+
+    /** Entrega um evento só às abas de um usuário (ex.: mensagem apagada "para mim"). */
+    public void enviarAo(Long usuarioId, Object evento) {
+        try {
+            enviarPara(usuarioId, mapper.writeValueAsString(evento));
+        } catch (Exception ignored) {
+            // falha de serialização: a tela se acerta no próximo carregamento do histórico
+        }
+    }
+
     /** Logout de uma sessão: fecha os sockets abertos com o ticket pedido por aquele token. */
     @EventListener
     public void aoRevogarSessao(AccessTokensRevogados.SessaoRevogada evento) {

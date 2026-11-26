@@ -18,7 +18,7 @@
     <description>Backend Java/Spring do Nexo - Gestão Escolar (arquitetura_java.md)</description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
         <jjwt.version>0.12.6</jjwt.version>
         <!-- À frente do que o BOM do Spring Boot 3.5.16 fixa (42.7.11): o driver
              até 42.7.11 tem a CVE-2026-54291, em que a falha ao negociar TLS

@@ -67,11 +67,12 @@ spring:
     generator:
       escape-non-ascii: true
 
-  # Envio da foto de perfil; o cliente já reduz a imagem antes de mandar.
+  # Teto geral de upload. A foto de perfil confere os próprios 2 MB no controller;
+  # o chat aceita até 3 anexos de 5 MB cada (ChatService.TAMANHO_MAXIMO_ANEXO).
   servlet:
     multipart:
-      max-file-size: 2MB
-      max-request-size: 3MB
+      max-file-size: 5MB
+      max-request-size: 16MB
 
 server:
   # Render (e outros PaaS) injetam a porta em $PORT; local cai no 8080

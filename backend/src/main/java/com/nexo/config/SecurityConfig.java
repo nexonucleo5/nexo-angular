@@ -61,7 +61,10 @@ public class SecurityConfig {
             "font-src 'self'",
             "manifest-src 'self'",
             "worker-src 'self'",
-            "img-src 'self' data:",
+            // blob: = anexos do chat (imagem e áudio), baixados com o token e exibidos
+            // a partir de um object URL — <img>/<audio src> não enviam Authorization.
+            "img-src 'self' data: blob:",
+            "media-src 'self' blob:",
             "connect-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",

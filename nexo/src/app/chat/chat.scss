@@ -92,3 +92,235 @@
     background: color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 85%, #000000);
   }
 }
+
+/* ── Anexos, áudio e apagar ─────────────────────────────────────────────── */
+
+/* Cor de fundo da bolha exposta ao player de áudio (ícone do botão play). */
+.bolha { --bolha-fundo: var(--bg-primary); }
+.bolha.minha { --bolha-fundo: var(--nx-brand-deep, #5B21B6); }
+
+/* Bolha com anexo: largura estável, sem encolher até o tamanho do texto. */
+.bolha.com-anexo {
+  width: min(340px, 100%);
+  padding: 8px;
+  .texto-msg { padding: 6px 6px 0; }
+  .hora { padding: 0 6px; }
+}
+
+.anexos { display: flex; flex-direction: column; gap: 6px; }
+
+.texto-msg { white-space: pre-wrap; word-break: break-word; }
+
+.hora {
+  display: block;
+  text-align: right;
+  font-size: 11px;
+  margin-top: 4px;
+  opacity: 0.7;
+}
+
+/* Ícones desenhados inline (não dependem do sprite em cache). */
+.ic-inline {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.btn-secundario {
+  min-height: 44px;
+  min-width: 48px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--bg-primary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--nx-radius-control, 10px);
+  .ic { margin: 0; }
+  &:hover:not(:disabled) {
+    background: var(--hover-overlay);
+    color: var(--nx-brand, #6D28D9);
+    border-color: var(--nx-brand, #6D28D9);
+  }
+  &:disabled { opacity: 0.5; }
+}
+
+.btn-enviar {
+  min-width: 48px;
+  display: inline-flex; align-items: center; justify-content: center;
+  .ic { margin: 0; color: #fff; }
+}
+
+/* Lixeira aparece ao passar o mouse na própria mensagem (sempre visível no toque). */
+.btn-apagar {
+  background: none; border: none; padding: 6px;
+  display: inline-flex;
+  color: var(--text-muted);
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  .ic { margin: 0; }
+  &:hover, &:focus-visible { color: #ef4444; background: rgba(239, 68, 68, 0.1); opacity: 1; }
+}
+.bolha-wrap:hover .btn-apagar { opacity: 1; }
+@media (hover: none) { .btn-apagar { opacity: 1; } }
+
+.anexo-img {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  border-radius: 10px;
+  cursor: pointer;
+  object-fit: cover;
+}
+
+.anexo-carregando {
+  padding: 10px 12px;
+  font-size: 12px;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* Cartão de arquivo: etiqueta da extensão, nome/tamanho e botão de baixar. */
+.anexo-arquivo {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 8px 10px 8px 8px;
+  background: color-mix(in srgb, currentColor 7%, transparent);
+  border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+  border-radius: 10px;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+  &:hover { background: color-mix(in srgb, currentColor 13%, transparent); }
+  &:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+}
+
+.anexo-ext {
+  flex: 0 0 auto;
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border-radius: 8px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.02em;
+  background: var(--nx-brand, #6D28D9);
+  color: #fff;
+}
+.bolha.minha .anexo-ext {
+  background: #fff;
+  color: var(--nx-brand-deep, #5B21B6);
+}
+
+.anexo-info {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px;
+}
+
+.anexo-nome {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 13px; font-weight: 600;
+  line-height: 1.25;
+}
+
+.anexo-tamanho { font-size: 11px; opacity: 0.7; }
+
+.anexo-baixar {
+  flex: 0 0 auto;
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  svg {
+    width: 16px; height: 16px;
+    fill: none; stroke: currentColor; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+}
+
+/* Anexos aguardando envio */
+.pendente {
+  display: inline-flex; align-items: center; gap: 6px;
+  max-width: 260px;
+  padding: 4px 6px 4px 10px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-main);
+  .ic { margin: 0; flex: 0 0 auto; }
+  .anexo-nome { font-weight: 500; }
+}
+
+.btn-remover {
+  background: none; border: none; padding: 2px;
+  display: inline-flex;
+  color: var(--text-muted);
+  border-radius: 50%;
+  &:hover { color: #ef4444; }
+  .ic { width: 14px; height: 14px; margin: 0; }
+}
+
+.chat-erro {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 10px;
+  padding: 6px 10px;
+}
+
+.chat-input.gravando {
+  padding: 4px 4px 4px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-primary);
+}
+
+.rec-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #ef4444;
+  animation: pulsar 1s ease-in-out infinite;
+}
+
+@keyframes pulsar {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@media (prefers-reduced-motion: reduce) { .rec-dot { animation: none; } }
+
+/* ── Janela "Apagar mensagem?" ──────────────────────────────────────────── */
+
+.apagar-fundo {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1050;
+}
+
+.apagar-janela {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(360px, calc(100vw - 32px));
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--nx-radius-card, 14px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  z-index: 1051;
+
+  .btn { width: 100%; min-height: 42px; font-weight: 600; }
+}
+
+.btn-perigo {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: var(--nx-radius-control, 10px);
+  &:hover { background: #b91c1c; color: #fff; }
+}
+
+.btn-link-cancelar {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  &:hover { color: var(--text-main); }
+}
