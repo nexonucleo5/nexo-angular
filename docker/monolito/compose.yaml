@@ -1,14 +1,15 @@
-# Sobe o monolito (Angular embutido no Spring) igual ao que roda no Render.
+# Sobe o monolito (Angular embutido no Spring, H2 em arquivo) igual ao que roda
+# no Render. Para o dia a dia use o docker-compose.yaml da raiz.
 #
-#   docker compose up --build      → http://localhost:8080
-#   docker compose down            → para, mantendo o banco no volume
-#   docker compose down -v         → para e apaga o banco
-name: nexo
+#   docker compose -f docker/monolito/compose.yaml --env-file .env up --build   → http://localhost:8080
+#   docker compose -f docker/monolito/compose.yaml down                          → para, mantendo o banco
+#   docker compose -f docker/monolito/compose.yaml down -v                       → para e apaga o banco
+name: nexo-monolito
 
 services:
   app:
     build:
-      context: .
+      context: ../..
       dockerfile: Dockerfile
     image: nexo-app:local
     # HOST_PORT só troca a porta de fora; dentro o app fica sempre no 8080.
@@ -38,3 +39,4 @@ services:
 
 volumes:
   nexo-data:
+    name: nexo_nexo-data

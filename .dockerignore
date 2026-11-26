@@ -27,3 +27,6 @@ backend/data
 # Documentação
 *.md
 **/*.md
+
+# logs
+*.log
