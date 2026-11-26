@@ -148,8 +148,21 @@ export class Login {
         this.carregando = false;
         this.mensagemErro = erro.status === 401
           ? '❌ Credenciais inválidas. Tente novamente.'
-          : `❌ ${erro.message}`;
+          : `❌ ${this.comEspera(erro)}`;
       },
     });
+  }
+
+  /**
+   * Num 429 o servidor diz quanto falta (Retry-After); mostrar o tempo poupa o usuário de
+   * tentar de novo às cegas — cada tentativa dentro do bloqueio é inútil.
+   */
+  private comEspera(erro: ApiErro): string {
+    const espera = erro.retryAfterSegundos;
+    if (erro.status !== 429 || !espera) return erro.message;
+    const tempo = espera < 60
+      ? `${espera} segundo${espera === 1 ? '' : 's'}`
+      : `${Math.ceil(espera / 60)} minuto${Math.ceil(espera / 60) === 1 ? '' : 's'}`;
+    return `${erro.message.replace(/ em alguns minutos\.?$/, '.')} Aguarde cerca de ${tempo}.`;
   }
 }

@@ -7,6 +7,7 @@ import com.nexo.domain.Usuario;
 import com.nexo.repository.RedefinicaoSenhaRepository;
 import com.nexo.repository.RefreshTokenRepository;
 import com.nexo.repository.UsuarioRepository;
+import com.nexo.security.AccessTokensRevogados;
 import com.nexo.security.JanelaDeTentativas;
 import com.nexo.security.PoliticaSenha;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +47,7 @@ public class RecuperacaoSenhaService {
     private final UsuarioRepository usuarios;
     private final RedefinicaoSenhaRepository redefinicoes;
     private final RefreshTokenRepository refreshTokens;
+    private final AccessTokensRevogados accessTokensRevogados;
     private final PasswordEncoder passwordEncoder;
     private final PoliticaSenha politicaSenha;
     private final AuditoriaService auditoria;
@@ -63,6 +65,7 @@ public class RecuperacaoSenhaService {
     public RecuperacaoSenhaService(UsuarioRepository usuarios,
                                    RedefinicaoSenhaRepository redefinicoes,
                                    RefreshTokenRepository refreshTokens,
+                                   AccessTokensRevogados accessTokensRevogados,
                                    PasswordEncoder passwordEncoder,
                                    PoliticaSenha politicaSenha,
                                    AuditoriaService auditoria,
@@ -74,6 +77,7 @@ public class RecuperacaoSenhaService {
         this.usuarios = usuarios;
         this.redefinicoes = redefinicoes;
         this.refreshTokens = refreshTokens;
+        this.accessTokensRevogados = accessTokensRevogados;
         this.passwordEncoder = passwordEncoder;
         this.politicaSenha = politicaSenha;
         this.auditoria = auditoria;
@@ -167,6 +171,9 @@ public class RecuperacaoSenhaService {
         // Quem pediu a redefinição pode ser justamente quem perdeu o controle da conta:
         // todas as sessões caem, sem poupar nenhuma.
         int encerradas = refreshTokens.revogarTodosDoUsuario(usuario.getId());
+        // O refresh token cai acima, mas o access token que o invasor já tem valeria por até
+        // 15 minutos — o suficiente para trocar o e-mail de recuperação e retomar a conta.
+        accessTokensRevogados.revogarUsuario(usuario.getId());
 
         auditoria.registrar(usuario.getNome(), EventoAuditoria.Tipo.ALTERACAO, "Senha redefinida por link",
                 encerradas > 0 ? encerradas + " sessão(ões) encerrada(s)" : null, ip);

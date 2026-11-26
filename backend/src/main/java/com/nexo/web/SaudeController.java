@@ -21,7 +21,19 @@ import java.util.Map;
 @RestController
 public class SaudeController {
 
+    /**
+     * Por quanto tempo o último veredito vale. A rota é pública e cada chamada ocupava uma
+     * conexão do pool (5 em produção) com um {@code select 1}: um laço de requisições
+     * anônimas bastava para deixar as conexões ocupadas e o resto da API esperando. Com o
+     * cache, o banco é consultado no máximo uma vez por janela, qualquer que seja o volume.
+     * Um monitor que sonda a cada minuto continua vendo o estado real.
+     */
+    private static final long VALIDADE_MS = 5_000;
+
+    private record Veredito(boolean up, long ate) {}
+
     private final JdbcTemplate jdbc;
+    private volatile Veredito ultimo = new Veredito(false, 0);
 
     public SaudeController(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
@@ -29,11 +41,22 @@ public class SaudeController {
 
     @GetMapping("/api/saude")
     public ResponseEntity<Map<String, String>> saude() {
+        Veredito v = ultimo;
+        if (System.currentTimeMillis() >= v.ate()) {
+            v = new Veredito(consultarBanco(), System.currentTimeMillis() + VALIDADE_MS);
+            ultimo = v;
+        }
+        return v.up()
+                ? ResponseEntity.ok(Map.of("status", "UP"))
+                : ResponseEntity.status(503).body(Map.of("status", "DOWN"));
+    }
+
+    private boolean consultarBanco() {
         try {
             jdbc.queryForObject("select 1", Integer.class);
-            return ResponseEntity.ok(Map.of("status", "UP"));
+            return true;
         } catch (RuntimeException e) {
-            return ResponseEntity.status(503).body(Map.of("status", "DOWN"));
+            return false;
         }
     }
 }

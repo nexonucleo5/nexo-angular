@@ -76,12 +76,13 @@ public class AlunoService {
         // Normaliza (e recusa e-mail inválido) já no pedido: o erro aparece para quem cadastra, não na aprovação.
         String emailRecuperacao = RecuperacaoSenhaService.normalizarEmail(dados.emailRecuperacao());
         boolean diretor = Role.DIRETOR.name().equals(operador.role());
-        if (diretor && configuracoes.exigeAprovacaoManualDeAluno(operador.id())) {
+        if (diretor && configuracoes.exigeAprovacaoManualDeAluno()) {
             CadastroPendente pedido = new CadastroPendente();
             pedido.setNome(dados.nome().trim());
             pedido.setTurma(turma);
             pedido.setEmailRecuperacao(emailRecuperacao);
             pedido.setSolicitadoPor(operador.nome());
+            pedido.setSolicitadoPorId(operador.id());
             pendentes.save(pedido);
             auditoria.registrar(operador.nome(), EventoAuditoria.Tipo.ALTERACAO,
                     "Cadastro de aluno aguardando aprovação", "Aluno: " + pedido.getNome(), null);
@@ -103,8 +104,16 @@ public class AlunoService {
 
     /** Aprova o pedido: é aqui que a conta, a inscrição e a senha provisória passam a existir. */
     @Transactional
-    public AlunoCriado aprovar(Long pedidoId, String operador) {
+    public AlunoCriado aprovar(Long pedidoId, UsuarioAutenticado aprovador) {
+        String operador = aprovador.nome();
         CadastroPendente pedido = pedidoPendente(pedidoId);
+        // Quem pede não aprova: com a mesma pessoa nos dois lados a fila seria só um clique a
+        // mais, não um controle. O pedido fica pendente para outro diretor ou o administrador
+        // (que nunca passa pela fila, então nunca é o solicitante).
+        if (pedido.foiPedidoPor(aprovador.id(), aprovador.nome())) {
+            throw ApiException.forbidden(
+                    "Você não pode aprovar um cadastro que você mesmo pediu. Peça a outro diretor ou ao administrador.");
+        }
         String nome = pedido.getNome();
         String solicitante = pedido.getSolicitadoPor();
         String emailRecuperacao = pedido.getEmailRecuperacao();

@@ -27,19 +27,24 @@ public class CadastrosPendentesController {
         this.alunos = alunos;
     }
 
+    /**
+     * {@code proprio}: o pedido é de quem está olhando — a tela esconde o "Aprovar" (o servidor
+     * recusa de qualquer jeito; isto só evita oferecer um botão que não funciona).
+     */
     public record PedidoDTO(Long id, String nome, Long turmaId, String turma, String solicitadoPor,
-                            String situacao, Instant criadoEm) {
-        static PedidoDTO of(CadastroPendente c) {
+                            String situacao, Instant criadoEm, boolean proprio) {
+        static PedidoDTO of(CadastroPendente c, UsuarioAutenticado operador) {
             return new PedidoDTO(c.getId(), c.getNome(), c.getTurma().getId(), c.getTurma().getNome(),
-                    c.getSolicitadoPor(), c.getSituacao().name(), c.getCriadoEm());
+                    c.getSolicitadoPor(), c.getSituacao().name(), c.getCriadoEm(),
+                    c.foiPedidoPor(operador.id(), operador.nome()));
         }
     }
 
     public record ContagemDTO(long pendentes) {}
 
     @GetMapping
-    public List<PedidoDTO> listar() {
-        return alunos.listarPendentes().stream().map(PedidoDTO::of).toList();
+    public List<PedidoDTO> listar(@AuthenticationPrincipal UsuarioAutenticado operador) {
+        return alunos.listarPendentes().stream().map(c -> PedidoDTO.of(c, operador)).toList();
     }
 
     /** Só o número, para o painel: não vale trazer a fila inteira para exibir um contador. */
@@ -55,13 +60,14 @@ public class CadastrosPendentesController {
     @PostMapping("/{id}/aprovar")
     public AlunoService.AlunoCriado aprovar(@PathVariable Long id,
                                             @AuthenticationPrincipal UsuarioAutenticado operador) {
-        return alunos.aprovar(id, operador.nome());
+        return alunos.aprovar(id, operador);
     }
 
     @PostMapping("/{id}/rejeitar")
     public PedidoDTO rejeitar(@PathVariable Long id, @AuthenticationPrincipal UsuarioAutenticado operador) {
         CadastroPendente pedido = alunos.rejeitar(id, operador.nome());
         return new PedidoDTO(pedido.getId(), pedido.getNome(), pedido.getTurma().getId(), null,
-                pedido.getSolicitadoPor(), CadastroPendente.Situacao.REJEITADO.name(), pedido.getCriadoEm());
+                pedido.getSolicitadoPor(), CadastroPendente.Situacao.REJEITADO.name(), pedido.getCriadoEm(),
+                pedido.foiPedidoPor(operador.id(), operador.nome()));
     }
 }

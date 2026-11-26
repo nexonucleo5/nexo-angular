@@ -101,7 +101,7 @@
       <div class="settings-item toggle-item">
         <div>
           <span>Exigir aprovação manual de cadastro de aluno</span>
-          <small>Matrículas só concluem após sua aprovação</small>
+          <small>Regra da escola, vale para todos os diretores. Quem pede o cadastro não o aprova</small>
         </div>
         <input type="checkbox" class="custom-switch" [checked]="gestao().exigirAprovacaoManualAluno"
           (change)="onGestaoChange('exigirAprovacaoManualAluno', $any($event.target).checked)">

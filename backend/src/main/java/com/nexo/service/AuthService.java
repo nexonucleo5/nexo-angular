@@ -174,6 +174,9 @@ public class AuthService {
         // valendo pelos 7 dias restantes.
         if (atual.isRevogado()) {
             refreshTokens.revogarTodosDoUsuario(atual.getUsuario().getId());
+            // O refresh token roubado morre acima, mas o access token que ele já rendeu ao
+            // ladrão ainda valeria por até 15 minutos. Derruba os dois.
+            accessTokensRevogados.revogarUsuario(atual.getUsuario().getId());
             auditoria.registrar(atual.getUsuario().getNome(), EventoAuditoria.Tipo.ERRO,
                     "Refresh token reutilizado — sessões revogadas", null, null);
             throw ApiException.unauthorized("Sessão encerrada por segurança. Entre novamente.");
@@ -208,6 +211,10 @@ public class AuthService {
      */
     @Transactional
     public void logout(UsuarioAutenticado usuario, String refreshToken, String ip) {
+        if (usuario == null) {
+            logoutSomenteComCookie(refreshToken, ip);
+            return;
+        }
         if (refreshToken != null && !refreshToken.isBlank()) {
             refreshTokens.findByTokenHash(hash(refreshToken))
                     // Um cookie de outro usuário não encerra a sessão alheia.
@@ -223,6 +230,34 @@ public class AuthService {
         accessTokensRevogados.revogar(usuario.jti());
 
         auditoria.registrar(usuario.nome(), EventoAuditoria.Tipo.LOGOUT, "Logout realizado", null, ip);
+    }
+
+    /**
+     * Logout de quem não tem access token utilizável — o caso comum é o token ter expirado
+     * (15 min) enquanto a aba ficou aberta, ou a página ter sido recarregada antes de a
+     * sessão ser restaurada. Antes o endpoint exigia o access token: o pedido tomava 401,
+     * o front limpava só o estado local e o refresh token seguia válido no servidor por até
+     * 7 dias — exatamente o cenário do computador compartilhado.
+     *
+     * <p>O cookie é a credencial aqui, do mesmo jeito que em {@link #refresh}: quem o
+     * apresenta já poderia usá-lo para renovar a sessão, então revogá-lo não dá a ninguém
+     * poder que não tivesse. Cookie desconhecido ou já revogado não é erro (idempotente) e
+     * não conta como falha de renovação — só o bloqueio por origem é respeitado, para o
+     * endpoint não virar uma sondagem de banco sem freio.
+     */
+    private void logoutSomenteComCookie(String refreshToken, String ip) {
+        if (refreshToken == null || refreshToken.isBlank()) return;
+        verificarBloqueio(refreshPorOrigem, ip, "REFRESH_BLOQUEADO",
+                "Muitas renovações inválidas vindas desta rede. Entre novamente.");
+
+        refreshTokens.findByTokenHash(hash(refreshToken)).ifPresent(t -> {
+            if (!t.isRevogado()) {
+                t.setRevogado(true);
+                refreshTokens.save(t);
+            }
+            auditoria.registrar(t.getUsuario().getNome(), EventoAuditoria.Tipo.LOGOUT,
+                    "Logout realizado", null, ip);
+        });
     }
 
     /**

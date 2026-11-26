@@ -76,9 +76,11 @@ public class AuditoriaController {
         auditoria.registrarConsulta(operador.nome(), "Trilha de auditoria consultada",
                 clienteIp.de(http), JANELA_DE_CONSULTA);
         String filtro = (busca == null || busca.isBlank()) ? null : "%" + busca.trim().toLowerCase() + "%";
+        // Teto de 100 anos: Instant.minus estoura (e a tela recebia 500) com um periodo
+        // absurdo como 2147483647 dias.
         Instant desde = (periodo == null || periodo <= 0)
                 ? Instant.EPOCH
-                : Instant.now().minus(periodo, ChronoUnit.DAYS);
+                : Instant.now().minus(Math.min(periodo, 36_500), ChronoUnit.DAYS);
         var pagina = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), TAMANHO_MAXIMO));
         return PageEnvelope.of(eventos.buscar(tipo, filtro, desde, pagina), EventoDTO::of);
     }
