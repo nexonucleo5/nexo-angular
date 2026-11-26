@@ -10,10 +10,10 @@ ENV npm_config_fund=false \
     npm_config_audit=false \
     npm_config_update_notifier=false
 
-# --legacy-peer-deps: o ng2-charts pede @angular/cdk e o npm ci dá ERESOLVE sem a flag
+# @angular/cdk está declarado no package.json, então o npm ci resolve sem flag extra
 COPY nexo/package.json nexo/package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm,sharing=locked \
-    npm ci --legacy-peer-deps
+    npm ci
 
 COPY nexo/ ./
 RUN npx ng build --configuration production --base-href /
